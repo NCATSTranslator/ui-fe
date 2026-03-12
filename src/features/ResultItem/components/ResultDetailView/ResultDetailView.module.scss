@@ -1,0 +1,52 @@
+@use "@/assets/styles/variables" as *;
+
+.resultDetailView {
+  padding: 0 $m $m;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+  padding-bottom: $s;
+  border-bottom: 1px solid $midGray;
+  margin-bottom: $s;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+}
+
+.name {
+  margin: 0;
+  font-size: $h5Size;
+  font-weight: 700;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: $s;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  font-size: $bodyTwoSize;
+  color: $darkGray;
+}
+
+.description {
+  font-size: $bodyTwoSize;
+  color: $darkGray;
+  margin: 0;
+}
+
+.tabs {
+  margin-top: $xs;
+}
+
+.pathsTab {
+  min-height: 200px;
+}

@@ -19,7 +19,6 @@ interface ResultItemInteractablesProps {
   hasUser: boolean;
   isBookmarked: boolean;
   isEven: boolean;
-  isExpanded: boolean;
   isPathfinder: boolean;
   nameString: string;
 }
@@ -32,7 +31,6 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   hasUser,
   isBookmarked,
   isEven,
-  isExpanded,
   isPathfinder,
   nameString,
 }) => {
@@ -111,7 +109,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
             : <></>
         }
         <button
-          className={`${styles.icon} ${styles.shareResultIcon} ${isExpanded ? styles.open : styles.closed } share-result-icon`}
+          className={`${styles.icon} ${styles.shareResultIcon} ${ styles.closed } share-result-icon`}
           onClick={handleOpenResultShare}
           data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
           >

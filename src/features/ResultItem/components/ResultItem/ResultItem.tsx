@@ -1,35 +1,22 @@
-import { useState, useEffect, useCallback, useRef, FC, RefObject, lazy, Suspense, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import PathView from '@/features/ResultItem/components/PathView/PathView';
-import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
-import ChevDown from "@/assets/icons/directional/Chevron/Chevron Down.svg?react";
-import AnimateHeight from "react-animate-height";
 import Highlighter from 'react-highlight-words';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
-// import { CSVLink } from 'react-csv';
-// import { generateCsvFromItem } from '@/features/ResultItem/utils/csvGeneration';
 import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getPathById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
-import { Result, Path, ResultBookmark } from '@/features/ResultList/types/results';
+import { Result, ResultBookmark } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
-import { useTurnstileEffect } from '@/features/Common/hooks/customHooks';
-import Tabs from '@/features/Common/components/Tabs/Tabs';
-import Tab from '@/features/Common/components/Tabs/Tab';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
-import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
-import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
-
-const GraphView = lazy(() => import("@/features/ResultItem/components/GraphView/GraphView"));
 
 const sortTagsBySelected = (
   a: string,
@@ -51,21 +38,16 @@ type ResultItemProps = {
   isEven: boolean;
   isInUserSave?: boolean;
   result: Result | ResultBookmark;
-  sharedItemRef: RefObject<HTMLDivElement> | null;
-  startExpanded: boolean;
 }
 
 const ResultItem: FC<ResultItemProps> = ({
     bookmarkItem,
     isEven = false,
     isInUserSave = false,
-    result,
-    sharedItemRef,
-    startExpanded = false,
+    result
   }) => {
 
   const {
-    activateEvidence,
     activateNotes,
     activeEntityFilters,
     activeFilters,
@@ -75,7 +57,6 @@ const ResultItem: FC<ResultItemProps> = ({
     bookmarkRemovedToast,
     handleBookmarkError,
     isPathfinder,
-    pathFilterState,
     pk,
     queryNodeID,
     queryNodeLabel,
@@ -83,14 +64,11 @@ const ResultItem: FC<ResultItemProps> = ({
     queryType,
     resultsComplete,
     scoreWeights,
-    setExpandSharedResult,
     setShareModalOpen,
     setShareResultID,
-    showHiddenPaths,
-    setShowHiddenPaths,
+    resultsNavigate,
     shouldUpdateResultsAfterBookmark,
     updateUserSaves,
-    zoomKeyDown,
   } = useResultListContext();
   const currentQueryID = pk;
 
@@ -129,24 +107,15 @@ const ResultItem: FC<ResultItemProps> = ({
     shouldUpdateResultsAfterBookmark,
   });
 
-  const { height, isOpen: isExpanded, toggle: handleToggle, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: startExpanded });
-  const [graphActive, setGraphActive] = useState<boolean>(false);
+  const handleResultClick = useCallback(() => {
+    resultsNavigate(`/results/${result.id}`);
+  }, [resultsNavigate, result.id]);
+
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-  const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
-  const graph = useMemo(()=> {
-    if(!resultSet)
-      return {nodes:[], edges: []};
-    return resultToCytoscape(result, resultSet.data)
-  }, [result, resultSet]);
 
   const tagsRef = useRef<HTMLDivElement>(null);
   const [tagsHeight, setTagsHeight] = useState<number>(0);
   const minTagsHeight = 45;
-
-  useTurnstileEffect(
-    () => startExpanded,
-    () => setIsExpanded(true),
-    () => setExpandSharedResult(false));
 
   useEffect(() => {
     if(!tagsRef.current)
@@ -170,22 +139,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode?.descriptions[0];
 
-  const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
-    if(!result)
-      return;
-
-    activateEvidence(result, edgeIDs, path, pathKey);
-  }, [result, activateEvidence])
-
-  const handleActivateEvidence = useCallback((path: Path, pathKey: string) => {
-    if(!!path.subgraph[1])
-      activateEvidence(result, [path.subgraph[1]], path, pathKey);
-  }, [result, activateEvidence])
-
-  const handleClearSelectedPaths = useCallback(() => {
-    setSelectedPaths(null);
-  },[]);
-
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
@@ -200,7 +153,6 @@ const ResultItem: FC<ResultItemProps> = ({
     handleFilter(newObj);
   }
 
-
   const handleOpenResultShare = () => {
     setShareResultID(result.id);
     setShareModalOpen(true);
@@ -212,12 +164,12 @@ const ResultItem: FC<ResultItemProps> = ({
   return (
     <div
       className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
-      ref={sharedItemRef}
       data-result-curie={result.subject}
       data-result-name={nameString}
-      data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}>
+      data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}
+    >
       <div className={styles.top}>
-        <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleToggle}>
+        <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleResultClick}>
           <ResultItemName
             isPathfinder={isPathfinder}
             subjectNode={subjectNode}
@@ -236,7 +188,6 @@ const ResultItem: FC<ResultItemProps> = ({
           hasUser={!!user}
           isBookmarked={isBookmarked}
           isEven={isEven}
-          isExpanded={isExpanded}
           isPathfinder={isPathfinder}
           nameString={nameString}
         />
@@ -272,29 +223,11 @@ const ResultItem: FC<ResultItemProps> = ({
             <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
           </span>
         </div>
-        {/* <CSVLink
-          className={styles.downloadButton}
-          data={csvData}
-          filename={`${item.name.toLowerCase()}.csv`}
-          onClick={generateCsvFromItem(item, setCsvData)}>
-            <Export data-tooltip-id={`csv-tooltip-${nameString}`} aria-describedby={`csv-tooltip-${nameString}`}/>
-            <Tooltip id={`csv-tooltip-${nameString}`}>
-              <span className={styles.tooltip}>Download a version of this result in CSV format.</span>
-            </Tooltip>
-        </CSVLink> */}
-        <button className={`${styles.accordionButton} ${isExpanded ? styles.open : styles.closed } result-accordion-button`} onClick={handleToggle} data-result-name={nameString}>
-          <ChevDown/>
-        </button>
       </div>
-      <AnimateHeight
-        className={`${styles.accordionPanel}
-          ${isExpanded ? styles.open : styles.closed }
-          ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
-          ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' }
-          ${!!isInUserSave && styles.inUserSave}
+      <div
+        className={`${styles.accordionPanel} ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
+          ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' } ${!!isInUserSave && styles.inUserSave}
         `}
-        duration={500}
-        height={height}
         >
         <div className={styles.container}>
           <div>
@@ -330,47 +263,7 @@ const ResultItem: FC<ResultItemProps> = ({
             }
           </div>
         </div>
-        <Tabs
-          isOpen
-          className={styles.resultTabs}
-          handleTabSelection={(heading)=>{
-              if(heading === "Graph")
-                setGraphActive(true);
-              else
-                setGraphActive(false);
-            }}
-          >
-            <Tab heading="Paths" className={styles.pathsTabContent}>
-              <PathView
-                active={isExpanded}
-                activeEntityFilters={activeEntityFilters}
-                activeFilters={activeFilters}
-                handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
-                handleActivateEvidence={handleActivateEvidence}
-                isEven={isEven}
-                pathArray={result?.paths}
-                pathFilterState={pathFilterState ?? {}}
-                pk={pk ? pk : ""}
-                resultID={result.id}
-                selectedPaths={selectedPaths}
-                setShowHiddenPaths={setShowHiddenPaths}
-                showHiddenPaths={showHiddenPaths}
-              />
-            </Tab>
-            <Tab heading="Graph">
-              <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
-                <GraphView
-                  graph={graph}
-                  result={result}
-                  resultSet={resultSet}
-                  clearSelectedPaths={handleClearSelectedPaths}
-                  active={graphActive}
-                  zoomKeyDown={zoomKeyDown}
-                />
-              </Suspense>
-            </Tab>
-        </Tabs>
-      </AnimateHeight>
+      </div>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}

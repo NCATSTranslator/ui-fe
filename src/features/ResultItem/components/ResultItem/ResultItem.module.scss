@@ -215,11 +215,6 @@
     &>div {
       display: block !important;
     }
-    &.closed {
-      button {
-        opacity: 0;
-      }
-    }
     .container {
       max-width: calc(100% - 390px);
       p, p span, p mark {
