@@ -13,7 +13,7 @@ import NodeBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabe
 import PathBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/PathBreadcrumbLabel';
 import PathRedirect from '@/features/Navigation/components/PathRedirect/PathRedirect';
 import { resultsLoader } from '@/features/Navigation/utils/navigationUtils';
-import QueryBreadcrumbLabel from './features/Navigation/components/BreadcrumbLabels/QueryBreadcrumb';
+import QueryBreadcrumbLabel from './features/Navigation/components/BreadcrumbLabels/QueryBreadcrumbLabel';
 const AboutTranslator = lazy(() => import('@/pageRoutes/Articles/AboutTranslator').then(m => ({ default: m.AboutTranslator })));
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));
 const ResultsLayout = lazy(() => import('@/pageRoutes/ResultsLayout/ResultsLayout'));
