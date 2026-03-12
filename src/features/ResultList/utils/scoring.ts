@@ -91,20 +91,28 @@ const computeSugeno = (
   const a = confidenceWeight;
   const b = noveltyWeight;
   const c = clinicalWeight;
-  const solutions = polynomialRoot(a+b+c-1, a*b+a*c+b*c, a*b*c);
+  // When fewer than 2 weights are non-zero, the polynomial coefficients are all zero
+  // and polynomialRoot cannot solve. Lambda = 0 is the correct degenerate case
+  // (additive fuzzy measure), so skip the root-finding.
+  const c0 = a + b + c - 1;
+  const c1 = a * b + a * c + b * c;
+  const c2 = a * b * c;
   let lambda: number = 0;
-  solutions.forEach((s) => {
-    let val: number;
-    if (isComplex(s)) {
-      val = (s as Complex).re;
-    } else {
-      val = s as number;
-    }
+  if (c0 !== 0 || c1 !== 0 || c2 !== 0) {
+    const solutions = polynomialRoot(c0, c1, c2);
+    solutions.forEach((s) => {
+      let val: number;
+      if (isComplex(s)) {
+        val = (s as Complex).re;
+      } else {
+        val = s as number;
+      }
 
-    if (!(equal(val, 0)) && largerEq(val, -1)) {
-      lambda = val;
-    }
-  });
+      if (!(equal(val, 0)) && largerEq(val, -1)) {
+        lambda = val;
+      }
+    });
+  }
 
   const weightSets = computeWeightSets(lambda, a, b, c, 3);
   const allScores: { id: string; score: number }[] = [
