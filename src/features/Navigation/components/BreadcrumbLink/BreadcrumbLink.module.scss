@@ -1,0 +1,14 @@
+@use "@/assets/styles/variables" as *;
+
+.breadcrumbLink {
+  color: $purpleOne;
+  text-decoration: none;
+  transition: $defaultAnim;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.current {
+  color: $darkGray;
+}
