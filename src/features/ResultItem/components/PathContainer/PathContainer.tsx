@@ -27,8 +27,8 @@ interface PathContainerProps {
   path: Path;
   inModal: boolean;
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
+  handleActivateEvidence: (path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   activeEntityFilters: string[];
   selectedPaths: Set<Path> | null;
   pathFilterState: PathFilterState;
@@ -128,7 +128,7 @@ const PathContainer: FC<PathContainerProps> = ({
           onClick={() => {
             if (!!path?.id) {
               setLastViewedPathID(path.id);
-              handleActivateEvidence(path, (indexInFullCollection + 1).toString());
+              handleActivateEvidence(path);
             }
           }}
           className={styles.pathEvidenceButton}
@@ -175,24 +175,24 @@ const PathContainer: FC<PathContainerProps> = ({
                         let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
                         return (
                           <PathObject
-                            pathViewStyles={styles}
-                            index={i}
-                            isEven={false}
-                            path={path}
-                            parentPathKey={(indexInFullCollection + 1).toString()}
-                            id={edge.id}
-                            key={key}
-                            handleEdgeClick={handleEdgeClick}
-                            pathFilterState={{}}
-                            activeFilters={[]}
                             activeEntityFilters={[]}
-                            selected={selected}
-                            selectedPaths={null}
-                            inModal={true}
+                            activeFilters={[]}
+                            handleEdgeClick={handleEdgeClick}
+                            id={edge.id}
+                            index={i}
+                            inModal
+                            isEven={false}
+                            key={key}
+                            parentPathKey={(indexInFullCollection + 1).toString()}
+                            path={path}
+                            pathFilterState={{}}
+                            pathViewStyles={styles}
                             pk={pk}
+                            selected={selected}
                             selectedEdgeRef={selectedEdgeRef}
+                            selectedPaths={null}
                           />
-                        )
+                        );
                       })}
                     </div>
                     <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
@@ -218,22 +218,22 @@ const PathContainer: FC<PathContainerProps> = ({
                 let selected = (!!selectedEdge && selectedEdge.id === key) ? true : false;
                 return (
                   <PathObject
-                    pathViewStyles={styles}
-                    index={i}
-                    isEven={false}
-                    path={path}
-                    parentPathKey={(indexInFullCollection + 1).toString()}
-                    id={key}
-                    key={key}
-                    handleEdgeClick={handleEdgeClick}
-                    pathFilterState={{}}
-                    activeFilters={[]}
                     activeEntityFilters={[]}
-                    selected={selected}
-                    selectedPaths={null}
-                    inModal={true}
+                    activeFilters={[]}
+                    handleEdgeClick={handleEdgeClick}
+                    id={key}
+                    index={i}
+                    inModal
+                    isEven={false}
+                    key={key}
+                    parentPathKey={(indexInFullCollection + 1).toString()}
+                    path={path}
+                    pathFilterState={{}}
                     pk={pk}
+                    pathViewStyles={styles}
+                    selected={selected}
                     selectedEdgeRef={selectedEdgeRef}
+                    selectedPaths={null}
                   />
                 )
               }

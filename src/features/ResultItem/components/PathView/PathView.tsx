@@ -15,6 +15,7 @@ import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/re
 import { useSelector } from 'react-redux';
 import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 export const SupportPathDepthContext = createContext<number>(1);
@@ -28,14 +29,13 @@ interface PathViewProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
-  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path, pathKey: string) => void;
+  handleActivateEvidence: (path: Path) => void;
+  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path) => void;
   inModal?: boolean;
   isEven: boolean;
   pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
-  resultID: string;
   selectedEdge?: ResultEdge | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedPaths: Set<Path> | null;
@@ -55,13 +55,13 @@ const PathView: FC<PathViewProps> = ({
   pathArray,
   pathFilterState,
   pk,
-  resultID,
   selectedEdge,
   selectedEdgeRef,
   selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
 
+  const { resultId } = useResultListContext();
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const itemsPerPage: number = 10;
@@ -95,9 +95,9 @@ const PathView: FC<PathViewProps> = ({
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
 
-  const handleEdgeClick = useCallback((edgeIDs: string[], path: Path, pathKey: string) => {
+  const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     setLastViewedPathID(path?.id || null);
-    handleEdgeSpecificEvidence(edgeIDs, path, pathKey);
+    handleEdgeSpecificEvidence(edgeIDs, path);
   }, [handleEdgeSpecificEvidence]);
 
   if(!resultSet)
@@ -183,12 +183,12 @@ const PathView: FC<PathViewProps> = ({
                   handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
                   variant="secondary"
                   small
-                  dataTooltipId={`${resultID}-excluded-paths-toggle`}
+                  dataTooltipId={`${resultId}-excluded-paths-toggle`}
                   className={`${!!isEven && styles.evenButton}`}
                   iconRight={<Information/>}
                   >
                   {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
-                  <Tooltip id={`${resultID}-excluded-paths-toggle`}>
+                  <Tooltip id={`${resultId}-excluded-paths-toggle`}>
                     {
                       showHiddenPaths 
                       ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>

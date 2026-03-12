@@ -1,5 +1,5 @@
 import styles from './PathObject.module.scss';
-import { FC, RefObject, useContext, useId } from 'react';
+import { FC, RefObject, useCallback, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
@@ -14,13 +14,14 @@ import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence?: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
+  handleActivateEvidence?: (path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -56,6 +57,7 @@ const PathObject: FC<PathObjectProps> = ({
   selectedEdgeRef,
   showHiddenPaths = true}) => {
 
+  const { resultId, resultsNavigate } = useResultListContext();
   const resultSet = useSelector(getResultSetById(pk));
 
   // ID of the main element (in the case of a compressed edge)
@@ -103,11 +105,15 @@ const PathObject: FC<PathObjectProps> = ({
     isHighlighted && styles.highlighted
   );
 
-
-  const handleNodeClick = (node: ResultNode ) => {
-    if(Array.isArray(node.provenance) && node.provenance[0].length > 0 && node.provenance[0].includes("http"))
+  const handleNodeClick = useCallback((node: ResultNode) => {
+    if (resultId) {
+      resultsNavigate(`/results/${resultId}/node/${node.id}`);
+    } else if(Array.isArray(node.provenance) && node.provenance[0].length > 0 && node.provenance[0].includes("http")) {
       window.open(node.provenance[0], '_blank');
-  }
+    } else {
+      console.warn('Could not navigate to node, resultId is not set and no provenance is available');
+    }
+  }, [resultId, resultsNavigate]);
 
   return (
     <>

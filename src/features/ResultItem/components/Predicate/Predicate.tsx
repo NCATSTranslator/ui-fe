@@ -16,7 +16,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 
@@ -24,8 +24,8 @@ interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
+  handleActivateEvidence: (path: Path) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
   hoverHandlers?: {
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -95,14 +95,6 @@ const Predicate: FC<PredicateProps> = ({
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
   const isInferred = hasSupport(formattedEdge);
 
-  const ancestorsPathKey = useSupportPathKey();
-  const fullPathKey = useMemo(() => {
-    if(!!ancestorsPathKey)
-      return `${ancestorsPathKey}.${parentPathKey}`;
-    else
-      return parentPathKey;
-  }, [ancestorsPathKey, parentPathKey]);
-
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setExpandedPredicateId(isSupportExpanded ? null : predicateId);
@@ -140,7 +132,7 @@ const Predicate: FC<PredicateProps> = ({
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path, fullPathKey);}}
+        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path);}}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
@@ -167,7 +159,7 @@ const Predicate: FC<PredicateProps> = ({
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
                         onClick={(e)=> {
                           e.stopPropagation();
-                          handleEdgeClick([edge.id], path, fullPathKey);
+                          handleEdgeClick([edge.id], path);
                         }}
                         >
                         <Highlighter

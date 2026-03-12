@@ -7,7 +7,7 @@ import { PathFilterState, Path } from '@/features/ResultList/types/results.d';
 import { joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useLastViewedPath, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { ExpandedPredicateContext } from '../PathContainer/PathContainer';
 
@@ -15,8 +15,8 @@ interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
+  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleActivateEvidence: (path: Path) => void;
   isEven: boolean;
   path: Path;
   pathFilterState: PathFilterState;
@@ -42,8 +42,6 @@ const SupportPath: FC<SupportPathProps> = ({
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { isPathSeen } = useSeenStatus(pk);
-  const parentPathKey = useSupportPathKey();
-  const fullPathKey = `${parentPathKey}.${character}`;
   const tooltipID = path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
@@ -83,7 +81,7 @@ const SupportPath: FC<SupportPathProps> = ({
               onClick={()=>{
                 if(!!path?.id) {
                   setLastViewedPathID(path.id);
-                  handleActivateEvidence(path, fullPathKey);
+                  handleActivateEvidence(path);
                 }
               }}
               className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
