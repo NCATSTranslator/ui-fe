@@ -12,6 +12,11 @@ const fetchNodeTypeDefinition = async (nodeType: string): Promise<string | null>
   return data[nodeType] ?? null;
 };
 
+/**
+ * A hook that fetches the definition of a node type.
+ * @param nodeType - The type of the node to fetch the definition of.
+ * @returns The definition of the node type.
+ */
 const useNodeTypeDefinition = (nodeType: string | null) => {
   return useQuery({
     queryKey: ["nodeTypeDefinition", nodeType],

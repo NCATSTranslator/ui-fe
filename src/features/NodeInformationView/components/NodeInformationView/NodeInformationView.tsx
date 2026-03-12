@@ -1,31 +1,30 @@
 import { FC, ReactNode, useMemo } from "react";
 import styles from "./NodeInformationView.module.scss";
-import { ResultNode } from "@/features/ResultList/types/results";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
+import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
+import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import { useDecodedParams } from "@/features/Core/hooks/useDecodedParams";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
 import { formatBiolinkEntity, getNodeIcon } from "@/features/Common/utils/utilities";
-import Button from "@/features/Core/components/Button/Button";
-import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
-import { joinClasses } from "@/features/Common/utils/utilities";
-import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { formatLabel, renderValue } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
+import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeViewSkeleton/NodeViewSkeleton";
+import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
 
-interface NodeInformationViewProps {
-  backFunction: () => void;
-  backLabel: string;
-  node: ResultNode | null;
-}
+const NodeInformationView: FC = () => {
+  const { nodeId } = useParams();
+  const decodedParams = useDecodedParams();
+  const queryId = getDataFromQueryVar("q", decodedParams);
+  const resultSet = useSelector(getResultSetById(queryId));
+  const queryStatus = useSelector(getQueryStatusById(queryId));
 
-const NodeInformationView: FC<NodeInformationViewProps> = ({
-  backFunction,
-  backLabel,
-  node
-}) => {
-
+  const node = nodeId ? resultSet?.data?.nodes?.[nodeId] ?? null : null;
   const nodeType = node?.types[0] ?? null;
   const nodeName = node?.names[0] ?? null;
-  
+
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
 
   const annotationFields = useMemo<{label: string; content: ReactNode}[]>(() => {
@@ -54,21 +53,23 @@ const NodeInformationView: FC<NodeInformationViewProps> = ({
     return null;
   }, [node]);
 
-  const { activePanelId } = useSidebar();
+  if (!queryId) {
+    return <ViewNotFound entity="query" id="missing" />;
+  }
+
+  // Loading: result set not loaded yet and query is still loading
+  if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
+    return <NodeViewSkeleton />;
+  }
+
+  // Not found: result set loaded but node not in it
+  if (!node) {
+    return <ViewNotFound entity="node" id={nodeId || "unknown"} />;
+  }
 
   return (
-    <div className={joinClasses(styles.nodeInformationView, !node && styles.hidden, activePanelId !== 'none' && styles.panelIsOpen)}>
+    <div className={styles.nodeInformationView}>
       <div className={styles.container}>
-        <div className={styles.back}>
-          <Button
-            variant="textOnly"
-            iconLeft={<ChevLeftIcon />}
-            handleClick={backFunction}
-            className={styles.backButton}
-          >
-            {backLabel}
-          </Button>
-        </div>
         <div className={styles.top}>
           <div className={styles.nodeType}>
             <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
