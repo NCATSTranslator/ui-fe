@@ -37,10 +37,16 @@
   color: $darkGray;
 }
 
-.description {
+.description, .description a {
   font-size: $bodyTwoSize;
   color: $darkGray;
   margin: 0;
+  a {
+    color: $purpleOne;
+    &:visited {
+      color: $darkGray;
+    }
+  }
 }
 
 .tabs {

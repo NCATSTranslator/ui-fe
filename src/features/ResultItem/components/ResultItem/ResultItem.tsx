@@ -3,7 +3,7 @@ import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import Highlighter from 'react-highlight-words';
+import SafeHtmlHighlighter from '@/features/Common/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
@@ -253,11 +253,10 @@ const ResultItem: FC<ResultItemProps> = ({
             {
               !!resultDescription && !isPathfinder &&
               <p className={styles.description}>
-                <Highlighter
-                  highlightClassName="highlight"
+                <SafeHtmlHighlighter
+                  htmlString={resultDescription}
                   searchWords={activeEntityFilters}
-                  autoEscape={true}
-                  textToHighlight={resultDescription}
+                  highlightClassName="highlight"
                 />
               </p>
             }
