@@ -1,8 +1,19 @@
 @use "@/assets/styles/variables" as *;
 
 .breadcrumbs {
-  padding: $xs $m;
+  padding: $m $l $l;
   font-size: $bodyTwoSize;
+  display: flex;
+  align-items: center;
+  gap: $xs;
+}
+
+.arrowLeftIcon {
+  width: $m;
+  height: $m;
+  path {
+    stroke: $purpleOne;
+  }
 }
 
 .list {
@@ -11,13 +22,11 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: $xxs;
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: $xxs;
 }
 
 .separator {

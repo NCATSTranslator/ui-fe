@@ -4,6 +4,7 @@
   color: $purpleOne;
   text-decoration: none;
   transition: $defaultAnim;
+  font-size: $captionSize;
   &:hover {
     text-decoration: underline;
   }
@@ -11,4 +12,5 @@
 
 .current {
   color: $darkGray;
+  font-size: $captionSize;
 }
