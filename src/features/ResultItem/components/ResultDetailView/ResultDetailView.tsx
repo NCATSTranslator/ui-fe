@@ -16,7 +16,7 @@ import Tab from '@/features/Common/components/Tabs/Tab';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
 import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
-import SafeHtmlHighlighter from '@/features/Common/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
+import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import styles from './ResultDetailView.module.scss';
 
 const GraphView = lazy(() => import('@/features/ResultItem/components/GraphView/GraphView'));

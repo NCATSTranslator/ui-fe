@@ -3,7 +3,7 @@ import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import SafeHtmlHighlighter from '@/features/Common/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
+import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
