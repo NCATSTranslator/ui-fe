@@ -20,12 +20,10 @@ const EvidenceHeader: FC<EvidenceHeaderProps> = ({
   return (
     <>
       <h5 className={styles.title}>
-        {isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence
+        {edgeLabel}
       </h5>
       <div className={styles.labelContainer}>
-        {edgeLabel && (
-          <p className={styles.subtitle}>{edgeLabel}</p>
-        )}
+        {isInferred ? "Indirect" : "Direct"} Path {pathKey} Evidence
         <span className={styles.sep}>·</span>
         <p 
           className={styles.toggleSeen}

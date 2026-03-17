@@ -153,10 +153,10 @@ const EvidenceView: FC = () => {
   return (
     <div className={styles.evidenceView}>
       <h5 className={styles.title}>
-        {isInferred ? "Indirect" : pathKey.length > 1 ? "Supporting" : "Direct"} Path {pathKey} Evidence
+        {edgeLabel}
       </h5>
       <div className={styles.labelContainer}>
-        {edgeLabel && <p className={styles.subtitle}>{edgeLabel}</p>}
+        {edgeLabel && <p className={styles.subtitle}>{isInferred ? "Indirect" : pathKey.length > 1 ? "Supporting" : "Direct"} Path {pathKey} Evidence</p>}
         <span className={styles.sep}>·</span>
         <p className={styles.toggleSeen} onClick={handleToggleSeen}>
           Mark as {edgeSeen ? "Unseen" : "Seen"}
