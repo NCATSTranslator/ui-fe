@@ -4,6 +4,22 @@
   padding: 0 $l $m;
 }
 
+.tableHeader, .top {
+  display: grid;
+  grid-template-columns: 1fr 112px 110px 90px 90px;
+  column-gap: $s;
+}
+
+.tableHeader {
+  margin-bottom: $xxs;
+  .tableHeaderRow {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: $purpleTwo;
+  }
+}
+
 .header {
   display: flex;
   flex-direction: column;
@@ -11,6 +27,12 @@
   padding-bottom: $s;
   border-bottom: 1px solid $midGray;
   margin-bottom: $s;
+}
+
+.nameContainer {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
 }
 
 .nameRow {
@@ -55,4 +77,21 @@
 
 .pathsTab {
   min-height: 200px;
+}
+
+.scoreNum, .pathsNum, .info {
+  font-size: $captionSize;
+  line-height: 1.25;
+  color: $darkGray;
+}
+
+.info {
+  display: flex;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $xs;
+  width: calc(100% - 450px);
 }

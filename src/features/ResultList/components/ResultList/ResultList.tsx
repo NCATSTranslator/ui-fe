@@ -415,6 +415,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
 
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
+    userSaves,
     navigateToEvidenceView,
     activateNotes,
     activeEntityFilters,
@@ -444,7 +445,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     updateUserSaves: setUserSaves,
     zoomKeyDown,
   }), [
-    activateNotes, activeEntityFilters, activeFilters, availableFilters,
+    userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
     handleFilter, isPathfinder, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     nodeIdParam, nodeLabelParam, nodeDescription,

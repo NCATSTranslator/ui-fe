@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef, FC, useMemo, memo } from 'react';
+import { useCallback, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
-import { getARATagsFromResultTags } from '@/features/ResultItem/utils/utilities';
+import { getARATagsFromResultTags, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
@@ -12,26 +12,10 @@ import { getResultSetById, getNodeById, getPathById, getNodeSpecies } from '@/fe
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { Result, ResultBookmark } from '@/features/ResultList/types/results';
-import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
-import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
-
-const sortTagsBySelected = (
-  a: string,
-  b: string,
-  selected: [{id: string;}] | Filter[]
-): number => {
-  const aExistsInSelected = selected.some((item) => item.id === a);
-  const bExistsInSelected = selected.some((item) => item.id === b);
-
-  if (aExistsInSelected && bExistsInSelected) return 0;
-  if (aExistsInSelected) return -1;
-  if (bExistsInSelected) return 1;
-
-  return 0;
-};
+import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
@@ -51,7 +35,7 @@ const ResultItem: FC<ResultItemProps> = ({
     activateNotes,
     activeEntityFilters,
     activeFilters,
-    availableFilters: availableTags,
+    availableFilters,
     handleFilter,
     bookmarkAddedToast,
     bookmarkRemovedToast,
@@ -112,26 +96,6 @@ const ResultItem: FC<ResultItemProps> = ({
   }, [resultsNavigate, result.id]);
 
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-
-  const tagsRef = useRef<HTMLDivElement>(null);
-  const [tagsHeight, setTagsHeight] = useState<number>(0);
-  const minTagsHeight = 45;
-
-  useEffect(() => {
-    if(!tagsRef.current)
-      return;
-
-    const resizeObserver = new ResizeObserver(() => {
-      if(tagsRef.current !== null)
-      setTagsHeight(tagsRef.current.clientHeight);
-    });
-
-    resizeObserver.observe(tagsRef.current);
-    return() => {
-      resizeObserver.disconnect();
-    };
-  },[]);
-
   const pathCount: number = (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
   const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
   const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
@@ -142,16 +106,6 @@ const ResultItem: FC<ResultItemProps> = ({
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
-
-  const handleTagClick = (filterID: string, filter: Filter) => {
-    let newObj: Filter = {
-      name: filter.name,
-      negated: false,
-      id: filterID,
-      value: filter.name
-    };
-    handleFilter(newObj);
-  }
 
   const handleOpenResultShare = () => {
     setShareResultID(result.id);
@@ -177,7 +131,6 @@ const ResultItem: FC<ResultItemProps> = ({
             item={result}
             activeEntityFilters={activeEntityFilters}
             nameString={nameString}
-            ResultItemStyles={styles}
           />
         </div>
         <ResultItemInteractables
@@ -232,19 +185,19 @@ const ResultItem: FC<ResultItemProps> = ({
         <div className={styles.container}>
           <div>
             {
-              result.tags && roleCount > 0 && availableTags &&
-              <div className={`${styles.tags} ${tagsHeight > minTagsHeight ? styles.more : '' }`} ref={tagsRef}>
+              result.tags && roleCount > 0 && availableFilters &&
+              <div className={styles.tags}>
                 {
-                  Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
-                    if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
-                    const tag = availableTags[fid];
-                    const activeClass = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name))
-                      ? styles.active
-                      : styles.inactive;
-                    if(!tag)
-                      return null;
+                  // Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
+                  Object.keys(result.tags).map((fid) => {
                     return(
-                      <button key={fid} className={`${styles.tag} ${activeClass}`} onClick={()=>handleTagClick(fid, tag)}>{tag.name} ({tag.count})</button>
+                      <ResultItemTag
+                        activeFilters={activeFilters}
+                        availableFilters={availableFilters}
+                        fid={fid}
+                        handleFilter={handleFilter}
+                        handleTagClick={handleTagClick}
+                      />
                     )
                   })
                 }

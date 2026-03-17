@@ -5,6 +5,7 @@ import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
 
 export interface ResultListContextValue {
+  userSaves: SaveGroup | null;
   activateNotes: (label: string, bookmarkId: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];

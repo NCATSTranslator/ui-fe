@@ -8,6 +8,7 @@ import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { Path } from '@/features/ResultList/types/results';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
@@ -18,6 +19,12 @@ import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkel
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import styles from './ResultDetailView.module.scss';
+import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
+import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
+import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
+import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { sortTagsBySelected, handleTagClick } from '@/features/ResultItem/utils/utilities';
+import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
 
 const GraphView = lazy(() => import('@/features/ResultItem/components/GraphView/GraphView'));
 
@@ -30,22 +37,38 @@ const ResultDetailView: FC = () => {
 
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
-
-  const ctx = useResultListContext();
+  const objectNode = useMemo(() => result ? getNodeById(resultSet, result.object) : undefined, [resultSet, result]);
+  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const {
-    isPathfinder,
+    activateNotes,
     activeEntityFilters,
     activeFilters,
-    pathFilterState,
-    scoreWeights,
-    showHiddenPaths,
-    setShowHiddenPaths,
-    resultsComplete,
-    zoomKeyDown,
-    pk,
+    availableFilters,
+    bookmarkAddedToast,
+    bookmarkRemovedToast,
+    handleBookmarkError,
+    handleFilter,
+    isPathfinder,
     navigateToEvidenceView,
-  } = ctx;
+    pathFilterState,
+    pk,
+    queryNodeDescription,
+    queryNodeID,
+    queryNodeLabel,
+    queryType,
+    resultsComplete,
+    scoreWeights,
+    setShareModalOpen,
+    setShareResultID,
+    setShowHiddenPaths,
+    showHiddenPaths,
+    shouldUpdateResultsAfterBookmark,
+    updateUserSaves,
+    userSaves,
+    zoomKeyDown
+  } = useResultListContext();
+
 
   const [graphActive, setGraphActive] = useState(false);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
@@ -69,11 +92,52 @@ const ResultDetailView: FC = () => {
       : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
     : null;
 
+  const user = useSelector(currentUser);
   const evidenceCounts = result ? (result.evidenceCount ?? getEvidenceCounts(resultSet, result)) : null;
   const pathCount = result && resultSet ? getPathCount(resultSet, result.paths) : 0;
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode?.descriptions[0];
+
+  const bookmarkItem = useMemo(
+    () => (result ? userSaves?.saves.get(result.id) ?? null : null),
+    [userSaves, result]
+  );
+
+  const {
+    isBookmarked,
+    hasNotes: itemHasNotes,
+    confirmModalOpen: bookmarkRemovalConfirmationModalOpen,
+    setConfirmModalOpen: setBookmarkRemovalConfirmationModalOpen,
+    handleBookmarkClick,
+    handleNotesClick: handleNotesClickHook,
+    handleRemovalApproval: handleBookmarkRemovalApproval,
+    resetRemovalApproval,
+  } = useBookmarkItem({
+    bookmarkItem,
+    result,
+    resultSet,
+    queryNodeID,
+    queryNodeLabel,
+    queryNodeDescription,
+    queryType,
+    currentQueryID: pk,
+    bookmarkAddedToast,
+    bookmarkRemovedToast,
+    handleBookmarkError,
+    updateUserSaves,
+    shouldUpdateResultsAfterBookmark,
+  });
+
+  const handleNotesClick = useCallback(async () => {
+    await handleNotesClickHook(activateNotes, nameString);
+  }, [handleNotesClickHook, activateNotes, nameString]);
+
+  const handleOpenResultShare = useCallback(() => {
+    if (!result) return;
+    setShareResultID(result.id);
+    setShareModalOpen(true);
+  }, [result, setShareResultID, setShareModalOpen]);
 
   const graph = useMemo(() => {
     if (!resultSet || !result) return { nodes: [], edges: [] };
@@ -96,19 +160,68 @@ const ResultDetailView: FC = () => {
 
   return (
     <div className={styles.resultDetailView}>
+      <div className={styles.tableHeader}>
+        <span className={styles.tableHeaderRow}>Name</span>
+        <span className={styles.tableHeaderRow}></span>
+        <span className={styles.tableHeaderRow}>Evidence</span>
+        <span className={styles.tableHeaderRow}>Paths</span>
+        <span className={styles.tableHeaderRow}>Score</span>
+      </div>
       <div className={styles.header}>
-        <div className={styles.nameRow}>
-          <h4 className={styles.name}>{nameString}</h4>
-        </div>
-        <div className={styles.meta}>
-          {evidenceCounts && evidenceCounts.publicationCount > 0 && (
-            <span className={styles.metaItem}>Publications ({evidenceCounts.publicationCount})</span>
-          )}
-          {evidenceCounts && evidenceCounts.clinicalTrialCount > 0 && (
-            <span className={styles.metaItem}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-          )}
-          <span className={styles.metaItem}>{pathCount} {pathCount === 1 ? 'Path' : 'Paths'}</span>
-          <span className={styles.metaItem}>Score: {resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : 'Processing...'}</span>
+        <div className={styles.top}>
+          <div className={styles.nameContainer}>
+            <ResultItemName
+              isPathfinder={isPathfinder}
+              subjectNode={subjectNode}
+              objectNode={objectNode}
+              item={result}
+              activeEntityFilters={activeEntityFilters}
+              nameString={nameString}
+            />
+          </div>
+          <ResultItemInteractables
+            handleBookmarkClick={handleBookmarkClick}
+            handleNotesClick={handleNotesClick}
+            handleOpenResultShare={handleOpenResultShare}
+            hasNotes={itemHasNotes}
+            hasUser={!!user}
+            isBookmarked={isBookmarked}
+            isEven={false}
+            isPathfinder={isPathfinder}
+            nameString={nameString}
+          />
+          <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+            <span className={styles.evidenceLink}>
+              <div>
+                {
+                  evidenceCounts && evidenceCounts.publicationCount > 0  &&
+                  <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
+                }
+                {
+                  evidenceCounts && evidenceCounts.clinicalTrialCount > 0  &&
+                  <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
+                }
+                {
+                  evidenceCounts && evidenceCounts.miscCount > 0  &&
+                  <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
+                }
+                {
+                  evidenceCounts && evidenceCounts.sourceCount > 0  &&
+                  <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
+                }
+              </div>
+            </span>
+          </div>
+          <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+            <span className={styles.paths}>
+              <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
+            </span>
+          </div>
+          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+            <span className={styles.score}>
+              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
+            </span>
+          </div>
         </div>
         {resultDescription && !isPathfinder && (
           <p className={styles.description}>
@@ -118,6 +231,25 @@ const ResultDetailView: FC = () => {
               highlightClassName="highlight"
             />
           </p>
+        )}
+        {
+        result.tags && roleCount > 0 && availableFilters && (
+          <div className={styles.tags}>
+            {
+              // Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
+              Object.keys(result.tags).map((fid) => {
+                return(
+                  <ResultItemTag
+                    activeFilters={activeFilters}
+                    availableFilters={availableFilters}
+                    fid={fid}
+                    handleFilter={handleFilter}
+                    handleTagClick={handleTagClick}
+                  />
+                )
+              })
+            }
+          </div>
         )}
       </div>
       <Tabs
@@ -154,6 +286,14 @@ const ResultDetailView: FC = () => {
           </Suspense>
         </Tab>
       </Tabs>
+      <BookmarkConfirmationModal
+        isOpen={bookmarkRemovalConfirmationModalOpen}
+        onApprove={handleBookmarkRemovalApproval}
+        onClose={() => {
+          setBookmarkRemovalConfirmationModalOpen(false);
+          resetRemovalApproval();
+        }}
+      />
     </div>
   );
 };

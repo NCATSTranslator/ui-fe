@@ -12,10 +12,9 @@ type ResultItemNameProps = {
   item: Result;
   activeEntityFilters: string[];
   nameString: string;
-  ResultItemStyles: { [key: string]: string;};
 }
 
-const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString, ResultItemStyles }) => {
+const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString }) => {
 
   if(!subjectNode || !objectNode) {
     console.warn("Cannot generate result item name, subject or object node prop is missing."); 
@@ -68,7 +67,7 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
                       searchWords={activeEntityFilters}
                       autoEscape={true}
                       textToHighlight={pfNameString}
-                      className={`${styles.name} ${ResultItemStyles.name}`}
+                      className={`${styles.name}`}
                     />
                     {
                       (isNotLastItem) &&
@@ -81,8 +80,8 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
           </>
         :
           <>
-            <span className={ResultItemStyles.icon}>{icon}</span>
-            <span className={ResultItemStyles.name} >
+            <span className={styles.icon}>{icon}</span>
+            <span className={styles.name}>
               <Highlighter
                 highlightClassName="highlight"
                 searchWords={activeEntityFilters}

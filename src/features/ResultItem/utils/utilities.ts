@@ -3,6 +3,7 @@ import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features
 import { cloneDeep } from "lodash";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { Filter } from "@/features/ResultFiltering/types/filters";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -469,4 +470,46 @@ export const isNotesEmpty = (notes?: string | null) => {
   }
 
   return true;
+}
+
+
+/**
+ * Sorts tags by whether they are selected or not.
+ *
+ * @param {string} a - The first tag ID.
+ * @param {string} b - The second tag ID.
+ * @param {[{id: string;}] | Filter[]} selected - The selected tags.
+ * @returns {number} - The sorted tags.
+ */
+export const sortTagsBySelected = (
+  a: string,
+  b: string,
+  selected: [{id: string;}] | Filter[]
+): number => {
+  const aExistsInSelected = selected.some((item) => item.id === a);
+  const bExistsInSelected = selected.some((item) => item.id === b);
+
+  if (aExistsInSelected && bExistsInSelected) return 0;
+  if (aExistsInSelected) return -1;
+  if (bExistsInSelected) return 1;
+
+  return 0;
+};
+
+/**
+ * Handles a tag click by creating a new filter object and applying it.
+ *
+ * @param {string} filterID - The ID of the filter.
+ * @param {Filter} filter - The filter object.
+ * @param {Function} handleFilter - The function to handle the filter.
+ * @returns {void}
+ */
+export const handleTagClick = (filterID: string, filter: Filter, handleFilter: (filter: Filter) => void) => {
+  let newObj: Filter = {
+    name: filter.name,
+    negated: false,
+    id: filterID,
+    value: filter.name
+  };
+  handleFilter(newObj);
 }

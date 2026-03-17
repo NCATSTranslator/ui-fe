@@ -3,12 +3,29 @@
 .nameContainer {
   display: flex;
   align-items: center;
-  .name, svg {
-    margin-right: 4px;
-  }
-  .arrow {
-    path {
-      stroke: $midPurpleTwo; 
-    }
+}
+.name, .name span, .name mark {
+  display: flex;
+  font-size: $h6Size;
+  font-weight: 800;
+  line-height: 1.25;
+  color: $black;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-transform: none;
+}
+
+.icon, .icon svg {
+  display: flex;
+  width: $m;
+  height: $m;
+  min-width: $m;
+  min-height: $m;
+}
+
+.arrow {
+  path {
+    stroke: $midPurpleTwo; 
   }
 }
