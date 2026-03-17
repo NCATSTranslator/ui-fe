@@ -15,7 +15,7 @@ import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
-import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkeleton';
+import ResultDetailViewSkeleton from '@/features/ResultItem/components/ResultDetailViewSkeleton/ResultDetailViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import styles from './ResultDetailView.module.scss';
@@ -150,7 +150,7 @@ const ResultDetailView: FC = () => {
 
   // Loading state
   if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
-    return <ViewSkeleton statusMessage="Loading results..." />;
+    return <ResultDetailViewSkeleton />;
   }
 
   // Not found
@@ -223,15 +223,6 @@ const ResultDetailView: FC = () => {
             </span>
           </div>
         </div>
-        {resultDescription && !isPathfinder && (
-          <p className={styles.description}>
-            <SafeHtmlHighlighter
-              htmlString={resultDescription}
-              searchWords={activeEntityFilters}
-              highlightClassName="highlight"
-            />
-          </p>
-        )}
         {
         result.tags && roleCount > 0 && availableFilters && (
           <div className={styles.tags}>
@@ -250,6 +241,16 @@ const ResultDetailView: FC = () => {
               })
             }
           </div>
+        )}
+        {
+          resultDescription && !isPathfinder && (
+          <p className={styles.description}>
+            <SafeHtmlHighlighter
+              htmlString={resultDescription}
+              searchWords={activeEntityFilters}
+              highlightClassName="highlight"
+            />
+          </p>
         )}
       </div>
       <Tabs

@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { getNodeById, getResultById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { capitalizeAllWords, getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
-import styles from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs.module.scss';
 import { Result, ResultSet } from '@/features/ResultList/types/results';
+import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 
 const formatResultLabel = (resultSet: ResultSet | null, result: Result | undefined) => {
   if(!result || !resultSet)
@@ -30,7 +30,7 @@ const ResultBreadcrumbLabel: FC = () => {
   const resultLabel = formatResultLabel(resultSet, result);
 
   if (resultLabel) return <>{resultLabel}</>;
-  if (!resultSet) return <span className={styles.shimmer} />;
+  if (!resultSet) return <SkeletonBar width="100%" height="17px" />;
   return <>Result</>;
 };
 
