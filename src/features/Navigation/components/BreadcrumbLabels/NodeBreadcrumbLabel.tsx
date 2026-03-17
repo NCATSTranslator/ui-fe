@@ -6,7 +6,7 @@ import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
-import styles from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs.module.scss';
+import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 
 const NodeBreadcrumbLabel: FC = () => {
   const { nodeId } = useParams();
@@ -27,7 +27,7 @@ const NodeBreadcrumbLabel: FC = () => {
   if (node) return <>{node.names[0]}</>;
   if (resolvedName) return <>{resolvedName}</>;
   if (nodeId) return <>{nodeId}</>;
-  return <span className={styles.shimmer} />;
+  return <SkeletonBar width="100px" height="17px" />;
 };
 
 export default NodeBreadcrumbLabel;

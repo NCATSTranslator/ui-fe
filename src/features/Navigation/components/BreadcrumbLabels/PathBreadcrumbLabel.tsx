@@ -5,7 +5,7 @@ import { getResultSetById, getResultById } from '@/features/ResultList/slices/re
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { derivePathKey } from '@/features/Navigation/utils/navigationUtils';
-import styles from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs.module.scss';
+import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 
 const PathBreadcrumbLabel: FC = () => {
   const { resultId, pathId } = useParams();
@@ -17,7 +17,7 @@ const PathBreadcrumbLabel: FC = () => {
   const pathKey = useMemo(() => derivePathKey(resultSet, result, pathId), [resultSet, result, pathId]);
 
   if (pathKey) return <>Path {pathKey}</>;
-  if (!resultSet) return <span className={styles.shimmer} />;
+  if (!resultSet) return <SkeletonBar width="80px" height="17px" />;
   return <>Path</>;
 };
 

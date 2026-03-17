@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
-import styles from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs.module.scss';
 import { generateQueryTitle } from '@/features/Projects/utils/queryTitleUtils';
+import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 
 const QueryBreadcrumbLabel: FC = () => {
   const decodedParams = useDecodedParams();
@@ -14,7 +14,7 @@ const QueryBreadcrumbLabel: FC = () => {
   const queryTitle = generateQueryTitle(queryType, nodeOneLabel || '', nodeTwoLabel || '', constraint);
 
   if (queryTitle) return <>{queryTitle}</>;
-  return <span className={styles.shimmer} />;
+  return <SkeletonBar width="150px" height="17px" />;
 };
 
 export default QueryBreadcrumbLabel;

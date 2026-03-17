@@ -30,7 +30,7 @@ const ResultBreadcrumbLabel: FC = () => {
   const resultLabel = formatResultLabel(resultSet, result);
 
   if (resultLabel) return <>{resultLabel}</>;
-  if (!resultSet) return <SkeletonBar width="100%" height="17px" />;
+  if (!resultSet) return <SkeletonBar width="100px" height="17px" />;
   return <>Result</>;
 };
 
