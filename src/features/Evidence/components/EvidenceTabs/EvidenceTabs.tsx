@@ -9,7 +9,7 @@ import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { Preferences } from '@/features/UserAuth/types/user';
-import styles from '@/features/Evidence/components/EvidenceModal/EvidenceModal.module.scss';
+import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import { getFormattedDate } from '@/features/Common/utils/utilities';
 
 interface EvidenceTabsProps {
