@@ -5,6 +5,9 @@ export interface ResultsNavigateOptions {
   replace?: boolean;
 }
 
+// Parameters that are not persisted in the URL after navigation
+export const TRANSIENT_PARAMS = ['pkey'] as const;
+
 /**
  * A hook that navigates to a results page with the current search params.
  * @returns A function that navigates to a results page with the current search params.
@@ -19,6 +22,7 @@ export const useResultsNavigate = () => {
   return useCallback(
     (path: string, extraParams?: Record<string, string>, options?: ResultsNavigateOptions) => {
       const merged = new URLSearchParams(searchParamsRef.current);
+      TRANSIENT_PARAMS.forEach(p => merged.delete(p));
       if (extraParams) {
         for (const [k, v] of Object.entries(extraParams)) {
           merged.set(k, v);
