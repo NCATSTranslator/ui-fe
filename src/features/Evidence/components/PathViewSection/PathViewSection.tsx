@@ -3,7 +3,7 @@ import Button from '@/features/Core/components/Button/Button';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import styles from '@/features/Evidence/components/EvidenceModal/EvidenceModal.module.scss';
+import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 
 interface PathViewSectionProps {
   path: Path;

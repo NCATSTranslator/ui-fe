@@ -14,7 +14,7 @@ import { derivePathKey, resolveEdgeFromPath } from '@/features/Navigation/utils/
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkeleton';
+import EvidenceViewSkeleton from '@/features/Evidence/components/EvidenceViewSkeleton/EvidenceViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import styles from './EvidenceView.module.scss';
 
@@ -136,7 +136,7 @@ const EvidenceView: FC = () => {
   }
 
   if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
-    return <ViewSkeleton statusMessage="Loading evidence..." />;
+    return <EvidenceViewSkeleton />;
   }
 
   if (!result) {
@@ -147,7 +147,7 @@ const EvidenceView: FC = () => {
     if (!resolvedEdge) {
       return <ViewNotFound entity="edge" id={edgeId || 'unknown'} />;
     }
-    return <ViewSkeleton statusMessage="Loading evidence..." />;
+    return <EvidenceViewSkeleton />;
   }
 
   return (
