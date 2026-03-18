@@ -52,7 +52,10 @@ const EvidenceView: FC = () => {
     return resolveEdgeFromPath(resultSet, path, decodedEdgeId);
   }, [resultSet, path, decodedEdgeId]);
 
-  const pathKey = useMemo(() => derivePathKey(resultSet, result, pathId) ?? "", [resultSet, result, pathId]);
+  const pathKey = useMemo(
+    () => getDataFromQueryVar("pkey", decodedParams) ?? derivePathKey(resultSet, result, pathId) ?? "",
+    [decodedParams, resultSet, result, pathId]
+  );
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
 
@@ -114,9 +117,10 @@ const EvidenceView: FC = () => {
       const basePath = pathId
         ? `/results/${resultId}/path/${pathId}/evidence/${encodedEdgeId}`
         : `/results/${resultId}/evidence/${encodedEdgeId}`;
-      resultsNavigate(basePath, undefined, { replace: true });
+      const pkeyParam = getDataFromQueryVar("pkey", decodedParams);
+      resultsNavigate(basePath, pkeyParam ? { pkey: pkeyParam } : undefined, { replace: true });
     }
-  }, [resultSet, compressedSubgraph, handleEvidenceData, markEdgeSeen, resultsNavigate, resultId, pathId]);
+  }, [resultSet, compressedSubgraph, handleEvidenceData, markEdgeSeen, resultsNavigate, resultId, pathId, decodedParams]);
 
   useEffect(() => {
     if (selectedEdge) scrollToRef(selectedEdgeDomRef);

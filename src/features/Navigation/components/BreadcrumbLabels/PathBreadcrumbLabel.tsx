@@ -14,7 +14,10 @@ const PathBreadcrumbLabel: FC = () => {
   const resultSet = useSelector(getResultSetById(queryId));
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
 
-  const pathKey = useMemo(() => derivePathKey(resultSet, result, pathId), [resultSet, result, pathId]);
+  const pathKey = useMemo(
+    () => getDataFromQueryVar("pkey", decodedParams) ?? derivePathKey(resultSet, result, pathId),
+    [decodedParams, resultSet, result, pathId]
+  );
 
   if (pathKey) return <>Path {pathKey}</>;
   if (!resultSet) return <SkeletonBar width="80px" height="17px" />;
