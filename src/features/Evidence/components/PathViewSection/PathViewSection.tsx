@@ -44,7 +44,6 @@ const PathViewSection: FC<PathViewSectionProps> = ({
         pathArray={[path]}
         selectedPaths={new Set()}
         handleEdgeSpecificEvidence={handleEdgeClick}
-        handleActivateEvidence={(path) => console.log(path)}
         activeEntityFilters={[]}
         pathFilterState={{}}
         isEven={false}

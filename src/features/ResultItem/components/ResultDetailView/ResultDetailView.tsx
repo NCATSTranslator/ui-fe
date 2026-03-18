@@ -50,7 +50,6 @@ const ResultDetailView: FC = () => {
     handleBookmarkError,
     handleFilter,
     isPathfinder,
-    navigateToEvidenceView,
     pathFilterState,
     pk,
     queryNodeDescription,
@@ -73,16 +72,6 @@ const ResultDetailView: FC = () => {
   const [graphActive, setGraphActive] = useState(false);
   const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
   const handleClearSelectedPaths = useCallback(() => setSelectedPaths(null), []);
-
-  const handleEdgeSpecificEvidence = useCallback((edgeIDs: string[], path: Path) => {
-    if (!result) return;
-    navigateToEvidenceView(result, edgeIDs, path);
-  }, [result, navigateToEvidenceView]);
-  
-  const handleActivateEvidence = useCallback((path: Path) => {
-    if (!result) return;
-    if (path.subgraph[1]) navigateToEvidenceView(result, [path.subgraph[1]], path);
-  }, [result, navigateToEvidenceView]);
 
   const firstPath = result?.paths[0];
   const firstPathObj = typeof firstPath === 'string' ? null : firstPath;
@@ -263,8 +252,6 @@ const ResultDetailView: FC = () => {
             active
             activeEntityFilters={activeEntityFilters}
             activeFilters={activeFilters}
-            handleEdgeSpecificEvidence={handleEdgeSpecificEvidence}
-            handleActivateEvidence={handleActivateEvidence}
             isEven={false}
             pathArray={result.paths}
             pathFilterState={pathFilterState ?? {}}

@@ -16,16 +16,16 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   hoverHandlers?: {
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -56,7 +56,6 @@ const Predicate: FC<PredicateProps> = ({
   className = "",
   edge,
   edgeIds,
-  handleActivateEvidence,
   handleEdgeClick,
   hoverHandlers,
   inModal = false,
@@ -81,6 +80,10 @@ const Predicate: FC<PredicateProps> = ({
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
   const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
+  const { navigateToEvidenceView } = useResultListContext();
+  const { setLastViewedPathID } = useLastViewedPath();
+  const supportPathKey = useSupportPathKey();
+  const fullPathKey = supportPathKey ? `${supportPathKey}.${parentPathKey}` : parentPathKey;
 
   // Create a unique identifier for this predicate
   const predicateId = useMemo(() => {
@@ -125,6 +128,14 @@ const Predicate: FC<PredicateProps> = ({
     (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
   )
 
+  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, targetEdgeIds: string[], targetPath: Path, targetFullPathKey: string ) => {
+    e.stopPropagation();
+    handleEdgeClick?.(targetEdgeIds, targetPath);
+    setLastViewedPathID(targetPath?.id || null);
+    if(!inModal)
+      navigateToEvidenceView(targetEdgeIds, targetPath, targetFullPathKey);
+  }
+
   return (
     <>
       <span
@@ -132,7 +143,7 @@ const Predicate: FC<PredicateProps> = ({
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path);}}
+        onClick={(e)=> handlePredicateClick(e, edgeIds, path, fullPathKey)}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
@@ -157,10 +168,7 @@ const Predicate: FC<PredicateProps> = ({
                       <p
                         key={`${edge.predicate}`}
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                        onClick={(e)=> {
-                          e.stopPropagation();
-                          handleEdgeClick([edge.id], path);
-                        }}
+                        onClick={(e)=> handlePredicateClick(e, [edge.id], path, fullPathKey)}
                         >
                         <Highlighter
                           highlightClassName="highlight"
@@ -264,7 +272,6 @@ const Predicate: FC<PredicateProps> = ({
           isEven={isEven}
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}
-          handleActivateEvidence={handleActivateEvidence}
           handleEdgeClick={handleEdgeClick}
           selectedPaths={selectedPaths}
           activeEntityFilters={activeEntityFilters}

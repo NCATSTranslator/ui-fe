@@ -7,16 +7,16 @@ import { PathFilterState, Path } from '@/features/ResultList/types/results.d';
 import { joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-import { useLastViewedPath, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { ExpandedPredicateContext } from '../PathContainer/PathContainer';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
-  handleActivateEvidence: (path: Path) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   isEven: boolean;
   path: Path;
   pathFilterState: PathFilterState;
@@ -31,7 +31,6 @@ const SupportPath: FC<SupportPathProps> = ({
   activeFilters, 
   character,
   handleEdgeClick,
-  handleActivateEvidence,
   isEven = false,
   path,
   pathFilterState,
@@ -42,6 +41,9 @@ const SupportPath: FC<SupportPathProps> = ({
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { isPathSeen } = useSeenStatus(pk);
+  const { navigateToEvidenceView } = useResultListContext();
+  const supportPathKey = useSupportPathKey();
+  const fullPathKey = supportPathKey ? `${supportPathKey}.${character}` : character;
   const tooltipID = path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
@@ -81,7 +83,9 @@ const SupportPath: FC<SupportPathProps> = ({
               onClick={()=>{
                 if(!!path?.id) {
                   setLastViewedPathID(path.id);
-                  handleActivateEvidence(path);
+                  if (path.subgraph[1]) {
+                    navigateToEvidenceView([path.subgraph[1]], path, fullPathKey);
+                  }
                 }
               }}
               className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
@@ -123,7 +127,6 @@ const SupportPath: FC<SupportPathProps> = ({
                           parentPathKey={character}
                           id={subgraphItemID}
                           key={key}
-                          handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}
@@ -149,7 +152,6 @@ const SupportPath: FC<SupportPathProps> = ({
                           parentPathKey={character}
                           id={subgraphItemID}
                           key={subgraphItemID}
-                          handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}

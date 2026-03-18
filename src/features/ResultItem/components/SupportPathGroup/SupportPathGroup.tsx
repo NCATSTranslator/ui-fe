@@ -21,8 +21,7 @@ export const SupportPathKeyContext = createContext<string>("");
 interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
-  handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   isExpanded: boolean;
   isEven: boolean;
   parentPathKey: string;
@@ -37,8 +36,7 @@ interface SupportPathGroupProps {
 const SupportPathGroup: FC<SupportPathGroupProps> = ({ 
   activeFilters, 
   activeEntityFilters, 
-  handleActivateEvidence, 
-  handleEdgeClick, 
+  handleEdgeClick,
   isExpanded,
   isEven = false,
   parentPathKey,
@@ -136,7 +134,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     pathFilterState={pathFilterState}
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
-                    handleActivateEvidence={handleActivateEvidence}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}

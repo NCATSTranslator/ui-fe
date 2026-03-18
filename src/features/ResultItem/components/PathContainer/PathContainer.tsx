@@ -15,6 +15,7 @@ import { numberToWords } from '@/features/Common/utils/utilities';
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 export const ExpandedPredicateContext = createContext<{
   expandedPredicateId: string | null;
@@ -27,8 +28,7 @@ interface PathContainerProps {
   path: Path;
   inModal: boolean;
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
-  handleActivateEvidence: (path: Path) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   activeEntityFilters: string[];
   selectedPaths: Set<Path> | null;
   pathFilterState: PathFilterState;
@@ -49,7 +49,6 @@ const PathContainer: FC<PathContainerProps> = ({
   path,
   inModal,
   compressedSubgraph,
-  handleActivateEvidence,
   handleEdgeClick,
   activeEntityFilters,
   selectedPaths,
@@ -65,6 +64,7 @@ const PathContainer: FC<PathContainerProps> = ({
   formattedPaths,
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
+  const { navigateToEvidenceView } = useResultListContext();
   const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
   const initialExpandedPredicateIdSet = useRef(false);
 
@@ -72,7 +72,8 @@ const PathContainer: FC<PathContainerProps> = ({
   const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
   const { isPathSeen } = useSeenStatus(pk);
   const isSeen = isPathSeen(edgeIds);
-  const tooltipID: string = (!!path?.id) ? path.id : useId();
+  const generatedId = useId();
+  const tooltipID: string = path?.id ?? generatedId;
   const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
   const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
   
@@ -128,7 +129,10 @@ const PathContainer: FC<PathContainerProps> = ({
           onClick={() => {
             if (!!path?.id) {
               setLastViewedPathID(path.id);
-              handleActivateEvidence(path);
+              const pathKey = indexInFullCollection !== -1 ? (indexInFullCollection + 1).toString() : "-";
+              if (path.subgraph[1]) {
+                navigateToEvidenceView([path.subgraph[1]], path, pathKey);
+              }
             }
           }}
           className={styles.pathEvidenceButton}
@@ -266,7 +270,6 @@ const PathContainer: FC<PathContainerProps> = ({
                     parentPathKey={(indexInFullCollection + 1).toString()}
                     id={subgraphItemID}
                     key={key}
-                    handleActivateEvidence={handleActivateEvidence}
                     handleEdgeClick={handleEdgeClick}
                     activeEntityFilters={activeEntityFilters}
                     selectedPaths={selectedPaths}

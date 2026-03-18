@@ -29,8 +29,7 @@ interface PathViewProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
-  handleActivateEvidence: (path: Path) => void;
-  handleEdgeSpecificEvidence:(edgeIDs: string[], path: Path) => void;
+  handleEdgeSpecificEvidence?:(edgeIDs: string[], path: Path) => void;
   inModal?: boolean;
   isEven: boolean;
   pathArray: string[] | Path[];
@@ -48,9 +47,8 @@ const PathView: FC<PathViewProps> = ({
   activeEntityFilters,
   activeFilters,
   compressedSubgraph,
-  handleActivateEvidence,
   handleEdgeSpecificEvidence,
-  inModal = false, 
+  inModal = false,
   isEven,
   pathArray,
   pathFilterState,
@@ -96,8 +94,7 @@ const PathView: FC<PathViewProps> = ({
   let inferredLabelDisplayed = false;
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
-    setLastViewedPathID(path?.id || null);
-    handleEdgeSpecificEvidence(edgeIDs, path);
+    handleEdgeSpecificEvidence?.(edgeIDs, path);
   }, [handleEdgeSpecificEvidence]);
 
   if(!resultSet)
@@ -157,7 +154,6 @@ const PathView: FC<PathViewProps> = ({
                           path={path}
                           inModal={inModal}
                           compressedSubgraph={compressedSubgraph}
-                          handleActivateEvidence={handleActivateEvidence}
                           handleEdgeClick={handleEdgeClick}
                           activeEntityFilters={activeEntityFilters}
                           selectedPaths={selectedPaths}

@@ -20,8 +20,7 @@ export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence?: (path: Path) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -41,7 +40,6 @@ const PathObject: FC<PathObjectProps> = ({
   activeEntityFilters,
   activeFilters,
   className = "",
-  handleActivateEvidence = ()=>{},
   handleEdgeClick,
   id,
   index,
@@ -168,7 +166,6 @@ const PathObject: FC<PathObjectProps> = ({
                   activeEntityFilters={activeEntityFilters}
                   activeFilters={activeFilters}
                   uid={uid}
-                  handleActivateEvidence={handleActivateEvidence}
                   handleEdgeClick={handleEdgeClick}
                   hoverHandlers={hoverHandlers}
                   parentClass={styles.predicateContainer}
