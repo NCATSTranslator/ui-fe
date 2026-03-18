@@ -25,7 +25,7 @@ const ResultDetailViewSkeleton: FC = () => {
           <SkeletonBar width="96px" height="24px" borderRadius="12px" />
           <SkeletonBar width="64px" height="24px" borderRadius="12px" />
         </div>
-        <SkeletonBar width="90%" height="14px" />
+        <SkeletonBar width="70%" height="72px" />
       </div>
       <div className={styles.tabBar}>
         <SkeletonBar width="48px" height="40px" />

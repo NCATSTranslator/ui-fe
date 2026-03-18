@@ -87,9 +87,12 @@
   display: flex;
 }
 
+.tags, .description {
+  width: calc(100% - 450px);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: $xs;
-  width: calc(100% - 450px);
 }
