@@ -93,7 +93,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Evidence navigation via hook
   const {
     navigateToEvidenceView,
-  } = useEvidenceViewNavigation();
+  } = useEvidenceViewNavigation(resultId);
 
   const { scoreWeights, noveltyBoost, handleToggleNoveltyBoost } = useScoreWeights({
     onWeightsChange: (newWeights: ScoreWeights) => {

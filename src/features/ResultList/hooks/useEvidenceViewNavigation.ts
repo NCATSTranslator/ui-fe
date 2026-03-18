@@ -1,24 +1,26 @@
 import { useCallback } from 'react';
-import { Result, Path } from '@/features/ResultList/types/results.d';
+import { Path } from '@/features/ResultList/types/results.d';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 
 export interface UseEvidenceViewNavigationReturn {
-  navigateToEvidenceView: (item: Result, edgeID: string[], path: Path) => void;
+  navigateToEvidenceView: (edgeID: string[], path: Path, pathKey: string) => void;
 }
 
-const useEvidenceViewNavigation = (): UseEvidenceViewNavigationReturn => {
+const useEvidenceViewNavigation = (resultId?: string): UseEvidenceViewNavigationReturn => {
   const resultsNavigate = useResultsNavigate();
 
-  const navigateToEvidenceView = useCallback((item: Result, edgeID: string[], path: Path) => {
+  const navigateToEvidenceView = useCallback((edgeID: string[], path: Path, pathKey: string) => {
+    if (!resultId) return;
     const primaryEdgeId = edgeID[0];
     const encodedEdgeId = encodeURIComponent(primaryEdgeId);
+    const extraParams = pathKey ? { pkey: pathKey } : undefined;
 
     if (path.id) {
-      resultsNavigate(`/results/${item.id}/path/${path.id}/evidence/${encodedEdgeId}`);
+      resultsNavigate(`/results/${resultId}/path/${path.id}/evidence/${encodedEdgeId}`, extraParams);
     } else {
-      resultsNavigate(`/results/${item.id}/evidence/${encodedEdgeId}`);
+      resultsNavigate(`/results/${resultId}/evidence/${encodedEdgeId}`, extraParams);
     }
-  }, [resultsNavigate]);
+  }, [resultsNavigate, resultId]);
 
   return {
     navigateToEvidenceView,
