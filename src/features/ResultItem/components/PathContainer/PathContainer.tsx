@@ -1,4 +1,4 @@
-import { createContext, FC, useId, useRef, useState } from 'react';
+import { createContext, FC, Fragment, useId, useRef, useState } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
@@ -16,6 +16,7 @@ import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resu
 import { useSelector } from 'react-redux';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 export const ExpandedPredicateContext = createContext<{
   expandedPredicateId: string | null;
@@ -131,7 +132,7 @@ const PathContainer: FC<PathContainerProps> = ({
               setLastViewedPathID(path.id);
               const pathKey = indexInFullCollection !== -1 ? (indexInFullCollection + 1).toString() : "-";
               if (path.subgraph[1]) {
-                navigateToEvidenceView([path.subgraph[1]], path, pathKey);
+                navigateToEvidenceView(path.subgraph[1], extractCompressedEdgeSets(path), path, pathKey);
               }
             }
           }}
@@ -154,14 +155,14 @@ const PathContainer: FC<PathContainerProps> = ({
             compressedSubgraph.map((subgraphItem, i) => {
               if (Array.isArray(subgraphItem) && subgraphItem.length > 1) {
                 const svgHeight = (subgraphItem.length * (edgeHeight + 8)) - 8;
-                let hasSelected = (!!selectedEdge && subgraphItem.find(edge => edge.id === selectedEdge.id)) ? true : false;
+                const hasSelected = !!selectedEdge && !!subgraphItem.find(edge => edge.id === selectedEdge.id);
                 return (
-                  <>
+                  <Fragment key={subgraphItem[0].id}>
                     <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
                       {/* Render node → edge connections */}
                       {subgraphItem.map((edge, index) => {
-                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
-                        let strokeColor = getStrokeColor(index, hoveredIndex, selected);
+                        const selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
+                        const strokeColor = getStrokeColor(index, hoveredIndex, selected);
                         return (
                           <path
                             key={`node-to-edge-${edge.id}`}
@@ -175,8 +176,8 @@ const PathContainer: FC<PathContainerProps> = ({
                     </svg>
                     <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
                       {subgraphItem.map((edge) => {
-                        let key = `${edge.id}`;
-                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
+                        const key = `${edge.id}`;
+                        const selected = !!selectedEdge && (selectedEdge.id === edge.id);
                         return (
                           <PathObject
                             activeEntityFilters={[]}
@@ -202,8 +203,8 @@ const PathContainer: FC<PathContainerProps> = ({
                     <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
                       {/* Render edge → node connections */}
                       {subgraphItem.map((edge, index) => {
-                        let selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
-                        let strokeColor = getStrokeColor(index, hoveredIndex, selected);
+                        const selected = !!selectedEdge && (selectedEdge.id === edge.id);
+                        const strokeColor = getStrokeColor(index, hoveredIndex, selected);
                         return (
                           <path
                             key={`edge-to-node-${edge.id}`}
@@ -215,11 +216,11 @@ const PathContainer: FC<PathContainerProps> = ({
                         );
                       })}
                     </svg>
-                  </>
+                  </Fragment>
                 )
               } else {
-                let key = (Array.isArray(subgraphItem)) ? subgraphItem[0].id : subgraphItem.id;
-                let selected = (!!selectedEdge && selectedEdge.id === key) ? true : false;
+                const key = (Array.isArray(subgraphItem)) ? subgraphItem[0].id : subgraphItem.id;
+                const selected = !!selectedEdge && (selectedEdge.id === key);
                 return (
                   <PathObject
                     activeEntityFilters={[]}
@@ -244,8 +245,8 @@ const PathContainer: FC<PathContainerProps> = ({
             })
           ) : (
             subgraphToMap.map((subgraphItemID: string | string[], i: number) => {
-              let selected = (!!selectedEdge && selectedEdge.id === subgraphItemID) ? true : false;
-              let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+              const selected = !!selectedEdge && (selectedEdge.id === subgraphItemID);
+              const key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
               // check for inferred edges and set the expanded predicate id if it's the first one in the path
               if(!isNodeIndex(i)) {
                 const formattedEdge = (!isNodeIndex(i)) && (!!resultSet && Array.isArray(subgraphItemID) && subgraphItemID.length > 1) ? getCompressedEdge(resultSet, subgraphItemID) : getEdgeById(resultSet, subgraphItemID as string);
@@ -260,27 +261,25 @@ const PathContainer: FC<PathContainerProps> = ({
               if (path.id === undefined)
                 return null;
               return (
-                <>
-                  <PathObject
-                    pathViewStyles={styles}
-                    index={i}
-                    isEven={isEven}
-                    inModal={inModal}
-                    path={path}
-                    parentPathKey={(indexInFullCollection + 1).toString()}
-                    id={subgraphItemID}
-                    key={key}
-                    handleEdgeClick={handleEdgeClick}
-                    activeEntityFilters={activeEntityFilters}
-                    selectedPaths={selectedPaths}
-                    pathFilterState={pathFilterState}
-                    activeFilters={activeFilters}
-                    pk={pk}
-                    showHiddenPaths={showHiddenPaths}
-                    selected={selected}
-                    selectedEdgeRef={selectedEdgeRef}
-                  />
-                </>
+                <PathObject
+                  pathViewStyles={styles}
+                  index={i}
+                  isEven={isEven}
+                  inModal={inModal}
+                  path={path}
+                  parentPathKey={(indexInFullCollection + 1).toString()}
+                  id={subgraphItemID}
+                  key={key}
+                  handleEdgeClick={handleEdgeClick}
+                  activeEntityFilters={activeEntityFilters}
+                  selectedPaths={selectedPaths}
+                  pathFilterState={pathFilterState}
+                  activeFilters={activeFilters}
+                  pk={pk}
+                  showHiddenPaths={showHiddenPaths}
+                  selected={selected}
+                  selectedEdgeRef={selectedEdgeRef}
+                />
               )
             })
           )}

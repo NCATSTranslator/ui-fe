@@ -20,6 +20,7 @@ import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/fe
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -75,7 +76,7 @@ const Predicate: FC<PredicateProps> = ({
   showHiddenPaths,
   uid }) => {
 
-  let resultSet = useSelector(getResultSetById(pk));
+  const resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
@@ -103,14 +104,8 @@ const Predicate: FC<PredicateProps> = ({
     setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
 
-  const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
-    let newArr = cloneDeep(arr);
-    newArr.push(element);
-    return newArr;
-  }
-
   const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
-  ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
+  ? [...formattedEdge.compressed_edges, formattedEdge]
   : [formattedEdge];
 
   const edgeClass = joinClasses(
@@ -128,12 +123,15 @@ const Predicate: FC<PredicateProps> = ({
     (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
   )
 
-  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, targetEdgeIds: string[], targetPath: Path, targetFullPathKey: string ) => {
+  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string) => {
     e.stopPropagation();
-    handleEdgeClick?.(targetEdgeIds, targetPath);
+    handleEdgeClick?.([selectedEdgeId, ...compressedEdgeIds], targetPath);
     setLastViewedPathID(targetPath?.id || null);
-    if(!inModal)
-      navigateToEvidenceView(targetEdgeIds, targetPath, targetFullPathKey);
+    if(!inModal) {
+      let allSets = extractCompressedEdgeSets(targetPath);
+      if (allSets.length === 0 && edgeIds.length > 1) allSets = [edgeIds];
+      navigateToEvidenceView(selectedEdgeId, allSets, targetPath, targetFullPathKey);
+    }
   }
 
   return (
@@ -143,7 +141,7 @@ const Predicate: FC<PredicateProps> = ({
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> handlePredicateClick(e, edgeIds, path, fullPathKey)}
+        onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, fullPathKey)}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
@@ -168,7 +166,7 @@ const Predicate: FC<PredicateProps> = ({
                       <p
                         key={`${edge.predicate}`}
                         className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                        onClick={(e)=> handlePredicateClick(e, [edge.id], path, fullPathKey)}
+                        onClick={(e)=> handlePredicateClick(e, edge.id, edgeIds.filter(id => id !== edge.id), path, fullPathKey)}
                         >
                         <Highlighter
                           highlightClassName="highlight"
