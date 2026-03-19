@@ -15,7 +15,7 @@ export interface ResultListContextValue {
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
   isPathfinder: boolean;
-  navigateToEvidenceView: (edgeIDs: string[], path: Path, pathKey: string) => void;
+  navigateToEvidenceView: (selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => void;
   pathFilterState: PathFilterState | null;
   pk: string | null;
   resultId: string | undefined;
