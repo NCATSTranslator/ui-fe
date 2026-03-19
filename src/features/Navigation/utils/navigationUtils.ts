@@ -80,10 +80,80 @@ const findInSupportChain = (
   return null;
 };
 
+
+/**
+ * Extracts all compressed edge groups from a path's compressedSubgraph (or subgraph).
+ * Each group is an array of edge IDs that occupy the same compressed position.
+ * Only groups with more than one edge are included.
+ */
+export const extractCompressedEdgeSets = (path: Path): string[][] => {
+  const subgraph = path.compressedSubgraph ?? path.subgraph;
+  const sets: string[][] = [];
+  for (let i = 1; i < subgraph.length; i += 2) {
+    const item = subgraph[i];
+    if (Array.isArray(item) && item.length > 1) {
+      sets.push(item as string[]);
+    }
+  }
+  return sets;
+};
+
+interface EvidenceUrlOptions {
+  resultId: string;
+  pathId?: string;
+  primaryEdgeId: string;
+  compressedEdgeSets?: string[][];
+  pathKey?: string;
+}
+/**
+ * Builds the evidence URL and extraParams object for evidence navigation.
+ *
+ * The `ceids` query param is serialized as pipe-delimited groups of comma-delimited
+ * edge IDs (e.g. `"id1,id2|id3,id4"`). Edge IDs are assumed to be alphanumeric,
+ * so `|` and `,` are safe delimiters. URLSearchParams handles any necessary
+ * percent-encoding of the delimiters in the query string.
+ *
+ * @param resultId - The result ID.
+ * @param pathId - The path ID.
+ * @param primaryEdgeId - The edge ID to display in the URL path (the actively selected edge).
+ * @param compressedEdgeSets - All compressed edge groups in the path (passed via `ceids` query param).
+ * @param pathKey - The path key.
+ * @returns The evidence URL and extraParams object.
+ */
+export const buildEvidenceUrl = ({
+  resultId,
+  pathId,
+  primaryEdgeId,
+  compressedEdgeSets,
+  pathKey,
+}: EvidenceUrlOptions): { path: string; params?: Record<string, string> } => {
+  const encodedEdgeId = encodeURIComponent(primaryEdgeId);
+  const path = pathId
+    ? `/results/${resultId}/path/${pathId}/evidence/${encodedEdgeId}`
+    : `/results/${resultId}/evidence/${encodedEdgeId}`;
+
+  const params: Record<string, string> = {};
+  if (pathKey) params.pkey = pathKey;
+  if (compressedEdgeSets && compressedEdgeSets.length > 0) {
+    params.ceids = compressedEdgeSets
+      .map(group => group.join(','))
+      .join('|');
+  }
+
+  return {
+    path,
+    params: Object.keys(params).length > 0 ? params : undefined,
+  };
+};
+
 /**
  * Resolves an edge from a path's subgraph data. If the path has a compressedSubgraph,
  * finds the compressed group containing the edgeId and merges them.
  * Falls back to a simple edge lookup.
+ * @param resultSet - The result set.
+ * @param path - The path.
+ * @param edgeId - The edge ID.
+ * @returns The edge.
  */
 export const resolveEdgeFromPath = (
   resultSet: ResultSet,
