@@ -10,7 +10,8 @@ import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useEvidenceData, useEdgeInitialization } from '@/features/Evidence/hooks/evidenceHooks';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
-import { derivePathKey, resolveEdgeFromPath } from '@/features/Navigation/utils/navigationUtils';
+import { derivePathKey, resolveEdgeFromPath, buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
@@ -22,6 +23,8 @@ const EvidenceView: FC = () => {
   const { resultId, edgeId, pathId } = useParams();
   const resultsNavigate = useResultsNavigate();
   const decodedParams = useDecodedParams();
+  const decodedParamsRef = useRef(decodedParams);
+  decodedParamsRef.current = decodedParams;
   const queryId = getDataFromQueryVar("q", decodedParams);
 
   const prefs = useSelector(currentPrefs);
@@ -34,7 +37,6 @@ const EvidenceView: FC = () => {
   const selectedEdgeRef = useRef(selectedEdge);
   selectedEdgeRef.current = selectedEdge;
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
-  const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
 
   const pk = queryId || "";
 
@@ -47,10 +49,28 @@ const EvidenceView: FC = () => {
 
   const decodedEdgeId = useMemo(() => edgeId ? decodeURIComponent(edgeId) : undefined, [edgeId]);
 
+  const compressedEdgeSets: string[][] = useMemo(() => {
+    const ceidsParam = getDataFromQueryVar("ceids", decodedParams);
+    if (!ceidsParam) return [];
+    return ceidsParam.split('|').map(group => group.split(','));
+  }, [decodedParams]);
+
+  const selectedEdgeGroup: string[] = useMemo(() => {
+    if (!decodedEdgeId) return [];
+    const match = compressedEdgeSets.find(g => g.includes(decodedEdgeId));
+    return match ?? [decodedEdgeId];
+  }, [decodedEdgeId, compressedEdgeSets]);
+
   const resolvedEdge = useMemo(() => {
     if (!resultSet || !decodedEdgeId) return null;
+    if (selectedEdgeGroup.length > 1) {
+      // Put the selected edge first so the merged edge reflects the current selection,
+      // ensuring useEdgeInitialization detects the change when switching within a group.
+      const ordered = [decodedEdgeId, ...selectedEdgeGroup.filter(id => id !== decodedEdgeId)];
+      return getCompressedEdge(resultSet, ordered);
+    }
     return resolveEdgeFromPath(resultSet, path, decodedEdgeId);
-  }, [resultSet, path, decodedEdgeId]);
+  }, [resultSet, path, decodedEdgeId, selectedEdgeGroup]);
 
   const pathKey = useMemo(
     () => getDataFromQueryVar("pkey", decodedParams) ?? derivePathKey(resultSet, result, pathId) ?? "",
@@ -72,8 +92,21 @@ const EvidenceView: FC = () => {
   const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(() => {
-    return path?.compressedSubgraph && !!resultSet ? getCompressedSubgraph(resultSet, path.compressedSubgraph) : false;
-  }, [path, resultSet]);
+    if (path?.compressedSubgraph && resultSet) {
+      return getCompressedSubgraph(resultSet, path.compressedSubgraph);
+    }
+    if (path && resultSet && compressedEdgeSets.length > 0) {
+      const compressedRaw: (string | string[])[] = path.subgraph.map((id, index) => {
+        if (!isNodeIndex(index)) {
+          const match = compressedEdgeSets.find(g => g.includes(id));
+          if (match) return match;
+        }
+        return id;
+      });
+      return getCompressedSubgraph(resultSet, compressedRaw);
+    }
+    return false;
+  }, [path, resultSet, compressedEdgeSets]);
 
   useEdgeInitialization({
     edgeId,
@@ -87,24 +120,20 @@ const EvidenceView: FC = () => {
   const handleEdgeClick = useCallback((edgeIDs: string[]) => {
     if (!resultSet) return;
 
-    const getEdgeFromSubgraph = (edgeID: string, subgraph: (ResultEdge | ResultNode | ResultEdge[])[]) => {
-      for (let i = 1; i < subgraph.length; i += 2) {
-        const edgeItem = subgraph[i];
+    let edge;
+    if (compressedSubgraph) {
+      for (let i = 1; i < compressedSubgraph.length; i += 2) {
+        const edgeItem = compressedSubgraph[i];
         if (Array.isArray(edgeItem)) {
-          const found = edgeItem.find(e => e.id === edgeID);
-          if (found) return found;
-        } else {
-          if (edgeItem.id === edgeID) return subgraph[i];
+          const found = edgeItem.find(e => e.id === edgeIDs[0]);
+          if (found) { edge = found; break; }
+        } else if (isResultEdge(edgeItem) && edgeItem.id === edgeIDs[0]) {
+          edge = edgeItem; break;
         }
       }
-      return false;
-    };
-
-    let edge;
-    if (compressedSubgraph)
-      edge = getEdgeFromSubgraph(edgeIDs[0], compressedSubgraph);
-    else
+    } else {
       edge = getCompressedEdge(resultSet, edgeIDs);
+    }
 
     if (!isResultEdge(edge) || !selectedEdgeRef.current || !resultSet) return;
 
@@ -113,14 +142,16 @@ const EvidenceView: FC = () => {
     markEdgeSeen(edge.id);
 
     if (resultId) {
-      const encodedEdgeId = encodeURIComponent(edge.id);
-      const basePath = pathId
-        ? `/results/${resultId}/path/${pathId}/evidence/${encodedEdgeId}`
-        : `/results/${resultId}/evidence/${encodedEdgeId}`;
-      const pkeyParam = getDataFromQueryVar("pkey", decodedParams);
-      resultsNavigate(basePath, pkeyParam ? { pkey: pkeyParam } : undefined, { replace: true });
+      const { path: url, params } = buildEvidenceUrl({
+        resultId,
+        pathId,
+        primaryEdgeId: edge.id,
+        compressedEdgeSets,
+        pathKey: getDataFromQueryVar("pkey", decodedParamsRef.current) ?? undefined,
+      });
+      resultsNavigate(url, params, { replace: true });
     }
-  }, [resultSet, compressedSubgraph, handleEvidenceData, markEdgeSeen, resultsNavigate, resultId, pathId, decodedParams]);
+  }, [resultSet, compressedSubgraph, compressedEdgeSets, handleEvidenceData, markEdgeSeen, resultsNavigate, resultId, pathId]);
 
   useEffect(() => {
     if (selectedEdge) scrollToRef(selectedEdgeDomRef);
@@ -173,8 +204,6 @@ const EvidenceView: FC = () => {
         <PathViewSection
           path={path}
           compressedSubgraph={compressedSubgraph}
-          isPathViewMinimized={isPathViewMinimized}
-          setIsPathViewMinimized={setIsPathViewMinimized}
           handleEdgeClick={handleEdgeClick}
           isOpen={true}
           pk={pk}
