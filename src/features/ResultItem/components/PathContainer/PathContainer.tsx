@@ -9,7 +9,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
 import { extractEdgeIDsFromSubgraph, generatePathD, generatePredicateId, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
-import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useLastViewedPath, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
 import { numberToWords } from '@/features/Common/utils/utilities';
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
@@ -24,8 +24,6 @@ export const ExpandedPredicateContext = createContext<{
 } | null>(null);
 
 interface PathContainerProps {
-  lastViewedPathID: string | null;
-  setLastViewedPathID: (id: string | null) => void;
   path: Path;
   inModal: boolean;
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
@@ -45,8 +43,6 @@ interface PathContainerProps {
 }
 
 const PathContainer: FC<PathContainerProps> = ({
-  lastViewedPathID,
-  setLastViewedPathID,
   path,
   inModal,
   compressedSubgraph,
@@ -65,6 +61,7 @@ const PathContainer: FC<PathContainerProps> = ({
   formattedPaths,
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
+  const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
   const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
   const initialExpandedPredicateIdSet = useRef(false);

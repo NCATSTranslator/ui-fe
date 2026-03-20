@@ -7,6 +7,7 @@ import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationU
 
 const ResultsLayout = () => {
   const isBaseView = useMatch('/results') !== null;
+  const resultMatch = useMatch('/results/:resultId/*');
   const scrollRef = useRef(0);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const ResultsLayout = () => {
       <Breadcrumbs />
       <ResultList hidden={!isBaseView}>
         {!isBaseView && (
-          <ViewTransition>
+          <ViewTransition transitionKey={resultMatch?.params.resultId}>
             <Outlet />
           </ViewTransition>
         )}

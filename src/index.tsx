@@ -49,6 +49,7 @@ const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
 const ResultDetailView = lazy(() => import('@/features/ResultItem/components/ResultDetailView/ResultDetailView'));
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
+const ResultDetailLayout = lazy(() => import('@/pageRoutes/ResultDetailLayout/ResultDetailLayout'));
 
 const container = document.getElementById('root');
 if (!container) {
@@ -175,6 +176,7 @@ const routes = [
       { index: true, element: null },
       {
         path: ":resultId",
+        element: <Suspense fallback={<LoadingWrapper />}><ResultDetailLayout /></Suspense>,
         handle: { breadcrumb: ResultBreadcrumbLabel },
         children: [
           { index: true, element: <Suspense fallback={<LoadingWrapper />}><ResultDetailView /></Suspense> },

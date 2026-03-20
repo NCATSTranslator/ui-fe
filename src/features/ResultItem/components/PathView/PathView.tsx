@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useState, useMemo, useCallback, useRef, FC, Dispatch, SetStateAction, RefObject, createContext } from "react";
+import { useMemo, useCallback, useRef, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
@@ -9,7 +9,6 @@ import { isStringArray } from '@/features/Common/utils/utilities';
 import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { LastViewedPathIDContextType } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -17,7 +16,6 @@ import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
-export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 export const SupportPathDepthContext = createContext<number>(1);
 export const HoverContext = createContext<{
   hoveredItem: HoverTarget;
@@ -87,9 +85,6 @@ const PathView: FC<PathViewProps> = ({
   }
   const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
   const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
-  // Create the context with a default value of null
-  const [lastViewedPathID, setLastViewedPathID] = useState<string|null>(null);
-
   let directLabelDisplayed = false;
   let inferredLabelDisplayed = false;
 
@@ -115,87 +110,83 @@ const PathView: FC<PathViewProps> = ({
         (!active)
         ? <></>
         :
-        <LastViewedPathIDContext.Provider value={{lastViewedPathID, setLastViewedPathID}}>
-          <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
-            <SupportPathDepthContext.Provider value={0}>
-              <div className={`${styles.paths} ${inModal && styles.inModal}`}>
-                {
-                  displayedPaths.map((path: Path, i: number)=> {
-                    if(!path.id) 
-                      return null;
-                    const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
-                      if(displayIndirectLabel)
-                        inferredLabelDisplayed = true;
-                    const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
-                      if(displayDirectLabel)
-                        directLabelDisplayed = true;
-                                          return (
-                        <div key={path.id || i.toString()}>
-                        { displayDirectLabel && !inModal && (
-                          <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                            Direct <Information className={styles.infoIcon} />
-                            <Tooltip id='direct-label-tooltip'>
-                              <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
-                            </Tooltip>
-                          </p>
-                        )}
-                        { displayIndirectLabel && !inModal && (
-                          <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip">
-                            Indirect <Information className={styles.infoIcon} />
-                            <Tooltip id='inferred-label-tooltip'>
-                              <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them. <a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
-                            </Tooltip>
-                          </p>
-                        )}
-                        <PathContainer
-                          key={path.id}
-                          lastViewedPathID={lastViewedPathID}
-                          setLastViewedPathID={setLastViewedPathID}
-                          path={path}
-                          inModal={inModal}
-                          compressedSubgraph={compressedSubgraph}
-                          handleEdgeClick={handleEdgeClick}
-                          activeEntityFilters={activeEntityFilters}
-                          selectedPaths={selectedPaths}
-                          pathFilterState={pathFilterState}
-                          activeFilters={activeFilters}
-                          pk={pk}
-                          showHiddenPaths={showHiddenPaths}
-                          selectedEdgeRef={selectedEdgeRef}
-                          selectedEdge={selectedEdge}
-                          isEven={isEven}
-                          hoveredIndex={hoveredIndex}
-                          styles={styles}
-                          formattedPaths={formattedPaths}
-                        />
-                      </div>
-                    )
-                  })
-                }
-              </div>
+        <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
+          <SupportPathDepthContext.Provider value={0}>
+            <div className={`${styles.paths} ${inModal && styles.inModal}`}>
               {
-                Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
-                <Button
-                  handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
-                  variant="secondary"
-                  small
-                  dataTooltipId={`${resultId}-excluded-paths-toggle`}
-                  className={`${!!isEven && styles.evenButton}`}
-                  iconRight={<Information/>}
-                  >
-                  {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
-                  <Tooltip id={`${resultId}-excluded-paths-toggle`}>
-                    {
-                      showHiddenPaths 
-                      ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
-                      : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
-                    }
-                  </Tooltip>
-                </Button>
+                displayedPaths.map((path: Path, i: number)=> {
+                  if(!path.id) 
+                    return null;
+                  const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
+                    if(displayIndirectLabel)
+                      inferredLabelDisplayed = true;
+                  const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
+                    if(displayDirectLabel)
+                      directLabelDisplayed = true;
+                                        return (
+                      <div key={path.id || i.toString()}>
+                      { displayDirectLabel && !inModal && (
+                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
+                          Direct <Information className={styles.infoIcon} />
+                          <Tooltip id='direct-label-tooltip'>
+                            <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
+                          </Tooltip>
+                        </p>
+                      )}
+                      { displayIndirectLabel && !inModal && (
+                        <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip">
+                          Indirect <Information className={styles.infoIcon} />
+                          <Tooltip id='inferred-label-tooltip'>
+                            <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them. <a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
+                          </Tooltip>
+                        </p>
+                      )}
+                      <PathContainer
+                        key={path.id}
+                        path={path}
+                        inModal={inModal}
+                        compressedSubgraph={compressedSubgraph}
+                        handleEdgeClick={handleEdgeClick}
+                        activeEntityFilters={activeEntityFilters}
+                        selectedPaths={selectedPaths}
+                        pathFilterState={pathFilterState}
+                        activeFilters={activeFilters}
+                        pk={pk}
+                        showHiddenPaths={showHiddenPaths}
+                        selectedEdgeRef={selectedEdgeRef}
+                        selectedEdge={selectedEdge}
+                        isEven={isEven}
+                        hoveredIndex={hoveredIndex}
+                        styles={styles}
+                        formattedPaths={formattedPaths}
+                      />
+                    </div>
+                  )
+                })
               }
-            </SupportPathDepthContext.Provider>
-          </HoverContext.Provider>
-        </LastViewedPathIDContext.Provider>
+            </div>
+            {
+              Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
+              <Button
+                handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
+                variant="secondary"
+                small
+                dataTooltipId={`${resultId}-excluded-paths-toggle`}
+                className={`${!!isEven && styles.evenButton}`}
+                iconRight={<Information/>}
+                >
+                {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
+                <Tooltip id={`${resultId}-excluded-paths-toggle`}>
+                  {
+                    showHiddenPaths 
+                    ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
+                    : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
+                  }
+                </Tooltip>
+              </Button>
+            }
+          </SupportPathDepthContext.Provider>
+        </HoverContext.Provider>
       }
       {
         pageCount > 1 &&
