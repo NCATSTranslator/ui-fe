@@ -47,7 +47,6 @@ const SubmittingQueries = lazy(() => import('@/pageRoutes/Articles/SubmittingQue
 const HowToUseTranslator = lazy(() => import('@/pageRoutes/Articles/HowToUseTranslator').then(m => ({ default: m.HowToUseTranslator })));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
-const ResultDetailView = lazy(() => import('@/features/ResultItem/components/ResultDetailView/ResultDetailView'));
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
 const ResultDetailLayout = lazy(() => import('@/pageRoutes/ResultDetailLayout/ResultDetailLayout'));
 
@@ -179,7 +178,6 @@ const routes = [
         element: <Suspense fallback={<LoadingWrapper />}><ResultDetailLayout /></Suspense>,
         handle: { breadcrumb: ResultBreadcrumbLabel },
         children: [
-          { index: true, element: <Suspense fallback={<LoadingWrapper />}><ResultDetailView /></Suspense> },
           {
             path: "node/:nodeId",
             element: <Suspense fallback={<LoadingWrapper />}><NodeInformationView /></Suspense>,
