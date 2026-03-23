@@ -143,10 +143,6 @@ export const handleResultsError = (errorExists = true, setIsError: (value: boole
   setIsLoading(false);
 }
 
-export const handleEvidenceModalClose = (setEvidenceOpen: (value: boolean) => void) => {
-  setEvidenceOpen(false);
-}
-
 /**
  * Applies all active filters (entity, result, facet, path) to the provided result set.
  * Separates results into included and excluded groups based on match criteria, then

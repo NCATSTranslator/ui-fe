@@ -1,27 +1,26 @@
 import styles from './PathObject.module.scss';
-import { FC, RefObject, useContext, useId } from 'react';
+import { FC, RefObject, useCallback, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
-import { formatBiolinkEntity, formatBiolinkNode, getIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
-import { Path, PathFilterState, isResultNode, ResultNode, isResultEdge } from '@/features/ResultList/types/results.d';
+import { Path, PathFilterState, isResultNode, isResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
-import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
+import { getEdgeById, getNodeById, getNodeSpecies, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence?: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   id: string | string[];
   index: number;
   inModal?: boolean;
@@ -41,9 +40,7 @@ const PathObject: FC<PathObjectProps> = ({
   activeEntityFilters,
   activeFilters,
   className = "",
-  handleActivateEvidence = ()=>{},
   handleEdgeClick,
-  handleNodeClick,
   id,
   index,
   inModal = false,
@@ -58,6 +55,7 @@ const PathObject: FC<PathObjectProps> = ({
   selectedEdgeRef,
   showHiddenPaths = true}) => {
 
+  const { resultId, resultsNavigate } = useResultListContext();
   const resultSet = useSelector(getResultSetById(pk));
 
   // ID of the main element (in the case of a compressed edge)
@@ -72,7 +70,7 @@ const PathObject: FC<PathObjectProps> = ({
   let nameString = '';
   let typeString = '';
   if(isNode) {
-    nameString = formatBiolinkNode(pathObject.names[0], type, pathObject.species);
+    nameString = formatBiolinkNode(pathObject.names[0], type, getNodeSpecies(pathObject));
     typeString = formatBiolinkEntity(type);
   }
   const hoverContext = useContext(HoverContext);
@@ -105,6 +103,16 @@ const PathObject: FC<PathObjectProps> = ({
     isHighlighted && styles.highlighted
   );
 
+  const handleNodeClick = useCallback((node: ResultNode) => {
+    if (resultId) {
+      resultsNavigate(`/results/${resultId}/node/${node.id}`);
+    } else if(Array.isArray(node.provenance) && node.provenance[0].length > 0 && node.provenance[0].includes("http")) {
+      window.open(node.provenance[0], '_blank');
+    } else {
+      console.warn('Could not navigate to node, resultId is not set and no provenance is available');
+    }
+  }, [resultId, resultsNavigate]);
+
   return (
     <>
       {
@@ -121,7 +129,7 @@ const PathObject: FC<PathObjectProps> = ({
                 <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
               </div>
               <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
-                {getIcon(pathObject?.types[0])}
+                {getNodeIcon(pathObject?.types[0])}
                 <span className={styles.text}>
                   <Highlighter
                     highlightClassName="highlight"
@@ -158,9 +166,7 @@ const PathObject: FC<PathObjectProps> = ({
                   activeEntityFilters={activeEntityFilters}
                   activeFilters={activeFilters}
                   uid={uid}
-                  handleActivateEvidence={handleActivateEvidence}
                   handleEdgeClick={handleEdgeClick}
-                  handleNodeClick={handleNodeClick}
                   hoverHandlers={hoverHandlers}
                   parentClass={styles.predicateContainer}
                   inModal={inModal}

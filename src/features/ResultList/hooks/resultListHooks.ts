@@ -6,7 +6,7 @@ import { handleResultsError } from "@/features/ResultList/utils/resultsInteracti
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
 import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+
 
 // Constants
 const STATUS_CHECK_TIMEOUT = 120; // 20 minutes (120 * 10 second intervals)
@@ -322,7 +322,6 @@ export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isF
 export interface QueryChangeResetConfig {
   // Current state
   currentQueryID: string | null;
-  decodedParamsRef: RefObject<string>;
   itemsPerPageRef: RefObject<number>;
 
   // Refs to reset
@@ -347,11 +346,9 @@ export interface QueryChangeResetConfig {
   setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
   setItemOffset: Dispatch<SetStateAction<number>>;
   setEndResultIndex: Dispatch<SetStateAction<number>>;
-  resetEvidenceModal: () => void;
   closeNotesModal: () => void;
   resetShareState: () => void;
   resetBookmarks: () => void;
-  setResultIdParam: Dispatch<SetStateAction<string | null>>;
   setNodeDescription: Dispatch<SetStateAction<string>>;
 }
 
@@ -365,7 +362,6 @@ export interface QueryChangeResetConfig {
 export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
   const {
     currentQueryID,
-    decodedParamsRef,
     itemsPerPageRef,
     prevQueryID,
     rawResults,
@@ -385,11 +381,9 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     setResultStatus,
     setItemOffset,
     setEndResultIndex,
-    resetEvidenceModal,
     closeNotesModal,
     resetShareState,
     resetBookmarks,
-    setResultIdParam,
     setNodeDescription,
   } = config;
 
@@ -433,16 +427,12 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     // Reset first load flag to handle shared result modal
     firstLoad.current = true;
     
-    // Reset modal and selection state
-    resetEvidenceModal();
     closeNotesModal();
     resetShareState();
     
     // Reset user saves for new query
     resetBookmarks();
     
-    // Update result ID param from URL for new query
-    setResultIdParam(getDataFromQueryVar("r", decodedParamsRef.current));
-    setNodeDescription(""); 
+    setNodeDescription("");
   }, [currentQueryID]);
 };

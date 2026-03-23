@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, useContext, useMemo } from "react";
-import { LastViewedPathIDContext, SupportPathDepthContext } from "@/features/ResultItem/components/PathView/PathView";
+import { createContext, Dispatch, SetStateAction, useContext, useMemo } from "react";
+import { SupportPathDepthContext } from "@/features/ResultItem/components/PathView/PathView";
 import { ExpandedPredicateContext } from "@/features/ResultItem/components/PathContainer/PathContainer";
 import { SupportPathKeyContext } from "@/features/ResultItem/components/SupportPathGroup/SupportPathGroup";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
@@ -10,6 +10,7 @@ export type LastViewedPathIDContextType = {
   lastViewedPathID: string | null;
   setLastViewedPathID: Dispatch<SetStateAction<string | null>>;
 };
+export const LastViewedPathIDContext = createContext<LastViewedPathIDContextType | undefined>(undefined);
 export const useLastViewedPath = (): LastViewedPathIDContextType => {
   const context = useContext(LastViewedPathIDContext);
   if (!context) {

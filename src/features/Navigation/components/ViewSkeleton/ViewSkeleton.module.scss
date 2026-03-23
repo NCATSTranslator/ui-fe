@@ -1,0 +1,17 @@
+@use "@/assets/styles/variables" as *;
+
+.viewSkeleton {
+  max-width: calc(640px + ($m * 2));
+  margin: 0 auto;
+  padding: $m;
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+}
+
+.status {
+  margin-top: $s;
+  text-align: center;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+}

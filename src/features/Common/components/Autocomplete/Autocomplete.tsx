@@ -1,6 +1,6 @@
 import { FC, useEffect, KeyboardEvent, RefObject } from 'react';
 import styles from './Autocomplete.module.scss';
-import { getMoreInfoLink, getIcon, formatBiolinkEntity } from '@/features/Common/utils/utilities';
+import { getMoreInfoLink, getNodeIcon, formatBiolinkEntity } from '@/features/Common/utils/utilities';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
@@ -66,7 +66,7 @@ const Autocomplete: FC<AutocompleteProps> = ({
             items.map((item, i) => {
               const type = (item?.types) ? item.types[0] : "";
               const typeString = formatBiolinkEntity(type);
-              const icon = getIcon(type);
+              const icon = getNodeIcon(type);
               const isSelected = i === scrollingIndex;
               return (
                   <div

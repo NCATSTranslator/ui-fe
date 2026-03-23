@@ -1,0 +1,37 @@
+@use "@/assets/styles/variables" as *;
+
+.container {
+  padding: 0 $l $m;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: $xs;
+  max-width: $resultsViewMaxWidth;
+  margin: 0 auto;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+}
+
+.pathPlaceholder {
+  border-radius: $largeBorderRadius;
+  margin: $xs 0;
+  overflow: hidden;
+}
+
+.tabBar {
+  display: flex;
+  gap: $m;
+  padding-bottom: $xs;
+  border-bottom: 1px solid $lightGray;
+}
+
+.tableRows {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+  padding-top: $xs;
+}

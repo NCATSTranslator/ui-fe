@@ -1,11 +1,11 @@
 import { createContext, useContext, FC, ReactNode, RefObject, Dispatch, SetStateAction } from 'react';
-import { Result, Path, PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
+import { Path, PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
 
 export interface ResultListContextValue {
-  activateEvidence: (item: Result, edgeIDs: string[], path: Path, pathKey: string) => void;
+  userSaves: SaveGroup | null;
   activateNotes: (label: string, bookmarkId: string) => void;
   activeEntityFilters: string[];
   activeFilters: Filter[];
@@ -15,8 +15,11 @@ export interface ResultListContextValue {
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
   isPathfinder: boolean;
+  navigateToEvidenceView: (selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => void;
   pathFilterState: PathFilterState | null;
   pk: string | null;
+  resultId: string | undefined;
+  resultsNavigate: (path: string, extraParams?: Record<string, string>) => void;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
   queryNodeDescription: string | null;

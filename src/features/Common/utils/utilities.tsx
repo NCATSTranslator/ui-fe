@@ -25,7 +25,7 @@ import { Location as RouterLocation } from 'react-router-dom';
  * @param {string} category - The category to retrieve an icon for.
  * @returns {ReactNode} - The icon for the category.
  */
-export const getIcon = (category: string): ReactNode => {
+export const getNodeIcon = (category: string): ReactNode => {
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':
@@ -165,7 +165,7 @@ const isRomanNumeral = (word: string): boolean => {
 }
 
 /**
- * Capitalizes the first letter of a word.
+ * Capitalizes the first letter of a single word and lowercase the rest.
  *
  * @param {string} word - The word to capitalize.
  * @returns {string} - The capitalized word.
@@ -174,6 +174,12 @@ export const capitalizeWord = (word: string): string => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
+/**
+ * Capitalizes the first letter of each word and lowercase the rest.
+ *
+ * @param {string} str - The string to capitalize.
+ * @returns {string} - The capitalized string.
+ */
 export const capitalizeAllWords = (str: string): string => {
   return str.split(' ').map(word => {
     if (isRomanNumeral(word)) {
@@ -907,7 +913,8 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   subject: edge?.subject || "",
   support: edge?.support || [],
   trials: edge?.trials || [],
-  tags: edge?.tags || {}
+  tags: edge?.tags || {},
+  type: edge?.type || "",
 });
 
 /**

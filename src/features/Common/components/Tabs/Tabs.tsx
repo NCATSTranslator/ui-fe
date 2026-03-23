@@ -13,7 +13,7 @@ interface TabsProps {
   tabListClassName?: string;
   tabListWrapperClassName?: string;
   tabClassName?: string;
-  isOpen: boolean;
+  isOpen?: boolean;
   handleTabSelection?: (heading: string) => void;
   handleOutsideTabListClick?: () => void;
   defaultActiveTab?: string;
@@ -28,7 +28,7 @@ const Tabs: FC<TabsProps> = ({
   tabListClassName = "",
   tabListWrapperClassName = "",
   tabClassName = "",
-  isOpen, 
+  isOpen = true, 
   handleTabSelection = () => {}, 
   handleOutsideTabListClick = () => {},
   defaultActiveTab,

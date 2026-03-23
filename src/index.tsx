@@ -8,12 +8,17 @@ import HelpPage from '@/features/Page/components/Page/HelpPage';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
+import ResultBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/ResultBreadcrumbLabel';
+import NodeBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/NodeBreadcrumbLabel';
+import PathBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/PathBreadcrumbLabel';
+import PathRedirect from '@/features/Navigation/components/PathRedirect/PathRedirect';
+import { resultsLoader } from '@/features/Navigation/utils/navigationUtils';
+import QueryBreadcrumbLabel from './features/Navigation/components/BreadcrumbLabels/QueryBreadcrumbLabel';
 const AboutTranslator = lazy(() => import('@/pageRoutes/Articles/AboutTranslator').then(m => ({ default: m.AboutTranslator })));
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));
-const Results = lazy(() => import('@/pageRoutes/Results/Results'));
+const ResultsLayout = lazy(() => import('@/pageRoutes/ResultsLayout/ResultsLayout'));
 const History = lazy(() => import('@/pageRoutes/History/History'));
 const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
-const Workspace = lazy(() => import('@/pageRoutes/Workspace/Workspace'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
 const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
@@ -41,6 +46,18 @@ const LoadingAndSyncing = lazy(() => import('@/pageRoutes/Articles/LoadingAndSyn
 const SubmittingQueries = lazy(() => import('@/pageRoutes/Articles/SubmittingQueries').then(m => ({ default: m.SubmittingQueries })));
 const HowToUseTranslator = lazy(() => import('@/pageRoutes/Articles/HowToUseTranslator').then(m => ({ default: m.HowToUseTranslator })));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
+const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
+const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
+const ResultDetailLayout = lazy(() => import('@/pageRoutes/ResultDetailLayout/ResultDetailLayout'));
+
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  const lastReload = sessionStorage.getItem('vite:preloadError');
+  if (!lastReload || Date.now() - Number(lastReload) > 10_000) {
+    sessionStorage.setItem('vite:preloadError', String(Date.now()));
+    window.location.reload();
+  }
+});
 
 const container = document.getElementById('root');
 if (!container) {
@@ -60,7 +77,7 @@ const routes = [
   {
     // old help page, redirect to frequently asked questions
     path: "help",
-    element: <Navigate to="/frequently-asked-questions" replace /> 
+    element: <Navigate to="/frequently-asked-questions" replace />
   },
   {
     path: "about-translator",
@@ -160,15 +177,41 @@ const routes = [
   },
   {
     path: "results",
-    element: <Page title="Results"><Suspense fallback={<LoadingWrapper />}><Results /></Suspense></Page>
+    loader: resultsLoader,
+    element: <Page title="Results"><Suspense fallback={<LoadingWrapper />}><ResultsLayout /></Suspense></Page>,
+    handle: { breadcrumb: QueryBreadcrumbLabel },
+    children: [
+      { index: true, element: null },
+      {
+        path: ":resultId",
+        element: <Suspense fallback={<LoadingWrapper />}><ResultDetailLayout /></Suspense>,
+        handle: { breadcrumb: ResultBreadcrumbLabel },
+        children: [
+          {
+            path: "node/:nodeId",
+            element: <Suspense fallback={<LoadingWrapper />}><NodeInformationView /></Suspense>,
+            handle: { breadcrumb: NodeBreadcrumbLabel },
+          },
+          {
+            path: "path/:pathId",
+            handle: { breadcrumb: PathBreadcrumbLabel },
+            children: [
+              { index: true, element: <PathRedirect /> },
+              {
+                path: "evidence/:edgeId",
+                element: <Suspense fallback={<LoadingWrapper />}><EvidenceView /></Suspense>,
+                // no breadcrumb label for evidence in path view
+                // handle: { breadcrumb: ':)' },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     path: "history",
     element: <Page title="History"><Suspense fallback={<LoadingWrapper />}><History /></Suspense></Page>
-  },
-  {
-    path: "workspace",
-    element: <Page title="User Workspace"><Suspense fallback={<LoadingWrapper />}><Workspace /></Suspense></Page>
   },
   {
     path: "projects",
@@ -211,4 +254,3 @@ root.render(
     />
   </Provider>
 );
-

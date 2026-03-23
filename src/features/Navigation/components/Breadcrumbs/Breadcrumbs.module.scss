@@ -1,0 +1,40 @@
+@use "@/assets/styles/variables" as *;
+
+.breadcrumbs {
+  padding: $m $l $l;
+  font-size: $bodyTwoSize;
+  display: flex;
+  align-items: center;
+  gap: $m;
+}
+
+.arrowLeftIcon {
+  width: $m;
+  height: $m;
+  cursor: pointer;
+  path {
+    stroke: $purpleOne;
+  }
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+}
+
+.separator {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  path {
+    stroke: $midDarkGray;
+  }
+}

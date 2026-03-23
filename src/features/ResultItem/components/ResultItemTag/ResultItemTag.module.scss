@@ -1,0 +1,22 @@
+@use "@/assets/styles/variables" as *;
+
+.resultItemTag {
+  font-size: $captionSize;
+  line-height: 1.25;
+  font-weight: 800;
+  background-color: $white;
+  box-shadow: none;
+  color: $purpleTwo;
+  border: 1px solid $purpleTwo;
+  border-radius: $defaultBorderRadius;
+  padding: $xxs $xs;
+  transition: $defaultAnim;
+  &.active, &:hover {
+    background-color: $purpleTwo;
+    color: $white;
+    &:hover {
+      background-color: $purpleOne;
+      color: $white;
+    }
+  }
+}

@@ -8,7 +8,7 @@ import OutsideClickHandler from '@/features/Common/components/OutsideClickHandle
 import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
-import { getIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
 import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 
@@ -156,7 +156,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   const IconLeft = (
     <>
       {handleSwapTerms && <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" />}
-      {!!selectedItem?.types ? getIcon(selectedItem.types[0]) : <QuestionIcon/>}
+      {!!selectedItem?.types ? getNodeIcon(selectedItem.types[0]) : <QuestionIcon/>}
     </>
   )
 

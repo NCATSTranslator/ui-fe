@@ -1,4 +1,5 @@
 import { PublicationObject, TrialObject, Provenance, KnowledgeLevel, PublicationSupport } from "@/features/Evidence/types/evidence";
+import { Species } from "@/features/ResultList/types/results.d.ts";
 
 export type DownloadScope = 'full' | 'filtered' | 'bookmarked';
 export type ExportFormat = 'json' | 'csv';
@@ -19,8 +20,9 @@ export interface ExportedNode {
   types: string[];
   curies: string[];
   descriptions: string[];
-  species: "Zebrafish" | "Mouse" | "Rat" | null;
-  provenance: string;
+  species: Species;
+  provenance: string[];
+  synonyms: string[];
   aras: string[];
 }
 
@@ -37,6 +39,7 @@ export interface ExportedEdge {
   support: string[];
   aras: string[];
   description?: string | null;
+  type: string;
 }
 
 export interface ExportedResult {

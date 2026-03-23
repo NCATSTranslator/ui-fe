@@ -1,14 +1,19 @@
    @use "@/assets/styles/variables" as *;
 
+.hidden {
+  display: none;
+}
+
 .resultList {
   margin-bottom: $s;
   padding: 0 0 $s;
+  position: relative;
   .resultsContainer {
     display: grid;
     column-gap: $l;
     align-items: flex-start;
     position: relative;
-    max-width: 1400px;
+    max-width: $resultsViewMaxWidth;
     width: auto;
     padding: $l;
     .resultsTableContainer.pathfinder {
