@@ -2,15 +2,14 @@ import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from 'reac
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import ClinicalTrialsTable from '@/features/Evidence/components/ClinicalTrialsTable/ClinicalTrialsTable';
+import MiscEvidenceTable from '@/features/Evidence/components/MiscEvidenceTable/MiscEvidenceTable';
+import KnowledgeSourcesTable from '@/features/Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { Preferences } from '@/features/UserAuth/types/user';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
-import { getFormattedDate } from '@/features/Common/utils/utilities';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
@@ -83,75 +82,13 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
 
       {clinicalTrials.length > 0 ? (
         <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
-          <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
-            <div className={`table-head ${styles.tableHead}`}>
-              <div className={`head ${styles.head}`}>Title</div>
-              <div className={`head ${styles.head}`}>Start Date</div>
-              <div className={`head ${styles.head}`}>Phase</div>
-              <div className={`head ${styles.head}`}>Status</div>
-              <div className={`head ${styles.head}`}>Participants</div>
-            </div>
-            <div className={`table-items ${styles.tableItems} scrollable`}>
-              {clinicalTrials.map((item, i) => {
-                let url = item.url;
-                let title = item.title;
-                let startDate = item.start_date;
-                let phase = item.phase;
-                let participants = item.size;
-                let type = item.type;
-                let status = item.status;
-                if (!item.url && item.id) {
-                  url = getUrlByType(item.id, "NCT");
-                }
-                return (
-                  <div className={styles.tableItem} key={i}>
-                    <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                      {url && (
-                        <a href={url} rel="noreferrer" target="_blank">
-                          {title || url} <ExternalLink />
-                        </a>
-                      )}
-                    </div>
-                    <div className={`table-cell ${styles.cell}`}>
-                      {startDate ? getFormattedDate(new Date(startDate), false) : ''}
-                    </div>
-                    <div className={`table-cell ${styles.cell}`}>
-                      {phase}
-                    </div>
-                    <div className={`table-cell ${styles.cell}`}>
-                      {status}
-                    </div>
-                    <div className={`table-cell ${styles.cell}`}>
-                      {participants} {type || ''}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <ClinicalTrialsTable clinicalTrials={clinicalTrials} />
         </Tab>
       ) : null}
 
       {miscEvidence.length > 0 ? (
         <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
-          <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
-            <div className={`table-head ${styles.tableHead}`}>
-              <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-            </div>
-            <div className={`table-items ${styles.tableItems} scrollable`}>
-              {miscEvidence.map((item, i) => (
-                <div className={`table-item ${styles.tableItem}`} key={i}>
-                  <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                    {item.url && (
-                      <a href={item.url} rel="noreferrer" target="_blank">
-                        {item.url} <ExternalLink />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MiscEvidenceTable miscEvidence={miscEvidence} />
         </Tab>
       ) : null}
 
@@ -162,44 +99,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
           dataTooltipId="knowledge-sources-tooltip"
           className={`${styles.tab} scrollable`}
         >
-          <div className={`table-body ${styles.tableBody} ${styles.sources}`}>
-            <div className={`table-head ${styles.tableHead}`}>
-              <div className={`head ${styles.head}`}>Source</div>
-              <div className={`head ${styles.head}`}>Rationale</div>
-            </div>
-            <div className={`table-items ${styles.tableItems} scrollable`}>
-              {sources.map((src, i) => {
-                const sourceKey = `${src.url}-${i}`;
-                const tooltipId = `source-tooltip-${sourceKey}`;
-                return (
-                  <div className={`table-item ${styles.tableItem}`} key={sourceKey}>
-                    <Tooltip id={tooltipId}>
-                      <span className={styles.tooltipSpan}>
-                        <a href={src?.wiki} target="_blank" rel="noreferrer">
-                          Why do we use this source?
-                          <ExternalLink />
-                        </a>
-                      </span>
-                    </Tooltip>
-                    <span className={`table-cell ${styles.cell} ${styles.source} ${styles.sourceItem}`}>
-                      {src.name}
-                      {src?.wiki && <InfoIcon className={styles.infoIcon} data-tooltip-id={tooltipId} />}
-                    </span>
-                    <span className={`table-cell ${styles.cell} ${styles.link} ${styles.sourceItem}`}>
-                      {src?.url ? (
-                        <a href={src.url} target="_blank" rel="noreferrer" className={`url ${styles.edgeProvenanceLink}`}>
-                          {src.url}
-                          <ExternalLink />
-                        </a>
-                      ) : (
-                        <span>No link available</span>
-                      )}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <KnowledgeSourcesTable sources={sources} />
         </Tab>
       ) : null}
 
