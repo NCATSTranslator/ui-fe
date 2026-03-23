@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo, RefObject, Dispatch, SetStateAction } from "react";
 import { cloneDeep, isEqual } from "lodash";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
+import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { getPathCount } from "@/features/Common/utils/utilities";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
@@ -183,6 +184,21 @@ const useResultsData = ({
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
   }, [freshRawResults, handleNewResults]);
+
+  // Dispatch loading status to Redux for sub-views (flattened to primitives)
+  const araCount = arsStatus?.data?.aras?.length ?? 0;
+  const prevStatusRef = useRef<QueryLoadingStatus | null>(null);
+  useEffect(() => {
+    if (!currentQueryID)
+      return;
+    const next: QueryLoadingStatus = { isLoading, isError, araCount, resultStatus };
+    const prev = prevStatusRef.current;
+    // If the previous status is the same as the next status, don't dispatch
+    if (prev && isEqual(prev, next))
+      return;
+    prevStatusRef.current = next;
+    dispatch(setQueryStatus({ pk: currentQueryID, status: next }));
+  }, [dispatch, currentQueryID, isLoading, isError, araCount, resultStatus]);
 
   // --- React Query calls ---
 

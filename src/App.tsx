@@ -2,6 +2,7 @@ import { useState, ReactNode } from 'react';
 import './App.scss';
 import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/hooks/customHooks';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
 import { commonQueryClientOptions, getDataFromQueryVar } from '@/features/Common/utils/utilities';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
@@ -89,7 +90,7 @@ const App = ({children}: {children?: ReactNode}) => {
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               <div className="layout">
                 <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
-                <main className='content scrollable'>
+                <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
                   <Header />
                   {
                     children && children

@@ -6,7 +6,7 @@ import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { sortSupportByEntityStrings, sortSupportByLength } from '@/features/Common/utils/sortingFunctions';
-import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results';
+import { Path, PathFilterState } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, isStringArray, intToNumeral } from '@/features/Common/utils/utilities';
 import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
@@ -21,9 +21,7 @@ export const SupportPathKeyContext = createContext<string>("");
 interface SupportPathGroupProps {
   activeFilters: Filter[];
   activeEntityFilters: string[];
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   isExpanded: boolean;
   isEven: boolean;
   parentPathKey: string;
@@ -38,9 +36,7 @@ interface SupportPathGroupProps {
 const SupportPathGroup: FC<SupportPathGroupProps> = ({ 
   activeFilters, 
   activeEntityFilters, 
-  handleActivateEvidence, 
-  handleEdgeClick, 
-  handleNodeClick, 
+  handleEdgeClick,
   isExpanded,
   isEven = false,
   parentPathKey,
@@ -138,8 +134,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     pathFilterState={pathFilterState}
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
-                    handleNodeClick={handleNodeClick}
-                    handleActivateEvidence={handleActivateEvidence}
                     selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}

@@ -368,7 +368,7 @@ export function convertResultNodeToRenderable(n: ResultNode): RenderableNode {
     id: n.id,
     label: n.names[0] ?? "unknown node",
     type: n.types[0] ?? "unknown",
-    provenance: n.provenance ?? null,
+    provenance: n.provenance ?? [],
     isTargetCount: 0,
     isSourceCount: 0,
     isTargetEdges: [],

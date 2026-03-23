@@ -98,7 +98,7 @@ const extractNodeFields = (node: ExportedNode | undefined): {
     curies: joinArrayForCSV(node.curies),
     descriptions: joinArrayForCSVSanitized(node.descriptions),
     species: node.species || '',
-    provenance: node.provenance || '',
+    provenance: joinArrayForCSV(node.provenance),
   };
 };
 

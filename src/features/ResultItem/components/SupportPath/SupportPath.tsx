@@ -3,21 +3,21 @@ import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { PathFilterState, Path, ResultNode } from '@/features/ResultList/types/results.d';
+import { PathFilterState, Path } from '@/features/ResultList/types/results.d';
 import { joinClasses, numberToWords } from '@/features/Common/utils/utilities';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { ExpandedPredicateContext } from '../PathContainer/PathContainer';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   character: string;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   isEven: boolean;
   path: Path;
   pathFilterState: PathFilterState;
@@ -31,21 +31,20 @@ const SupportPath: FC<SupportPathProps> = ({
   activeEntityFilters, 
   activeFilters, 
   character,
-  handleEdgeClick, 
-  handleNodeClick, 
-  handleActivateEvidence,
+  handleEdgeClick,
   isEven = false,
   path,
-  pathFilterState, 
-  pathViewStyles, 
+  pathFilterState,
+  pathViewStyles,
   pk,
   selectedPaths,
   showHiddenPaths }) => {
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { isPathSeen } = useSeenStatus(pk);
-  const parentPathKey = useSupportPathKey();
-  const fullPathKey = `${parentPathKey}.${character}`;
+  const { navigateToEvidenceView } = useResultListContext();
+  const supportPathKey = useSupportPathKey();
+  const fullPathKey = supportPathKey ? `${supportPathKey}.${character}` : character;
   const tooltipID = path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
@@ -69,109 +68,98 @@ const SupportPath: FC<SupportPathProps> = ({
     (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted && !!pathViewStyles) && pathViewStyles.unhighlighted
   )
   return (
-    <>
-      {
-        path !== null &&
-        <ExpandedPredicateContext.Provider value={{ expandedPredicateId, setExpandedPredicateId }}>
-          <div 
-            className={formattedPathClass} 
-            key={path.id}
-            >
-            {
-              !!lastViewedPathID && lastViewedPathID === path.id &&
-              <LastViewedTag/>
-            }
-            <button
-              onClick={()=>{
-                if(!!path?.id) {
-                  setLastViewedPathID(path.id);
-                  handleActivateEvidence(path, fullPathKey);
-                }
-              }}
-              className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
-              data-tooltip-id={`${tooltipID}`}
-              >
-                <div className={`${!!pathViewStyles && pathViewStyles.icon}`}>
-                  <ResearchMultiple />
-                </div>
-                <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
-                  <span className={`${!!pathViewStyles && pathViewStyles.val}`}>
-                    { character }
-                  </span>
-                  <PathArrow/>
-                </span>
-            </button>
-            <Tooltip
-              id={`${tooltipID}`}
-              >
-                <span>View evidence for this path.</span>
-            </Tooltip>
-            <div
-              data-path-id={`${path.id || ""}`}
-              className={pathClass}
-              >
-              {
-                !!path?.compressedSubgraph
-                ?
-                  path.compressedSubgraph.map((subgraphItemID, i) => {
-                    let key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
-                    if(path.id === undefined)
-                      return null;
-                    return (
-                      <>
-                        <PathObject
-                          pathViewStyles={pathViewStyles}
-                          index={i}
-                          isEven={isEven}
-                          path={path}
-                          parentPathKey={character}
-                          id={subgraphItemID}
-                          key={key}
-                          handleActivateEvidence={handleActivateEvidence}
-                          handleEdgeClick={handleEdgeClick}
-                          handleNodeClick={handleNodeClick}
-                          activeEntityFilters={activeEntityFilters}
-                          selectedPaths={selectedPaths}
-                          pathFilterState={pathFilterState}
-                          activeFilters={activeFilters}
-                          pk={pk}
-                          showHiddenPaths={showHiddenPaths}
-                        />
-                      </>
-                    )
-                  }) 
-                :
-                  path.subgraph.map((subgraphItemID, i) => {
-                    if(path.id === undefined)
-                      return null;
-                    return (
-                      <>
-                        <PathObject
-                          pathViewStyles={pathViewStyles}
-                          index={i}
-                          isEven={isEven}
-                          path={path}
-                          parentPathKey={character}
-                          id={subgraphItemID}
-                          key={subgraphItemID}
-                          handleActivateEvidence={handleActivateEvidence}
-                          handleEdgeClick={handleEdgeClick}
-                          handleNodeClick={handleNodeClick}
-                          activeEntityFilters={activeEntityFilters}
-                          selectedPaths={selectedPaths}
-                          pathFilterState={pathFilterState}
-                          activeFilters={activeFilters}
-                          pk={pk}
-                        />
-                      </>
-                    )
-                  })
+    <ExpandedPredicateContext.Provider value={{ expandedPredicateId, setExpandedPredicateId }}>
+      <div 
+        className={formattedPathClass} 
+        key={path.id}
+        >
+        {
+          !!lastViewedPathID && lastViewedPathID === path.id &&
+          <LastViewedTag/>
+        }
+        <button
+          onClick={()=>{
+            if(!!path?.id) {
+              setLastViewedPathID(path.id);
+              if (path.subgraph[1]) {
+                navigateToEvidenceView(path.subgraph[1], extractCompressedEdgeSets(path), path, fullPathKey);
               }
+            }
+          }}
+          className={`${!!pathViewStyles && pathViewStyles.pathEvidenceButton}`}
+          data-tooltip-id={`${tooltipID}`}
+          >
+            <div className={`${!!pathViewStyles && pathViewStyles.icon}`}>
+              <ResearchMultiple />
             </div>
-          </div>
-        </ExpandedPredicateContext.Provider>
-      }
-    </>
+            <span className={`${!!pathViewStyles && pathViewStyles.num}`}>
+              <span className={`${!!pathViewStyles && pathViewStyles.val}`}>
+                { character }
+              </span>
+              <PathArrow/>
+            </span>
+        </button>
+        <Tooltip
+          id={`${tooltipID}`}
+          >
+            <span>View evidence for this path.</span>
+        </Tooltip>
+        <div
+          data-path-id={`${path.id || ""}`}
+          className={pathClass}
+          >
+          {
+            !!path?.compressedSubgraph
+            ?
+              path.compressedSubgraph.map((subgraphItemID, i) => {
+                const key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
+                if(path.id === undefined)
+                  return null;
+                return (
+                  <PathObject
+                    pathViewStyles={pathViewStyles}
+                    index={i}
+                    isEven={isEven}
+                    path={path}
+                    parentPathKey={character}
+                    id={subgraphItemID}
+                    key={key}
+                    handleEdgeClick={handleEdgeClick}
+                    activeEntityFilters={activeEntityFilters}
+                    selectedPaths={selectedPaths}
+                    pathFilterState={pathFilterState}
+                    activeFilters={activeFilters}
+                    pk={pk}
+                    showHiddenPaths={showHiddenPaths}
+                  />
+                )
+              }) 
+            :
+              path.subgraph.map((subgraphItemID, i) => {
+                if(path.id === undefined)
+                  return null;
+                return (
+                  <PathObject
+                    pathViewStyles={pathViewStyles}
+                    index={i}
+                    isEven={isEven}
+                    path={path}
+                    parentPathKey={character}
+                    id={subgraphItemID}
+                    key={subgraphItemID}
+                    handleEdgeClick={handleEdgeClick}
+                    activeEntityFilters={activeEntityFilters}
+                    selectedPaths={selectedPaths}
+                    pathFilterState={pathFilterState}
+                    activeFilters={activeFilters}
+                    pk={pk}
+                  />
+                )
+              })
+          }
+        </div>
+      </div>
+    </ExpandedPredicateContext.Provider>
   );
 }
 

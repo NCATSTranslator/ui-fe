@@ -3,7 +3,7 @@ import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { Preferences } from '@/features/UserAuth/types/user';
-import { PublicationObject, EvidenceSortState, KnowledgeLevelFilterType } from '@/features/Evidence/types/evidence';
+import { PublicationObject, EvidenceSortState } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -55,14 +55,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     const newOffset = (event.selected * state.itemsPerPage) % publications.length;
     updateState({ currentPage: event.selected, itemOffset: newOffset });
   }, [state.itemsPerPage, publications.length, updateState]);
-
-  const handleKnowledgeLevelFilter = useCallback((knowledgeLevel: KnowledgeLevelFilterType) => {
-    updateState({
-      currentPage: 0,
-      itemOffset: 0,
-      knowledgeLevelFilter: knowledgeLevel,
-    });
-  }, [updateState]);
 
   const handleItemsPerPageChange = useCallback((value: number) => {
     updateState({ itemsPerPage: value, currentPage: 0, itemOffset: 0 });

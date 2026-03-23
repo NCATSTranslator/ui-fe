@@ -2,7 +2,6 @@ import { FC, ReactNode, useCallback } from "react";
 import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
 import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
 import { PageTitleProvider } from "@/features/Page/components/PageTitleProvider/PageTitleProvider";
-import BackNavButton from "@/features/Core/components/BackNavButton/BackNavButton";
 import { joinClasses } from "@/features/Common/utils/utilities";
 
 export interface PageProps {
@@ -46,7 +45,6 @@ const Page: FC<PageProps> = ({
     <PageTitleProvider baseTitle={title}>
       <div className={pageClasses}>
         {children}
-        <BackNavButton />
         <DisclaimerModal
           isOpen={!isDisclaimerApproved}
           onClose={handleDisclaimerClose}

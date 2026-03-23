@@ -4,8 +4,8 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie } from '@/features/Projects/utils/utilities';
-import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitle,
+import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitleFromQueryObject,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -59,7 +59,7 @@ export const useUserQueries = () => {
           ...query,
           data: {
             ...query.data,
-            title: generateQueryTitle(query)
+            title: generateQueryTitleFromQueryObject(query)
           }
         };
       }
@@ -289,7 +289,7 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
       await Promise.all(
         curies.map(async (curie) => {
           try {
-            const name = await fetcNodeNameFromCurie(curie);
+            const name = await fetchNodeNameFromCurie(curie);
             results[curie] = name;
           } catch (error) {
             console.error(`Failed to resolve curie ${curie}:`, error);
@@ -316,7 +316,7 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
  * @returns { title: string; isLoading: boolean } Object with title and loading state
  */
 export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: string; isLoading: boolean } => {
-  const baseTitle = useMemo(() => query ? generateQueryTitle(query) : '', [query]);
+  const baseTitle = useMemo(() => query ? generateQueryTitleFromQueryObject(query) : '', [query]);
   
   const curies = useMemo(() => findAllCuriesInTitle(baseTitle), [baseTitle]);
   const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(curies, curies.length > 0);
@@ -338,7 +338,7 @@ export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { querie
   
   const baseTitles = useMemo(() => 
     queries.reduce((acc, query) => {
-      acc[query.data.qid] = generateQueryTitle(query);
+      acc[query.data.qid] = generateQueryTitleFromQueryObject(query);
       return acc;
     }, {} as Record<string, string>), 
     [queries]

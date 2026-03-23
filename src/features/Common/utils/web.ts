@@ -218,22 +218,24 @@ export const encodeParams = (params: string): string => {
  * Generates the share URL path for a results query.
  *
  * @param {string} label - The label of the result.
- * @param {string | number} nodeID - The ID of the node.
+ * @param {string} nodeID - The ID of the node.
  * @param {string | number} typeID - The ID of the type.
- * @param {string | number} resultID - The ID of the result.
+ * @param {string} resultID - The ID of the result. Used as a URL path segment
+ *   (`results/{resultID}?...`). Pass `'0'` for list-only links (`results?...`).
  * @param {string | number} pk - The ID of the query.
  * @param {boolean} shouldHash - Whether to hash the parameters.
- * @returns {string} The share URL path.
+ * @returns {string} The share URL path — either `results?{params}` when
+ *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
-export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number, shouldHash: boolean = false) => {
-  let path = "";
-  // partially encode params, q (query pk) is not encoded
-  if(shouldHash)
-    path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}`)}&q=${pk}`;
-  else
-    path = `results?${`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`}`;
+export const getResultsShareURLPath = (label: string, nodeID: string, typeID: string | number, resultID: string, pk: string | number, shouldHash: boolean = false) => {
+  const params = shouldHash
+    ? `${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}`)}&q=${pk}`
+    : `l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
 
-  return path;
+  if (resultID === '0')
+    return `results?${params}`;
+
+  return `results/${resultID}?${params}`;
 }
 
 /**
@@ -241,23 +243,26 @@ export const getResultsShareURLPath = (label: string, nodeID: string | number, t
  *
  * @param {AutocompleteItem} itemOne - The first item.
  * @param {AutocompleteItem} itemTwo - The second item.
- * @param {string} resultID - The ID of the result.
+ * @param {string} resultID - The ID of the result. Used as a URL path segment
+ *   (`results/{resultID}?...`). Pass `'0'` for list-only links (`results?...`).
  * @param {string | undefined} constraint - The constraint.
  * @param {string} pk - The ID of the query.
  * @param {boolean} shouldHash - Whether to hash the parameters.
- * @returns {string} The share URL path.
+ * @returns {string} The share URL path — either `results?{params}` when
+ *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
 export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string, shouldHash: boolean = false) => {
-  let labelOne = (itemOne.label) ? itemOne.label : null;
-  let labelTwo = (itemTwo.label) ? itemTwo.label : null;
-  let idOne = (itemOne.id) ? itemOne.id : null;
-  let idTwo = (itemTwo.id) ? itemTwo.id : null;
-  let constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  let path = "";
-  // partially encode params, q (query pk) is not encoded
-  if(shouldHash)
-    path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}`)}&q=${pk}`;
-  else
-    path = `results?${`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`}`;
-  return path;
+  const labelOne = (itemOne.label) ? itemOne.label : null;
+  const labelTwo = (itemTwo.label) ? itemTwo.label : null;
+  const idOne = (itemOne.id) ? itemOne.id : null;
+  const idTwo = (itemTwo.id) ? itemTwo.id : null;
+  const constraintVar = !!constraint ?  `&c=${constraint}`: '';
+  const params = shouldHash
+    ? `${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`)}&q=${pk}`
+    : `lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&q=${pk}`;
+
+  if (resultID === '0')
+    return `results?${params}`;
+
+  return `results/${resultID}?${params}`;
 }

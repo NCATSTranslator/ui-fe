@@ -130,7 +130,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         </div>
       )}
       <Tabs
-        isOpen={true}
         defaultActiveTab="Smart Query"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
