@@ -13,7 +13,7 @@
     column-gap: $l;
     align-items: flex-start;
     position: relative;
-    max-width: 1400px;
+    max-width: $resultsViewMaxWidth;
     width: auto;
     padding: $l;
     .resultsTableContainer.pathfinder {

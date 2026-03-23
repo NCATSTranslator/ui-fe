@@ -1,11 +1,13 @@
 @use "@/assets/styles/variables" as *;
 
 .container {
-  padding: 0 $m $m;
+  padding: 0 $l $m;
   height: 100%;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   gap: $xs;
+  max-width: $resultsViewMaxWidth;
+  margin: 0 auto;
 }
 
 .labelRow {

@@ -1,10 +1,12 @@
 @use "@/assets/styles/variables" as *;
 
 .evidenceView {
-  padding: 0 $m $m;
+  padding: 0 $l $m;
   height: 100%;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
+  max-width: $resultsViewMaxWidth;
+  margin: 0 auto;
 }
 
 .title {

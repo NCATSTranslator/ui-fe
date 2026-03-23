@@ -1,7 +1,9 @@
 @use "@/assets/styles/variables" as *;
 
 .container {
-  padding: 0 $l $m;
+  padding: $xs $l $m;
+  max-width: $resultsViewMaxWidth;
+  margin: 0 auto;
 }
 
 .tableHeader, .top {

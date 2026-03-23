@@ -4,6 +4,7 @@ import { useMatches, useNavigate, useSearchParams } from 'react-router-dom';
 import { BreadcrumbHandle } from '@/features/Navigation/types/navigation.d';
 import BreadcrumbLink from '@/features/Navigation/components/BreadcrumbLink/BreadcrumbLink';
 import ArrowLeftIcon from '@/assets/icons/directional/Arrows/Arrow Left.svg?react';
+import Button from '@/features/Core/components/Button/Button';
 
 const Breadcrumbs: FC = () => {
   const matches = useMatches();
@@ -20,7 +21,13 @@ const Breadcrumbs: FC = () => {
 
   return (
     <nav aria-label="Breadcrumb" className={styles.breadcrumbs}>
-      <ArrowLeftIcon className={styles.arrowLeftIcon} onClick={() => navigate(-1)} />
+      <Button
+        variant="secondary"
+        iconOnly
+        iconLeft={<ArrowLeftIcon className={styles.arrowLeftIcon} />}
+        handleClick={() => navigate(-1)}
+        className={styles.arrowLeftButton}
+      />
       <ol className={styles.list}>
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
