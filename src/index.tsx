@@ -50,6 +50,15 @@ const NodeInformationView = lazy(() => import('@/features/NodeInformationView/co
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
 const ResultDetailLayout = lazy(() => import('@/pageRoutes/ResultDetailLayout/ResultDetailLayout'));
 
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  const lastReload = sessionStorage.getItem('vite:preloadError');
+  if (!lastReload || Date.now() - Number(lastReload) > 10_000) {
+    sessionStorage.setItem('vite:preloadError', String(Date.now()));
+    window.location.reload();
+  }
+});
+
 const container = document.getElementById('root');
 if (!container) {
   throw new Error('Root element not found');
