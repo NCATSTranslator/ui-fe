@@ -1,0 +1,6 @@
+@use "@/assets/styles/variables" as *;
+
+.urlGrid {
+  display: grid;
+  gap: $xs;
+}
