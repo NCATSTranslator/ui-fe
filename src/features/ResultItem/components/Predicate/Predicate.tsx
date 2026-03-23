@@ -15,7 +15,6 @@ import { Path, PathFilterState, ResultEdge } from '@/features/ResultList/types/r
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-import { cloneDeep } from 'lodash';
 import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';

@@ -44,7 +44,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
   }, [sources]);
 
   return (
-    <div className={`table-body ${evidenceStyles.tableBody} ${evidenceStyles.sources}`}>
+    <div className={`table-body ${styles.tableBody} ${evidenceStyles.tableBody} ${evidenceStyles.sources}`}>
       <div className={`table-head ${evidenceStyles.tableHead}`}>
         <div className={`head ${evidenceStyles.head}`}>Source</div>
         <div className={`head ${evidenceStyles.head}`}>Rationale</div>
@@ -55,7 +55,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
           const tooltipId = `source-tooltip-${sourceKey}`;
 
           return (
-            <div className={`table-item ${evidenceStyles.tableItem}`} key={sourceKey}>
+            <div className={`table-item ${styles.tableItem} ${evidenceStyles.tableItem}`} key={sourceKey}>
               {src.wiki ? (
                 <Tooltip id={tooltipId}>
                   <span className={evidenceStyles.tooltipSpan}>
@@ -66,9 +66,11 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                   </span>
                 </Tooltip>
               ) : null}
-              <span className={`table-cell ${evidenceStyles.cell} ${evidenceStyles.source} ${evidenceStyles.sourceItem}`}>
-                {src.name}
-                {src.wiki && <InfoIcon className={evidenceStyles.infoIcon} data-tooltip-id={tooltipId} />}
+              <span className={`table-cell ${styles.sourceName} ${evidenceStyles.cell} ${evidenceStyles.source} ${evidenceStyles.sourceItem}`}>
+                <span className={styles.sourceNameText}>
+                  {src.name}
+                  {src.wiki && <InfoIcon className={evidenceStyles.infoIcon} data-tooltip-id={tooltipId} />}
+                </span>
               </span>
               <span className={`table-cell ${evidenceStyles.cell} ${evidenceStyles.link} ${evidenceStyles.sourceItem}`}>
                 {src.urls.length > 0 ? (

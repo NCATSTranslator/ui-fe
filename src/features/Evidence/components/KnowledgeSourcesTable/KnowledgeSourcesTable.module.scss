@@ -4,3 +4,14 @@
   display: grid;
   gap: $xs;
 }
+
+.tableBody .tableItem  {
+  .sourceName {
+    align-items: flex-start;
+  }
+  .sourceNameText {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
