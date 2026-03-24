@@ -169,7 +169,7 @@ export const getDecodedParamsFromSearch = (search: string): string => {
     // If successful and results in valid query parameters, use decoded version
     // Otherwise treat as regular key=value parameter
     try {
-      const decoded = window.atob(segment);
+      const decoded = window.atob(decodeURIComponent(segment));
       // Verify the decoded content looks like query parameters
       // It should contain at least one = that's not at the start or end
       const hasValidQueryFormat = decoded.includes('=') && 
