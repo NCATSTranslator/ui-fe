@@ -985,3 +985,19 @@ export const commonQueryClientOptions = {
     },
   },
 };
+
+/**
+ * Returns a formatted name for a node based on the provided node type.
+ *
+ * @param {string} nodeName - The node name to format.
+ * @param {string} nodeType - The type of the node.
+ * @returns {string} - The formatted node name.
+ */
+export const getFormattedNodeName = (nodeName: string | undefined, nodeType: string | null): string => {
+  if(!nodeName || !nodeType)
+    return capitalizeAllWords(nodeName ?? '');
+
+  if(nodeType === 'biolink:Gene' || nodeType === 'biolink:Protein')
+    return nodeName.toUpperCase() ?? '';
+  return capitalizeAllWords(nodeName ?? '');
+}

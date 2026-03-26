@@ -54,4 +54,9 @@
       font-weight: 400;
     }
   }
+  .nodeTypeIcon {
+    display: flex;
+    gap: $xxs;
+    align-items: center;
+  }
 }
