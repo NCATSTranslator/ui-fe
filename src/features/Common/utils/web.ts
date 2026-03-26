@@ -149,6 +149,23 @@ export const fetchWithErrorHandling = async <T>(
  * @param {string} search - The search string (e.g., "?param=value" or "param=value").
  * @returns {string} The decoded query parameters.
  */
+/**
+ * Decodes a single URL-safe or standard base64 segment.
+ * Handles URI-encoded characters, URL-safe base64 substitutions (-/_ → +//),
+ * and normalizes padding before decoding.
+ *
+ * @param {string} segment - A raw query string segment that may be base64.
+ * @returns {string} The decoded string.
+ * @throws If the segment is not valid base64.
+ */
+export const decodeBase64Param = (segment: string): string => {
+  const uriDecoded = decodeURIComponent(segment);
+  const standardB64 = uriDecoded.replace(/-/g, '+').replace(/_/g, '/');
+  const strippedPadding = standardB64.replace(/=+$/, '');
+  const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
+  return window.atob(normalizedB64);
+}
+
 export const getDecodedParamsFromSearch = (search: string): string => {
   if (!search)
     return "";
@@ -169,7 +186,7 @@ export const getDecodedParamsFromSearch = (search: string): string => {
     // If successful and results in valid query parameters, use decoded version
     // Otherwise treat as regular key=value parameter
     try {
-      const decoded = window.atob(decodeURIComponent(segment));
+      const decoded = decodeBase64Param(segment);
       // Verify the decoded content looks like query parameters
       // It should contain at least one = that's not at the start or end
       const hasValidQueryFormat = decoded.includes('=') && 
@@ -211,7 +228,10 @@ export const getDecodedParams = (): string => {
 export const encodeParams = (params: string): string => {
   if(!params)
     return "";
-  return window.btoa(params);
+  return window.btoa(params)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 /**

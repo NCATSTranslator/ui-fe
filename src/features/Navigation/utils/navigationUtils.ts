@@ -1,5 +1,5 @@
 import { redirect } from 'react-router-dom';
-import { encodeParams } from '@/features/Common/utils/web';
+import { decodeBase64Param, encodeParams } from '@/features/Common/utils/web';
 import { getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { Result, ResultEdge, ResultSet, Path } from '@/features/ResultList/types/results.d';
 import { getCompressedEdge, hasSupport, intToChar, intToNumeral } from '@/features/Common/utils/utilities';
@@ -192,7 +192,7 @@ const extractResultIdFromEncodedParams = (url: URL): Response | null => {
 
   for (const segment of segments) {
     try {
-      const decoded = window.atob(segment);
+      const decoded = decodeBase64Param(segment);
       const decodedParams = new URLSearchParams(decoded);
       if (decodedParams.has('r')) {
         resultId = decodedParams.get('r');
