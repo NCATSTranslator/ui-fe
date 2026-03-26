@@ -171,23 +171,24 @@ const isRomanNumeral = (word: string): boolean => {
  * @returns {string} - The capitalized word.
  */
 export const capitalizeWord = (word: string): string => {
-  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 /**
  * Capitalizes the first letter of each word and lowercase the rest.
  *
  * @param {string} str - The string to capitalize.
+ * @param {string} splitBy - The character to split the string by. Defaults to a space.
  * @returns {string} - The capitalized string.
  */
-export const capitalizeAllWords = (str: string): string => {
-  return str.split(' ').map(word => {
+export const capitalizeAllWords = (str: string, splitBy: string = ' '): string => {
+  return str.split(splitBy).map(word => {
     if (isRomanNumeral(word)) {
       return word.toUpperCase();
     } else {
       return capitalizeWord(word);
     }
-  }).join(' ');
+  }).join(splitBy);
 }
 
 /**
