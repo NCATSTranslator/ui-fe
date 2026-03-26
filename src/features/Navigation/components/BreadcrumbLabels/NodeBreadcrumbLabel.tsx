@@ -1,9 +1,9 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar, getFormattedNodeName } from '@/features/Common/utils/utilities';
 import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
@@ -24,7 +24,9 @@ const NodeBreadcrumbLabel: FC = () => {
     placeholderData: nodeId ?? undefined,
   });
 
-  if (node) return <>{node.names[0]}</>;
+  const nodeName = useMemo(() => getFormattedNodeName(node?.names[0] ?? undefined, node?.types[0] ?? null), [node?.names, node?.types]);
+
+  if (node) return <>{nodeName}</>;
   if (resolvedName) return <>{resolvedName}</>;
   if (nodeId) return <>{nodeId}</>;
   return <SkeletonBar width="100px" height="17px" />;

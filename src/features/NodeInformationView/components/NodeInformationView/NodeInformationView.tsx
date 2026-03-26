@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar, getFormattedNodeName } from "@/features/Common/utils/utilities";
 import { useDecodedParams } from "@/features/Core/hooks/useDecodedParams";
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
@@ -13,6 +13,7 @@ import { formatLabel, renderValue } from "@/features/NodeInformationView/utils/u
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeViewSkeleton/NodeViewSkeleton";
 import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
+import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 
 const NodeInformationView: FC = () => {
   const { nodeId } = useParams();
@@ -22,9 +23,9 @@ const NodeInformationView: FC = () => {
   const queryStatus = useSelector(getQueryStatusById(queryId));
 
   const node = nodeId ? resultSet?.data?.nodes?.[nodeId] ?? null : null;
-  const nodeType = node?.types[0] ?? null;
-  const nodeName = node?.names[0] ?? null;
-
+  const nodeType = useMemo(() => node?.types[0] ?? null, [node?.types]);
+  const nodeName = useMemo(() => getFormattedNodeName(node?.names[0] ?? undefined, nodeType ?? null), [node?.names, nodeType]);
+  
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
 
   const annotationFields = useMemo<{label: string; content: ReactNode}[]>(() => {
@@ -71,9 +72,9 @@ const NodeInformationView: FC = () => {
     <div className={styles.nodeInformationView}>
       <div className={styles.container}>
         <div className={styles.top}>
-          <div className={styles.nodeType}>
+          <div className={styles.nodeName}>
             <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
-            <h5 className={styles.nodeTypeTitle}>{nodeName}</h5>
+            <h5 className={styles.nodeTitle}>{nodeName}</h5>
           </div>
         </div>
         <Tabs className={styles.tabs} fadeClassName={styles.tabFade}>
@@ -85,7 +86,13 @@ const NodeInformationView: FC = () => {
                     description &&
                     <div className={styles.section}>
                       <p className={styles.sectionTitle}>Description</p>
-                      <p className={styles.description}>{description}</p>
+                      <p className={styles.description}>
+                        <SafeHtmlHighlighter
+                          htmlString={description || ""}
+                          searchWords={[]}
+                          highlightClassName="highlight"
+                        />
+                      </p>
                     </div>
                   }
                   {
