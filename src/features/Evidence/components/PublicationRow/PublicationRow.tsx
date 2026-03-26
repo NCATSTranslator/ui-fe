@@ -21,25 +21,31 @@ const PublicationRow: FC<{
     };
 
     const matchingEdgePub = pub?.id && selectedEdge ? checkEdgeForPub(pub.id, selectedEdge) : false;
-    
-    if (matchingEdgePub && matchingEdgePub.support !== null) {
-      const objectNode = getNodeById(resultSet, selectedEdge?.object);
-      const objectName = objectNode?.names[0] || "";
-      const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
-      const subjectName = subjectNode?.names[0] || "";
-      
-      return (
-        <EmphasizeWord
-          text={matchingEdgePub.support.text}
-          objectName={objectName}
-          objectPos={matchingEdgePub.support.object}
-          subjectName={subjectName}
-          subjectPos={matchingEdgePub.support.subject}
-        />
-      );
+
+    if(!matchingEdgePub || matchingEdgePub.support === null)
+      return pub.snippet ?? 'No snippet available.';
+
+    // early returns aren't combined in order to log a specific warning for null positions
+    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null) {
+      console.warn('No object or subject positions found for publication:', pub, 'on edge:', selectedEdge, 'support:', matchingEdgePub.support);
+      return pub.snippet ?? 'No snippet available.';
     }
     
-    return pub.snippet ?? 'No snippet available.';
+    const objectNode = getNodeById(resultSet, selectedEdge?.object);
+    const objectName = objectNode?.names[0] || "";
+    const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
+    const subjectName = subjectNode?.names[0] || "";
+    
+    return (
+      <EmphasizeWord
+        text={matchingEdgePub.support.text}
+        objectName={objectName}
+        objectPos={matchingEdgePub.support.object}
+        subjectName={subjectName}
+        subjectPos={matchingEdgePub.support.subject}
+      />
+    );
+    
   }, [pub, resultSet, selectedEdge]);
 
   return (
