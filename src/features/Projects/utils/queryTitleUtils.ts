@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 /**
@@ -29,10 +29,10 @@ export const generateQueryTitleFromQueryObject = (query: UserQueryObject): strin
 export const generateQueryTitle = (queryTypeId: string | null, nodeOneLabel: string, nodeTwoLabel: string, constraint: string | null): string => {
   let title = 'No title available';
 
-  if(queryTypeId === 'pathfinder') {
+  if(queryTypeId === 'p' || queryTypeId === 'pathfinder') {
     title = constraint
-      ? `${capitalizeFirstLetter(nodeOneLabel)} and ${capitalizeFirstLetter(nodeTwoLabel)} — ${formatBiolinkTypeString(constraint)} Connections`
-      : `${capitalizeFirstLetter(nodeOneLabel)} and ${capitalizeFirstLetter(nodeTwoLabel)}`;
+      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${formatBiolinkTypeString(constraint)} Connections`
+      : `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)}`;
   } else {
     const queryTypeObject = queryTypes.find(type => type.targetType === queryTypeId || type.id === parseInt(queryTypeId || '0'));
     if(queryTypeObject)
