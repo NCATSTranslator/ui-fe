@@ -14,6 +14,19 @@ import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeT
 import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeViewSkeleton/NodeViewSkeleton";
 import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
+import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
+
+interface AnnotationOverrideProps {
+  value: unknown;
+  nodeName: string;
+  nodeType: string;
+}
+
+const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
+  clinical_trials: ({ value, nodeName, nodeType }) => (
+    <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
+  ),
+};
 
 const NodeInformationView: FC = () => {
   const { nodeId } = useParams();
@@ -34,12 +47,17 @@ const NodeInformationView: FC = () => {
     for(const category of Object.values(node.annotations)) {
       for(const [key, value] of Object.entries(category)) {
         if(key === "descriptions" || value === null || value === undefined) continue;
+        const Override = ANNOTATION_OVERRIDES[key];
+        if(Override) {
+          fields.push({ label: formatLabel(key), content: <Override value={value} nodeName={nodeName ?? ""} nodeType={nodeType ?? ""} /> });
+          continue;
+        }
         const content = renderValue(value);
         if(content !== null) fields.push({ label: formatLabel(key), content });
       }
     }
     return fields;
-  }, [node]);
+  }, [node, nodeName, nodeType]);
 
   const description = useMemo(() => {
     if(!node || !node.annotations) return null;
