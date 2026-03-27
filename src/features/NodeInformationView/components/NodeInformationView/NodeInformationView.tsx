@@ -70,53 +70,56 @@ const NodeInformationView: FC = () => {
 
   return (
     <div className={styles.nodeInformationView}>
-      <div className={styles.container}>
-        <div className={styles.top}>
-          <div className={styles.nodeName}>
-            <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
-            <h5 className={styles.nodeTitle}>{nodeName}</h5>
-          </div>
+      <div className={styles.top}>
+        <div className={styles.nodeName}>
+          <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
+          <h5 className={styles.nodeTitle}>{nodeName}</h5>
         </div>
-        <Tabs className={styles.tabs} fadeClassName={styles.tabFade}>
-          {
-            [
-              <Tab heading="Information" className={styles.tabContent} key="information">
-                <div className={styles.information}>
-                  {
-                    description &&
-                    <div className={styles.section}>
-                      <p className={styles.sectionTitle}>Description</p>
-                      <p className={styles.description}>
-                        <SafeHtmlHighlighter
-                          htmlString={description || ""}
-                          searchWords={[]}
-                          highlightClassName="highlight"
-                        />
-                      </p>
-                    </div>
-                  }
-                  {
-                    nodeType &&
-                    <div className={styles.section}>
-                      <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
-                      <p className={styles.description}>{nodeTypeDefinition}</p>
-                      <a href="https://biolink.github.io/biolink-model/" target="_blank" rel="noreferrer">Learn More About the Biolink Model</a>
-                    </div>
-                  }
-                  {
-                    annotationFields.map(({ label, content }) => (
-                      <div key={label} className={styles.section}>
-                        <p className={styles.sectionTitle}>{label}</p>
-                        <p className={styles.sectionContent}>{content}</p>
-                      </div>
-                    ))
-                  }
-                </div>
-              </Tab>
-            ]
-          }
-        </Tabs>
       </div>
+      <Tabs
+        className={styles.tabs}
+        fadeClassName={styles.tabFade}
+        tabListClassName={styles.tabList}
+        tabListWrapperClassName={styles.tabListWrapper}
+      >
+        {
+          [
+            <Tab heading="Information" className={styles.tabContent} key="information">
+              <div className={styles.information}>
+                {
+                  description &&
+                  <div className={styles.section}>
+                    <p className={styles.sectionTitle}>Description</p>
+                    <p className={styles.description}>
+                      <SafeHtmlHighlighter
+                        htmlString={description || ""}
+                        searchWords={[]}
+                        highlightClassName="highlight"
+                      />
+                    </p>
+                  </div>
+                }
+                {
+                  nodeType &&
+                  <div className={styles.section}>
+                    <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
+                    <p className={styles.description}>{nodeTypeDefinition}</p>
+                    <a href="https://biolink.github.io/biolink-model/" target="_blank" rel="noreferrer">Learn More About the Biolink Model</a>
+                  </div>
+                }
+                {
+                  annotationFields.map(({ label, content }) => (
+                    <div key={label} className={styles.section}>
+                      <p className={styles.sectionTitle}>{label}</p>
+                      <p className={styles.sectionContent}>{content}</p>
+                    </div>
+                  ))
+                }
+              </div>
+            </Tab>
+          ]
+        }
+      </Tabs>
     </div>
   );
 };
