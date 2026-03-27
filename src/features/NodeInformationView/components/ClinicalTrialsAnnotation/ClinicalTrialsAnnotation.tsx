@@ -15,7 +15,6 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
   const uniqueIds = useMemo(() => [...new Set(nctIds)], [nctIds]);
   const displayedIds = useMemo(() => uniqueIds.slice(0, DISPLAY_LIMIT), [uniqueIds]);
   const { trials, isLoading } = useClinicalTrialMetadata(displayedIds);
-  const totalCount = uniqueIds.length;
   const param = (nodeType === 'biolink:Drug' || nodeType === 'biolink:SmallMolecule') ? 'intr' : (nodeType === 'biolink:Disease' || nodeType === 'biolink:PhenotypicFeature') ? 'cond' : 'term';
   const searchUrl = `https://clinicaltrials.gov/search?${param}=${encodeURIComponent(nodeName)}&viewType=Card`;
 
@@ -42,7 +41,7 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
         ))}
         <li>
           <a className={styles.viewAllLink} href={searchUrl} target="_blank" rel="noreferrer">
-            View all {totalCount} on clinicaltrials.gov
+            View all on clinicaltrials.gov
           </a>
         </li>
       </ul>
