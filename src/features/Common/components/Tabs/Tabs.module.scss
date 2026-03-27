@@ -27,6 +27,7 @@
       pointer-events: none;
       height: 0;
       border: none;
+      overflow: hidden;
     }
   }
   .fade {
@@ -35,6 +36,7 @@
       pointer-events: none;
       height: 0;
       opacity: 0;
+      overflow: hidden;
     }
   }
 }
