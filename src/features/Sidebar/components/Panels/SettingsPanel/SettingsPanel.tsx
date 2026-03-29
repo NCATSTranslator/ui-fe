@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './SettingsPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
@@ -9,7 +9,7 @@ import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 import { useDispatch, useSelector } from 'react-redux';
-import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
+import { currentPrefs, setCurrentPrefs, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import { cloneDeep } from 'lodash';
@@ -31,6 +31,29 @@ const SettingsPanel = () => {
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
   const dispatch = useDispatch();
+
+  const config = useSelector(currentConfig);
+  const idpLogoutFormRef = useRef<HTMLFormElement>(null);
+
+  const idpLogoutProvider = useMemo(() => {
+    if (!config?.social_providers) return null;
+    for (const provider of Object.values(config.social_providers)) {
+      if (provider.logout_uri && provider.client_id) {
+        return provider;
+      }
+    }
+    return null;
+  }, [config]);
+
+  const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
+
+  const handleLogout = () => {
+    if (idpLogoutProvider && idpLogoutFormRef.current) {
+      idpLogoutFormRef.current.submit();
+    } else {
+      window.location.href = '/logout';
+    }
+  };
   
   const resultPrefs = useMemo(()=> {
     return {
@@ -98,8 +121,20 @@ const SettingsPanel = () => {
                 <>
                   <div className={styles.iconText}>
                     <div className={styles.userIcon}><span>{user.name.charAt(0)}</span></div>
-                    <p>{user.email}<br/><Button href="/logout" title="Log Out" className={styles.loginButton} variant="textOnly" inline>Log Out</Button></p>
+                    <p>{user.email}<br/><Button handleClick={handleLogout} title="Log Out" className={styles.loginButton} variant="textOnly" inline>Log Out</Button></p>
                   </div>
+                  {idpLogoutProvider && (
+                    <form
+                      ref={idpLogoutFormRef}
+                      method="post"
+                      action={idpLogoutProvider.logout_uri}
+                      style={{ display: 'none' }}
+                    >
+                      <input type="hidden" name="client_id" value={idpLogoutProvider.client_id} />
+                      <input type="hidden" name="show_prompt" value="false" />
+                      <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri} />
+                    </form>
+                  )}
                   <div className={styles.prefs}>
                     <h6 className={styles.title}>Preferences</h6>
                     <p className={styles.helpText}>These preferences are automatically applied to all of your queries and projects.</p>
