@@ -42,14 +42,14 @@ Results can be filtered and sorted according to several different criteria, such
 
 ## Technologies Used
 
-- **Frontend Framework**: React 18.2 with TypeScript
+- **Frontend Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
 - **State Management**: Redux Toolkit with React Redux
 - **Routing**: React Router DOM
 - **Styling**: Sass modules
-- **Graph Visualization**: Cytoscape.js with multiple layout extensions
+- **Graph Visualization**: translator-graph-view (React Flow + ELK layout engine)
 - **Rich Text Editing**: Lexical
-- **Testing**: Cypress for E2E testing, React Testing Library
+- **Testing**: Vitest with Playwright for browser testing, React Testing Library
 - **UI Components**: Custom component library with React Toastify, React Tooltip, React Range
 - **Data Handling**: React Query, React CSV for exports
 
@@ -87,11 +87,13 @@ The project follows a feature-based architecture organized into the following ma
 - **QuerySelect**: Query type selection
 - **QueryTypeIcon**: Icons for different query types
 
+#### **ResultGraphView** - Graph Visualization
+- **GraphView**: Interactive graph visualization powered by translator-graph-view (React Flow + ELK)
+- **GraphLayoutButtons**: Graph layout control buttons
+
 #### **ResultItem** - Individual Result Display
 - **BookmarkConfirmationModal**: Bookmark confirmation dialog
 - **BookmarkToasts**: Toast notifications for bookmark actions
-- **GraphLayoutButtons**: Graph layout control buttons
-- **GraphView**: Cytoscape graph visualization
 - **LastViewedTag**: Tag for recently viewed items
 - **NotesModal**: Notes editing modal
 - **PathObject**: Individual path node/edge display
@@ -155,12 +157,16 @@ The project follows a feature-based architecture organized into the following ma
 
 ## Installation and Setup Instructions
 
-#### Node v17.x, React v18.2
+#### Node v17.x, React v19
 
 Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
 
 Installation:
-- Run `npm install` inside the root directory of this repo. 
+- Run `npm install` inside the root directory of this repo.
+- Copy the ELK layout web worker into the public directory:
+  ```
+  cp node_modules/elkjs/lib/elk-worker.min.js public/elk-worker.min.js
+  ```
 
 In order to submit queries you'll need a copy of the UI's backend running locally as well. You can find it [here](https://github.com/NCATSTranslator/ui-be). Clone it, then run `npm install` inside its root directory. You can then run `npm run prod` or `npm run dev` depending on your preferred environment.
 
