@@ -33,7 +33,6 @@ export interface ResultListContextValue {
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   shouldUpdateResultsAfterBookmark: RefObject<boolean>;
   updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
-  zoomKeyDown: boolean;
 }
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
