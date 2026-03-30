@@ -1,4 +1,6 @@
 import { defineConfig } from 'vite';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import eslint from 'vite-plugin-eslint';
@@ -12,14 +14,10 @@ export default defineConfig(() => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'cytoscape-vendor': [
-              'cytoscape',
-              'cytoscape-klay',
-              'cytoscape-dagre', 
-              'cytoscape-avsdf',
-              'cytoscape-popper',
-              'cytoscape-navigator',
-              '@popperjs/core'
+            'graph-vendor': [
+              'translator-graph-view',
+              '@xyflow/react',
+              'elkjs'
             ],
             'ui-vendor': [
               'react-select',
@@ -60,7 +58,8 @@ export default defineConfig(() => {
     },
     resolve: {
       alias: {
-        '@': '/src'
+        '@': '/src',
+        'translator-graph-view/styles.css': resolve(dirname(fileURLToPath(import.meta.url)), 'node_modules/translator-graph-view/dist/translator-graph-view.css')
       }
     }
   };
