@@ -48,6 +48,13 @@ export interface ExportedResult {
   subject: string;
   object: string;
   paths: string[];
+  score: string;
+  scoreComponents: {
+    clinical_evidence: number;
+    confidence: number;
+    novelty: number;
+    normalized_score: number;
+  }[];
 }
 
 export interface ExportedPath {
