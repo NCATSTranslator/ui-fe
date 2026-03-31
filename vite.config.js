@@ -16,8 +16,7 @@ export default defineConfig(() => {
           manualChunks: {
             'graph-vendor': [
               'translator-graph-view',
-              '@xyflow/react',
-              'elkjs'
+              '@xyflow/react'
             ],
             'ui-vendor': [
               'react-select',
