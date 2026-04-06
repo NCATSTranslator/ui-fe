@@ -36,6 +36,10 @@
       cursor: default;
       user-select: none;
     }
+    .loginButton span {
+      font-size: $captionSize;
+      margin-top: $xxs;
+    }
   }
   .title {
     // border bottom, but inset
