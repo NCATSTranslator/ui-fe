@@ -14,7 +14,20 @@ import PathBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabe
 import PathRedirect from '@/features/Navigation/components/PathRedirect/PathRedirect';
 import { resultsLoader } from '@/features/Navigation/utils/navigationUtils';
 import QueryBreadcrumbLabel from './features/Navigation/components/BreadcrumbLabels/QueryBreadcrumbLabel';
-const AboutTranslator = lazy(() => import('@/pageRoutes/Articles/AboutTranslator').then(m => ({ default: m.AboutTranslator })));
+import { AboutTranslator } from '@/pageRoutes/Articles/AboutTranslator';
+import { QueryHistoryArticle } from '@/pageRoutes/Articles/QueryHistoryArticle';
+import { SortingAndFiltering } from '@/pageRoutes/Articles/SortingAndFiltering';
+import { SecurityAndPrivacy } from '@/pageRoutes/Articles/SecurityAndPrivacy';
+import { FrequentlyAskedQuestions } from '@/pageRoutes/Articles/FrequentlyAskedQuestions';
+import { AccountAndSettings } from '@/pageRoutes/Articles/AccountAndSettings';
+import { ProjectsArticle } from '@/pageRoutes/Articles/ProjectsArticle';
+import { SharingResults } from '@/pageRoutes/Articles/SharingResults';
+import { BookmarksAndNotes } from '@/pageRoutes/Articles/BookmarksAndNotes';
+import { RelationshipEvidence } from '@/pageRoutes/Articles/RelationshipEvidence';
+import { PathsAndGraphs } from '@/pageRoutes/Articles/PathsAndGraphs';
+import { LoadingAndSyncing } from '@/pageRoutes/Articles/LoadingAndSyncing';
+import { SubmittingQueries } from '@/pageRoutes/Articles/SubmittingQueries';
+import { HowToUseTranslator } from '@/pageRoutes/Articles/HowToUseTranslator';
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));
 const ResultsLayout = lazy(() => import('@/pageRoutes/ResultsLayout/ResultsLayout'));
 const History = lazy(() => import('@/pageRoutes/History/History'));
@@ -23,7 +36,6 @@ const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
 const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
-const QueryHistoryArticle = lazy(() => import('@/pageRoutes/Articles/QueryHistoryArticle').then(m => ({ default: m.QueryHistoryArticle })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
 const Affiliates = lazy(() => import('@/pageRoutes/Articles/Affiliates').then(m => ({ default: m.Affiliates })));
 const SearchHistoryArticle = lazy(() => import('@/pageRoutes/Articles/SearchHistoryArticle').then(m => ({ default: m.SearchHistoryArticle })));
@@ -33,18 +45,6 @@ const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/Explorin
 const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify').then(m => ({ default: m.ReviewIdentify })));
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
-const SortingAndFiltering = lazy(() => import('@/pageRoutes/Articles/SortingAndFiltering').then(m => ({ default: m.SortingAndFiltering })));
-const SecurityAndPrivacy = lazy(() => import('@/pageRoutes/Articles/SecurityAndPrivacy').then(m => ({ default: m.SecurityAndPrivacy })));
-const FrequentlyAskedQuestions = lazy(() => import('@/pageRoutes/Articles/FrequentlyAskedQuestions').then(m => ({ default: m.FrequentlyAskedQuestions })));
-const AccountAndSettings = lazy(() => import('@/pageRoutes/Articles/AccountAndSettings').then(m => ({ default: m.AccountAndSettings })));
-const ProjectsArticle = lazy(() => import('@/pageRoutes/Articles/ProjectsArticle').then(m => ({ default: m.ProjectsArticle })));
-const SharingResults = lazy(() => import('@/pageRoutes/Articles/SharingResults').then(m => ({ default: m.SharingResults })));
-const BookmarksAndNotes = lazy(() => import('@/pageRoutes/Articles/BookmarksAndNotes').then(m => ({ default: m.BookmarksAndNotes })));
-const RelationshipEvidence = lazy(() => import('@/pageRoutes/Articles/RelationshipEvidence').then(m => ({ default: m.RelationshipEvidence })));
-const PathsAndGraphs = lazy(() => import('@/pageRoutes/Articles/PathsAndGraphs').then(m => ({ default: m.PathsAndGraphs })));
-const LoadingAndSyncing = lazy(() => import('@/pageRoutes/Articles/LoadingAndSyncing').then(m => ({ default: m.LoadingAndSyncing })));
-const SubmittingQueries = lazy(() => import('@/pageRoutes/Articles/SubmittingQueries').then(m => ({ default: m.SubmittingQueries })));
-const HowToUseTranslator = lazy(() => import('@/pageRoutes/Articles/HowToUseTranslator').then(m => ({ default: m.HowToUseTranslator })));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
@@ -81,7 +81,7 @@ const routes = [
   },
   {
     path: "about-translator",
-    element: <HelpPage title="About Translator"><Suspense fallback={<LoadingWrapper />}><AboutTranslator /></Suspense></HelpPage>
+    element: <HelpPage title="About Translator"><AboutTranslator /></HelpPage>
   },
   {
     path: "logging-in",
@@ -89,11 +89,11 @@ const routes = [
   },
   {
     path: "query-history-article",
-    element: <HelpPage title="Query History"><Suspense fallback={<LoadingWrapper />}><QueryHistoryArticle /></Suspense></HelpPage>
+    element: <HelpPage title="Query History"><QueryHistoryArticle /></HelpPage>
   },
   {
     path: "projects-article",
-    element: <HelpPage title="Projects"><Suspense fallback={<LoadingWrapper />}><ProjectsArticle /></Suspense></HelpPage>
+    element: <HelpPage title="Projects"><ProjectsArticle /></HelpPage>
   },
   {
     path: "overview",
@@ -105,19 +105,19 @@ const routes = [
   },
   {
     path: 'paths-and-graphs',
-    element: <HelpPage title="Paths and Graphs"><Suspense fallback={<LoadingWrapper />}><PathsAndGraphs/></Suspense></HelpPage>
+    element: <HelpPage title="Paths and Graphs"><PathsAndGraphs/></HelpPage>
   },
   {
     path: 'submitting-queries',
-    element: <HelpPage title="Submitting Queries"><Suspense fallback={<LoadingWrapper />}><SubmittingQueries/></Suspense></HelpPage>
+    element: <HelpPage title="Submitting Queries"><SubmittingQueries/></HelpPage>
   },
   {
     path: 'loading-and-syncing',
-    element: <HelpPage title="Loading and Syncing"><Suspense fallback={<LoadingWrapper />}><LoadingAndSyncing/></Suspense></HelpPage>
+    element: <HelpPage title="Loading and Syncing"><LoadingAndSyncing/></HelpPage>
   },
   {
     path: 'relationship-evidence',
-    element: <HelpPage title="Relationship Evidence"><Suspense fallback={<LoadingWrapper />}><RelationshipEvidence/></Suspense></HelpPage>
+    element: <HelpPage title="Relationship Evidence"><RelationshipEvidence/></HelpPage>
   },
   {
     path: 'review-and-identify',
@@ -149,31 +149,31 @@ const routes = [
   },
   {
     path: "bookmarks-and-notes",
-    element: <HelpPage title="Bookmarks and Notes"><Suspense fallback={<LoadingWrapper />}><BookmarksAndNotes /></Suspense></HelpPage>
+    element: <HelpPage title="Bookmarks and Notes"><BookmarksAndNotes /></HelpPage>
   },
   {
     path: "how-to-use-translator",
-    element: <HelpPage title="How to Use Translator"><Suspense fallback={<LoadingWrapper />}><HowToUseTranslator /></Suspense></HelpPage>
+    element: <HelpPage title="How to Use Translator"><HowToUseTranslator /></HelpPage>
   },
   {
     path: "sorting-and-filtering",
-    element: <HelpPage title="Sorting and Filtering"><Suspense fallback={<LoadingWrapper />}><SortingAndFiltering /></Suspense></HelpPage>
+    element: <HelpPage title="Sorting and Filtering"><SortingAndFiltering /></HelpPage>
   },
   {
     path: "security-and-privacy",
-    element: <HelpPage title="Security and Privacy"><Suspense fallback={<LoadingWrapper />}><SecurityAndPrivacy /></Suspense></HelpPage>
+    element: <HelpPage title="Security and Privacy"><SecurityAndPrivacy /></HelpPage>
   },
   {
     path: "frequently-asked-questions",
-    element: <HelpPage title="Frequently Asked Questions"><Suspense fallback={<LoadingWrapper />}><FrequentlyAskedQuestions /></Suspense></HelpPage>
+    element: <HelpPage title="Frequently Asked Questions"><FrequentlyAskedQuestions /></HelpPage>
   },
   {
     path: "account-and-settings",
-    element: <HelpPage title="Account and Settings"><Suspense fallback={<LoadingWrapper />}><AccountAndSettings /></Suspense></HelpPage>
+    element: <HelpPage title="Account and Settings"><AccountAndSettings /></HelpPage>
   },
   {
     path: "sharing-results",
-    element: <HelpPage title="Sharing Results"><Suspense fallback={<LoadingWrapper />}><SharingResults /></Suspense></HelpPage>
+    element: <HelpPage title="Sharing Results"><SharingResults /></HelpPage>
   },
   {
     path: "results",

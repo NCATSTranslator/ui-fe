@@ -89,14 +89,14 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 
 /**
  * Custom hook for filtering queries based on a search term
- * @param {UserQueryObject[]} queries - The queries to filter
+ * @param {UserQueryObject[]} queryObjects - The queries to filter
  * @param {boolean} includeDeleted - Whether to include deleted queries
  * @param {SortSearchState} sortState - The sort state to use
  * @param {string} searchTerm - The search term to filter by
  * @returns {UserQueryObject[]} The filtered queries
  */
-export const useFilteredQueries = (queries: UserQueryObject[], includeDeleted: boolean = false, sortState: SortSearchState, searchTerm?: string) => {
-  const { queries: queriesWithTitles } = useGetQueriesUpdatedTitles(queries);
+export const useFilteredQueries = (queryObjects: UserQueryObject[], includeDeleted: boolean = false, sortState: SortSearchState, searchTerm?: string) => {
+  const { queryObjects: queriesWithTitles } = useGetQueriesUpdatedTitles(queryObjects);
 
   return useMemo(() => filterAndSortQueries(queriesWithTitles, sortState.sortField, sortState.sortDirection, searchTerm ?? '').filter((query) => {
     return includeDeleted ? true : !query.data.deleted;

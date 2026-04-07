@@ -341,7 +341,7 @@ export const usePubmedDataFetch = (
   }, []);
 
   useQuery({
-    queryKey: ['pubmedMetadata', processedEvidenceIDs, fetchState.isFetching],
+    queryKey: ['pubmedMetadata', processedEvidenceIDs, fetchState.isFetching, publications.length],
     queryFn: () => fetchPubmedData(processedEvidenceIDs, publications.length),
     enabled: fetchState.isFetching && processedEvidenceIDs.length > 0,
     retry: 1,
