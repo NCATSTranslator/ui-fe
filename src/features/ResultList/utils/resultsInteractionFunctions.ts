@@ -4,7 +4,7 @@ import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
 

@@ -25,7 +25,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, no
   const sharedQueryLabel = (label) ? label : getDataFromQueryVar("l", decodedParams);
   const sharedQueryType = (typeID) ? typeID : getDataFromQueryVar("t", decodedParams);
   const sharedQueryItemID = (nodeID) ? nodeID : getDataFromQueryVar("i", decodedParams);
-  const initSharedQueryResultID = (shareResultID != null) ? shareResultID : getDataFromQueryVar("r", decodedParams);
+  const initSharedQueryResultID = (shareResultID !== null) ? shareResultID : getDataFromQueryVar("r", decodedParams);
   const [sharedQueryResultID, setSharedQueryResultID] = useState(initSharedQueryResultID);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const ShareModal: FC<ShareModalProps> = ({isOpen, onClose, qid, label = null, no
       containerClass={styles.feedbackContainer}
       >
       {
-        shareResultID != null
+        shareResultID !== null
         ?
           <>
             <h5>Share this result</h5>

@@ -3,7 +3,7 @@ import styles from './QueryBar.module.scss';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Button from "@/features/Core/components/Button/Button";
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { AutocompleteItem, AutocompleteContext, QueryItem, QueryType } from '@/features/Query/types/querySubmission';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 

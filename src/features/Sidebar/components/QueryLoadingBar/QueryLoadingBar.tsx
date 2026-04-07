@@ -12,6 +12,7 @@ const QueryLoadingBar: FC<QueryLoadingBarProps> = ({ fillPercentage, full = fals
     <div className={`${styles.loadingBarContainer} ${hide ? styles.hide : ''}`}>
       <div 
         className={`${styles.loadingBarFill} ${full ? styles.full : ''}`}
+        // eslint-disable-next-line no-restricted-syntax
         style={{ width: `${Math.min(Math.max(fillPercentage, 0), 100)}%` }}
       />
     </div>

@@ -150,8 +150,8 @@ export const QuerySelect: FC<QuerySelectProps> = ({
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         <div className={`${styles.selectContainer} ${openClass}`}>
           <div 
-            className={styles.selectDisplay} 
-            onMouseDown={handleSelectClick} 
+            className={styles.selectDisplay}
+            onMouseDown={handleSelectClick}
           >
             {
               getModifiedName(children, selectedItem)
@@ -162,12 +162,14 @@ export const QuerySelect: FC<QuerySelectProps> = ({
           </div>
           <div className={styles.borderVert}></div>
           {
-            noanimate && 
-            <div 
+            noanimate &&
+            <div
               className={`${styles.selectList} ${openClass}`}
               style={
-                selectOpen 
+                selectOpen
+                // eslint-disable-next-line no-restricted-syntax
                 ? {maxHeight: selectListContainerRef.current?.clientHeight}
+                // eslint-disable-next-line no-restricted-syntax
                 : {maxHeight: '0px'}
               }
             >

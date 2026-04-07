@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo, RefObject, Dispatch, SetStateAction } from "react";
-import { cloneDeep, isEqual } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import isEqual from "lodash/isEqual";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
 import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
@@ -115,7 +116,7 @@ const useResultsData = ({
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
 
-    if (resultSet == null || isEqual(resultSet, prevRawResults.current))
+    if (resultSet === null || isEqual(resultSet, prevRawResults.current))
       return;
 
     if (resultSet.status === 'error' || resultSet.data.results === undefined)

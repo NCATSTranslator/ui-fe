@@ -3,7 +3,9 @@ import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, use
 import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
-import { cloneDeep, chunk, isEqual } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import chunk from "lodash/chunk";
+import isEqual from "lodash/isEqual";
 import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
   isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";

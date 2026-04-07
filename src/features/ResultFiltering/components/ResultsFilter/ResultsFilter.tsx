@@ -1,7 +1,7 @@
 import { useMemo, FC, useState } from 'react';
 import styles from './ResultsFilter.module.scss';
 import { Filter, FilterType, GroupedFilters, FilterFamily } from '@/features/ResultFiltering/types/filters';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
 import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';

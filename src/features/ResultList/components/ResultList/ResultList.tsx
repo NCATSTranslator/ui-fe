@@ -4,7 +4,7 @@ import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { useSelector, useDispatch } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";

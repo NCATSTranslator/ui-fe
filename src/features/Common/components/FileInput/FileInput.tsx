@@ -136,7 +136,7 @@ const FileInput: FC<FileDropInputProps> = ({
             multiple={multiple}
             disabled={disabled}
             onChange={handleFileChange}
-            style={{ display: 'none' }}
+            className={styles.input}
           />
           {
             dragging
