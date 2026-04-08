@@ -179,13 +179,14 @@ const Predicate: FC<PredicateProps> = ({
                         }
                       </p>
                       {
-                        edge.predicate.includes("impact") ?
+                        edge.predicate === "impacts" ?
                           <span className={styles.predicateDescription}>
                             Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condition.
                           </span> :
                           edge.description &&
                             <span className={styles.predicateDescription}>
-                              {capitalizeFirstLetter(edge.description)}.
+                              {capitalizeFirstLetter(edge.description.replaceAll("treat", "impact"))}
+                              {edge.description.slice(-1) !== '.' && '.'}
                             </span>
                       }
                       {
