@@ -5,6 +5,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import tanstackQuery from '@tanstack/eslint-plugin-query';
 import reactHooks from 'eslint-plugin-react-hooks';
+import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
@@ -90,6 +91,14 @@ export default [
       'max-lines-per-function': ['warn', { max: 180, skipBlankLines: true, skipComments: true }],
     }
   },
+  {
+    plugins: { sonarjs },
+    rules: Object.fromEntries(
+      Object.entries(sonarjs.configs.recommended.rules)
+        .filter(([, severity]) => severity !== 'off')
+        .map(([rule]) => [rule, 'warn'])
+    ),
+  },
   ...tanstackQuery.configs['flat/recommended'],
-  ...storybook.configs["flat/recommended"]
+  ...storybook.configs["flat/recommended"],
 ];
