@@ -90,4 +90,5 @@ export default [{
   }
 },
 ...tanstackQuery.configs['flat/recommended'],
-...storybook.configs["flat/recommended"]]; 
+...storybook.configs["flat/recommended"]
+];
