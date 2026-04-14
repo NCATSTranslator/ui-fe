@@ -62,8 +62,8 @@ const PathObject: FC<PathObjectProps> = ({
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id;
   const pathObject = (isNodeIndex(index)) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
-  const isNode = isResultNode(pathObject);
-  const isEdge = isResultEdge(pathObject);
+  const isNode = isResultNode(pathObject, false);
+  const isEdge = isResultEdge(pathObject, false);
   const { isEdgeSeen } = useSeenStatus(pk);
   const isSeen = isEdge && isEdgeSeen(pathObject.id);
   const uid = useId();
