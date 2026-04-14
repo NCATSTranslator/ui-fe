@@ -1,4 +1,4 @@
-import { ReactNode, FC} from 'react';
+import { ReactNode, FC } from 'react';
 import styles from './Tooltip.module.scss';
 import 'react-tooltip/dist/react-tooltip.css';
 import {PlacesType, PositionStrategy, Tooltip as ReactTooltip } from 'react-tooltip';
@@ -15,6 +15,7 @@ interface TooltipProps {
   offset?: number;
   onClose?: () => void;
   place?: PlacesType;
+  position?: { x: number; y: number };
   positionStrategy?: PositionStrategy;
 }
 
@@ -30,6 +31,7 @@ const Tooltip: FC<TooltipProps> = ({
   offset,
   onClose = () => {},
   place = "top",
+  position,
   positionStrategy = "fixed"
 }) => {
   return (
@@ -44,7 +46,8 @@ const Tooltip: FC<TooltipProps> = ({
       afterHide={onClose}
       offset={offset}
       positionStrategy={positionStrategy}
-      {... isOpen !== undefined && {isOpen:isOpen}}
+      {...(isOpen !== undefined ? { isOpen } : {})}
+      {...(position !== undefined ? { position } : {})}
     >
       {children}
     </ReactTooltip>
