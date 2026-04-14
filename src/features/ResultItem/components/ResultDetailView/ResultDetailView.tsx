@@ -264,6 +264,7 @@ const ResultDetailView: FC = () => {
             <GraphView
               graph={graph}
               active={graphActive}
+              resultSet={resultSet ?? undefined}
             />
           </Suspense>
         </Tab>
