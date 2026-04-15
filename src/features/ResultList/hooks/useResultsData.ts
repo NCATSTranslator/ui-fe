@@ -128,6 +128,13 @@ const useResultsData = ({
     const currentScoreWeights = scoreWeightsRef.current;
     const currentIsPathfinder = isPathfinderRef.current;
 
+    // Assign ids to edges
+    for (const [id, edge] of Object.entries(newResultSet.data.edges))
+      edge.id = id;
+    // Assign ids to nodes
+    for (const [id, node] of Object.entries(newResultSet.data.nodes))
+      node.id = id;
+    
     // Precalculate evidence and path counts
     for (const result of newResultSet.data.results) {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
@@ -136,12 +143,6 @@ const useResultsData = ({
         ? generatePathfinderScore(newResultSet, result)
         : generateScore(result.scores, currentScoreWeights.confidenceWeight, currentScoreWeights.noveltyWeight, currentScoreWeights.clinicalWeight);
     }
-    // Assign ids to edges
-    for (const [id, edge] of Object.entries(newResultSet.data.edges))
-      edge.id = id;
-    // Assign ids to nodes
-    for (const [id, node] of Object.entries(newResultSet.data.nodes))
-      node.id = id;
 
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 
