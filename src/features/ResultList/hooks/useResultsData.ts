@@ -4,7 +4,7 @@ import isEqual from "lodash/isEqual";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
 import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
-import { getPathCount } from "@/features/Common/utils/utilities";
+import { getPathCount, hasSupport } from "@/features/Common/utils/utilities";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
@@ -129,12 +129,14 @@ const useResultsData = ({
     const currentIsPathfinder = isPathfinderRef.current;
 
     // Assign ids to edges
-    for (const [id, edge] of Object.entries(newResultSet.data.edges))
+    for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
       edge.id = id;
+      edge.inferred = hasSupport(edge);
+    }
     // Assign ids to nodes
     for (const [id, node] of Object.entries(newResultSet.data.nodes))
       node.id = id;
-    
+
     // Precalculate evidence and path counts
     for (const result of newResultSet.data.results) {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
