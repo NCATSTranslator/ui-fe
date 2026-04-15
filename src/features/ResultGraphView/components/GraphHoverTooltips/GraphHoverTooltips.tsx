@@ -1,4 +1,4 @@
-import { FC, useRef, useState, useEffect } from "react";
+import { FC, useRef, useState, useEffect, MouseEvent } from "react";
 import { ResultSet } from "@/features/ResultList/types/results";
 import { GraphHoverTarget } from "@/features/ResultGraphView/types/graphTypes";
 import { nodeToTooltipProps, edgeToTooltipEntry } from "@/features/Core/components/Tooltips/tooltipMappers";
@@ -12,6 +12,7 @@ interface GraphHoverTooltipsProps {
   target: GraphHoverTarget;
   onTooltipEnter?: () => void;
   onTooltipLeave?: () => void;
+  onPredicateClick?: (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => void;
 }
 
 interface Slot {
@@ -74,6 +75,7 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
   cursor,
   resultSet,
   target,
+  onPredicateClick,
   onTooltipEnter,
   onTooltipLeave,
 }) => {
@@ -113,7 +115,10 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
       >
         {entries.length > 0 && (
           <div onMouseEnter={onTooltipEnter} onMouseLeave={onTooltipLeave}>
-            <EdgeTooltipContent edges={entries} />
+            <EdgeTooltipContent
+              edges={entries}
+              onPredicateClick={onPredicateClick}
+            />
           </div>
         )}
       </Tooltip>

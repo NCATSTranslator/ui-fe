@@ -51,6 +51,12 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
     }
   };
 
+  const onPredicateClick = (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => {
+    e.stopPropagation();
+    // create a dummy edge, since we're really just passing the id to the onEdgeClick handler
+    onEdgeClick({id: edgeId, subject: '', object: '', predicate: ''});
+  };
+
   const onNodeHover = (node: GraphNodeType | null, geometry: HoverGeometry | null) => {
     setPending(resolveNodeTarget(node, geometry, resultSet));
   };
@@ -85,6 +91,7 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
           onEdgeHover={onEdgeHover}
         />
         <GraphHoverTooltips
+          onPredicateClick={onPredicateClick}
           target={visible}
           cursor={cursor}
           resultSet={resultSet}
