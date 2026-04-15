@@ -223,7 +223,7 @@ export const filterCompare = (filter1: Filter, filter2: Filter) => {
 }
 
 export const compareByKeyLexographic = (k: keyof Provenance) => {
-  return (a: Provenance, b: Provenance) => { return a[k].localeCompare(b[k]) };
+  return (a: Provenance, b: Provenance) => { return (a[k] ?? '').localeCompare(b[k] ?? '') };
 }
 
 // Returns a shallow copy of an array sorted independently on the left and right side of the pivot point

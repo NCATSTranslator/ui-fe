@@ -52,10 +52,13 @@ export type OldEvidence = {
 }
 
 export type Provenance = {
+  infores: string;
   knowledge_level: KnowledgeLevel;
-  name: string;
-  url: string;
-  wiki: string;
+  name: string | null;
+  notes: string | null;
+  status: string | null;
+  url: string | null;
+  wiki: string | null;
 }
 
 export type PublicationSupport = {
