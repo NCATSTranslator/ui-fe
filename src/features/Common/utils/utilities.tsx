@@ -653,7 +653,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
       if(isNodeIndex(i))
         continue;
       const edge = getEdgeById(resultSet, subgraphItemID);
-      if(isResultEdge(edge, false) && edge.support.length > 0) {
+      if(isResultEdge(edge) && edge.support.length > 0) {
         count += getPathCount(resultSet, edge.support);
       }
     }
