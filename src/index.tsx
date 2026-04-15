@@ -205,9 +205,21 @@ const routes = [
               },
             ],
           },
+          // Evidence view for edges outside of paths (graph view)
+          {
+            path: "evidence/:edgeId",
+            element: <Suspense fallback={<LoadingWrapper />}><EvidenceView /></Suspense>,
+            handle: { breadcrumb: 'Graph Evidence' },
+          },
         ],
       },
     ],
+  },
+  // Evidence view for edges outside of results (canvas view)
+  {
+    path: "evidence/:edgeId",
+    element: <Suspense fallback={<LoadingWrapper />}><EvidenceView /></Suspense>,
+    handle: { breadcrumb: 'Canvas Evidence' },
   },
   {
     path: "history",

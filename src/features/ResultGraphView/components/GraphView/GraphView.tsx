@@ -44,7 +44,11 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   };
 
   const onEdgeClick = (edge: GraphEdgeType) => {
-    console.log('edge clicked', edge);
+    if(resultId) {
+      resultsNavigate(`/results/${resultId}/evidence/${edge.id}`);
+    } else {
+      console.warn('Could not navigate to edge, resultId is not set');
+    }
   };
 
   const onNodeHover = (node: GraphNodeType | null, geometry: HoverGeometry | null) => {
