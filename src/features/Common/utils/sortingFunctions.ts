@@ -237,7 +237,7 @@ export const makePathRank = (resultSet: ResultSet, path: Path) => {
   const pathRank: PathRank  = { rank: 0, path: path, support: [] };
   for (let i = 1; i < path.subgraph.length; i += 2) {
     const edge = getEdgeById(resultSet, path.subgraph[i]);
-    if (!!edge && hasSupport(edge)) {
+    if (!!edge && edge.inferred) {
       for (const sp of edge.support) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
         if(!!supportPath)
@@ -285,7 +285,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
         console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
         continue;
       };
-      if (hasSupport(edge)) {
+      if (edge.inferred) {
         const supportRanks = [];
         for (const [j, sp] of edge.support.entries()) {
           const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;

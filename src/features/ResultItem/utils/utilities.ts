@@ -2,7 +2,6 @@ import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/s
 import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
-import { hasSupport } from "@/features/Common/utils/utilities";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 
@@ -264,7 +263,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       } else {
         const edge = getEdgeById(resultSet, item);
         // edges return 'indirect' or 'direct' based on presence of support
-        return (hasSupport(edge)) ? "indirect" : "direct";
+        return (edge?.inferred ?? false) ? "indirect" : "direct";
       }
     })
   };
@@ -386,7 +385,7 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     if(!isResultEdge(edge))
       continue;
 
-    if(hasSupport(edge))
+    if(edge.inferred)
       return true;
   }
   return false;

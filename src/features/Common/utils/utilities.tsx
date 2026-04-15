@@ -674,7 +674,7 @@ export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
 export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
   if (!(path.subgraph && path.subgraph.length === 3)) return false;
   const edge = getEdgeById(resultSet, path.subgraph[1]);
-  return hasSupport(edge);
+  return edge?.inferred ?? false;
 }
 /**
  * Generates a single compressed edge based on a provided list of edge IDs.
@@ -735,7 +735,11 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
         // Merge into existing compressed_edge with the same predicate
         compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
         compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-        mergeSupport(baseEdge, currentEdge);
+        // Merge support into compressedEdge (not baseEdge) to match the other
+        // field merges in this branch (aras/provenance/publications all target
+        // compressedEdge). Paths belong to the sibling predicate bucket they
+        // describe, not the parent.
+        mergeSupport(compressedEdge, currentEdge);
 
         // Merge publications into the compressed edge
         for (const [key, value] of Object.entries(currentEdge.publications)) {
@@ -756,11 +760,13 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
         if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
           mergeSupport(baseEdge, currentEdge);
         // Add as a new compressed edge
-        baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: emptyCompressedEdgesArray });
+        baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: emptyCompressedEdgesArray });
       }
     }
   }
 
+  // recompute inferred status, since support paths may have been merged in from compressed edges
+  baseEdge.inferred = hasSupport(baseEdge);
   return baseEdge;
 };
 
@@ -784,7 +790,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
     // compress edges if predicates match and support status is the same
     if(!!nextEdge
       && nextEdge.predicate === edge.predicate
-      && hasSupport(nextEdge) === hasSupport(edge)
+      && nextEdge.inferred === edge.inferred
     ) {
       if(!edgeIDsToCompress.has(edge.id))
         edgeIDsToCompress.add(edge.id);
@@ -898,6 +904,7 @@ export const isStringArray = (value: unknown): value is string[] => {
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   aras: edge?.aras || [],
   id: edge?.id || "",
+  inferred: edge?.inferred || false,
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",

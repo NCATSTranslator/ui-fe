@@ -6,7 +6,7 @@ import CTIcon from '@/assets/icons/status/HasCT.svg?react';
 import Up from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
-import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
+import { getCompressedEdge, joinClasses } from '@/features/Common/utils/utilities';
 import { checkEdgesForClinicalTrials, checkEdgesForPubs } from '@/features/Evidence/utils/utilities';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import EdgeTooltipContent from '@/features/Core/components/Tooltips/EdgeTooltipContent';
@@ -96,7 +96,7 @@ const Predicate: FC<PredicateProps> = ({
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
-  const isInferred = hasSupport(formattedEdge);
+  const isInferred = formattedEdge?.inferred ?? false;
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

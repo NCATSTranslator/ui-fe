@@ -1,5 +1,5 @@
 import { GraphData, GraphNodeType, GraphEdgeType, LayoutType, HoverGeometry } from 'translator-graph-view';
-import { hasSupport, replaceTreatWithImpact } from '@/features/Common/utils/utilities';
+import { replaceTreatWithImpact } from '@/features/Common/utils/utilities';
 import { Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Preferences } from '@/features/UserAuth/types/user';
@@ -31,7 +31,7 @@ export const resultToGraphData = (
         else {
           edgeCollection.add(elemID);
           const edge = edgesArray[elemID];
-          if (hasSupport(edge)) {
+          if (edge.inferred) {
             const validSupport = edge.support.filter(p => {
               const pid = typeof p === "string" ? p : p.id;
               return !!pid && !supportStack.includes(pid);
@@ -80,6 +80,7 @@ export const resultToGraphData = (
       subject: e.subject,
       object: e.object,
       predicate,
+      inferred: e.inferred,
     };
   }
 

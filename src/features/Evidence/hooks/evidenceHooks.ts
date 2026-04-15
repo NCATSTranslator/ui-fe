@@ -11,7 +11,6 @@ import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateT
   isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { getInitItemsPerPage, getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
-import { hasSupport } from '@/features/Common/utils/utilities';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 
 const QUERY_AMOUNT = 200;
@@ -518,7 +517,7 @@ export const useEvidenceModalState = ({ edge, pk }: UseEvidenceModalStateProps) 
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
   
-  const isInferred = useMemo(() => hasSupport(selectedEdge), [selectedEdge]);
+  const isInferred = useMemo(() => selectedEdge?.inferred ?? false, [selectedEdge]);
   const edgeSeen = useMemo(() => 
     !!selectedEdge?.id && isEdgeSeen(selectedEdge.id), 
     [selectedEdge?.id, isEdgeSeen]

@@ -2,7 +2,6 @@ import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/sli
 import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { hasSupport } from "@/features/Common/utils/utilities";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import cloneDeep from "lodash/cloneDeep";
@@ -91,7 +90,7 @@ export const findStringMatch = (
         return true;
       }
       // Recursive support path checking
-      if (isResultEdge(item) && hasSupport(item)) {
+      if (isResultEdge(item) && item.inferred) {
         for (let j = 0; j < item.support.length; j++) {
           const support = item.support[j];
           const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
@@ -124,7 +123,7 @@ export const findStringMatch = (
       const elementID = path.subgraph[i];
       const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
       // Recursive support path checking
-      if (isResultEdge(item) && hasSupport(item)) {
+      if (isResultEdge(item) && item.inferred) {
         for (let j = 0; j < item.support.length; j++) {
           const support = item.support[j];
           const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);

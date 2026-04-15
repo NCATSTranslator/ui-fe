@@ -1,7 +1,7 @@
 //  Focus: General evidence processing and data analysis
 
 import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
-import { capitalizeAllWords, hasSupport } from "@/features/Common/utils/utilities";
+import { capitalizeAllWords } from "@/features/Common/utils/utilities";
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
 import { checkProperties } from "@/features/Common/types/checkers";
@@ -63,7 +63,7 @@ export const getEvidenceFromEdge = (
 
     // Process sources
     // don't process sources for inferred edges, only for direct edges
-    if(edgeToProcess.provenance && !hasSupport(edgeToProcess)) { 
+    if(edgeToProcess.provenance && !edgeToProcess.inferred) { 
       for(const source of edgeToProcess.provenance)
         sources.add(source.name ?? "");
     }
@@ -77,7 +77,7 @@ export const getEvidenceFromEdge = (
     processEdge(resultEdge);
     
     // Process support edges if requested (recursively so nested support paths e.g. 2.a.i are counted)
-    if(includeSupport && hasSupport(resultEdge) && resultEdge.support) {
+    if(includeSupport && resultEdge.inferred && resultEdge.support) {
       for(const sp of resultEdge.support) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
         if(!supportPath) 
