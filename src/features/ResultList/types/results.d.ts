@@ -85,6 +85,7 @@ export interface ResultEdge {
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
   id: string;
+  inferred: boolean;
   knowledge_level: KnowledgeLevel;
   metadata: EdgeMetadata;
   // nodeID
