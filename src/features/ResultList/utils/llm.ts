@@ -1,5 +1,6 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { ResultEdge, ResultNode, ResultSet, Result, isResultNode, isResultEdge } from "@/features/ResultList/types/results.d";
+import { ResultEdge, ResultNode, ResultSet, Result } from "@/features/ResultList/types/results.d";
+import { isResultNode, isResultEdge } from "@/features/ResultList/types/checkers";
 import { isNodeIndex } from "./resultsInteractionFunctions";
 
 export type ResultContextObject = {

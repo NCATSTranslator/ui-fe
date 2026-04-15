@@ -1,5 +1,6 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { isPath, isResultEdge, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
+import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
+import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";

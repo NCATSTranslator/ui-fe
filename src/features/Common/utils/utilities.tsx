@@ -14,7 +14,8 @@ import AnatomicalEntity from '@/assets/icons/queries/Anatomical Entity.svg?react
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
-import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { isResultEdge } from '@/features/ResultList/types/checkers';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Location as RouterLocation } from 'react-router-dom';

@@ -1,5 +1,6 @@
 import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features/ResultList/types/results.d";
+import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
+import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { hasSupport } from "@/features/Common/utils/utilities";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
@@ -17,8 +18,6 @@ export const getARATagsFromResultTags = (tags: Tags): string[] => {
   if (!tags) return araTags;
 
   for (const [tagKey] of Object.entries(tags)) {
-    // Check if tagValue exists and has a value property
-
     // Check if this is an ARA tag by looking for the 'ara' family in the tag key
     if (tagKey.includes('/ara/')) {
       // Extract the portion after "infores:" from the tag value
