@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, Dispatch, SetStateAction, RefObject } from 'react';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { getSaves, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { ResultSet } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';

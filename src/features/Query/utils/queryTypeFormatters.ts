@@ -209,10 +209,10 @@ const _findExactMatch = (
   input: string,
   matches: string[]
 ): [string, boolean] => {
-    input = input.toLowerCase();
+    const lowInput = input.toLowerCase();
     for (const match of matches) {
       const lowMatch = match.toLowerCase();
-      if (lowMatch.includes(input)) return [match, true];
+      if (lowMatch.includes(lowInput)) return [match, true];
     }
     return ['', false];
 };

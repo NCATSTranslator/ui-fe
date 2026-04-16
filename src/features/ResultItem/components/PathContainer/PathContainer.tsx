@@ -10,7 +10,7 @@ import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
 import { extractEdgeIDsFromSubgraph, generatePathD, generatePredicateId, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import { useLastViewedPath, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
-import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
+import { getCompressedEdge, joinClasses } from '@/features/Common/utils/utilities';
 import { numberToWords } from '@/features/Common/utils/utilities';
 import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
@@ -247,7 +247,7 @@ const PathContainer: FC<PathContainerProps> = ({
               // check for inferred edges and set the expanded predicate id if it's the first one in the path
               if(!isNodeIndex(i)) {
                 const formattedEdge = (!isNodeIndex(i)) && (!!resultSet && Array.isArray(subgraphItemID) && subgraphItemID.length > 1) ? getCompressedEdge(resultSet, subgraphItemID) : getEdgeById(resultSet, subgraphItemID as string);
-                const isInferred = hasSupport(formattedEdge);
+                const isInferred = formattedEdge?.inferred ?? false;
                 if(isInferred && !initialExpandedPredicateIdSet.current) {
                   const edgeIds = (Array.isArray(subgraphItemID)) ? subgraphItemID : [subgraphItemID];
                   setExpandedPredicateId(generatePredicateId(path, edgeIds));  

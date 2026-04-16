@@ -19,6 +19,7 @@ const SkeletonBar: FC<SkeletonBarProps> = ({
   return (
     <div
       className={`${styles.skeletonBar}${className ? ` ${className}` : ''}`}
+      // eslint-disable-next-line no-restricted-syntax
       style={{ width, height, borderRadius, ...style }}
     />
   );

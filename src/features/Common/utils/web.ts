@@ -1,5 +1,6 @@
 import { forbiddenErrorToast, internalServerErrorToast, notFoundErrorToast, unauthorizedErrorToast } from "@/features/Core/utils/toastMessages";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
+import { checkProperties } from "@/features/Common/types/checkers";
 
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
@@ -70,14 +71,17 @@ export const defaultFetchErrorHandler: ErrorHandler = (error: Error): void => {
 /**
  * Type guard to check if an object is an ErrorObject
  */
-export const isErrorObject = (obj: unknown): obj is ErrorObject => {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'error' in obj &&
-    'message' in obj &&
-    'status' in obj
-  );
+export const isErrorObject = (obj: unknown, warn = true): obj is ErrorObject => {
+  if (typeof obj !== 'object' || obj === null) {
+    if (warn) console.warn("[isErrorObject] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  const o = obj as Record<string, unknown>;
+  return checkProperties("isErrorObject", obj, [
+    ["error", "error" in obj, "present", o.error],
+    ["message", "message" in obj, "present", o.message],
+    ["status", "status" in obj, "present", o.status],
+  ], warn);
 };
 
 /**

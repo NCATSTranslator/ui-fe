@@ -36,9 +36,9 @@ export const getAutocompleteTerms = (
       .then((annotatedNodes) => autocompleteFunctions.format(annotatedNodes, formatData))
       .then((autocompleteItems) => {
         // Truncate items in case of too many matches
-        autocompleteItems = autocompleteItems.slice(0, 40);
-        console.log('formatted autocomplete items:', autocompleteItems);
-        setAutoCompleteItems(autocompleteItems);
+        const newAutocompleteItems = autocompleteItems.slice(0, 40);
+        console.log('formatted autocomplete items:', newAutocompleteItems);
+        setAutoCompleteItems(newAutocompleteItems);
         setLoadingAutocomplete(false);
       })
       .catch((error) => {

@@ -96,7 +96,7 @@ const ResultItem: FC<ResultItemProps> = ({
   }, [resultsNavigate, result.id]);
 
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-  const pathCount: number = (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
+  const pathCount: number = (result?.pathCount !== undefined) ? result.pathCount : (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
   const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
   const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';

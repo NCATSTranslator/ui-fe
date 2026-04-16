@@ -4,7 +4,7 @@ import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { useSelector, useDispatch } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
@@ -20,7 +20,6 @@ import { ResultSet, Result, PathFilterState, ScoreWeights } from "@/features/Res
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
-import useZoomKey from "@/features/ResultList/hooks/useZoomKey";
 import useSortState from "@/features/ResultList/hooks/useSortState";
 import usePagination from "@/features/ResultList/hooks/usePagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
@@ -182,9 +181,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   } = useShareState({
     initialResultIdParam: getDataFromQueryVar("r", decodedParams),
   });
-
-  // Bool, is the zoom key being held down
-  const { zoomKeyDown } = useZoomKey();
 
   // Result filtering state management via hook
   const {
@@ -443,14 +439,13 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setShowHiddenPaths,
     shouldUpdateResultsAfterBookmark,
     updateUserSaves: setUserSaves,
-    zoomKeyDown,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
     handleFilter, isPathfinder, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     nodeIdParam, nodeLabelParam, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,
-    showHiddenPaths, zoomKeyDown
+    showHiddenPaths
   ]);
 
   return (

@@ -1,5 +1,5 @@
 import { RefObject, Dispatch, SetStateAction } from 'react';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { createUserSave, deleteUserSave, generateSafeResultSet, getFormattedBookmarkObject, Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { Result, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
 import { QueryType } from '@/features/Query/types/querySubmission';
@@ -277,5 +277,5 @@ export const checkBookmarkIDForNotes = (bookmarkID: string | null, bookmarkSet: 
 export const checkBookmarksForItem = (itemID: string, bookmarksSet: SaveGroup): string | null => {
   const save = bookmarksSet.saves.get(itemID);
   if (!save) return null;
-  return save.id != null ? save.id.toString() : null;
+  return save.id !== null ? save.id.toString() : null;
 }

@@ -132,7 +132,7 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     }
 
     return undefined;
-  }, [isAddToProjectMode, isSelectedProjectMode, project, setSelectedProject, setSelectedProjectMode, handleAddQueryToProject]);
+  }, [isAddToProjectMode, isSelectedProjectMode, project, setSelectedProject, setSelectedProjectMode, handleAddQueryToProject, closePanel]);
 
   return (
     <OutsideClickHandler onOutsideClick={handleOutsideClick}>

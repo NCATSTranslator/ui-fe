@@ -1,5 +1,5 @@
 import { equal } from 'mathjs';
-import { getPathCount, hasSupport, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
+import { getPathCount, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
 import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
@@ -223,7 +223,7 @@ export const filterCompare = (filter1: Filter, filter2: Filter) => {
 }
 
 export const compareByKeyLexographic = (k: keyof Provenance) => {
-  return (a: Provenance, b: Provenance) => { return a[k].localeCompare(b[k]) };
+  return (a: Provenance, b: Provenance) => { return (a[k] ?? '').localeCompare(b[k] ?? '') };
 }
 
 // Returns a shallow copy of an array sorted independently on the left and right side of the pivot point
@@ -237,7 +237,7 @@ export const makePathRank = (resultSet: ResultSet, path: Path) => {
   const pathRank: PathRank  = { rank: 0, path: path, support: [] };
   for (let i = 1; i < path.subgraph.length; i += 2) {
     const edge = getEdgeById(resultSet, path.subgraph[i]);
-    if (!!edge && hasSupport(edge)) {
+    if (!!edge && edge.inferred) {
       for (const sp of edge.support) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
         if(!!supportPath)
@@ -285,7 +285,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
         console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
         continue;
       };
-      if (hasSupport(edge)) {
+      if (edge.inferred) {
         const supportRanks = [];
         for (const [j, sp] of edge.support.entries()) {
           const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;

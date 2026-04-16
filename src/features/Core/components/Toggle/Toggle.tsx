@@ -1,6 +1,5 @@
-import { FC, useRef } from "react";
+import { FC, useId } from "react";
 import styles from './Toggle.module.scss';
-import { uniqueId } from "lodash";
 
 type ToggleProps = {
   className?: string;
@@ -11,7 +10,7 @@ type ToggleProps = {
 }
 
 const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, labelOne, labelTwo}) => {
-  const id = useRef(uniqueId()).current;
+  const toggleId = useId();
 
   const handleToggle = () => {
     setActive?.(!active);
@@ -21,13 +20,13 @@ const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, lab
     <div className={`${className} ${styles.toggle}`}>
       <input 
         type="checkbox" 
-        id={`checkbox-${id}`} 
+        id={toggleId} 
         checked={active}
         onChange={handleToggle}
       />
       {labelOne && <span className={`${styles.label} ${styles.labelOne} ${active ? styles.active : styles.inactive}`}>{labelOne}</span>}
       <label 
-        htmlFor={`checkbox-${id}`} 
+        htmlFor={toggleId} 
         className={`${styles.container} ${active ? styles.active : styles.inactive}`}
       >
         <span className={styles.ball}></span>

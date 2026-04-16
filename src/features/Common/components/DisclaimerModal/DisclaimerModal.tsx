@@ -16,12 +16,12 @@ const DisclaimerModal: FC<DisclaimerModalProps> = ({ onClose = () => {}, isOpen 
   }
 
   useEffect(() => {
-    if(!isFaded) {
-      const timer = setTimeout(() => {
-        setIsFaded(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
+    if(isFaded) return;
+    
+    const timer = setTimeout(() => {
+      setIsFaded(true);
+    }, 500);
+    return () => clearTimeout(timer);
   },[isFaded]);
 
   return isOpen ? (
