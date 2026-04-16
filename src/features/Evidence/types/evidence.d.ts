@@ -55,8 +55,6 @@ export type Provenance = {
   infores: string;
   knowledge_level: KnowledgeLevel;
   name: string | null;
-  notes: string | null;
-  status: string | null;
   url: string | null;
   wiki: string | null;
 }
