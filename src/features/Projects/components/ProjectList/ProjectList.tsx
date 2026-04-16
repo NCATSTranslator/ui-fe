@@ -97,7 +97,6 @@ const ProjectList = () => {
                 Create New Project
               </Button>
               <Tabs
-                isOpen={true}
                 handleTabSelection={() => {}}
                 defaultActiveTab={projectsTabHeading}
                 className={styles.projectTabs}

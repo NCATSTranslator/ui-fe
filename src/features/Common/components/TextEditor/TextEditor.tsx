@@ -25,7 +25,8 @@ import EditorRefPlugin from "./plugins/EditorRefPlugin";
 import OnChangePlugin from "./plugins/OnChangePlugin";
 import { getUserSave, updateUserSave, Save } from "@/features/UserAuth/utils/userApi";
 import { emptyEditor } from "@/features/UserAuth/utils/userDefaults";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
+
 
 interface TextEditorProps {
   bookmarkID: string | null;

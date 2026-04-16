@@ -4,50 +4,8 @@
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   transition: $defaultAnim;
-  overflow: hidden;
   position: relative;
   height: 100%;
-  .activeFilterFamily {
-    position: absolute;
-    inset: 0 1px 0 0;
-    background-color: $lightGray;
-    z-index: 1000;
-  }
-  .facetButton {
-    background-color: $white;
-    border: none;
-    border-radius: 0;
-    color: $darkGray;
-    font-size: $bodyTwoSize;
-    width: -webkit-fill-available;
-    justify-content: space-between;
-    padding: $s 0;
-    margin: 0 $s;
-    border-bottom: 1px solid $midGray;
-    text-align: left;
-    & > span {
-      width: 100%;
-      color: $darkGray;
-      padding: 0;
-      white-space: nowrap;
-      text-align: right;
-      font-size: $subTwoSize;
-    }
-    &:hover {
-      & > span {
-        text-decoration: underline;
-      }
-    }
-  }
-  &.backButton {
-    margin: 0;
-    justify-content: flex-start;
-    gap: $xxs;
-    & > span {
-      width: auto;
-      text-align: left;
-    }
-  }
   .entitySearch {
     span {
       overflow: hidden;

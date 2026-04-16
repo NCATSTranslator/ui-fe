@@ -1,14 +1,19 @@
    @use "@/assets/styles/variables" as *;
 
+.hidden {
+  display: none;
+}
+
 .resultList {
   margin-bottom: $s;
   padding: 0 0 $s;
+  position: relative;
   .resultsContainer {
     display: grid;
     column-gap: $l;
     align-items: flex-start;
     position: relative;
-    max-width: 1400px;
+    max-width: $resultsViewMaxWidth;
     width: auto;
     padding: $l;
     .resultsTableContainer.pathfinder {
@@ -145,7 +150,7 @@
 
 .statusSidebarIcon {
   position: relative;
-  padding: 10.5px 12px !important;
+  padding: 10.5px 15px !important;
   min-height: $xxl;
   max-width: $xl;
 }

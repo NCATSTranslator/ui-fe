@@ -1,0 +1,7 @@
+@use "@/assets/styles/variables" as *;
+
+.helpContainer {
+  display: grid;
+  grid-template-columns: 1fr 330px;
+  column-gap: $m;
+}

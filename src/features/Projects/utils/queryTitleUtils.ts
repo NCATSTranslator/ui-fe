@@ -1,33 +1,44 @@
-import { capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 /**
- * Generates the title of a query based on the query type and direction
+ * Generates the title of a query based on the query object
  * @param {UserQueryObject} query - The query to generate the title for
  * @returns {string} The title of the query
  */
-export const generateQueryTitle = (query: UserQueryObject): string => {
+export const generateQueryTitleFromQueryObject = (query: UserQueryObject): string => {
   if(query.data.title)
     return query.data.title;
 
+  const queryType = query.data.query.type;
+  const nodeOneLabel = query.data.query.node_one_label || query.data.query.subject?.id || '';
+  const nodeTwoLabel = query.data.query.node_two_label || query.data.query.object?.id || '';
+  const constraint = query.data.query.constraint || null;
+
+  return generateQueryTitle(queryType, nodeOneLabel, nodeTwoLabel, constraint);
+}
+
+/**
+ * Generates the title of a query based on the query type and direction
+ * @param {string} queryTypeId - The type of the query
+ * @param {string} nodeOneLabel - The label of the first node
+ * @param {string} nodeTwoLabel - The label of the second node
+ * @param {string | null} constraint - The constraint of the query
+ * @returns {string} The title of the query
+ */
+export const generateQueryTitle = (queryTypeId: string | null, nodeOneLabel: string, nodeTwoLabel: string, constraint: string | null): string => {
   let title = 'No title available';
 
-  if(query.data.query.type === 'pathfinder') {
-    // TODO: add constraint and nodes to title when Gus adds them to the query object
-    const constraint = query.data.query.constraint || null;
-    const nodeOne = query.data.query.node_one_label || query.data.query.subject?.id || 'nodeOne';
-    const nodeTwo = query.data.query.node_two_label || query.data.query.object?.id || 'nodeTwo';
-
+  if(queryTypeId === 'p' || queryTypeId === 'pathfinder') {
     title = constraint
-      ? `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)} — ${formatBiolinkTypeString(constraint)} Connections`
-      : `${capitalizeFirstLetter(nodeOne)} and ${capitalizeFirstLetter(nodeTwo)}`;
+      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${formatBiolinkTypeString(constraint)} Connections`
+      : `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)}`;
   } else {
-    const queryType = queryTypes.find(type => type.targetType === query.data.query.type);
-    const label = query.data.query.node_one_label || query.data.query.curie;
-    if(queryType) {
-      // TODO: update curie to node label when Gus adds it to the query object
-      title = `${label} — ${capitalizeFirstLetter(queryType.targetType)}s`;
-    }
+    const queryTypeObject = queryTypes.find(type => type.targetType === queryTypeId || type.id === parseInt(queryTypeId || '0'));
+    if(queryTypeObject)
+      title = `${nodeOneLabel} — ${capitalizeFirstLetter(queryTypeObject.targetType)}s`;
+    else
+      console.warn(`Query type object not found for query type: ${queryTypeId}`);
   }
 
   return title;

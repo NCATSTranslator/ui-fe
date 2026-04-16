@@ -32,6 +32,7 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      containerClass={styles.resultItemSummaryModalContainer}
     >
       <LoadingWrapper loading={isLoading && !isStreaming} size="medium">
         <div>

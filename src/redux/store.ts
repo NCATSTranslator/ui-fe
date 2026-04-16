@@ -2,6 +2,7 @@ import { AnyAction, configureStore, ThunkDispatch } from '@reduxjs/toolkit';
 import historyReducer from '@/features/History/slices/historySlice';
 import resultsReducer from '@/features/ResultList/slices/resultsSlice';
 import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
+import queryStatusReducer from '@/features/ResultList/slices/queryStatusSlice';
 import userReducer from '@/features/UserAuth/slices/userSlice';
 import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
@@ -9,6 +10,7 @@ export type RootState = {
   history: ReturnType<typeof historyReducer>;
   resultSets: ReturnType<typeof resultsReducer>;
   seenStatus: ReturnType<typeof seenStatusReducer>;
+  queryStatus: ReturnType<typeof queryStatusReducer>;
   user: ReturnType<typeof userReducer>;
 }
 export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
@@ -19,6 +21,7 @@ export const store = configureStore({
     history: historyReducer,
     resultSets: resultsReducer,
     seenStatus: seenStatusReducer,
+    queryStatus: queryStatusReducer,
     user: userReducer,
   },
   middleware: (getDefaultMiddleware) =>

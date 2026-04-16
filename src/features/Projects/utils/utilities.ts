@@ -3,6 +3,7 @@ import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Pr
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
+import { getFormattedNodeName } from "@/features/Common/utils/utilities";
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -87,13 +88,14 @@ export const getProjectQueryCount = (project: Project | ProjectRaw | undefined, 
 /**
  * Get the name of a node from a curie using the name resolver
  * @param {string} curie - The curie of the node
+ * @param {AbortSignal | undefined} signal - The abort signal to cancel the fetch
  * @returns {string} The preferred name of the node
  */
-export const fetcNodeNameFromCurie = async (curie: string): Promise<string> => {
+export const fetchNodeNameFromCurie = async (curie: string, signal?: AbortSignal): Promise<string> => {
   const nameResolverEndpoint = 'https://name-resolution-sri.renci.org/synonyms';
-  const response = await fetch(`${nameResolverEndpoint}?preferred_curies=${curie}`);
+  const response = await fetch(`${nameResolverEndpoint}?preferred_curies=${curie}`, { signal });
   const data = await response.json();
-  return data[curie]?.preferred_name || '';
+  return getFormattedNodeName(data[curie]?.preferred_name || undefined, null);
 }
 
 /**

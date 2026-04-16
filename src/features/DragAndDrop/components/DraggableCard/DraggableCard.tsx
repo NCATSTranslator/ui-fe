@@ -60,6 +60,7 @@ export const DraggableCard: FC<DraggableCardProps> = ({
   return (
     <div
       ref={setNodeRef}
+      // eslint-disable-next-line no-restricted-syntax
       style={{...style}}
       className={cardClassName}
       data-draggable-id={id}

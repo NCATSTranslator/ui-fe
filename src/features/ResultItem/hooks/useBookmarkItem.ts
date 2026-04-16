@@ -13,7 +13,7 @@ import {
 
 export interface UseBookmarkItemParams {
   bookmarkItem: Save | null;
-  result: Result | ResultBookmark;
+  result: Result | ResultBookmark | undefined;
   resultSet: ResultSet | null;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
@@ -77,7 +77,9 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
   const bookmarkRemovalApproved = useRef(false);
 
   // Memoized bookmark params
-  const bookmarkParams: BookmarkFunctionParams = useMemo(() => ({
+  const bookmarkParams: BookmarkFunctionParams | null = useMemo(() => {
+    if (!result) return null;
+    return {
     result,
     resultSet: resultSet!,
     queryNodeID,
@@ -93,15 +95,16 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
     handleBookmarkError,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark,
-  }), [
+  };
+  }, [
     result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription,
     queryType, currentQueryID, user, bookmarkId, bookmarkRemovedToast,
     bookmarkAddedToast, handleBookmarkError, updateUserSaves,
     shouldUpdateResultsAfterBookmark,
   ]);
 
-  // Bookmark click handler
   const handleBookmarkClick = useCallback(async (): Promise<string | false> => {
+    if (!bookmarkParams) return false;
     return await handleBookmarkClickUtil(
       isBookmarked,
       bookmarkRemovalApproved,

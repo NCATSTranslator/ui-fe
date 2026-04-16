@@ -1,0 +1,30 @@
+@use "@/assets/styles/variables" as *;
+
+.trialList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+}
+
+.trialItem {
+  display: flex;
+  flex-direction: column;
+  gap: $xxs;
+}
+
+.trialYear {
+  font-size: $captionSize;
+  color: $darkGray;
+}
+
+.viewAllLink {
+  font-size: $subTwoSize;
+}
+
+.description {
+  font-size: $captionSize;
+  color: $darkGray;
+}

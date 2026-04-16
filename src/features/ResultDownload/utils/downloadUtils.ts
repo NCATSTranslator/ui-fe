@@ -1,4 +1,5 @@
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
+import { getNodeSpecies } from "@/features/ResultList/slices/resultsSlice";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import {
@@ -14,6 +15,8 @@ import {
   ExportFormat,
 } from "@/features/ResultDownload/types/download.d";
 import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
+import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
+import { displayScore } from "@/features/ResultList/utils/scoring";
 
 /**
  * Returns results based on the specified scope
@@ -189,8 +192,9 @@ const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
   types: node.types,
   curies: node.curies,
   descriptions: node.descriptions,
-  species: node.species,
+  species: getNodeSpecies(node),
   provenance: node.provenance,
+  synonyms: node.synonyms,
   aras: node.aras,
 });
 
@@ -214,6 +218,7 @@ const cleanEdge = (edge: ResultEdge, edgeId: string): ExportedEdge => ({
     : [],
   aras: edge.aras,
   description: edge.description,
+  type: edge.type,
 });
 
 /**
@@ -225,6 +230,8 @@ const cleanResult = (result: Result): ExportedResult => ({
   subject: result.subject,
   object: result.object,
   paths: result.paths.map(p => (typeof p === 'string' ? p : p.id || '')),
+  score: result.score ? displayScore(result.score, 2) : '0.00',
+  scoreComponents: result.scores
 });
 
 /**
@@ -290,6 +297,8 @@ export const cleanResultSet = (
   // Clean edges
   Object.entries(entities.edges).forEach(([id, edge]) => {
     cleanedEdges[id] = cleanEdge(edge, id);
+    // replace any instances of "treats" or "treat" with "impacts" or "impact" in the predicate
+    cleanedEdges[id].predicate = replaceTreatWithImpact(cleanedEdges[id].predicate);
   });
 
   // Clean paths
@@ -356,7 +365,7 @@ export const triggerDownload = (content: string, filename: string, mimeType: str
  */
 export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
   if (!str) return '';
-  
+
   return str
     .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
     .replace(/\s+/g, '-')            // Replace spaces with dashes

@@ -9,7 +9,7 @@ const API_URL = `https://transltr-bma-ui-dev.ncats.io/summarizer/summary-streami
 // old, non-streaming summary hook (not used anymore)
 export const useResultSummary = (resultSet: ResultSet | null, result: Result, diseaseId: string, diseaseName: string, diseaseDescription: string) => {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["resultSummary", result, diseaseId, diseaseName, diseaseDescription],
+    queryKey: ["resultSummary", result, diseaseId, diseaseName, diseaseDescription, resultSet],
     queryFn: async () => {
       const response = await fetch(`${API_URL}`, {
         method: "POST",
@@ -249,7 +249,7 @@ export const useStreamingSummaryState = (
   };
 
   const { refetch } = useQuery({
-    queryKey: ['newTextStream', result.id],
+    queryKey: ['newTextStream', result.id, abortControllerRef.current, abortControllerRef.current?.signal],
     queryFn: () => {
       abortControllerRef.current = new AbortController();
       return fetchTextStream(abortControllerRef.current.signal);

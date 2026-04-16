@@ -1,5 +1,6 @@
 import { forbiddenErrorToast, internalServerErrorToast, notFoundErrorToast, unauthorizedErrorToast } from "@/features/Core/utils/toastMessages";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
+import { checkProperties } from "@/features/Common/types/checkers";
 
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
@@ -70,14 +71,17 @@ export const defaultFetchErrorHandler: ErrorHandler = (error: Error): void => {
 /**
  * Type guard to check if an object is an ErrorObject
  */
-export const isErrorObject = (obj: unknown): obj is ErrorObject => {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'error' in obj &&
-    'message' in obj &&
-    'status' in obj
-  );
+export const isErrorObject = (obj: unknown, warn = true): obj is ErrorObject => {
+  if (typeof obj !== 'object' || obj === null) {
+    if (warn) console.warn("[isErrorObject] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  const o = obj as Record<string, unknown>;
+  return checkProperties("isErrorObject", obj, [
+    ["error", "error" in obj, "present", o.error],
+    ["message", "message" in obj, "present", o.message],
+    ["status", "status" in obj, "present", o.status],
+  ], warn);
 };
 
 /**
@@ -149,6 +153,23 @@ export const fetchWithErrorHandling = async <T>(
  * @param {string} search - The search string (e.g., "?param=value" or "param=value").
  * @returns {string} The decoded query parameters.
  */
+/**
+ * Decodes a single URL-safe or standard base64 segment.
+ * Handles URI-encoded characters, URL-safe base64 substitutions (-/_ → +//),
+ * and normalizes padding before decoding.
+ *
+ * @param {string} segment - A raw query string segment that may be base64.
+ * @returns {string} The decoded string.
+ * @throws If the segment is not valid base64.
+ */
+export const decodeBase64Param = (segment: string): string => {
+  const uriDecoded = decodeURIComponent(segment);
+  const standardB64 = uriDecoded.replace(/-/g, '+').replace(/_/g, '/');
+  const strippedPadding = standardB64.replace(/=+$/, '');
+  const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
+  return window.atob(normalizedB64);
+}
+
 export const getDecodedParamsFromSearch = (search: string): string => {
   if (!search)
     return "";
@@ -169,7 +190,7 @@ export const getDecodedParamsFromSearch = (search: string): string => {
     // If successful and results in valid query parameters, use decoded version
     // Otherwise treat as regular key=value parameter
     try {
-      const decoded = window.atob(segment);
+      const decoded = decodeBase64Param(segment);
       // Verify the decoded content looks like query parameters
       // It should contain at least one = that's not at the start or end
       const hasValidQueryFormat = decoded.includes('=') && 
@@ -211,29 +232,34 @@ export const getDecodedParams = (): string => {
 export const encodeParams = (params: string): string => {
   if(!params)
     return "";
-  return window.btoa(params);
+  return window.btoa(params)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 /**
  * Generates the share URL path for a results query.
  *
  * @param {string} label - The label of the result.
- * @param {string | number} nodeID - The ID of the node.
+ * @param {string} nodeID - The ID of the node.
  * @param {string | number} typeID - The ID of the type.
- * @param {string | number} resultID - The ID of the result.
+ * @param {string} resultID - The ID of the result. Used as a URL path segment
+ *   (`results/{resultID}?...`). Pass `'0'` for list-only links (`results?...`).
  * @param {string | number} pk - The ID of the query.
  * @param {boolean} shouldHash - Whether to hash the parameters.
- * @returns {string} The share URL path.
+ * @returns {string} The share URL path — either `results?{params}` when
+ *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
-export const getResultsShareURLPath = (label: string, nodeID: string | number, typeID: string | number, resultID: string | number, pk: string | number, shouldHash: boolean = false) => {
-  let path = "";
-  // partially encode params, q (query pk) is not encoded
-  if(shouldHash)
-    path = `results?${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}`)}&q=${pk}`;
-  else
-    path = `results?${`l=${label}&i=${nodeID}&t=${typeID}&r=${resultID}&q=${pk}`}`;
+export const getResultsShareURLPath = (label: string, nodeID: string, typeID: string | number, resultID: string, pk: string | number, shouldHash: boolean = false) => {
+  const params = shouldHash
+    ? `${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}`)}&q=${pk}`
+    : `l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
 
-  return path;
+  if (resultID === '0')
+    return `results?${params}`;
+
+  return `results/${resultID}?${params}`;
 }
 
 /**
@@ -241,23 +267,26 @@ export const getResultsShareURLPath = (label: string, nodeID: string | number, t
  *
  * @param {AutocompleteItem} itemOne - The first item.
  * @param {AutocompleteItem} itemTwo - The second item.
- * @param {string} resultID - The ID of the result.
+ * @param {string} resultID - The ID of the result. Used as a URL path segment
+ *   (`results/{resultID}?...`). Pass `'0'` for list-only links (`results?...`).
  * @param {string | undefined} constraint - The constraint.
  * @param {string} pk - The ID of the query.
  * @param {boolean} shouldHash - Whether to hash the parameters.
- * @returns {string} The share URL path.
+ * @returns {string} The share URL path — either `results?{params}` when
+ *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
 export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string, shouldHash: boolean = false) => {
-  let labelOne = (itemOne.label) ? itemOne.label : null;
-  let labelTwo = (itemTwo.label) ? itemTwo.label : null;
-  let idOne = (itemOne.id) ? itemOne.id : null;
-  let idTwo = (itemTwo.id) ? itemTwo.id : null;
-  let constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  let path = "";
-  // partially encode params, q (query pk) is not encoded
-  if(shouldHash)
-    path = `results?${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}`)}&q=${pk}`;
-  else
-    path = `results?${`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&r=${resultID}&q=${pk}`}`;
-  return path;
+  const labelOne = (itemOne.label) ? itemOne.label : null;
+  const labelTwo = (itemTwo.label) ? itemTwo.label : null;
+  const idOne = (itemOne.id) ? itemOne.id : null;
+  const idTwo = (itemTwo.id) ? itemTwo.id : null;
+  const constraintVar = !!constraint ?  `&c=${constraint}`: '';
+  const params = shouldHash
+    ? `${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`)}&q=${pk}`
+    : `lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&q=${pk}`;
+
+  if (resultID === '0')
+    return `results?${params}`;
+
+  return `results/${resultID}?${params}`;
 }

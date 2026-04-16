@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect, useMemo, RefObject, Dispatch, SetStateAction } from "react";
-import { cloneDeep, isEqual } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import isEqual from "lodash/isEqual";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
+import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
-import { getPathCount } from "@/features/Common/utils/utilities";
+import { getPathCount, hasSupport } from "@/features/Common/utils/utilities";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
@@ -114,7 +116,7 @@ const useResultsData = ({
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
 
-    if (resultSet == null || isEqual(resultSet, prevRawResults.current))
+    if (resultSet === null || isEqual(resultSet, prevRawResults.current))
       return;
 
     if (resultSet.status === 'error' || resultSet.data.results === undefined)
@@ -126,6 +128,15 @@ const useResultsData = ({
     const currentScoreWeights = scoreWeightsRef.current;
     const currentIsPathfinder = isPathfinderRef.current;
 
+    // Assign ids to edges
+    for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
+      edge.id = id;
+      edge.inferred = hasSupport(edge);
+    }
+    // Assign ids to nodes
+    for (const [id, node] of Object.entries(newResultSet.data.nodes))
+      node.id = id;
+
     // Precalculate evidence and path counts
     for (const result of newResultSet.data.results) {
       result.evidenceCount = getEvidenceCounts(newResultSet, result);
@@ -134,12 +145,6 @@ const useResultsData = ({
         ? generatePathfinderScore(newResultSet, result)
         : generateScore(result.scores, currentScoreWeights.confidenceWeight, currentScoreWeights.noveltyWeight, currentScoreWeights.clinicalWeight);
     }
-    // Assign ids to edges
-    for (const [id, edge] of Object.entries(newResultSet.data.edges))
-      edge.id = id;
-    // Assign ids to nodes
-    for (const [id, node] of Object.entries(newResultSet.data.nodes))
-      node.id = id;
 
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 
@@ -183,6 +188,21 @@ const useResultsData = ({
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
   }, [freshRawResults, handleNewResults]);
+
+  // Dispatch loading status to Redux for sub-views (flattened to primitives)
+  const araCount = arsStatus?.data?.aras?.length ?? 0;
+  const prevStatusRef = useRef<QueryLoadingStatus | null>(null);
+  useEffect(() => {
+    if (!currentQueryID)
+      return;
+    const next: QueryLoadingStatus = { isLoading, isError, araCount, resultStatus };
+    const prev = prevStatusRef.current;
+    // If the previous status is the same as the next status, don't dispatch
+    if (prev && isEqual(prev, next))
+      return;
+    prevStatusRef.current = next;
+    dispatch(setQueryStatus({ pk: currentQueryID, status: next }));
+  }, [dispatch, currentQueryID, isLoading, isError, araCount, resultStatus]);
 
   // --- React Query calls ---
 

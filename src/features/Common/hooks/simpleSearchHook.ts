@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 export const useSimpleSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');

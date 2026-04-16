@@ -10,7 +10,7 @@ import CheckmarkIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react'
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import TrashIcon from '@/assets/icons/buttons/TrashFilled.svg?react';
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
 import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";

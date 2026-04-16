@@ -1,32 +1,31 @@
 import { FC, MouseEvent, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
 import CTIcon from '@/assets/icons/status/HasCT.svg?react';
 import Up from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
-import { getCompressedEdge, hasSupport, joinClasses } from '@/features/Common/utils/utilities';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs, getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';
+import { getCompressedEdge, joinClasses } from '@/features/Common/utils/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs } from '@/features/Evidence/utils/utilities';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import EdgeTooltipContent from '@/features/Core/components/Tooltips/EdgeTooltipContent';
+import { edgesToTooltipEntries } from '@/features/Core/components/Tooltips/tooltipMappers';
 import SupportPathGroup from '@/features/ResultItem/components/SupportPathGroup/SupportPathGroup';
-import { Path, PathFilterState, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
+import { Path, PathFilterState, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-import { cloneDeep } from 'lodash';
-import { useSupportPathKey, useExpandedPredicate } from '@/features/ResultItem/hooks/resultHooks';
+import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
-import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
+import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 interface PredicateProps {
   activeEntityFilters: string[];
   activeFilters: Filter[];
   className?: string;
-  handleActivateEvidence: (path: Path, pathKey: string) => void;
-  handleEdgeClick: (edgeIDs: string[], path: Path, pathKey: string) => void;
-  handleNodeClick: (name: ResultNode) => void;
+  handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   hoverHandlers?: {
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -57,9 +56,7 @@ const Predicate: FC<PredicateProps> = ({
   className = "",
   edge,
   edgeIds,
-  handleActivateEvidence,
   handleEdgeClick,
-  handleNodeClick,
   hoverHandlers,
   inModal = false,
   isEven = false,
@@ -78,11 +75,15 @@ const Predicate: FC<PredicateProps> = ({
   showHiddenPaths,
   uid }) => {
 
-  let resultSet = useSelector(getResultSetById(pk));
+  const resultSet = useSelector(getResultSetById(pk));
   const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
   const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
+  const { navigateToEvidenceView } = useResultListContext();
+  const { setLastViewedPathID } = useLastViewedPath();
+  const supportPathKey = useSupportPathKey();
+  const fullPathKey = supportPathKey ? `${supportPathKey}.${parentPathKey}` : parentPathKey;
 
   // Create a unique identifier for this predicate
   const predicateId = useMemo(() => {
@@ -95,30 +96,21 @@ const Predicate: FC<PredicateProps> = ({
   const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
-  const isInferred = hasSupport(formattedEdge);
-
-  const ancestorsPathKey = useSupportPathKey();
-  const fullPathKey = useMemo(() => {
-    if(!!ancestorsPathKey)
-      return `${ancestorsPathKey}.${parentPathKey}`;
-    else
-      return parentPathKey;
-  }, [ancestorsPathKey, parentPathKey]);
+  const isInferred = formattedEdge?.inferred ?? false;
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setExpandedPredicateId(isSupportExpanded ? null : predicateId);
   }
 
-  const pushAndReturn = (arr: ResultEdge[], element: ResultEdge) => {
-    let newArr = cloneDeep(arr);
-    newArr.push(element);
-    return newArr;
-  }
-
   const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
-  ? pushAndReturn(formattedEdge.compressed_edges, formattedEdge)
+  ? [...formattedEdge.compressed_edges, formattedEdge]
   : [formattedEdge];
+
+  const tooltipEdgeEntries = useMemo(() => {
+    if (!resultSet) return [];
+    return edgesToTooltipEntries(resultSet, edgesToDisplay.filter(Boolean) as ResultEdge[]);
+  }, [resultSet, formattedEdge]);
 
   const edgeClass = joinClasses(
     styles.edge,
@@ -135,6 +127,17 @@ const Predicate: FC<PredicateProps> = ({
     (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
   )
 
+  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string) => {
+    e.stopPropagation();
+    handleEdgeClick?.([selectedEdgeId, ...compressedEdgeIds], targetPath);
+    setLastViewedPathID(targetPath?.id || null);
+    if(!inModal) {
+      let allSets = extractCompressedEdgeSets(targetPath);
+      if (allSets.length === 0 && edgeIds.length > 1) allSets = [edgeIds];
+      navigateToEvidenceView(selectedEdgeId, allSets, targetPath, targetFullPathKey);
+    }
+  }
+
   return (
     <>
       <span
@@ -142,7 +145,7 @@ const Predicate: FC<PredicateProps> = ({
         data-tooltip-id={`${formattedEdge.predicate}${uid}`}
         data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
-        onClick={(e)=> {e.stopPropagation(); handleEdgeClick(edgeIds, path, fullPathKey);}}
+        onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, fullPathKey)}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
@@ -155,76 +158,13 @@ const Predicate: FC<PredicateProps> = ({
           id={`${formattedEdge.predicate}${uid}`}
           place={`${inModal ? 'left' : 'top' }`}
           >
-          {
-            <div className={styles.predicatesList} onClick={(e)=> e.stopPropagation()}>
-              {
-                edgesToDisplay.sort((a, b)=> a.predicate.localeCompare(b.predicate)).map((edge) => {
-                  if(!edge || !resultSet)
-                    return null;
-                  const edgeEvidence = getEvidenceFromEdge(resultSet, edge);
-                  return (
-                    <div className={styles.tooltipPredicateContainer}>
-                      <p
-                        key={`${edge.predicate}`}
-                        className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
-                        onClick={(e)=> {
-                          e.stopPropagation();
-                          handleEdgeClick([edge.id], path, fullPathKey);
-                        }}
-                        >
-                        <Highlighter
-                          highlightClassName="highlight"
-                          searchWords={activeEntityFilters}
-                          autoEscape={true}
-                          textToHighlight={edge.predicate}
-                        />
-                        {
-                          edge.predicate.includes("impact") &&
-                          <span className={styles.predicateImpact}> (either positively or negatively)</span>
-                        }
-                      </p>
-                      {
-                        edge.predicate.includes("impact") ?
-                          <span className={styles.predicateDescription}>
-                            Indicates that a drug affects one or more biological processes relevant to a disease, in a way that may improve, worsen, or otherwise modify the condition.
-                          </span> :
-                          edge.description &&
-                            <span className={styles.predicateDescription}>
-                              {capitalizeFirstLetter(edge.description)}.
-                            </span>
-                      }
-                      {
-                        edge.predicate_url &&
-                        <a
-                          href={edge.predicate_url }
-                          onClick={(e)=> {
-                            e.stopPropagation();
-                          }}
-                          className={styles.predicateUrl}
-                          target="_blank"
-                          rel='noreferrer'>
-                            <span>{edge.predicate_url}</span>
-                            <ExternalLink/>
-                        </a>
-                      }
-                      {
-                        (edgeEvidence.pubs.size > 0 || edgeEvidence.cts.size > 0) &&
-                        <div className={styles.tooltipEvidenceCounts}>
-                          {
-                            (edgeEvidence.pubs.size > 0) &&
-                            <span className={styles.count}><PubIcon/>{edgeEvidence.pubs.size} Publication{edgeEvidence.pubs.size > 1 && "s"}</span>
-                          }
-                          {
-                            (edgeEvidence.cts.size > 0) &&
-                            <span className={styles.count}><CTIcon/>{edgeEvidence.cts.size} Clinical Trial{edgeEvidence.cts.size > 1 && "s"}</span>
-                          }
-                        </div>
-                      }
-                    </div>
-                  );
-                })
-              }
-            </div>
+          {resultSet &&
+            <EdgeTooltipContent
+              edges={tooltipEdgeEntries}
+              activeEntityFilters={activeEntityFilters}
+              inModal={!!inModal}
+              onPredicateClick={(e, edgeId) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), path, fullPathKey)}
+            />
           }
         </Tooltip>
         <span
@@ -274,9 +214,7 @@ const Predicate: FC<PredicateProps> = ({
           isEven={isEven}
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}
-          handleActivateEvidence={handleActivateEvidence}
           handleEdgeClick={handleEdgeClick}
-          handleNodeClick={handleNodeClick}
           selectedPaths={selectedPaths}
           activeEntityFilters={activeEntityFilters}
           activeFilters={activeFilters}

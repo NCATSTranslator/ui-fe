@@ -1,8 +1,9 @@
 import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features/ResultList/types/results.d";
-import { cloneDeep } from "lodash";
-import { hasSupport } from "@/features/Common/utils/utilities";
+import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
+import { isResultEdge } from "@/features/ResultList/types/checkers";
+import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { Filter } from "@/features/ResultFiltering/types/filters";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -16,8 +17,6 @@ export const getARATagsFromResultTags = (tags: Tags): string[] => {
   if (!tags) return araTags;
 
   for (const [tagKey] of Object.entries(tags)) {
-    // Check if tagValue exists and has a value property
-
     // Check if this is an ARA tag by looking for the 'ara' family in the tag key
     if (tagKey.includes('/ara/')) {
       // Extract the portion after "infores:" from the tag value
@@ -264,7 +263,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       } else {
         const edge = getEdgeById(resultSet, item);
         // edges return 'indirect' or 'direct' based on presence of support
-        return (hasSupport(edge)) ? "indirect" : "direct";
+        return (edge?.inferred ?? false) ? "indirect" : "direct";
       }
     })
   };
@@ -375,7 +374,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
  * @returns {boolean} - Does the path have any edges with support paths attached.
  */
 export const isPathInferred = (resultSet: ResultSet, path: Path) => {
-  if(!path || path == null)
+  if(!path || path === null)
     return false;
 
   for(const [i, itemID] of path.subgraph.entries()) {
@@ -386,7 +385,7 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     if(!isResultEdge(edge))
       continue;
 
-    if(hasSupport(edge))
+    if(edge.inferred)
       return true;
   }
   return false;
@@ -469,4 +468,46 @@ export const isNotesEmpty = (notes?: string | null) => {
   }
 
   return true;
+}
+
+
+/**
+ * Sorts tags by whether they are selected or not.
+ *
+ * @param {string} a - The first tag ID.
+ * @param {string} b - The second tag ID.
+ * @param {[{id: string;}] | Filter[]} selected - The selected tags.
+ * @returns {number} - The sorted tags.
+ */
+export const sortTagsBySelected = (
+  a: string,
+  b: string,
+  selected: [{id: string;}] | Filter[]
+): number => {
+  const aExistsInSelected = selected.some((item) => item.id === a);
+  const bExistsInSelected = selected.some((item) => item.id === b);
+
+  if (aExistsInSelected && bExistsInSelected) return 0;
+  if (aExistsInSelected) return -1;
+  if (bExistsInSelected) return 1;
+
+  return 0;
+};
+
+/**
+ * Handles a tag click by creating a new filter object and applying it.
+ *
+ * @param {string} filterID - The ID of the filter.
+ * @param {Filter} filter - The filter object.
+ * @param {Function} handleFilter - The function to handle the filter.
+ * @returns {void}
+ */
+export const handleTagClick = (filterID: string, filter: Filter, handleFilter: (filter: Filter) => void) => {
+  let newObj: Filter = {
+    name: filter.name,
+    negated: false,
+    id: filterID,
+    value: filter.name
+  };
+  handleFilter(newObj);
 }

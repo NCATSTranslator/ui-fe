@@ -1,9 +1,10 @@
 //  Focus: General evidence processing and data analysis
 
 import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
-import { capitalizeAllWords, hasSupport } from "@/features/Common/utils/utilities";
+import { capitalizeAllWords } from "@/features/Common/utils/utilities";
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
-import { ResultSet, ResultEdge, Result, Path, isResultEdge } from "@/features/ResultList/types/results.d";
+import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
+import { checkProperties } from "@/features/Common/types/checkers";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 
 /**
@@ -16,6 +17,7 @@ import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
  * @param {Set<string>} allCTs - Optional Set to add clinical trial IDs to (if not provided, creates new Set).
  * @param {Set<string>} allSources - Optional Set to add source names to (if not provided, creates new Set).
  * @param {Set<string>} allMisc - Optional Set to add miscellaneous URLs to (if not provided, creates new Set).
+ * @param {Set<string>} visitedPathIds - Optional Set of path IDs currently being processed (used to prevent cycles in nested support).
  * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
  */
 export const getEvidenceFromEdge = (
@@ -25,7 +27,8 @@ export const getEvidenceFromEdge = (
   allPubs?: Set<string>,
   allCTs?: Set<string>,
   allSources?: Set<string>,
-  allMisc?: Set<string>
+  allMisc?: Set<string>,
+  visitedPathIds: Set<string> = new Set()
 ) => {
   // Initialize Sets if not provided
   const pubs = allPubs || new Set<string>();
@@ -38,6 +41,7 @@ export const getEvidenceFromEdge = (
     // Process publications
     for(const key in edgeToProcess.publications) {
       const pubArray = edgeToProcess.publications[key];
+      if (!Array.isArray(pubArray)) continue;
       for(const pubData of pubArray) {
         const pub = getPubById(resultSet, pubData.id);
         if(!pub) 
@@ -50,34 +54,44 @@ export const getEvidenceFromEdge = (
       }
     }
 
-    // Process clinical trials
-    for(const trial in edgeToProcess.trials) 
-      cts.add(trial);
+    // Process clinical trials (use of trial IDs for correct deduplication across edges)
+    if (Array.isArray(edgeToProcess.trials)) {
+      for (const trialId of edgeToProcess.trials) {
+        cts.add(trialId);
+      }
+    }
 
     // Process sources
-    if(edgeToProcess.provenance) {
+    // don't process sources for inferred edges, only for direct edges
+    if(edgeToProcess.provenance && !edgeToProcess.inferred) { 
       for(const source of edgeToProcess.provenance)
-        sources.add(source.name);
+        sources.add(source.name ?? "");
     }
   };
 
   // Get the edge object
-  let resultEdge = (isResultEdge(edge)) ? edge : getEdgeById(resultSet, edge);
+  let resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
   
   if(!!resultEdge) {
     // Process the main edge
     processEdge(resultEdge);
     
-    // Process support edges if requested
-    if(includeSupport && hasSupport(resultEdge) && resultEdge.support) {
+    // Process support edges if requested (recursively so nested support paths e.g. 2.a.i are counted)
+    if(includeSupport && resultEdge.inferred && resultEdge.support) {
       for(const sp of resultEdge.support) {
         const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
         if(!supportPath) 
           continue;
-        for(let j = 1; j < supportPath.subgraph.length; j += 2) {
-          const supportEdge = getEdgeById(resultSet, supportPath.subgraph[j]);
-          if(isResultEdge(supportEdge)) 
-            processEdge(supportEdge);
+        const pathId = supportPath.id ?? (typeof sp === "string" ? sp : "");
+        if(pathId && visitedPathIds.has(pathId))
+          continue; // avoid cycles
+        if(pathId) visitedPathIds.add(pathId);
+        try {
+          for(let j = 1; j < supportPath.subgraph.length; j += 2) {
+            getEvidenceFromEdge(resultSet, supportPath.subgraph[j], true, pubs, cts, sources, misc, visitedPathIds);
+          }
+        } finally {
+          if(pathId) visitedPathIds.delete(pathId);
         }
       }
     }
@@ -254,14 +268,17 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
  * @param obj - The object to check.
  * @returns {boolean} True if the object is a PublicationObject, otherwise false.
  */
-export const isPublicationObject = (obj: unknown): obj is PublicationObject => {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    typeof (obj as PublicationObject).source === 'object' &&
-    typeof (obj as PublicationObject).type === 'string' &&
-    typeof (obj as PublicationObject).url === 'string'
-  );
+export const isPublicationObject = (obj: unknown, warn = true): obj is PublicationObject => {
+  if (typeof obj !== 'object' || obj === null) {
+    if (warn) console.warn("[isPublicationObject] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  const o = obj as Record<string, unknown>;
+  return checkProperties("isPublicationObject", obj, [
+    ["source", typeof o.source === 'object', "object", o.source],
+    ["type", typeof o.type === 'string', "string", o.type],
+    ["url", typeof o.url === 'string', "string", o.url],
+  ], warn);
 }
 
 /**
@@ -270,9 +287,17 @@ export const isPublicationObject = (obj: unknown): obj is PublicationObject => {
  * @param arr - The object to check.
  * @returns {boolean} True if the object is a PublicationsList, otherwise false.
  */
-export const isPublicationObjectArray = (arr: unknown): arr is PublicationObject[] => {
-  return Array.isArray(arr) && 
-    arr.every(item => isPublicationObject(item));
+export const isPublicationObjectArray = (arr: unknown, warn = true): arr is PublicationObject[] => {
+  if (!Array.isArray(arr)) {
+    if (warn) console.warn("[isPublicationObjectArray] expected array, got:", typeof arr, arr);
+    return false;
+  }
+  const invalidIndex = arr.findIndex(item => !isPublicationObject(item, warn));
+  if (invalidIndex !== -1) {
+    if (warn) console.warn(`[isPublicationObjectArray] item at index ${invalidIndex} failed validation`, arr[invalidIndex]);
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -297,8 +322,18 @@ export const checkPublicationsType = (edgeObject: ResultEdge): string => {
  * @param publications - The object to check.
  * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
  */
-export const isPublicationDictionary = (publications: unknown): publications is {[key: string]: string[]} => {
-  return typeof publications === 'object' && publications !== null && !Array.isArray(publications) && Object.values(publications as Record<string, unknown>).every(value => Array.isArray(value) && value.every(item => typeof item === 'string'));
+export const isPublicationDictionary = (publications: unknown, warn = true): publications is {[key: string]: string[]} => {
+  if (typeof publications !== 'object' || publications === null || Array.isArray(publications)) {
+    if (warn) console.warn("[isPublicationDictionary] expected object, got:", typeof publications, publications);
+    return false;
+  }
+  for (const [key, value] of Object.entries(publications as Record<string, unknown>)) {
+    if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
+      if (warn) console.warn(`[isPublicationDictionary] invalid value at key "${key}": expected string[], got:`, value);
+      return false;
+    }
+  }
+  return true;
 }
 
 /**

@@ -1,0 +1,21 @@
+@use "@/assets/styles/variables" as *;
+
+.viewNotFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $s;
+  padding: $xxl $m;
+  text-align: center;
+}
+
+.title {
+  font-size: $h5Size;
+  margin: 0;
+}
+
+.message {
+  font-size: $bodyOneSize;
+  color: $darkGray;
+  margin: 0;
+}

@@ -2,7 +2,7 @@
 
 .hash-anchor {
   position: relative;
-  top: -50px;
+  top: -80px;
   pointer-events: none;
   opacity: 0;
 }
@@ -66,8 +66,8 @@
 .terms-of-use h1.h5 {
   margin: 0;
 }
-.faq-container {
-  .right {
+.help-container {
+  .left {
     h1.h5 {
       margin: 0;
     }
@@ -78,7 +78,7 @@
 }
 
 .main-logging-in, .demo-logging-in {
-  .faq-container {
+  .help-container {
     .h6 {
       margin-top: 40px;
     }

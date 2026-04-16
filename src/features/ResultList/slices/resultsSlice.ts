@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ResultNode, ResultEdge, Path, ResultSet, Result } from "@/features/ResultList/types/results.d";
+import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { cloneDeep } from "lodash";
 import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
@@ -50,7 +50,9 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
     return undefined;
   }
   return node;
-
+}
+export const getNodeSpecies = (node: ResultNode): Species => {
+  return node.annotations?.gene?.species || null;
 }
 export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
   let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
@@ -72,7 +74,7 @@ export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdg
 export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): ResultEdge[] => {
   if(!resultSet)
     return [];
-  const edges: ResultEdge[] = []; 
+  const edges: ResultEdge[] = [];
   for(const edgeID of ids) {
     const edge = getEdgeById(resultSet, edgeID)
     if(!!edge)

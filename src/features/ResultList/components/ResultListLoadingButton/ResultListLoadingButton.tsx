@@ -4,16 +4,21 @@ import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import Button from '@/features/Core/components/Button/Button';
 // import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 interface ResultListLoadingButtonProps {
+  className?: string;
   hasFreshResults: boolean;
   showDisclaimer: boolean;
+  showIcon?: boolean;
   handleResultsRefresh: () => void;
 }
 
 const ResultListLoadingButton = ({
+  className,
   hasFreshResults,
   showDisclaimer,
+  showIcon = true,
   handleResultsRefresh,
 }: ResultListLoadingButtonProps) => {
 
@@ -30,7 +35,7 @@ const ResultListLoadingButton = ({
       {
         resultsAvailable && (
           <div 
-            className={`${styles.loadingButtonContainer}`}
+            className={joinClasses(`${styles.loadingButtonContainer}`, className)}
             >
             <Tooltip 
               id="sync-new-results-button"
@@ -64,7 +69,7 @@ const ResultListLoadingButton = ({
                   handleClick={handleResultsRefresh}
                   className={`${styles.loadingButton} ${resultsAvailable && styles.active}`}
                   dataTooltipId="sync-new-results-button"
-                  iconLeft={<ResultsAvailableIcon/>}
+                  iconLeft={showIcon ? <ResultsAvailableIcon/> : null}
                   >
                   Sync New Results
                 </Button>

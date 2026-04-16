@@ -1,8 +1,8 @@
-import { useState, useEffect, FC, ReactNode, useCallback, useMemo, MouseEvent } from "react";
+import { useState, useEffect, FC, ReactNode, useCallback, MouseEvent, useId } from "react";
 import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
 import { joinClasses } from "@/features/Common/utils/utilities";
-import { uniqueId } from "lodash";
+
 import InputLabel from "../InputLabel/InputLabel";
 
 export interface CheckboxProps {
@@ -40,6 +40,7 @@ const Checkbox: FC<CheckboxProps> = ({
 }) => {
 
   const [isChecked, setIsChecked] = useState(checked);
+  const checkboxId = useId();
 
   const checkboxClass = joinClasses(
     styles.checkbox,
@@ -72,15 +73,11 @@ const Checkbox: FC<CheckboxProps> = ({
     setIsChecked(checked);
   }, [checked]);
 
-  const checkboxId = useMemo(() => {
-    return id || `checkbox-${name || uniqueId()}`;
-  }, [id, name]);
-
   return (
     <label 
       className={checkboxClass} 
       title={title} 
-      htmlFor={checkboxId}
+      htmlFor={ id || checkboxId}
       aria-label={title}
       onClick={handleLabelClick}
     >
@@ -92,7 +89,7 @@ const Checkbox: FC<CheckboxProps> = ({
       <span className={boxClass}>{iconToRender}</span>
       <input 
         type="checkbox" 
-        id={checkboxId}
+        id={ id || checkboxId}
         checked={isChecked}
         name={name} 
         value={value} 

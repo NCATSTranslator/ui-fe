@@ -1,5 +1,11 @@
 @use "@/assets/styles/variables" as *;
 
+.resultItemSummaryModalContainer {
+  top: calc($xxl + $m);
+  bottom: $m;
+  transform: translateX(-50%);
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -13,6 +19,9 @@
 
 .summary {
   color: $black;
+  p, a, li, ul, ol, span, mark, strong, i, em, b, u, s, code {
+    font-size: $bodyTwoSize;
+  }
 }
 
 .header {

@@ -5,7 +5,7 @@ import { pivotSort } from '@/features/Common/utils/sortingFunctions';
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import FacetTag from "@/features/ResultFiltering/components/FacetTag/FacetTag";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 
 const getRoleCaption = (): ReactNode => {

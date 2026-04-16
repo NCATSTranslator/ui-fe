@@ -1,5 +1,5 @@
 import { Preferences } from "@/features/UserAuth/types/user";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { defaultPrefs } from "@/features/UserAuth/utils/userDefaults";
 import { capitalizeFirstLetter } from "@/features/Common/utils/utilities";
 

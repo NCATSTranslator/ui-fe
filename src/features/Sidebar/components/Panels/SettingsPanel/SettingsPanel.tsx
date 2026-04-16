@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './SettingsPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
@@ -7,16 +7,16 @@ import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWra
 import { getFormattedLoginURL, useUser } from '@/features/UserAuth/utils/userApi';
 import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
-import ChevLeft from "@/assets/icons/directional/Chevron/Chevron Left.svg?react";
 import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
 import { useDispatch, useSelector } from 'react-redux';
-import { currentPrefs, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
+import { currentPrefs, setCurrentPrefs, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
-import { preferencesSavedToast } from '@/features/Core/utils/toastMessages';
-import SidebarBackButton from '@/features/Sidebar/components/SidebarBackButton/SidebarBackButton';
+import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
+import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
+import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 
 const SettingsPanel = () => {
   const location = useLocation();
@@ -31,6 +31,29 @@ const SettingsPanel = () => {
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
   const dispatch = useDispatch();
+
+  const config = useSelector(currentConfig);
+  const idpLogoutFormRef = useRef<HTMLFormElement>(null);
+
+  const idpLogoutProvider = useMemo(() => {
+    if (!config?.social_providers) return null;
+    for (const provider of Object.values(config.social_providers)) {
+      if (provider.logout_uri && provider.client_id) {
+        return provider;
+      }
+    }
+    return null;
+  }, [config]);
+
+  const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
+
+  const handleLogout = () => {
+    if (idpLogoutProvider && idpLogoutFormRef.current) {
+      idpLogoutFormRef.current.submit();
+    } else {
+      window.location.href = '/logout';
+    }
+  };
   
   const resultPrefs = useMemo(()=> {
     return {
@@ -62,20 +85,23 @@ const SettingsPanel = () => {
   }, [activePrefTypeId, resultPrefs, evidencePrefs, graphPrefs]);
 
   const handleSubmitUserPrefs = async (prefs: Preferences) => {
-    await updateUserPreferences(prefs);
-    dispatch(setCurrentPrefs(prefs));
-    preferencesSavedToast();
+    try {
+      await updateUserPreferences(prefs);
+      dispatch(setCurrentPrefs(prefs));
+      preferencesSavedToast();
+    } catch (error) {
+      console.error("Failed to update preferences:", error);
+      errorToast("Failed to update preferences. Please try again.");
+    }
   }
 
-  const handlePrefValueClick = (prefKey: PrefKey, prefValue: string | number) => {
-    setUserPrefs(prev => {
-      let newPrefs = cloneDeep(prev);
-      newPrefs[prefKey].pref_value = prefValue;
-      handleSubmitUserPrefs(newPrefs);
-      return newPrefs;
-    });
+  const handlePrefValueClick = async (prefKey: PrefKey, prefValue: string | number) => {
+    const newPrefs = cloneDeep(userPrefs);
+    newPrefs[prefKey].pref_value = prefValue;
+    setUserPrefs(newPrefs);
     setActivePrefObject(null);
-  }
+    await handleSubmitUserPrefs(newPrefs);
+  };
 
   useEffect(() => {
     setUserPrefs(initPrefs);
@@ -95,8 +121,20 @@ const SettingsPanel = () => {
                 <>
                   <div className={styles.iconText}>
                     <div className={styles.userIcon}><span>{user.name.charAt(0)}</span></div>
-                    <p>{user.email}<br/><Button href="/logout" title="Log Out" className={styles.loginButton} variant="textOnly" inline>Log Out</Button></p>
+                    <p>{user.email}<br/><Button handleClick={handleLogout} title="Log Out" className={styles.loginButton} variant="textOnly" inline>Log Out</Button></p>
                   </div>
+                  {idpLogoutProvider && (
+                    <form
+                      ref={idpLogoutFormRef}
+                      method="post"
+                      action={idpLogoutProvider.logout_uri}
+                      style={{ display: 'none' }}
+                    >
+                      <input type="hidden" name="client_id" value={idpLogoutProvider.client_id} />
+                      <input type="hidden" name="show_prompt" value="false" />
+                      <input type="hidden" name="post_logout_redirect_uri" value={postLogoutRedirectUri} />
+                    </form>
+                  )}
                   <div className={styles.prefs}>
                     <h6 className={styles.title}>Preferences</h6>
                     <p className={styles.helpText}>These preferences are automatically applied to all of your queries and projects.</p>
@@ -109,14 +147,25 @@ const SettingsPanel = () => {
           !!user &&
           <>
             <div className={styles.prefs}>
-              <Button handleClick={()=>setActivePrefTypeId("results")} className={styles.prefButton} iconRight={<ChevRight />} variant="textOnly">Results</Button>
-              <Button handleClick={()=>setActivePrefTypeId("evidence")} className={styles.prefButton} iconRight={<ChevRight />} variant="textOnly">Evidence</Button>
-              <Button handleClick={()=>setActivePrefTypeId("graphs")} className={styles.prefButton} iconRight={<ChevRight />} variant="textOnly">Graphs</Button>
+              <SidebarTransitionButton 
+                handleClick={() => setActivePrefTypeId("results")}
+                label="Results"
+              />
+              <SidebarTransitionButton 
+                handleClick={() => setActivePrefTypeId("evidence")}
+                label="Evidence"
+              />
+              <SidebarTransitionButton 
+                handleClick={() => setActivePrefTypeId("graphs")}
+                label="Graphs"
+              />
             </div>
             {
               activePrefTypeId && 
-              <div className={`${styles.activePrefType} ${styles.coverPanel}`}>
-                <SidebarBackButton label={capitalizeFirstLetter(activePrefTypeId)} handleClick={()=>setActivePrefTypeId(null)} />
+              <InteriorPanelContainer
+                handleBack={() => setActivePrefTypeId(null)}
+                backButtonLabel={capitalizeFirstLetter(activePrefTypeId)}
+              >
                 <div className={styles.activePrefTypeContent}>
                   {
                     prefsToDisplay && Object.entries(prefsToDisplay).map(([key, pref]) => (
@@ -126,7 +175,7 @@ const SettingsPanel = () => {
                           className={styles.prefValueButton}
                           variant="secondary"
                           iconRight={<ChevRight />}
-                          handleClick={()=>handleSetActivePrefObject(key as PrefKey, userPrefs)}
+                          handleClick={() => handleSetActivePrefObject(key as PrefKey, userPrefs)}
                         >
                           {getPrettyPrefValue(pref.pref_value)}
                         </Button>
@@ -134,32 +183,27 @@ const SettingsPanel = () => {
                     ))
                   }
                 </div>
-              </div>
+              </InteriorPanelContainer>
             }
             {
               activePrefObject && activePrefObject.prefObject.possible_values &&
-              <div className={`${styles.activePref} ${styles.coverPanel}`}>
-                <Button
-                  handleClick={()=>setActivePrefObject(null)}
-                  className={`${styles.prefButton} ${styles.backButton}`}
-                  iconLeft={<ChevLeft />}
-                  variant="textOnly"
-                  >
-                    {activePrefObject.prefObject.name} 
-                  </Button>
-                  <div className={styles.activePrefContent}>
-                    {activePrefObject.prefObject.possible_values.map((value) => (
-                      <Button
-                        key={String(value)}
-                        className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
-                        variant="secondary"
-                        handleClick={()=>handlePrefValueClick(activePrefObject.prefKey, value)}
-                        >
-                        {getPrettyPrefValue(value)}
-                      </Button>
-                    ))}
-                  </div>
-              </div>
+              <InteriorPanelContainer
+                handleBack={() => setActivePrefObject(null)}
+                backButtonLabel={activePrefObject.prefObject.name}
+              >
+                <div className={styles.activePrefContent}>
+                  {activePrefObject.prefObject.possible_values.map((value) => (
+                    <Button
+                      key={value}
+                      className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
+                      variant="secondary"
+                      handleClick={() => handlePrefValueClick(activePrefObject.prefKey, value)}
+                      >
+                      {getPrettyPrefValue(value)}
+                    </Button>
+                  ))}
+                </div>
+              </InteriorPanelContainer>
             }
           </>
         }

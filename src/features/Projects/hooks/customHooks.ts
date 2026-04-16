@@ -4,8 +4,8 @@ import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQ
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetcNodeNameFromCurie } from '@/features/Projects/utils/utilities';
-import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitle,
+import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitleFromQueryObject,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
@@ -53,17 +53,17 @@ export const useUserQueries = () => {
   const processedData = useMemo(() => {
     if (!query.data) return query.data;
     
-    return query.data.map(query => {
-      if (query.data.title === null) {
+    return query.data.map(queryItem => {
+      if (queryItem.data.title === null) {
         return {
-          ...query,
+          ...queryItem,
           data: {
-            ...query.data,
-            title: generateQueryTitle(query)
+            ...queryItem.data,
+            title: generateQueryTitleFromQueryObject(queryItem)
           }
         };
       }
-      return query;
+      return queryItem;
     });
   }, [query.data]);
 
@@ -289,7 +289,7 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
       await Promise.all(
         curies.map(async (curie) => {
           try {
-            const name = await fetcNodeNameFromCurie(curie);
+            const name = await fetchNodeNameFromCurie(curie);
             results[curie] = name;
           } catch (error) {
             console.error(`Failed to resolve curie ${curie}:`, error);
@@ -312,11 +312,11 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
 
 /**
  * Hook to get query card title with async curie name resolution
- * @param {UserQueryObject} query - The query object
+ * @param {UserQueryObject} queryObject - The query object
  * @returns { title: string; isLoading: boolean } Object with title and loading state
  */
-export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: string; isLoading: boolean } => {
-  const baseTitle = useMemo(() => query ? generateQueryTitle(query) : '', [query]);
+export const useGetQueryCardTitle = (queryObject: UserQueryObject | null): { title: string; isLoading: boolean } => {
+  const baseTitle = useMemo(() => queryObject ? generateQueryTitleFromQueryObject(queryObject) : '', [queryObject]);
   
   const curies = useMemo(() => findAllCuriesInTitle(baseTitle), [baseTitle]);
   const { data: resolvedNames, isLoading } = useMultipleResolvedCurieNames(curies, curies.length > 0);
@@ -330,18 +330,17 @@ export const useGetQueryCardTitle = (query: UserQueryObject | null): { title: st
 
 /**
  * Hook to get queries with updated titles for multiple queries with async curie name resolution
- * @param {UserQueryObject[]} queries - Array of query objects
- * @returns { queries: UserQueryObject[]; isLoading: boolean } Array of query objects with updated titles and loading state
+ * @param {UserQueryObject[]} queryObjects - Array of query objects
+ * @returns { queryObjects: UserQueryObject[]; isLoading: boolean } Array of query objects with updated titles and loading state
  */
-export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { queries: UserQueryObject[]; isLoading: boolean } => {
-  const updateQueryMutation = useUpdateQuery();
-  
+export const useGetQueriesUpdatedTitles = (queryObjects: UserQueryObject[]): { queryObjects: UserQueryObject[]; isLoading: boolean } => {
+    
   const baseTitles = useMemo(() => 
-    queries.reduce((acc, query) => {
-      acc[query.data.qid] = generateQueryTitle(query);
+    queryObjects.reduce((acc, queryObject) => {
+      acc[queryObject.data.qid] = generateQueryTitleFromQueryObject(queryObject);
       return acc;
     }, {} as Record<string, string>), 
-    [queries]
+    [queryObjects]
   );
   
   const allCuries = useMemo(() => 
@@ -354,9 +353,9 @@ export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { querie
     allCuries.length > 0
   );
   
-  const updatedQueries = useMemo(() => {
-    return queries.map(query => {
-      const baseTitle = baseTitles[query.data.qid];
+  const updatedQueryObjects = useMemo(() => {
+    return queryObjects.map(queryObject => {
+      const baseTitle = baseTitles[queryObject.data.qid];
       const updatedTitle = replaceCuriesInTitle(baseTitle, resolvedNames);
       
       // Only update if we actually made replacements
@@ -366,15 +365,15 @@ export const useGetQueriesUpdatedTitles = (queries: UserQueryObject[]): { querie
         //   id: query.sid,
         //   title: updatedTitle
         // });
-        return createUpdatedQueryWithTitle(query, updatedTitle);
+        return createUpdatedQueryWithTitle(queryObject, updatedTitle);
       }
       
       // Return query with base title if no updates needed
-      return createUpdatedQueryWithTitle(query, baseTitle);
+      return createUpdatedQueryWithTitle(queryObject, baseTitle);
     });
-  }, [queries, baseTitles, allCuries, resolvedNames, updateQueryMutation]);
+  }, [queryObjects, baseTitles, resolvedNames]);
   
-  return { queries: updatedQueries, isLoading };
+  return { queryObjects: updatedQueryObjects, isLoading };
 };
 
 /**

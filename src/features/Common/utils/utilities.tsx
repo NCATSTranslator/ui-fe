@@ -14,7 +14,8 @@ import AnatomicalEntity from '@/assets/icons/queries/Anatomical Entity.svg?react
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
-import { isResultEdge, Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { isResultEdge } from '@/features/ResultList/types/checkers';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Location as RouterLocation } from 'react-router-dom';
@@ -25,7 +26,7 @@ import { Location as RouterLocation } from 'react-router-dom';
  * @param {string} category - The category to retrieve an icon for.
  * @returns {ReactNode} - The icon for the category.
  */
-export const getIcon = (category: string): ReactNode => {
+export const getNodeIcon = (category: string): ReactNode => {
   var icon = <Chemical/>;
   switch(category) {
     case 'biolink:Gene':
@@ -165,23 +166,30 @@ const isRomanNumeral = (word: string): boolean => {
 }
 
 /**
- * Capitalizes the first letter of a word.
+ * Capitalizes the first letter of a single word and lowercase the rest.
  *
  * @param {string} word - The word to capitalize.
  * @returns {string} - The capitalized word.
  */
 export const capitalizeWord = (word: string): string => {
-  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-export const capitalizeAllWords = (str: string): string => {
-  return str.split(' ').map(word => {
+/**
+ * Capitalizes the first letter of each word and lowercase the rest.
+ *
+ * @param {string} str - The string to capitalize.
+ * @param {string} splitBy - The character to split the string by. Defaults to a space.
+ * @returns {string} - The capitalized string.
+ */
+export const capitalizeAllWords = (str: string, splitBy: string = ' '): string => {
+  return str.split(splitBy).map(word => {
     if (isRomanNumeral(word)) {
       return word.toUpperCase();
     } else {
       return capitalizeWord(word);
     }
-  }).join(' ');
+  }).join(splitBy);
 }
 
 /**
@@ -666,7 +674,7 @@ export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
 export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
   if (!(path.subgraph && path.subgraph.length === 3)) return false;
   const edge = getEdgeById(resultSet, path.subgraph[1]);
-  return hasSupport(edge);
+  return edge?.inferred ?? false;
 }
 /**
  * Generates a single compressed edge based on a provided list of edge IDs.
@@ -727,7 +735,11 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
         // Merge into existing compressed_edge with the same predicate
         compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
         compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-        mergeSupport(baseEdge, currentEdge);
+        // Merge support into compressedEdge (not baseEdge) to match the other
+        // field merges in this branch (aras/provenance/publications all target
+        // compressedEdge). Paths belong to the sibling predicate bucket they
+        // describe, not the parent.
+        mergeSupport(compressedEdge, currentEdge);
 
         // Merge publications into the compressed edge
         for (const [key, value] of Object.entries(currentEdge.publications)) {
@@ -748,11 +760,13 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
         if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
           mergeSupport(baseEdge, currentEdge);
         // Add as a new compressed edge
-        baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: emptyCompressedEdgesArray });
+        baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: emptyCompressedEdgesArray });
       }
     }
   }
 
+  // recompute inferred status, since support paths may have been merged in from compressed edges
+  baseEdge.inferred = hasSupport(baseEdge);
   return baseEdge;
 };
 
@@ -776,7 +790,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
     // compress edges if predicates match and support status is the same
     if(!!nextEdge
       && nextEdge.predicate === edge.predicate
-      && hasSupport(nextEdge) === hasSupport(edge)
+      && nextEdge.inferred === edge.inferred
     ) {
       if(!edgeIDsToCompress.has(edge.id))
         edgeIDsToCompress.add(edge.id);
@@ -890,6 +904,7 @@ export const isStringArray = (value: unknown): value is string[] => {
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   aras: edge?.aras || [],
   id: edge?.id || "",
+  inferred: edge?.inferred || false,
   is_root: edge?.is_root || false,
   compressed_edges: edge?.compressed_edges || [],
   knowledge_level: edge?.knowledge_level || "unknown",
@@ -907,7 +922,8 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => ({
   subject: edge?.subject || "",
   support: edge?.support || [],
   trials: edge?.trials || [],
-  tags: edge?.tags || {}
+  tags: edge?.tags || {},
+  type: edge?.type || "",
 });
 
 /**
@@ -978,3 +994,19 @@ export const commonQueryClientOptions = {
     },
   },
 };
+
+/**
+ * Returns a formatted name for a node based on the provided node type.
+ *
+ * @param {string} nodeName - The node name to format.
+ * @param {string} nodeType - The type of the node.
+ * @returns {string} - The formatted node name.
+ */
+export const getFormattedNodeName = (nodeName: string | undefined, nodeType: string | null): string => {
+  if(!nodeName || !nodeType)
+    return capitalizeAllWords(nodeName ?? '');
+
+  if(nodeType === 'biolink:Gene' || nodeType === 'biolink:Protein')
+    return nodeName.toUpperCase() ?? '';
+  return capitalizeAllWords(nodeName ?? '');
+}

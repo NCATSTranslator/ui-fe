@@ -1,6 +1,15 @@
 @use "@/assets/styles/variables" as *;
 
 .statusSidebarIcon {
+  .loadingButton {
+    margin-top: 12px;
+    span {
+      font-size: $captionSize;
+    }
+    svg path {
+      fill: $white !important;
+    }
+  }
   .freshResultsToast {
     position: absolute;
     top: 0;

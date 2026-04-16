@@ -1,5 +1,7 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
+import * as tc from "@/features/Common/types/checkers";
+import { isProvenance } from "@/features/Evidence/types/checkers";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -71,18 +73,21 @@ export type PathRank = {
   support: PathRank[];
 }
 
+export type EdgeMetadata = {
+  edge_bindings: string[],
+  inverted_id: string | null,
+  is_root: boolean,
+}
+
 export interface ResultEdge {
   // array of ARA names
   aras: string[];
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
   id: string;
+  inferred: boolean;
   knowledge_level: KnowledgeLevel;
-  metadata: {
-    edge_bindings: string[],
-    inverted_id: string | null,
-    is_root: boolean,
-  };
+  metadata: EdgeMetadata;
   // nodeID
   object: string;
   predicate: string;
@@ -94,16 +99,53 @@ export interface ResultEdge {
   subject: string;
   // array of path ids or Path objects
   support: string[] | Path[];
-  trials: string[];
   tags: Tags;
+  trials: string[];
+  type: string;
 }
 
 export interface RankedEdge extends ResultEdge {
   support: RankedPath[];
 }
 
+export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
+export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
+
+export type Annotation = {
+  chemical: ChemicalAnnotation;
+  disease: DiseaseAnnotation;
+  gene: GeneAnnotation;
+}
+
+export type ChebiRole = {
+  id: string;
+  name: string;
+}
+
+export type ChemicalAnnotation = {
+  approval: number | null;
+  clinical_trials: string[] | null;
+  descriptions: string[] | null;
+  indications: string[] | null;
+  otc_status: {code: number, label: string} | null;
+  other_names: {commercial: string[], generic: string[]} | null;
+  roles: ChebiRole[] | null;
+}
+
+export type DiseaseAnnotation = {
+  curies: string[] | null;
+  descriptions: string[] | null;
+}
+
+export type GeneAnnotation = {
+  descriptions: string[] | null;
+  name: string | null;
+  species: Species;
+  tdl: Tdl;
+}
 
 export type ResultNode = {
+  annotations: Annotation;
   aras: string[];
   curies: string[];
   descriptions: string[];
@@ -111,8 +153,8 @@ export type ResultNode = {
   names: string[];
   other_names: {[key: string]: string[]};
   // link to relevant info about node
-  provenance: string;
-  species: "Zebrafish" | "Mouse" | "Rat" | null;
+  provenance: string[];
+  synonyms: string[];
   tags: Tags;
   // array of biolink types
   types: string[];
@@ -185,89 +227,6 @@ export type ScoreWeights = {
   noveltyWeight: number;
   clinicalWeight: number;
 }
-
-export const isResultEdge = (obj: unknown): obj is ResultEdge => {
-  return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    obj.aras.every((item: unknown) => typeof item === "string") &&
-    typeof obj.is_root === "boolean" &&
-    typeof obj.knowledge_level === "string" &&
-    typeof obj.metadata === "object" &&
-    Array.isArray(obj.metadata.edge_bindings) &&
-    obj.metadata.edge_bindings.every((item: unknown) => typeof item === "string") &&
-    (typeof obj.metadata.inverted_id === "string" || obj.metadata.inverted_id === null) &&
-    typeof obj.metadata.is_root === "boolean" &&
-    typeof obj.object === "string" &&
-    typeof obj.predicate === "string" &&
-    typeof obj.predicate_url === "string" &&
-    (typeof obj.description === "string" || obj.description === null || obj.description === undefined) &&
-    Array.isArray(obj.provenance) &&
-    obj.provenance.every((prov: unknown) => typeof prov === "object") &&
-    typeof obj.publications === "object" &&
-    typeof obj.subject === "string" &&
-    typeof obj.tags === "object" &&
-    Array.isArray(obj.support) &&
-    obj.support.every((item: unknown) => typeof item === "string")
-  );
-}
-
-export const isResultNode = (obj: unknown): obj is ResultNode => {
-  return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    obj.aras.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.curies) &&
-    obj.curies.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.descriptions) &&
-    obj.descriptions.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.names) &&
-    obj.names.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.provenance) &&
-    obj.provenance.every((item: unknown) => typeof item === "string") &&
-    (obj.species === "Zebrafish" ||
-      obj.species === "Mouse" ||
-      obj.species === "Rat" ||
-      obj.species === null) &&
-    typeof obj.tags === "object" &&
-    Array.isArray(obj.types) &&
-    obj.types.every((type: unknown) => typeof type === "string")
-  );
-}
-
-export const isPath = (obj: unknown): obj is Path => {
-  return (
-    obj &&
-    Array.isArray(obj.aras) &&
-    Array.isArray(obj.compressedIDs) &&
-    obj.compressedIDs.every((item: unknown) => typeof item === "string") &&
-    Array.isArray(obj.compressedSubgraph) &&
-    obj.compressedSubgraph.every((item: unknown) => typeof item === "string" || (Array.isArray(item) && item.every(subItem => typeof subItem === "string"))) &&
-    typeof obj.highlighted === "boolean" &&
-    typeof obj.id === "string" &&
-    Array.isArray(obj.subgraph) &&
-    obj.subgraph.every((item: unknown) => typeof item === "string") &&
-    isTags(obj.tags)
-  );
-}
-
-export const isTags = (obj: unknown): obj is Tags => {
-  if (typeof obj !== "object" || obj === null) return false;
-
-  for (const key in obj) {
-    const tag = (obj as Tags)[key];
-    if (
-      typeof tag !== "object" ||
-      tag === null ||
-      typeof tag.name !== "string" ||
-      typeof tag.value !== "string"
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 export interface ResultListLoadingData {
   handleResultsRefresh: () => void;

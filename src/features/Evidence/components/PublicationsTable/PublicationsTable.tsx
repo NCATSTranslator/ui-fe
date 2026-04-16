@@ -3,12 +3,11 @@ import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { Preferences } from '@/features/UserAuth/types/user';
-import { PublicationObject, EvidenceSortState, KnowledgeLevelFilterType } from '@/features/Evidence/types/evidence';
+import { PublicationObject, EvidenceSortState } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { DEFAULT_ITEMS_PER_PAGE, usePubmedDataFetch, usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
-import KnowledgeLevelFilter from '@/features/Evidence/components/KnowledgeLevelFilter/KnowledgeLevelFilter';
 import PublicationsTableHeader from '@/features/Evidence/components/PublicationsTableHeader/PublicationsTableHeader';
 import PublicationRow from '@/features/Evidence/components/PublicationRow/PublicationRow';
 import PublicationPaginationControls from '@/features/Evidence/components/PublicationPaginationControls/PublicationPaginationControls';
@@ -42,37 +41,20 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     updateState
   );
 
-  const availableKnowledgeLevels = useMemo(() => {
-    return new Set(publications.map(pub => pub.knowledgeLevel).filter((level): level is string => level !== undefined));
-  }, [publications]);
-
-  const filteredEvidence = useMemo(() => {
-    if (state.knowledgeLevelFilter === 'all') return publications;
-    return publications.filter(evidence => evidence.knowledgeLevel === state.knowledgeLevelFilter);
-  }, [publications, state.knowledgeLevelFilter]);
-
-  const endOffset = Math.min(state.itemOffset + state.itemsPerPage, filteredEvidence.length);
+  const endOffset = Math.min(state.itemOffset + state.itemsPerPage, publications.length);
   const displayedPublications = useMemo(() => {
-    return filteredEvidence.slice(state.itemOffset, endOffset);
-  }, [filteredEvidence, state.itemOffset, endOffset]);
+    return publications.slice(state.itemOffset, endOffset);
+  }, [publications, state.itemOffset, endOffset]);
 
   const pageCount = useMemo(() => {
-    return Math.ceil(filteredEvidence.length / state.itemsPerPage);
-  }, [filteredEvidence.length, state.itemsPerPage]);
+    return Math.ceil(publications.length / state.itemsPerPage);
+  }, [publications.length, state.itemsPerPage]);
 
   // Event handlers
   const handlePageClick = useCallback((event: { selected: number }) => {
-    const newOffset = (event.selected * state.itemsPerPage) % filteredEvidence.length;
+    const newOffset = (event.selected * state.itemsPerPage) % publications.length;
     updateState({ currentPage: event.selected, itemOffset: newOffset });
-  }, [state.itemsPerPage, filteredEvidence.length, updateState]);
-
-  const handleKnowledgeLevelFilter = useCallback((knowledgeLevel: KnowledgeLevelFilterType) => {
-    updateState({
-      currentPage: 0,
-      itemOffset: 0,
-      knowledgeLevelFilter: knowledgeLevel,
-    });
-  }, [updateState]);
+  }, [state.itemsPerPage, publications.length, updateState]);
 
   const handleItemsPerPageChange = useCallback((value: number) => {
     updateState({ itemsPerPage: value, currentPage: 0, itemOffset: 0 });
@@ -116,18 +98,13 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     <div className={styles.publicationsTableContainer}>
       <div className={styles.top}>
         <p className={styles.evidenceCount}>
-          {filteredEvidence.length > 0
-            ? `Showing ${state.itemOffset + 1}-${endOffset} of ${filteredEvidence.length} ${
-                filteredEvidence.length !== publications.length ? `(${publications.length}) ` : ''
+          {publications.length > 0
+            ? `Showing ${state.itemOffset + 1}-${endOffset} of ${publications.length} ${
+                publications.length !== publications.length ? `(${publications.length}) ` : ''
               }Publications`
             : `Showing 0-0 of 0 (${publications.length}) Publications`
           }
         </p>
-        <KnowledgeLevelFilter
-          filter={state.knowledgeLevelFilter}
-          availableLevels={availableKnowledgeLevels}
-          onFilterChange={handleKnowledgeLevelFilter}
-        />
       </div>
 
       <table className={`table-body ${styles.pubsTable}`}>

@@ -15,17 +15,12 @@
   }
   .top {
     & > *:first-child {
-      padding: 20px 12px;
+      padding: 18px 10px;
       background-color: $purpleTwo;
       margin-right: 0;
       svg path {
         fill: $white;
       }
-    }
-  }
-  .middle {
-    button {
-      width: -webkit-fill-available;
     }
   }
   .sep {

@@ -1,0 +1,72 @@
+@use "@/assets/styles/variables" as *;
+
+$maxWidth: calc(640px + ($m * 2));
+
+.nodeInformationView {
+  background-color: $white;
+  .top {
+    width: 100%;
+    max-width: $maxWidth;
+    margin: 0 auto;
+  }
+  .tabListWrapper > div {
+    width: 100%;
+  }
+  .tabList {
+    width: 100%;
+    max-width: $maxWidth;
+    margin: 0 auto;
+  }
+  .tabs {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .tabFade {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .tabContent {
+    height: 100%;
+    overflow: hidden;
+    max-width: $maxWidth;
+    margin: 0 auto;
+  }
+  .information {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: $l;
+    & > .section:first-of-type {
+      padding-top: 0;
+      border-top: none;
+    }
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: $xs;
+      border-top: 1px solid $midGray;
+      padding: $m 0;
+      & > p:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .sectionTitle {
+    font-size: $subOneSize;
+    font-weight: 800;
+    margin-bottom: 0;
+    .subtitle {
+      color: $darkGray;
+      font-weight: 400;
+    }
+  }
+  .nodeTypeIcon {
+    display: flex;
+    gap: $xxs;
+    align-items: center;
+  }
+}

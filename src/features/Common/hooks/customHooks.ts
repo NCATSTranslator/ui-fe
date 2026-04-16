@@ -287,6 +287,8 @@ export const useTextStream = (
   };
 
   const { isError, refetch, data, error } = useQuery({
+    // queryKey is intentionally static; query is triggered manually via refetch
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ['textStream'],
     queryFn: () => {
       abortControllerRef.current = new AbortController();
@@ -294,7 +296,7 @@ export const useTextStream = (
     },
     enabled: false,
     refetchOnWindowFocus: false,
-    retry: 3
+    retry: 3,
   });
 
   useEffect(() => {

@@ -1,14 +1,16 @@
-import { FC, ReactNode, useCallback, useMemo, useEffect } from "react";
+import { FC, ReactNode, useCallback, useEffect } from "react";
 import styles from './ContextPanel.module.scss';
 import Button from "@/features/Core/components/Button/Button";
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { SidebarItemId } from "@/features/Sidebar/types/sidebar";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 interface ContextPanelProps {
   activePanelId: SidebarItemId | 'none';
   buttonComponent?: ReactNode;
   panel: ReactNode;
+  reduceSpacing?: boolean;
   title: ReactNode;
 }
 
@@ -16,14 +18,10 @@ const ContextPanel: FC<ContextPanelProps> = ({
   activePanelId,
   buttonComponent,
   panel,
+  reduceSpacing,
   title
 }) => {
   const { closePanel, setSelectedProjectMode, isSelectedProjectMode } = useSidebar();
-
-  const reduceSpacing = useMemo(() => {
-    if(activePanelId === 'filters') return true;
-    return false;
-  }, [activePanelId]);
 
   const handleClosePanel = useCallback(() => {
     closePanel();
@@ -37,7 +35,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
   }, [closePanel, setSelectedProjectMode, isSelectedProjectMode, activePanelId]);
 
   return (
-    <div className={`${styles.contextPanel}  ${reduceSpacing && styles.reduceSpacing}`}>
+    <div className={joinClasses(styles.contextPanel, reduceSpacing && styles.reduceSpacing)}>
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
         <div className={styles.buttonContainer}>

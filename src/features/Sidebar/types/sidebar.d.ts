@@ -43,6 +43,7 @@ export type SidebarItem = {
   buttonComponentFactory?: () => ReactNode;
   tooltipText?: string;
   noUserTooltipText?: string;
+  reduceSpacing?: boolean;
 };
 
 export type SidebarRegistrationOptions = {
@@ -59,4 +60,22 @@ export type SidebarRegistrationOptions = {
   ariaLabel?: string;
   autoOpen?: boolean;
   dependencies?: readonly unknown[];
+  reduceSpacing?: boolean;
+}
+
+export type HelpPanelItem = {
+  id: string;
+  title: string;
+  component: ReactNode;
+}
+
+export type FAQItemParagraph = {
+  text: string;
+  anchor?: string;
+}
+
+export type FAQItem = {
+  id: string;
+  title: string;
+  paragraphs: (string | FAQItemParagraph)[];
 }

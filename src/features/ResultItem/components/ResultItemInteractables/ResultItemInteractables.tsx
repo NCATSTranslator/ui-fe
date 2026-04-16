@@ -23,7 +23,6 @@ interface ResultItemInteractablesProps {
   hasUser: boolean;
   isBookmarked: boolean;
   isEven: boolean;
-  isExpanded: boolean;
   isPathfinder: boolean;
   nameString: string;
   result: Result;
@@ -42,7 +41,6 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   hasUser,
   isBookmarked,
   isEven,
-  isExpanded,
   isPathfinder,
   nameString,
   result,
@@ -141,7 +139,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
           />
           
           <ShareButton
-            isExpanded={isExpanded}
+            isExpanded={false}
             onShareClick={handleOpenResultShare}
             nameStringNoApostrophes={nameStringNoApostrophes}
           />

@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
-import { formatBiolinkNode, getIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
+import { formatBiolinkNode, getNodeIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
 import Highlighter from "react-highlight-words";
 import ArrowIcon from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 
@@ -12,20 +12,19 @@ type ResultItemNameProps = {
   item: Result;
   activeEntityFilters: string[];
   nameString: string;
-  ResultItemStyles: { [key: string]: string;};
 }
 
-const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString, ResultItemStyles }) => {
+const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subjectNode, objectNode, item, activeEntityFilters, nameString }) => {
 
   if(!subjectNode || !objectNode) {
     console.warn("Cannot generate result item name, subject or object node prop is missing."); 
     return null;
   }
 
-  const icon: ReactNode = getIcon(subjectNode.types[0]);
+  const icon: ReactNode = getNodeIcon(subjectNode.types[0]);
   const pathfinderNameArray = (isPathfinder) ? item.drug_name.split("/") : null;
   const subjectIcon: ReactNode | null = subjectNode?.types.length > 0 ? icon : null;
-  const objectIcon: ReactNode | null = objectNode?.types.length > 0 ? getIcon(objectNode.types[0]) : null;
+  const objectIcon: ReactNode | null = objectNode?.types.length > 0 ? getNodeIcon(objectNode.types[0]) : null;
 
   const getPFNameString = (index: number, isNotLastItem: boolean, name: string, subject: ResultNode, object: ResultNode ) => {
     let pfNameString = "";
@@ -61,14 +60,14 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
                     }
                     {
                       i !== 0 && isNotLastItem &&
-                      getIcon(originalBiolinkName)
+                      getNodeIcon(originalBiolinkName)
                     }
                     <Highlighter
                       highlightClassName="highlight"
                       searchWords={activeEntityFilters}
                       autoEscape={true}
                       textToHighlight={pfNameString}
-                      className={`${styles.name} ${ResultItemStyles.name}`}
+                      className={`${styles.name}`}
                     />
                     {
                       (isNotLastItem) &&
@@ -81,8 +80,8 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
           </>
         :
           <>
-            <span className={ResultItemStyles.icon}>{icon}</span>
-            <span className={ResultItemStyles.name} >
+            <span className={styles.icon}>{icon}</span>
+            <span className={styles.name}>
               <Highlighter
                 highlightClassName="highlight"
                 searchWords={activeEntityFilters}
