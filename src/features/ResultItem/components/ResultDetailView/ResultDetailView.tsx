@@ -22,8 +22,8 @@ import styles from './ResultDetailView.module.scss';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { sortTagsBySelected, handleTagClick } from '@/features/ResultItem/utils/utilities';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
+import { handleTagClick } from '@/features/ResultItem/utils/utilities';
 import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
@@ -34,6 +34,7 @@ const ResultDetailView: FC = () => {
   const queryId = getDataFromQueryVar("q", decodedParams);
   const resultSet = useSelector(getResultSetById(queryId));
   const queryStatus = useSelector(getQueryStatusById(queryId));
+  const config = useSelector(currentConfig);
 
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
@@ -67,7 +68,7 @@ const ResultDetailView: FC = () => {
     userSaves,
   } = useResultListContext();
 
-
+  const hasSummary = (queryType?.id === 0 && config?.include_summarization) || false;
   const [graphActive, setGraphActive] = useState(false);
   const [selectedPaths] = useState<Set<Path> | null>(null);
 
@@ -176,6 +177,12 @@ const ResultDetailView: FC = () => {
             isEven={false}
             isPathfinder={isPathfinder}
             nameString={nameString}
+            result={result}
+            hasSummary={hasSummary}
+            pk={pk}
+            diseaseId={objectNode?.id || ""}
+            diseaseName={objectNode?.names[0] || ""}
+            diseaseDescription={objectNode?.descriptions[0] || ""}
           />
           <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
             <span className={styles.evidenceLink}>

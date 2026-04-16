@@ -483,7 +483,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
             :
               <Query
                 isResults
-                loading={isLoading}
                 initPresetTypeObject={presetTypeObject}
                 initNodeIdParam={nodeIdParam}
                 initNodeLabelParam={nodeLabelParam}
