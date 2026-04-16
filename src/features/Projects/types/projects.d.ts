@@ -1,3 +1,5 @@
+import { checkProperties, isObject } from "@/features/Common/types/checkers";
+
 export type ProjectCreate = {
   title: string;
   pks: string[];
@@ -115,239 +117,113 @@ export type ModalObject = {
 
 export type DataCardLocation = "list" | "detail" | "queries" | "trash";
 
-export const isProjectRaw = (obj: unknown): obj is ProjectRaw => {
-  if (typeof obj !== 'object' || obj === null) {
-    console.warn('isProjectRaw: Object is not an object or is null', obj);
+export const isProjectRaw = (obj: unknown, warn = true): obj is ProjectRaw => {
+  if (!isObject(obj)) {
+    if (warn) console.warn("[isProjectRaw] expected object, got:", typeof obj, obj);
     return false;
   }
-  
-  if (!('id' in obj)) {
-    console.warn('isProjectRaw: Missing "id" property', obj);
-    return false;
-  }
-  
-  if (!('data' in obj)) {
-    console.warn('isProjectRaw: Missing "data" property', obj);
-    return false;
-  }
-  
-  const data = (obj as unknown).data;
-  if (typeof data !== 'object' || data === null) {
-    console.warn('isProjectRaw: "data" property is not an object or is null', data);
-    return false;
-  }
-  
-  if (!('pks' in data)) {
-    console.warn('isProjectRaw: Missing "data.pks" property', data);
-    return false;
-  }
-  
-  if (!('title' in data)) {
-    console.warn('isProjectRaw: Missing "data.title" property', data);
-    return false;
-  }
-  
-  if (!('deleted' in obj)) {
-    console.warn('isProjectRaw: Missing "deleted" property', obj);
-    return false;
-  }
-  
-  if (!('save_type' in obj)) {
-    console.warn('isProjectRaw: Missing "save_type" property', obj);
-    return false;
-  }
-  
-  if (!('time_created' in obj)) {
-    console.warn('isProjectRaw: Missing "time_created" property', obj);
-    return false;
-  }
-  
-  if (!('time_updated' in obj)) {
-    console.warn('isProjectRaw: Missing "time_updated" property', obj);
-    return false;
-  }
-  
-  return true;
+  if (!checkProperties("isProjectRaw", obj, [
+    ["id", "id" in obj, "present", obj.id],
+    ["data", isObject(obj.data), "object", obj.data],
+    ["deleted", "deleted" in obj, "present", obj.deleted],
+    ["save_type", "save_type" in obj, "present", obj.save_type],
+    ["time_created", "time_created" in obj, "present", obj.time_created],
+    ["time_updated", "time_updated" in obj, "present", obj.time_updated],
+  ], warn)) return false;
+
+  const data = obj.data as Record<string, unknown>;
+  return checkProperties("isProjectRaw.data", data, [
+    ["pks", "pks" in data, "present", data.pks],
+    ["title", "title" in data, "present", data.title],
+  ], warn);
 };
 
-export const isProject = (obj: unknown): obj is Project => {
-  if (!isProjectRaw(obj)) {
-    console.warn('isProject: Failed ProjectRaw validation', obj);
-    return false;
-  }
-  
-  if (!('bookmark_count' in obj)) {
-    console.warn('isProject: Missing "bookmark_count" property', obj);
-    return false;
-  }
-  
-  if (!('note_count' in obj)) {
-    console.warn('isProject: Missing "note_count" property', obj);
-    return false;
-  }
-  
-  return true;
+export const isProject = (obj: unknown, warn = true): obj is Project => {
+  if (!isProjectRaw(obj, warn)) return false;
+  return checkProperties("isProject", obj, [
+    ["bookmark_count", "bookmark_count" in obj, "present", (obj as Record<string, unknown>).bookmark_count],
+    ["note_count", "note_count" in obj, "present", (obj as Record<string, unknown>).note_count],
+  ], warn);
 };
 
-export const isProjectArray = (obj: unknown): obj is Project[] => {
+export const isProjectArray = (obj: unknown, warn = true): obj is Project[] => {
   if (!Array.isArray(obj)) {
-    console.warn('isProjectArray: Object is not an array', obj);
+    if (warn) console.warn("[isProjectArray] expected array, got:", typeof obj, obj);
     return false;
   }
-  
-  const invalidIndex = obj.findIndex(item => !isProject(item));
+  const invalidIndex = obj.findIndex(item => !isProject(item, warn));
   if (invalidIndex !== -1) {
-    console.warn(`isProjectArray: Item at index ${invalidIndex} failed Project validation`, obj[invalidIndex]);
+    if (warn) console.warn(`[isProjectArray] item at index ${invalidIndex} failed validation`, obj[invalidIndex]);
     return false;
   }
-  
   return true;
 };
 
-export const isProjectRawArray = (obj: unknown): obj is ProjectRaw[] => {
+export const isProjectRawArray = (obj: unknown, warn = true): obj is ProjectRaw[] => {
   if (!Array.isArray(obj)) {
-    console.warn('isProjectRawArray: Object is not an array', obj);
+    if (warn) console.warn("[isProjectRawArray] expected array, got:", typeof obj, obj);
     return false;
   }
-  
-  const invalidIndex = obj.findIndex(item => !isProjectRaw(item));
+  const invalidIndex = obj.findIndex(item => !isProjectRaw(item, warn));
   if (invalidIndex !== -1) {
-    console.warn(`isProjectRawArray: Item at index ${invalidIndex} failed ProjectRaw validation`, obj[invalidIndex]);
+    if (warn) console.warn(`[isProjectRawArray] item at index ${invalidIndex} failed validation`, obj[invalidIndex]);
     return false;
   }
-  
   return true;
 };
 
-export const isUserQueryObjectArray = (obj: unknown): obj is UserQueryObject[] => {
+export const isUserQueryObjectArray = (obj: unknown, warn = true): obj is UserQueryObject[] => {
   if (!Array.isArray(obj)) {
-    console.warn('isUserQueryObjectArray: Object is not an array', obj);
+    if (warn) console.warn("[isUserQueryObjectArray] expected array, got:", typeof obj, obj);
     return false;
   }
-  
-  for (const item of obj) {
-    if (!isUserQueryObject(item)) {
-      console.warn('isUserQueryObjectArray: Item failed UserQueryObject validation', item);
-      return false;
-    }
+  const invalidIndex = obj.findIndex(item => !isUserQueryObject(item, warn));
+  if (invalidIndex !== -1) {
+    if (warn) console.warn(`[isUserQueryObjectArray] item at index ${invalidIndex} failed validation`, obj[invalidIndex]);
+    return false;
   }
-  
   return true;
 };
 
-export const isUserQueryObject = (obj: unknown): obj is UserQueryObject => {
-  if (typeof obj !== 'object' || obj === null) {
-    console.warn('isUserQueryObject: Object is not an object or is null', obj);
+export const isUserQueryObject = (obj: unknown, warn = true): obj is UserQueryObject => {
+  if (!isObject(obj)) {
+    if (warn) console.warn("[isUserQueryObject] expected object, got:", typeof obj, obj);
     return false;
   }
-  
-  if (!('sid' in obj)) {
-    console.warn('isUserQueryObject: Missing "sid" property', obj);
-    return false;
-  }
+  if (!checkProperties("isUserQueryObject", obj, [
+    ["sid", "sid" in obj, "present", obj.sid],
+    ["status", "status" in obj, "present", obj.status],
+    ["data", isObject(obj.data), "object", obj.data],
+  ], warn)) return false;
 
-  if (!('status' in obj)) {
-    console.warn('isUserQueryObject: Missing "status" property', obj);
-    return false;
-  }
+  const data = obj.data as Record<string, unknown>;
+  if (!checkProperties("isUserQueryObject.data", data, [
+    ["aras", "aras" in data, "present", data.aras],
+    ["bookmark_ids", "bookmark_ids" in data, "present", data.bookmark_ids],
+    ["deleted", "deleted" in data, "present", data.deleted],
+    ["note_count", "note_count" in data, "present", data.note_count],
+    ["qid", "qid" in data, "present", data.qid],
+    ["query", isObject(data.query), "object", data.query],
+    ["time_created", "time_created" in data, "present", data.time_created],
+    ["time_updated", "time_updated" in data, "present", data.time_updated],
+    ["title", "title" in data, "present", data.title],
+  ], warn)) return false;
 
-  if (!('data' in obj)) {
-    console.warn('isUserQueryObject: Missing "data" property', obj);
-    return false;
-  }
-
-  const data = (obj as unknown).data;
-  if (typeof data !== 'object' || data === null) {
-    console.warn('isUserQueryObject: "data" property is not an object or is null', data);
-    return false;
-  }
-
-  if (!('aras' in data)) {
-    console.warn('isUserQueryObject: Missing "data.aras" property', data);
-    return false;
-  }
-
-  if (!('bookmark_ids' in data)) {
-    console.warn('isUserQueryObject: Missing "data.bookmark_ids" property', data);
-    return false;
-  }
-
-  if (!('deleted' in data)) {
-    console.warn('isUserQueryObject: Missing "data.deleted" property', data);
-    return false;
-  }
-
-  if (!('note_count' in data)) {
-    console.warn('isUserQueryObject: Missing "data.note_count" property', data);
-    return false;
-  }
-
-  if (!('qid' in data)) {
-    console.warn('isUserQueryObject: Missing "data.qid" property', data);
-    return false;
-  }
-
-  if (!('query' in data)) {
-    console.warn('isUserQueryObject: Missing "data.query" property', data);
-    return false;
-  }
-
-  const query = data.query;
-  if (typeof query !== 'object' || query === null) {
-    console.warn('isUserQueryObject: "data.query" property is not an object or is null', query);
-    return false;
-  }
-
-  if (!('type' in query)) {
-    console.warn('isUserQueryObject: Missing "data.query.type" property', query);
-    return false;
-  }
-
-  // Validate type is one of the allowed values
-  const type = (query as unknown).type;
-  if (typeof type !== 'string' || !['drug', 'gene', 'chemical', 'pathfinder'].includes(type)) {
-    console.warn('isUserQueryObject: "data.query.type" must be one of: drug, gene, chemical, pathfinder', type);
-    return false;
-  }
-
-  if (!('time_created' in data)) {
-    console.warn('isUserQueryObject: Missing "data.time_created" property', data);
-    return false;
-  }
-
-  if (!('time_updated' in data)) {
-    console.warn('isUserQueryObject: Missing "data.time_updated" property', data);
-    return false;
-  }
-
-  if (!('title' in data)) {
-    console.warn('isUserQueryObject: Missing "data.title" property', data);
-    return false;
-  }
-  
-  return true;
+  const query = data.query as Record<string, unknown>;
+  const validTypes = ['drug', 'gene', 'chemical', 'pathfinder'];
+  return checkProperties("isUserQueryObject.data.query", query, [
+    ["type", typeof query.type === 'string' && validTypes.includes(query.type), `one of: ${validTypes.join(', ')}`, query.type],
+  ], warn);
 };
 
-export const isProjectUpdate = (obj: unknown): obj is ProjectUpdate => {
-  if (typeof obj !== 'object' || obj === null) {
-    console.warn('isProjectUpdate: Object is not an object or is null', obj);
+export const isProjectUpdate = (obj: unknown, warn = true): obj is ProjectUpdate => {
+  if (!isObject(obj)) {
+    if (warn) console.warn("[isProjectUpdate] expected object, got:", typeof obj, obj);
     return false;
   }
-  
-  if (!('id' in obj)) {
-    console.warn('isProjectUpdate: Missing "id" property', obj);
-    return false;
-  }
-
-  if (!('title' in obj)) {
-    console.warn('isProjectUpdate: Missing "title" property', obj);
-    return false;
-  }
-  
-  if (!('pks' in obj)) {
-    console.warn('isProjectUpdate: Missing "pks" property', obj);
-    return false;
-  }
-  
-  return true;
+  return checkProperties("isProjectUpdate", obj, [
+    ["id", "id" in obj, "present", obj.id],
+    ["title", "title" in obj, "present", obj.title],
+    ["pks", "pks" in obj, "present", obj.pks],
+  ], warn);
 };

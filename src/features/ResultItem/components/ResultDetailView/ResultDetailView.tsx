@@ -14,7 +14,7 @@ import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
-import { resultToCytoscape } from '@/features/ResultItem/utils/graphFunctions';
+import { resultToGraphData } from '@/features/ResultGraphView/utils/graphFunctions';
 import ResultDetailViewSkeleton from '@/features/ResultItem/components/ResultDetailViewSkeleton/ResultDetailViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
@@ -26,7 +26,7 @@ import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { sortTagsBySelected, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
 
-const GraphView = lazy(() => import('@/features/ResultItem/components/GraphView/GraphView'));
+const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
 const ResultDetailView: FC = () => {
   const { resultId } = useParams();
@@ -65,13 +65,11 @@ const ResultDetailView: FC = () => {
     shouldUpdateResultsAfterBookmark,
     updateUserSaves,
     userSaves,
-    zoomKeyDown
   } = useResultListContext();
 
 
   const [graphActive, setGraphActive] = useState(false);
-  const [selectedPaths, setSelectedPaths] = useState<Set<Path> | null>(null);
-  const handleClearSelectedPaths = useCallback(() => setSelectedPaths(null), []);
+  const [selectedPaths] = useState<Set<Path> | null>(null);
 
   const firstPath = result?.paths[0];
   const firstPathObj = typeof firstPath === 'string' ? null : firstPath;
@@ -129,9 +127,9 @@ const ResultDetailView: FC = () => {
   }, [result, setShareResultID, setShareModalOpen]);
 
   const graph = useMemo(() => {
-    if (!resultSet || !result) return { nodes: [], edges: [] };
-    return resultToCytoscape(result, resultSet.data);
-  }, [result, resultSet]);
+    if (!resultSet?.data || !result) return { nodes: {}, edges: {} };
+    return resultToGraphData(result, resultSet.data);
+  }, [result, resultSet?.data]);
 
   if (!queryId) {
     return <ViewNotFound entity="query" id="missing" />;
@@ -265,11 +263,8 @@ const ResultDetailView: FC = () => {
           <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
             <GraphView
               graph={graph}
-              result={result}
-              resultSet={resultSet}
-              clearSelectedPaths={handleClearSelectedPaths}
               active={graphActive}
-              zoomKeyDown={zoomKeyDown}
+              resultSet={resultSet ?? undefined}
             />
           </Suspense>
         </Tab>

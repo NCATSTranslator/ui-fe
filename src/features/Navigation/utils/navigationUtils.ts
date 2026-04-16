@@ -2,7 +2,7 @@ import { redirect } from 'react-router-dom';
 import { decodeBase64Param, encodeParams } from '@/features/Common/utils/web';
 import { getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { Result, ResultEdge, ResultSet, Path } from '@/features/ResultList/types/results.d';
-import { getCompressedEdge, hasSupport, intToChar, intToNumeral } from '@/features/Common/utils/utilities';
+import { getCompressedEdge, intToChar, intToNumeral } from '@/features/Common/utils/utilities';
 
 export const MAIN_CONTENT_ELEMENT_ID = 'main';
 
@@ -57,7 +57,7 @@ const findInSupportChain = (
   for (let i = 1; i < parentPath.subgraph.length; i += 2) {
     const edgeId = parentPath.subgraph[i];
     const edge = getEdgeById(resultSet, edgeId);
-    if (!edge || !hasSupport(edge)) continue;
+    if (!edge || !edge.inferred) continue;
 
     const supportPaths = edge.support;
     if (!Array.isArray(supportPaths)) continue;

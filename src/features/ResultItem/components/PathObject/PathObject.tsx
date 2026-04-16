@@ -1,15 +1,17 @@
 import styles from './PathObject.module.scss';
 import { FC, RefObject, useCallback, useContext, useId } from 'react';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import NodeTooltipContent from '@/features/Core/components/Tooltips/NodeTooltipContent';
+import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipMappers';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
-import { formatBiolinkEntity, formatBiolinkNode, getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
-import { Path, PathFilterState, isResultNode, isResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results.d';
+import { isResultNode, isResultEdge } from '@/features/ResultList/types/checkers';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
-import { getEdgeById, getNodeById, getNodeSpecies, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
+import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
@@ -61,37 +63,20 @@ const PathObject: FC<PathObjectProps> = ({
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id;
   const pathObject = (isNodeIndex(index)) ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
-  const isNode = isResultNode(pathObject);
-  const isEdge = isResultEdge(pathObject);
+  const isNode = isResultNode(pathObject, false);
+  const isEdge = isResultEdge(pathObject, false);
   const { isEdgeSeen } = useSeenStatus(pk);
   const isSeen = isEdge && isEdgeSeen(pathObject.id);
-  const type = isNode ? pathObject?.types[0].replace("biolink:", ""): '';
   const uid = useId();
-  let nameString = '';
-  let typeString = '';
-  if(isNode) {
-    nameString = formatBiolinkNode(pathObject.names[0], type, getNodeSpecies(pathObject));
-    typeString = formatBiolinkEntity(type);
-  }
+  const nodeTooltipProps = isNode && pathObject ? nodeToTooltipProps(pathObject) : null;
   const hoverContext = useContext(HoverContext);
-  if (!hoverContext) throw new Error('useHoverPathObject must be used within a HoverProvider');
+  if (!hoverContext) {
+    throw new Error("PathObject must be rendered inside PathView's HoverContext provider");
+  }
   const { hoveredItem, setHoveredItem } = hoverContext;
   const isHighlighted = hoveredItem?.id === itemID;
   const { getHoverHandlers } = useHoverPathObject(setHoveredItem);
   const hoverHandlers = (isEdge) ? getHoverHandlers(true, itemID, index) : getHoverHandlers(false, itemID, index);
-
-  const provenance = (!!pathObject?.provenance && pathObject.provenance.length > 0) ? pathObject.provenance[0] : false;
-  const description = (isNode && !!pathObject?.descriptions[0]) ? pathObject.descriptions[0] : '';
-
-  if (!pathObject) {
-    console.warn(`Could not generate PathObject, pathObject is ${String(pathObject)}`);
-    return null;
-  }
-  if (!isNode && !isEdge) {
-    console.warn('Could not generate PathObject, pathObject does not match any known type:');
-    console.warn(pathObject);
-    return null;
-  }
 
   const nodeClass = joinClasses(
     styles.nameContainer,
@@ -112,6 +97,16 @@ const PathObject: FC<PathObjectProps> = ({
       console.warn('Could not navigate to node, resultId is not set and no provenance is available');
     }
   }, [resultId, resultsNavigate]);
+
+  if (!pathObject) {
+    console.warn(`Could not generate PathObject, pathObject is ${String(pathObject)}`);
+    return null;
+  }
+  if (!isNode && !isEdge) {
+    console.warn('Could not generate PathObject, pathObject does not match any known type:');
+    console.warn(pathObject);
+    return null;
+  }
 
   return (
     <>
@@ -135,23 +130,13 @@ const PathObject: FC<PathObjectProps> = ({
                     highlightClassName="highlight"
                     searchWords={activeEntityFilters}
                     autoEscape={true}
-                    textToHighlight={nameString}
+                    textToHighlight={nodeTooltipProps?.nameString ?? ''}
                   />
                 </span>
               </span>
               <PathArrow className={`${!!pathViewStyles && pathViewStyles.icon} ${styles.icon}`}/>
               <Tooltip id={`${uid}`}>
-                <div onClick={(e)=> e.stopPropagation()}>
-                  <span><strong>{nameString}</strong> ({typeString})</span>
-                  <span className={styles.description}>{description}</span>
-                  {
-                    provenance && typeof provenance === "string" &&
-                    <a href={provenance} target="_blank" rel='noreferrer' className={styles.provenance}>
-                      <ExternalLink/>
-                      <span>{provenance}</span>
-                    </a>
-                  }
-                </div>
+                {nodeTooltipProps && <NodeTooltipContent {...nodeTooltipProps} />}
               </Tooltip>
             </span>
           :

@@ -16,6 +16,7 @@ import {
 } from "@/features/ResultDownload/types/download.d";
 import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
 import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
+import { displayScore } from "@/features/ResultList/utils/scoring";
 
 /**
  * Returns results based on the specified scope
@@ -229,6 +230,8 @@ const cleanResult = (result: Result): ExportedResult => ({
   subject: result.subject,
   object: result.object,
   paths: result.paths.map(p => (typeof p === 'string' ? p : p.id || '')),
+  score: result.score ? displayScore(result.score, 2) : '0.00',
+  scoreComponents: result.scores
 });
 
 /**

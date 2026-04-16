@@ -9,7 +9,7 @@ type RadioProps = {
   value?: string | number | undefined;
   checked?: boolean;
   children?: ReactNode;
-  handleClick: ()=>void;
+  handleClick?: ()=>void;
 }
 
 const Radio: FC<RadioProps> = ({
@@ -27,7 +27,7 @@ const Radio: FC<RadioProps> = ({
   let radioClass = joinClasses(styles.radio, isCheckedClass, className);
   let labelClass = joinClasses(styles.label, labelClassName);
   
-  const handleChange = () => {
+  const onChange = () => {
     setIsChecked(!isChecked);
   }
 
@@ -35,7 +35,7 @@ const Radio: FC<RadioProps> = ({
     setIsChecked(checked);
   }, [checked])
 
-  handleClick = (!!handleClick) ? handleClick : ()=>{ handleChange(); console.log('No handleClick function provided.') };
+  const onClick = (!!handleClick) ? handleClick : ()=>{ onChange(); console.log('No handleClick function provided.') };
 
   return (
     <label className={radioClass}>
@@ -45,8 +45,8 @@ const Radio: FC<RadioProps> = ({
         defaultChecked={isChecked}
         name={name}
         value={value}
-        onChange={handleChange}
-        onClick={handleClick}
+        onChange={onChange}
+        onClick={onClick}
       />
       <span className={labelClass}>{children}</span>
     </label>

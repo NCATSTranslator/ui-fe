@@ -51,8 +51,10 @@ const TextInput: FC<TextInputProps> = ({
   iconRightClickToReset,
   ref
 }) => {
-  const inputRef = ref as RefObject<HTMLInputElement> || useRef<HTMLInputElement>(null);
-  const textareaRef = ref as RefObject<HTMLTextAreaElement> || useRef<HTMLTextAreaElement>(null);
+  const initInputRef = useRef<HTMLInputElement>(null);
+  const initTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = ref as RefObject<HTMLInputElement> || initInputRef;
+  const textareaRef = ref as RefObject<HTMLTextAreaElement> || initTextareaRef;
 
   const containerStyle = joinClasses(
     styles.textInputContainer,

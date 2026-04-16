@@ -20,17 +20,19 @@ const ResultItemTag: FC<ResultItemTagProps> = ({
   handleTagClick,
 }) => {
 
-  if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
   const tag = availableFilters[fid];
   const isActive = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name));
+
+  const handleClick = useCallback(() => {
+    handleTagClick(fid, tag, handleFilter);
+  }, [fid, tag, handleFilter, handleTagClick]);
+
+  if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
+
   if(!tag) {
     console.warn('No tag found for', fid);
     return null;
   }
-
-  const handleClick = useCallback(() => {
-    handleTagClick(fid, tag, handleFilter);
-  }, [tag, handleFilter, handleTagClick]);
 
   return (
     <button

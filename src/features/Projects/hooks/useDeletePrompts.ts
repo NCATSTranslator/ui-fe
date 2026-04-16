@@ -5,7 +5,7 @@
  * @returns {boolean} shouldShow - Whether the prompt should be shown
  * @returns {Function} setHideDeletePrompt - Function to set the hide delete prompt
  */
-export const useShouldShowDeletePrompt = (storageKey: string, defaultShow: boolean = true) => {
+export const getShouldShowDeletePrompt = (storageKey: string, defaultShow: boolean = true) => {
   const showDeletePrompt = localStorage.getItem(storageKey) === 'true' ? false : defaultShow;
 
   const setHideDeletePrompt = (hide: boolean) => {
@@ -24,10 +24,10 @@ export const useShouldShowDeletePrompt = (storageKey: string, defaultShow: boole
  * @returns {Object} - An object containing all the delete prompt states
  */
 export const useDeletePrompts = (promptKeys: string[]) => {
-  const prompts: Record<string, ReturnType<typeof useShouldShowDeletePrompt>> = {};
+  const prompts: Record<string, ReturnType<typeof getShouldShowDeletePrompt>> = {};
   
   promptKeys.forEach(key => {
-    prompts[key] = useShouldShowDeletePrompt(key, true);
+    prompts[key] = getShouldShowDeletePrompt(key, true);
   });
 
   return prompts;

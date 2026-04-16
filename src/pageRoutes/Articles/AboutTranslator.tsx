@@ -48,12 +48,13 @@ export const AboutTranslator = () => {
 
       <p>
         Our knowledge sources might contain information that <em>Gene A</em> affects <em>Protein B</em> and <em>Protein B</em>{" "}
-        is linked to <em>Disease C</em>. Translator’s reasoning agents can suggest a potential connection between{" "}
+        is linked to <em>Disease C</em>. Translator's reasoning agents can suggest a potential connection between{" "}
         <em>Gene A</em> and <em>Disease C</em> even if no direct connection is recorded in the dataset. By following these
         logical pathways, reasoners can uncover hidden patterns that may lead to new discoveries, allowing researchers to
         generate fresh hypotheses and explore potential breakthroughs from existing data.
       </p>
 
+      {/* eslint-disable-next-line no-restricted-syntax */}
       <p style={{textAlign: 'center', margin: '30px auto'}}><img src={HelpEdgeDiagram} style={{display: 'block'}} alt="Gene A to Protein B to Disease C indicates an indirect relationship between Gene A and Disease C" /></p>
 
       <p>Each agent has different methods of reasoning:</p>

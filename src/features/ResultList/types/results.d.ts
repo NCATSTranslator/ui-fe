@@ -85,6 +85,7 @@ export interface ResultEdge {
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
   id: string;
+  inferred: boolean;
   knowledge_level: KnowledgeLevel;
   metadata: EdgeMetadata;
   // nodeID
@@ -109,9 +110,6 @@ export interface RankedEdge extends ResultEdge {
 
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
 export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
-
-const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
-const isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
 
 export type Annotation = {
   chemical: ChemicalAnnotation;
@@ -229,119 +227,6 @@ export type ScoreWeights = {
   noveltyWeight: number;
   clinicalWeight: number;
 }
-
-export const isResultEdge = (obj: unknown): obj is ResultEdge => {
-  return (
-    tc.isObject(obj) &&
-    tc.isStringArray(obj.aras) &&
-    tc.missable(obj.description, tc.isString) &&
-    tc.isString(obj.id) &&
-    tc.isBoolean(obj.is_root) &&
-    tc.isString(obj.knowledge_level) &&
-    __isEdgeMetadata(obj.metadata) &&
-    tc.isString(obj.object) &&
-    tc.isString(obj.predicate) &&
-    tc.isString(obj.predicate_url) &&
-    tc.makeIsHomogeneousArray(isProvenance)(obj.provenance) &&
-    tc.isObject(obj.publications) &&
-    tc.isString(obj.subject) &&
-    tc.isStringArray(obj.support) &&
-    tc.isString(obj.type)
-  );
-
-  function __isEdgeMetadata(obj: unknown): obj is EdgeMetadata {
-    return (
-      tc.isObject(obj) &&
-      tc.isStringArray(obj.edge_bindings) &&
-      tc.nullable(obj.inverted_id, tc.isString) &&
-      tc.isBoolean(obj.is_root)
-    );
-  }
-}
-
-export const isResultNode = (obj: unknown): obj is ResultNode => {
-  return (
-    tc.isObject(obj) &&
-    __isAnnotation(obj.annotations) &&
-    tc.isStringArray(obj.aras) &&
-    tc.isStringArray(obj.curies) &&
-    tc.isStringArray(obj.descriptions) &&
-    tc.isString(obj.id) &&
-    tc.isStringArray(obj.names) &&
-    tc.isStringArray(obj.provenance) &&
-    tc.isStringArray(obj.synonyms) &&
-    tc.isStringArray(obj.types)
-  );
-
-  function __isAnnotation(obj: unknown): obj is Annotation {
-    return (
-      tc.isObject (obj) &&
-      __isChemicalAnnotation(obj.chemical) &&
-      __isDiseaseAnnotation(obj.disease) &&
-      __isGeneAnnotation(obj.gene)
-    );
-  }
-
-  function __isChemicalAnnotation(obj: unknown): obj is ChemicalAnnotation {
-    return (
-      tc.isObject (obj) &&
-      tc.nullable(obj.approval, tc.isNumber) &&
-      tc.nullable(obj.clinical_trials, tc.isStringArray) &&
-      tc.nullable(obj.descriptions, tc.isStringArray) &&
-      tc.nullable(obj.indications, tc.isStringArray) &&
-      tc.nullable(obj.otc_status, (e) => tc.isObject(e) && tc.isNumber(e.code) && tc.isString(e.label)) &&
-      tc.nullable(obj.other_names,
-        e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic)) &&
-      tc.nullable(obj.roles,
-        tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.id) && tc.isString(e.name)))
-    );
-  }
-
-  function __isDiseaseAnnotation(obj: unknown): obj is DiseaseAnnotation {
-    return (
-      tc.isObject(obj) &&
-      tc.nullable(obj.curies, tc.isStringArray) &&
-      tc.nullable(obj.descriptions, tc.isStringArray)
-    );
-  }
-
-  function __isGeneAnnotation(obj: unknown): obj is GeneAnnotation {
-    return (
-      tc.isObject(obj) &&
-      tc.nullable(obj.descriptions, tc.isStringArray) &&
-      tc.nullable(obj.name, tc.isString) &&
-      tc.nullable(obj.species, isSpecies) &&
-      tc.nullable(obj.tdl, isTdl)
-    );
-  }
-}
-
-
-export const isPath = (obj: unknown): obj is Path => {
-  return (
-    tc.isObject(obj) &&
-    tc.isStringArray(obj.aras) &&
-    tc.missable(obj.compressedIDs, tc.isStringArray) &&
-    tc.missable(obj.compressedSubgraph,
-      tc.makeIsHomogeneousArray((e: unknown) => tc.isString(e) || tc.isStringArray(e))) &&
-    tc.missable(obj.highlighted, tc.isBoolean) &&
-    tc.missable(obj.id, tc.isString) &&
-    tc.missable(obj.score, tc.isNumber) &&
-    tc.isStringArray(obj.subgraph) &&
-    isTags(obj.tags)
-  );
-}
-
-export const isTags = (obj: unknown): obj is Tags => {
-  if (!tc.isObject(obj)) return false;
-  for (const key in obj) {
-    const tag = (obj as Record<string, unknown>)[key];
-    if (!tc.nullable(tag, (t) => tc.isObject(t) && tc.isString(t.name) && tc.isString(t.value))) {
-      return false;
-    }
-  }
-  return true;
-};
 
 export interface ResultListLoadingData {
   handleResultsRefresh: () => void;

@@ -1,7 +1,7 @@
 import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, isResultEdge, Tags } from "@/features/ResultList/types/results.d";
-import { cloneDeep } from "lodash";
-import { hasSupport } from "@/features/Common/utils/utilities";
+import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
+import { isResultEdge } from "@/features/ResultList/types/checkers";
+import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 
@@ -17,8 +17,6 @@ export const getARATagsFromResultTags = (tags: Tags): string[] => {
   if (!tags) return araTags;
 
   for (const [tagKey] of Object.entries(tags)) {
-    // Check if tagValue exists and has a value property
-
     // Check if this is an ARA tag by looking for the 'ara' family in the tag key
     if (tagKey.includes('/ara/')) {
       // Extract the portion after "infores:" from the tag value
@@ -265,7 +263,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
       } else {
         const edge = getEdgeById(resultSet, item);
         // edges return 'indirect' or 'direct' based on presence of support
-        return (hasSupport(edge)) ? "indirect" : "direct";
+        return (edge?.inferred ?? false) ? "indirect" : "direct";
       }
     })
   };
@@ -376,7 +374,7 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
  * @returns {boolean} - Does the path have any edges with support paths attached.
  */
 export const isPathInferred = (resultSet: ResultSet, path: Path) => {
-  if(!path || path == null)
+  if(!path || path === null)
     return false;
 
   for(const [i, itemID] of path.subgraph.entries()) {
@@ -387,7 +385,7 @@ export const isPathInferred = (resultSet: ResultSet, path: Path) => {
     if(!isResultEdge(edge))
       continue;
 
-    if(hasSupport(edge))
+    if(edge.inferred)
       return true;
   }
   return false;

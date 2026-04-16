@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { currentPrefs, setCurrentPrefs, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
 import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';

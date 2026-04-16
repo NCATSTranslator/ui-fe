@@ -6,7 +6,6 @@ import { formatBiolinkEntity, joinClasses } from "@/features/Common/utils/utilit
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { cloneDeep } from 'lodash';
 import { getTagType } from '@/features/ResultFiltering/utils/filterFunctions';
 import { CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
@@ -24,11 +23,7 @@ const handleFacetChange = (onFilter: (arg: Filter) => void, filterID: string, fi
     return;
   }
 
-  const newTag = cloneDeep(filter);
-  newTag.id = filterID;
-  newTag.value = label;
-  newTag.negated = negated;
-  onFilter(newTag);
+  onFilter({ ...filter, id: filterID, value: label, negated });
 }
 
 const getRoleLinkout = (tagKey: string): string => {

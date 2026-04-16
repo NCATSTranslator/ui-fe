@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { getQueryStatusById } from '@/features/ResultList/slices/queryStatusSlice';
-import { getDataFromQueryVar, getCompressedSubgraph, getCompressedEdge, hasSupport, scrollToRef } from '@/features/Common/utils/utilities';
-import { isResultEdge, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { getDataFromQueryVar, getCompressedSubgraph, getCompressedEdge, scrollToRef } from '@/features/Common/utils/utilities';
+import { ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
+import { isResultEdge } from '@/features/ResultList/types/checkers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
@@ -88,7 +89,7 @@ const EvidenceView: FC = () => {
     setPublications,
   } = useEvidenceData({ setEdgeLabel });
 
-  const isInferred = hasSupport(selectedEdge);
+  const isInferred = selectedEdge?.inferred ?? false;
   const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
 
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false = useMemo(() => {
