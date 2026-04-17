@@ -118,13 +118,14 @@ const PathView: FC<PathViewProps> = ({
                   if(!path.id) 
                     return null;
                   const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
-                    if(displayIndirectLabel)
-                      inferredLabelDisplayed = true;
+                  if(displayIndirectLabel)
+                    inferredLabelDisplayed = true;
                   const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
-                    if(displayDirectLabel)
-                      directLabelDisplayed = true;
-                                        return (
-                      <div key={path.id || i.toString()}>
+                  if(displayDirectLabel)
+                    directLabelDisplayed = true;
+                  
+                  return (
+                    <div key={path.id || i.toString()}>
                       { displayDirectLabel && !inModal && (
                         <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
                           Direct <Information className={styles.infoIcon} />

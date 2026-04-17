@@ -25,7 +25,7 @@ const LoadingBar: FC<LoadingBarProps> = ({useIcon, disclaimerText, className, re
           : <TextCrossfade />
         }
       </div>
-      {disclaimerText && disclaimerText}
+      {!disclaimerText ? null : disclaimerText}
     </div>
   )
 }

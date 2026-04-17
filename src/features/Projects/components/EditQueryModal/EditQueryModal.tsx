@@ -112,7 +112,6 @@ const EditQueryModal: FC<EditQueryModalProps> = ({
           setLocalSelectedProjects([...localSelectedProjects, data]);
         }
         projectCreatedToast();
-        // onClose();
       },
       onError: (error) => {
         console.error('Failed to create project:', error);

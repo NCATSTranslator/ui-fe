@@ -91,8 +91,8 @@ const SidebarCard: FC<SidebarCardProps> = ({
         />
         {(bottomLeft || bottomRight) && (
           <div className={styles.bottom}>
-            {bottomLeft && bottomLeft}
-            {bottomRight && bottomRight}
+            {!bottomLeft ? null : bottomLeft}
+            {!bottomRight ? null : bottomRight}
           </div>
         )}
         {
@@ -105,7 +105,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
                 </Button>
               </OutsideClickHandler>
               <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
-                {options && options}
+                {options}
               </OptionsPane>
             </div>
           )

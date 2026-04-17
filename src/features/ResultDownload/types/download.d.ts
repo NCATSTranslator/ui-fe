@@ -13,6 +13,8 @@ export interface DownloadOptions {
   excludeNodeFields?: string[];
 }
 
+export type CSVValue = string | number | null | undefined;
+
 // Exported entity types with internal fields stripped
 export interface ExportedNode {
   id: string;

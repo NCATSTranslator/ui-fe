@@ -1,4 +1,4 @@
-import { UserQueryObject, SortField, SortDirection, Project, ProjectRaw } from '@/features/Projects/types/projects.d';
+import { UserQueryObject, SortField, SortDirection, Project, ProjectRaw, SortValue } from '@/features/Projects/types/projects.d';
 
 /**
  * Sorts projects based on the specified field and direction
@@ -9,8 +9,8 @@ import { UserQueryObject, SortField, SortDirection, Project, ProjectRaw } from '
  */
 export const sortProjects = (projects: Project[], sortField: SortField, sortDirection: SortDirection): Project[] => {
   return [...projects].sort((a, b) => {
-    let aValue: string | Date | number;
-    let bValue: string | Date | number;
+    let aValue: SortValue;
+    let bValue: SortValue;
 
     switch (sortField) {
       case 'name':
@@ -87,8 +87,8 @@ export const filterAndSortProjects = (projects: Project[], queries: UserQueryObj
 */
 export const sortQueries = (queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection): UserQueryObject[] => {
   return [...queries].sort((a, b) => {
-    let aValue: string | Date | number;
-    let bValue: string | Date | number;
+    let aValue: SortValue;
+    let bValue: SortValue;
 
     switch (sortField) {
       case 'name':

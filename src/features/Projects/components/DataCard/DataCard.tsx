@@ -133,7 +133,7 @@ const DataCard: FC<DataCardProps> = ({
                 </Button>
               </OutsideClickHandler>
               <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
-                {options && options}
+                {options}
               </OptionsPane>
             </div>
           )

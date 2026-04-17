@@ -13,7 +13,7 @@ const OptionsPane: FC<OptionsPaneProps> = ({ children, className, open, onOption
   const optionsPaneClass = joinClasses(styles.optionsPane, className, open && styles.open);
   return (
     <div className={optionsPaneClass} onClick={onOptionItemClick}>
-      {children && children}
+      {!children ? null : children}
     </div>
   );
 };

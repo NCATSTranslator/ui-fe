@@ -46,7 +46,7 @@ export const findStringMatch = (
       : getPathById(resultSet, result.paths[i] as string);
 
     if (!!path && typeof path !== 'string') {
-      const pathRank = (path && typeof path !== 'string' && path.id) ? pathRanks.get(path.id) : null;
+      const pathRank = (path.id) ? pathRanks.get(path.id) : null;
       if (!!pathRank) {
         const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0);
         matched ||= subMatch;

@@ -171,11 +171,3 @@ export const getTagFamily = (tagID: string): FilterFamily => {
 const _splitTagID = (tagID: string): string[] => {
   return tagID.split('/');
 }
-
-// const _getTagSpecifier = (tagID: string): string => {
-//   return _splitTagID(tagID)[2];
-// }
-
-// const _getFilterSpecifier = (filter: Filter): string => {
-//   return _getTagSpecifier(filter.id || '');
-// }

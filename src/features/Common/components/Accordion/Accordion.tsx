@@ -1,4 +1,4 @@
-import { FC, useEffect, useCallback, ReactNode, MouseEvent } from 'react';
+import { FC, useEffect, useCallback, ReactNode, MouseEvent, useId } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
@@ -39,9 +39,9 @@ const Accordion: FC<AccordionProps> = ({
   disabled = false,
 }) => {
   const { height, isOpen: isExpanded, setIsOpen: setIsExpanded } = useAnimateHeight({ initialOpen: expanded });
-
+  const generatedAccordionId = useId();
   // Generate unique ID if not provided
-  const accordionId = id || `accordion-${Math.random().toString(36).substr(2, 9)}`;
+  const accordionId = id || generatedAccordionId;
   const panelId = `${accordionId}-panel`;
   const buttonId = `${accordionId}-button`;
 
