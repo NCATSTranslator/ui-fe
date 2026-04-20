@@ -1,5 +1,6 @@
 import { DraggableData } from "@/features/DragAndDrop/types/types";
-import { Project, isUserQueryObject } from "@/features/Projects/types/projects.d";
+import { Project } from "@/features/Projects/types/projects.d";
+import { isUserQueryObject } from "@/features/Projects/types/checkers";
 import { Active } from "@dnd-kit/core";
 import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
 
@@ -23,7 +24,7 @@ export const handleQueryDrop = (
       return;
     }
     if(!project?.id || !isUserQueryObject(draggedItem.data)) {
-      console.error('No project or query found');
+      console.error('handleQueryDrop: No project or query found', project, draggedItem.data);
       return;
     }
     

@@ -99,9 +99,7 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
       <div className={styles.top}>
         <p className={styles.evidenceCount}>
           {publications.length > 0
-            ? `Showing ${state.itemOffset + 1}-${endOffset} of ${publications.length} ${
-                publications.length !== publications.length ? `(${publications.length}) ` : ''
-              }Publications`
+            ? `Showing ${state.itemOffset + 1}-${endOffset} of ${publications.length} Publications`
             : `Showing 0-0 of 0 (${publications.length}) Publications`
           }
         </p>

@@ -1,6 +1,6 @@
 import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
-import { isProjectRaw, isProjectRawArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
-  UserQueryObject, ProjectRaw, QueryUpdate, isUserQueryObjectArray} from '@/features/Projects/types/projects.d';
+import { ProjectCreate, ProjectUpdate, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
+import { isProjectRaw, isProjectRawArray, isUserQueryObject, isUserQueryObjectArray } from '@/features/Projects/types/checkers';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';

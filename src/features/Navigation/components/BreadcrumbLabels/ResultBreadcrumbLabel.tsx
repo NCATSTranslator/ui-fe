@@ -15,10 +15,10 @@ const formatResultLabel = (resultSet: ResultSet | null, result: Result | undefin
   if(!node)
     return undefined;
 
-  if(node.types[0] === 'biolink:Gene' || node.types[0] === 'biolink:Protein')
+  if(result.drug_name.includes('/'))
+    return capitalizeAllWords(result.drug_name, '/');
+  else if(node.types[0] === 'biolink:Gene' || node.types[0] === 'biolink:Protein')
     return node.names[0].toUpperCase();
-  else if(result.drug_name.includes('/'))
-    return capitalizeAllWords(capitalizeAllWords(result.drug_name), '/');
   else 
     return capitalizeAllWords(result.drug_name);
 };

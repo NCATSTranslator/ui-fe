@@ -7,7 +7,14 @@ export const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
 export const isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
 
 
-export const isResultEdge = (obj: unknown, warn = true): obj is ResultEdge => {
+/**
+ * Type guard to check if an object is a ResultEdge object.
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a ResultEdge.
+ * @returns {boolean} - True if the object is a ResultEdge, otherwise false.
+ */
+export const isResultEdge = (obj: unknown, warn = false): obj is ResultEdge => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isResultEdge] expected object, got:", typeof obj, obj);
     return false;
@@ -29,7 +36,7 @@ export const isResultEdge = (obj: unknown, warn = true): obj is ResultEdge => {
     ["type", tc.isString(obj.type), "string", obj.type],
   ], warn);
 
-  function __isEdgeMetadata(obj: unknown, warn = true): obj is EdgeMetadata {
+  function __isEdgeMetadata(obj: unknown, warn = false): obj is EdgeMetadata {
     if (!tc.isObject(obj)) {
       if (warn) console.warn("[isResultEdge.metadata] expected object, got:", typeof obj, obj);
       return false;
@@ -42,7 +49,14 @@ export const isResultEdge = (obj: unknown, warn = true): obj is ResultEdge => {
   }
 }
 
-export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
+/**
+ * Type guard to check if an object is a ResultNode object.
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a ResultNode.
+ * @returns {boolean} - True if the object is a ResultNode, otherwise false.
+ */
+export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isResultNode] expected object, got:", typeof obj, obj);
     return false;
@@ -59,7 +73,14 @@ export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
     ["types", tc.isStringArray(obj.types), "string[]", obj.types],
   ], warn);
 
-  function __isAnnotation(obj: unknown, warn = true): obj is Annotation {
+  /**
+   * Type guard to check if an object is an Annotation object.
+   *
+   * @param {unknown} obj - The object to check.
+   * @param {boolean} warn - Whether to warn if the object is not an Annotation.
+   * @returns {boolean} - True if the object is an Annotation, otherwise false.
+   */
+  function __isAnnotation(obj: unknown, warn = false): obj is Annotation {
     if (!tc.isObject(obj)) {
       if (warn) console.warn("[isResultNode.annotations] expected object, got:", typeof obj, obj);
       return false;
@@ -71,7 +92,14 @@ export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
     ], warn);
   }
 
-  function __isChemicalAnnotation(obj: unknown, warn = true): obj is ChemicalAnnotation {
+  /**
+   * Type guard to check if an object is a ChemicalAnnotation object.
+   *
+   * @param {unknown} obj - The object to check.
+   * @param {boolean} warn - Whether to warn if the object is not a ChemicalAnnotation.
+   * @returns {boolean} - True if the object is a ChemicalAnnotation, otherwise false.
+   */
+  function __isChemicalAnnotation(obj: unknown, warn = false): obj is ChemicalAnnotation {
     if (!tc.isObject(obj)) {
       if (warn) console.warn("[isResultNode.annotations.chemical] expected object, got:", typeof obj, obj);
       return false;
@@ -87,7 +115,14 @@ export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
     ], warn);
   }
 
-  function __isDiseaseAnnotation(obj: unknown, warn = true): obj is DiseaseAnnotation {
+  /**
+   * Type guard to check if an object is a DiseaseAnnotation object.
+   *
+   * @param {unknown} obj - The object to check.
+   * @param {boolean} warn - Whether to warn if the object is not a DiseaseAnnotation.
+   * @returns {boolean} - True if the object is a DiseaseAnnotation, otherwise false.
+   */
+  function __isDiseaseAnnotation(obj: unknown, warn = false): obj is DiseaseAnnotation {
     if (!tc.isObject(obj)) {
       if (warn) console.warn("[isResultNode.annotations.disease] expected object, got:", typeof obj, obj);
       return false;
@@ -98,7 +133,14 @@ export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
     ], warn);
   }
 
-  function __isGeneAnnotation(obj: unknown, warn = true): obj is GeneAnnotation {
+  /**
+   * Type guard to check if an object is a GeneAnnotation object.
+   *
+   * @param {unknown} obj - The object to check.
+   * @param {boolean} warn - Whether to warn if the object is not a GeneAnnotation.
+   * @returns {boolean} - True if the object is a GeneAnnotation, otherwise false.
+   */
+  function __isGeneAnnotation(obj: unknown, warn = false): obj is GeneAnnotation {
     if (!tc.isObject(obj)) {
       if (warn) console.warn("[isResultNode.annotations.gene] expected object, got:", typeof obj, obj);
       return false;
@@ -112,7 +154,14 @@ export const isResultNode = (obj: unknown, warn = true): obj is ResultNode => {
   }
 }
 
-export const isPath = (obj: unknown, warn = true): obj is Path => {
+/**
+ * Type guard to check if an object is a Path object.
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a Path.
+ * @returns {boolean} - True if the object is a Path, otherwise false.
+ */
+export const isPath = (obj: unknown, warn = false): obj is Path => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isPath] expected object, got:", typeof obj, obj);
     return false;
@@ -129,7 +178,14 @@ export const isPath = (obj: unknown, warn = true): obj is Path => {
   ], warn);
 }
 
-export const isTags = (obj: unknown, warn = true): obj is Tags => {
+/**
+ * Type guard to check if an object is a Tags object.
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a Tags.
+ * @returns {boolean} - True if the object is a Tags, otherwise false.
+ */
+export const isTags = (obj: unknown, warn = false): obj is Tags => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isTags] expected object, got:", typeof obj, obj);
     return false;

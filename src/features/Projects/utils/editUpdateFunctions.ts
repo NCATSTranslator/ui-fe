@@ -418,7 +418,6 @@ export const useEditQueryHandlers = (
   };
 
   const handlePermanentDeleteQuery = (query: UserQueryObject) => {
-    // TODO: Implement permanent delete query
     console.log('NOT IMPLEMENTED: Permanently deleting query:', query);
   };
 

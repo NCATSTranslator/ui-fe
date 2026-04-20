@@ -1,13 +1,15 @@
 import { equal } from 'mathjs';
 import { getPathCount, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Common/utils/utilities';
-import { getEvidenceCounts, isPublicationObjectArray, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
+import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
+import { isPublicationObjectArray } from '@/features/Evidence/types/checkers';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
 import { getFilterFamily, getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { MAX_SUPPORT_DEPTH, getPathKey } from '@/features/ResultList/utils/pathUtils';
 
 const compareWithFallback = (
   aValue: string | undefined | null,
@@ -233,20 +235,28 @@ export const pivotSort = <T>(arr: T[], pivot: number, compare: (a: T, b: T) => n
   return left.concat(right);
 }
 
-export const makePathRank = (resultSet: ResultSet, path: Path) => {
-  const pathRank: PathRank  = { rank: 0, path: path, support: [] };
-  for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edge = getEdgeById(resultSet, path.subgraph[i]);
-    if (!!edge && edge.inferred) {
-      for (const sp of edge.support) {
-        const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
-        if(!!supportPath)
-          pathRank.support.push(makePathRank(resultSet, supportPath));
+export const makePathRank = (resultSet: ResultSet, path: Path): PathRank => {
+  return _makePathRank(path, new Set<string>([getPathKey(path)]), 0);
+
+  function _makePathRank(path: Path, visited: Set<string>, depth: number): PathRank {
+    const pathRank: PathRank = { rank: 0, path: path, support: [] };
+    if (depth > MAX_SUPPORT_DEPTH) return pathRank;
+    for (let i = 1; i < path.subgraph.length; i += 2) {
+      const edge = getEdgeById(resultSet, path.subgraph[i]);
+      if (!!edge && edge.inferred) {
+        for (const sp of edge.support) {
+          const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
+          if (!supportPath) continue;
+          const key = getPathKey(supportPath);
+          if (visited.has(key)) continue;
+          visited.add(key);
+          pathRank.support.push(_makePathRank(supportPath, visited, depth + 1));
+          visited.delete(key);
+        }
       }
     }
+    return pathRank;
   }
-
-  return pathRank;
 }
 
 export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: PathRank, pathFilters: Filter[]) => {
@@ -263,10 +273,13 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       otherFilters.push(ftr);
     }
   }
-  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters);
+  const visited = new Set<string>([getPathKey(path)]);
+  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters, visited, 0);
 
   function _updatePathRanks(resultSet: ResultSet, path: Path, pathRank: PathRank,
-      evidenceFilters: Filter[], otherFilters: Filter[]) {
+      evidenceFilters: Filter[], otherFilters: Filter[],
+      visited: Set<string>, depth: number) {
+    if (depth > MAX_SUPPORT_DEPTH) return;
     // Apply exclusion first
     const isIndirectEdge = isPathIndirectEdge(resultSet, path);
     if (!isIndirectEdge) {
@@ -294,7 +307,11 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
             console.warn(`_updatePathRanks: found undefined or null support path in edge: ${edge}`);
             continue;
           }
-          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters);
+          const key = getPathKey(supportPath);
+          if (visited.has(key)) continue;
+          visited.add(key);
+          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters, visited, depth + 1);
+          visited.delete(key);
           if (supportRank && supportRank.rank !== undefined && supportRank.rank !== null) {
             supportRanks.push(supportRank.rank);
           }

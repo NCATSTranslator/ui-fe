@@ -205,7 +205,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     cxt.event.preventDefault();
     cxt.event.stopPropagation();
     handleSubmission(queryItemOne, queryItemTwo);
-    return;
   }
 
   return (

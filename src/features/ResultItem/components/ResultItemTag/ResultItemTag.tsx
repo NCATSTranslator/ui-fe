@@ -27,7 +27,7 @@ const ResultItemTag: FC<ResultItemTagProps> = ({
     handleTagClick(fid, tag, handleFilter);
   }, [fid, tag, handleFilter, handleTagClick]);
 
-  if (!(filtering.getTagFamily(fid) === filtering.CONSTANTS.FAMILIES.ROLE)) return null;
+  if (filtering.getTagFamily(fid) !== filtering.CONSTANTS.FAMILIES.ROLE) return null;
 
   if(!tag) {
     console.warn('No tag found for', fid);
