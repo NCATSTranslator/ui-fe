@@ -8,7 +8,8 @@ import chunk from "lodash/chunk";
 import isEqual from "lodash/isEqual";
 import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
-  isPublication, getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
+  getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
+import { isPublication } from "@/features/Evidence/types/checkers";
 import { getInitItemsPerPage, getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';

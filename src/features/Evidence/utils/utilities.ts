@@ -1,10 +1,10 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
+import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
+import { isPublication } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from "@/features/Common/utils/utilities";
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
-import { checkProperties } from "@/features/Common/types/checkers";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 
 /**
@@ -47,7 +47,7 @@ export const getEvidenceFromEdge = (
         if(!pub) 
           continue;
         const url = pub.url;
-        if(isPublication(pub)) 
+        if(isPublication(pub, false)) 
           pubs.add(url);
         else 
           misc.add(url);
@@ -263,80 +263,6 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
 }
 
 /**
- * Type guard to check if an object is a PublicationObject.
- *
- * @param obj - The object to check.
- * @returns {boolean} True if the object is a PublicationObject, otherwise false.
- */
-export const isPublicationObject = (obj: unknown, warn = true): obj is PublicationObject => {
-  if (typeof obj !== 'object' || obj === null) {
-    if (warn) console.warn("[isPublicationObject] expected object, got:", typeof obj, obj);
-    return false;
-  }
-  const o = obj as Record<string, unknown>;
-  return checkProperties("isPublicationObject", obj, [
-    ["source", typeof o.source === 'object', "object", o.source],
-    ["type", typeof o.type === 'string', "string", o.type],
-    ["url", typeof o.url === 'string', "string", o.url],
-  ], warn);
-}
-
-/**
- * Type guard to check if an object is an array of PublicationObjects.
- *
- * @param arr - The object to check.
- * @returns {boolean} True if the object is a PublicationsList, otherwise false.
- */
-export const isPublicationObjectArray = (arr: unknown, warn = true): arr is PublicationObject[] => {
-  if (!Array.isArray(arr)) {
-    if (warn) console.warn("[isPublicationObjectArray] expected array, got:", typeof arr, arr);
-    return false;
-  }
-  const invalidIndex = arr.findIndex(item => !isPublicationObject(item, warn));
-  if (invalidIndex !== -1) {
-    if (warn) console.warn(`[isPublicationObjectArray] item at index ${invalidIndex} failed validation`, arr[invalidIndex]);
-    return false;
-  }
-  return true;
-}
-
-/**
- * Determines the type of publications structure in a ResultEdge object.
- *
- * @param {ResultEdge} edgeObject - The edge object to check publications type for.
- * @returns {string} - A string indicating the type of publications structure ("PublicationObject[]", "{[key: string]: string[]}", or "Unknown type").
- */
-export const checkPublicationsType = (edgeObject: ResultEdge): string => {
-  if (isPublicationObjectArray(edgeObject.publications)) {
-    return "PublicationObject[]";
-  } else if (isPublicationDictionary(edgeObject.publications)) {
-    return "{[key: string]: string[]}";
-  } else {
-    return "Unknown type";
-  }
-}
-
-/**
- * Type guard to check if an object is a PublicationDictionary.
- *
- * @param publications - The object to check.
- * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
- */
-export const isPublicationDictionary = (publications: unknown, warn = true): publications is {[key: string]: string[]} => {
-  if (typeof publications !== 'object' || publications === null || Array.isArray(publications)) {
-    if (warn) console.warn("[isPublicationDictionary] expected object, got:", typeof publications, publications);
-    return false;
-  }
-  for (const [key, value] of Object.entries(publications as Record<string, unknown>)) {
-    if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
-      if (warn) console.warn(`[isPublicationDictionary] invalid value at key "${key}": expected string[], got:`, value);
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
  * Checks if any edge in the provided array has clinical trials attached.
  *
  * @param {ResultEdge[]} edges - Array of edges to check for clinical trials.
@@ -362,22 +288,6 @@ export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
       return true;
   }
   return false;
-}
-
-/**
- * Determines if a publication object is categorized as a publication based on its type or ID.
- *
- * @param {PublicationObject | RawPublicationObject} publication - The publication object to check.
- * @returns {boolean} - True if the object is a publication (PMID or PMC), false otherwise.
- */
-export const isPublication = (publication: PublicationObject | RawPublicationObject) => {
-  if(isPublicationObject(publication) && (publication.type === "PMID" || publication.type === "PMC"))
-    return true;
-  else if(publication.id?.includes("PMID") || publication.id?.includes("PMC"))  {
-    return true;
-  }
-
-  return false
 }
 
 /**
