@@ -39,7 +39,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
         <div className={styles.buttonContainer}>
-          {buttonComponent && buttonComponent}
+          {!buttonComponent ? null : buttonComponent}
           <Button
             handleClick={handleClosePanel}
             iconLeft={<CloseIcon />}

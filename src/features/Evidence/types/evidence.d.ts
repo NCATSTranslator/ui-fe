@@ -31,7 +31,7 @@ export type SourceObject = {
   name: string;
   url: string;
 }
-type RawPublicationObject = {
+export type RawPublicationObject = {
   id: string;
   support: PublicationSupport | null;
 }

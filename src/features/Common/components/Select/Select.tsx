@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ReactNode, ReactElement, MouseEvent } from "react";
+import { useState, useEffect, useRef, ReactNode, ReactElement, MouseEvent, useId } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './Select.module.scss';
 import InputLabel from "@/features/Core/components/InputLabel/InputLabel";
@@ -47,7 +47,8 @@ const Select = <T extends string | number>({
   const animateClass = noanimate ? styles.noAnimate : styles.animate;
 
   const wrapperRef = useRef<HTMLLabelElement>(null);
-
+  const selectId = useId();
+  
   const handleSelectClick = (e: MouseEvent<HTMLSelectElement | HTMLSpanElement>) => {
     e.preventDefault();
     setSelectOpen(!selectOpen);
@@ -94,7 +95,7 @@ const Select = <T extends string | number>({
           name={name}
           onMouseDown={handleSelectClick}
           defaultValue={selectedItem}
-          key={`${Math.floor(Math.random() * 1000)}-min`}
+          key={selectId}
           data-testid={testId}
         >
           <option value="" disabled hidden>{name}</option>

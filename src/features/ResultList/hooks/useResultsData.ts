@@ -29,6 +29,8 @@ interface UseResultsDataArgs {
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
+type ResultStatusString = "error" | "running" | "success" | "unknown";
+
 interface UseResultsDataReturn {
   // State
   formattedResults: Result[];
@@ -39,8 +41,8 @@ interface UseResultsDataReturn {
   setIsError: Dispatch<SetStateAction<boolean>>;
   arsStatus: ARAStatusResponse | null;
   setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
-  resultStatus: "error" | "running" | "success" | "unknown";
-  setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
+  resultStatus: ResultStatusString;
+  setResultStatus: Dispatch<SetStateAction<ResultStatusString>>;
   setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
   nodeDescription: string;
   setNodeDescription: Dispatch<SetStateAction<string>>;
@@ -83,7 +85,7 @@ const useResultsData = ({
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(presetIsLoading);
   const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
-  const [resultStatus, setResultStatus] = useState<"error" | "running" | "success" | "unknown">("unknown");
+  const [resultStatus, setResultStatus] = useState<ResultStatusString>("unknown");
   const [freshRawResults, setFreshRawResults] = useState<ResultSet | null>(null);
   const [formattedResults, setFormattedResults] = useState<Result[]>([]);
   const [nodeDescription, setNodeDescription] = useState("");

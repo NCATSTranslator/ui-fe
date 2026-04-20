@@ -6,12 +6,13 @@ import {
   ExportedPublication,
   ExportedTrial,
   ExportedResult,
+  CSVValue,
 } from "@/features/ResultDownload/types/download.d";
 
 /**
  * Escapes a value for CSV format
  */
-const escapeCSVValue = (value: string | number | null | undefined): string => {
+const escapeCSVValue = (value: CSVValue): string => {
   if (value === null || value === undefined) return '';
   const stringValue = String(value);
   // If value contains comma, quote, newline, or semicolon, wrap in quotes and escape quotes
@@ -542,33 +543,6 @@ const CSV_HEADERS: (keyof DenormalizedCSVRow)[] = [
  */
 export const exportToCSV = (exportedResultSet: ExportedResultSet): string => {
   const rows: string[] = [];
-  // const { meta } = exportedResultSet;
-
-  // // Add metadata section header row
-  // const metaHeaders = ['aras', 'qid', 'timestamp', 'export_time', 'scope', 'format', 'resultCount'];
-  // rows.push(metaHeaders.join(','));
-
-  // // Add metadata values row
-  // rows.push([
-  //   escapeCSVValue(meta.aras.join('; ')),
-  //   escapeCSVValue(meta.qid),
-  //   escapeCSVValue(meta.timestamp),
-  //   escapeCSVValue(meta.export_time),
-  //   escapeCSVValue(meta.scope),
-  //   escapeCSVValue(meta.format),
-  //   escapeCSVValue(meta.resultCount),
-  // ].join(','));
-
-  // // Blank separator row
-  // rows.push('');
-
-  // // Column explanations section
-  // rows.push('Column,Description');
-  // rows.push('path_index,' + escapeCSVValue("Hierarchical path index: '1' = top-level path 1, '1.2.1' = support path 1 for edge 2 in path 1"));
-  // rows.push('support_level,' + escapeCSVValue("0 = top-level path, 1+ = nested support depth (1 = first-level support, 2 = support of support, etc.)"));
-
-  // // Blank separator row
-  // rows.push('');
 
   // Add data header row
   rows.push(CSV_HEADERS.join(','));

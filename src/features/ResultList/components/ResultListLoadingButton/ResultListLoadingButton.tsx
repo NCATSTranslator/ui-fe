@@ -2,7 +2,6 @@ import styles from './ResultListLoadingButton.module.scss';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ResultsAvailableIcon from '@/assets/icons/buttons/Refresh.svg?react';
 import Button from '@/features/Core/components/Button/Button';
-// import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useNewResultsDisclaimerApproved } from '@/features/ResultList/hooks/resultListHooks';
 import { joinClasses } from '@/features/Common/utils/utilities';
 
@@ -23,12 +22,10 @@ const ResultListLoadingButton = ({
 }: ResultListLoadingButtonProps) => {
 
   const [, setAndPersistNewResultsDisclaimerApproved] = useNewResultsDisclaimerApproved(false);
-  // const [isTooltipOpen, setIsTooltipOpen] = useState(!isNewResultsDisclaimerApproved);
   
   const handleCheckbox = (): void => setAndPersistNewResultsDisclaimerApproved(prev => !prev);
 
   const resultsAvailable = hasFreshResults;
-  // const resultsComplete = !resultsAvailable && !isFetchingARAStatus && !isFetchingResults;
 
   return(
     <>

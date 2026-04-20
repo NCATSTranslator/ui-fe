@@ -71,7 +71,7 @@ export const defaultFetchErrorHandler: ErrorHandler = (error: Error): void => {
 /**
  * Type guard to check if an object is an ErrorObject
  */
-export const isErrorObject = (obj: unknown, warn = true): obj is ErrorObject => {
+export const isErrorObject = (obj: unknown, warn = false): obj is ErrorObject => {
   if (typeof obj !== 'object' || obj === null) {
     if (warn) console.warn("[isErrorObject] expected object, got:", typeof obj, obj);
     return false;
