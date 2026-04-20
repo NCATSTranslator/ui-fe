@@ -28,3 +28,10 @@ yarn-error.log*
 
 *storybook.log
 storybook-static
+
+# test coverage
+coverage
+
+# e2e test results
+e2e/test-results
+playwright-report
