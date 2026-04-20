@@ -4,6 +4,7 @@ import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
+import { MAX_SUPPORT_DEPTH, getPathKey } from "@/features/ResultList/utils/pathUtils";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
@@ -26,7 +27,6 @@ import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
  * @param pathRanks - Mutable ranking data structure, updated based on path relevance
  * @returns True if the search term is found in the result or any associated path; false otherwise
  */
-
 export const findStringMatch = (
   resultSet: ResultSet,
   result: Result,
@@ -48,7 +48,10 @@ export const findStringMatch = (
     if (!!path && typeof path !== 'string') {
       const pathRank = (path.id) ? pathRanks.get(path.id) : null;
       if (!!pathRank) {
-        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0);
+        // Fresh visited set per top-level path; seed with this path's key so
+        // cyclic support references back to it are pruned.
+        const visited = new Set<string>([getPathKey(path)]);
+        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0, visited);
         matched ||= subMatch;
       }
     }
@@ -76,17 +79,19 @@ export const findStringMatch = (
       path: Path,
       pathRank: PathRank,
       isExclusion: boolean,
-      depth: number): boolean {
+      depth: number,
+      visited: Set<string>): boolean {
+    if (depth > MAX_SUPPORT_DEPTH) return false;
     for (let i = 0; i < path.subgraph.length; i++) {
       const elementID = path.subgraph[i];
       const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
       if (depth === 1 && _checkItemForMatch(item)) {
         pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
         if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
+          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY;
           return false;
         }
-        _cascadePathRank(resultSet, path, pathRank);
+        _cascadePathRank(resultSet, path, pathRank, new Set(visited), 0);
         return true;
       }
       // Recursive support path checking
@@ -96,7 +101,13 @@ export const findStringMatch = (
           const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
           const supportRank = pathRank.support?.[j];
           if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth+1);
+            // Skip support paths already on the current traversal stack to
+            // avoid infinite recursion when the support graph has cycles.
+            const key = getPathKey(supportPath);
+            if (visited.has(key)) continue;
+            visited.add(key);
+            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth+1, visited);
+            visited.delete(key);
             if (subMatch && supportRank.rank < 0) {
               pathRank.rank += supportRank.rank;
             }
@@ -106,7 +117,7 @@ export const findStringMatch = (
       // Direct match
       if (depth !== 1 && _checkItemForMatch(item)) {
         if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
+          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY;
           return false;
         }
         pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
@@ -118,7 +129,10 @@ export const findStringMatch = (
   function _cascadePathRank(
       resultSet: ResultSet,
       path: Path,
-      pathRank: PathRank) {
+      pathRank: PathRank,
+      visited: Set<string>,
+      depth: number) {
+    if (depth > MAX_SUPPORT_DEPTH) return;
     for (let i = 0; i < path.subgraph.length; i++) {
       const elementID = path.subgraph[i];
       const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
@@ -129,8 +143,12 @@ export const findStringMatch = (
           const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
           const supportRank = pathRank.support?.[j];
           if (supportPath && typeof supportPath !== "string" && supportRank) {
+            const key = getPathKey(supportPath);
+            if (visited.has(key)) continue;
+            visited.add(key);
             supportRank.rank = pathRank.rank;
-            _cascadePathRank(resultSet, supportPath, supportRank);
+            _cascadePathRank(resultSet, supportPath, supportRank, visited, depth + 1);
+            visited.delete(key);
           }
         }
       }
