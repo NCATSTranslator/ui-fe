@@ -2,7 +2,7 @@ import { isObject } from "@/features/Common/types/checkers";
 import { checkProperties } from "@/features/Common/types/checkers";
 import { ProjectRaw, Project, UserQueryObject, ProjectUpdate } from "./projects.d";
 
-export const isProjectRaw = (obj: unknown, warn = true): obj is ProjectRaw => {
+export const isProjectRaw = (obj: unknown, warn = false): obj is ProjectRaw => {
   if (!isObject(obj)) {
     if (warn) console.warn("[isProjectRaw] expected object, got:", typeof obj, obj);
     return false;
@@ -23,7 +23,7 @@ export const isProjectRaw = (obj: unknown, warn = true): obj is ProjectRaw => {
   ], warn);
 };
 
-export const isProject = (obj: unknown, warn = true): obj is Project => {
+export const isProject = (obj: unknown, warn = false): obj is Project => {
   if (!isProjectRaw(obj, warn)) return false;
   return checkProperties("isProject", obj, [
     ["bookmark_count", "bookmark_count" in obj, "present", (obj as Record<string, unknown>).bookmark_count],
@@ -31,7 +31,7 @@ export const isProject = (obj: unknown, warn = true): obj is Project => {
   ], warn);
 };
 
-export const isProjectArray = (obj: unknown, warn = true): obj is Project[] => {
+export const isProjectArray = (obj: unknown, warn = false): obj is Project[] => {
   if (!Array.isArray(obj)) {
     if (warn) console.warn("[isProjectArray] expected array, got:", typeof obj, obj);
     return false;
@@ -44,7 +44,7 @@ export const isProjectArray = (obj: unknown, warn = true): obj is Project[] => {
   return true;
 };
 
-export const isProjectRawArray = (obj: unknown, warn = true): obj is ProjectRaw[] => {
+export const isProjectRawArray = (obj: unknown, warn = false): obj is ProjectRaw[] => {
   if (!Array.isArray(obj)) {
     if (warn) console.warn("[isProjectRawArray] expected array, got:", typeof obj, obj);
     return false;
@@ -57,7 +57,7 @@ export const isProjectRawArray = (obj: unknown, warn = true): obj is ProjectRaw[
   return true;
 };
 
-export const isUserQueryObjectArray = (obj: unknown, warn = true): obj is UserQueryObject[] => {
+export const isUserQueryObjectArray = (obj: unknown, warn = false): obj is UserQueryObject[] => {
   if (!Array.isArray(obj)) {
     if (warn) console.warn("[isUserQueryObjectArray] expected array, got:", typeof obj, obj);
     return false;
@@ -70,7 +70,7 @@ export const isUserQueryObjectArray = (obj: unknown, warn = true): obj is UserQu
   return true;
 };
 
-export const isUserQueryObject = (obj: unknown, warn = true): obj is UserQueryObject => {
+export const isUserQueryObject = (obj: unknown, warn = false): obj is UserQueryObject => {
   if (!isObject(obj)) {
     if (warn) console.warn("[isUserQueryObject] expected object, got:", typeof obj, obj);
     return false;
@@ -101,7 +101,7 @@ export const isUserQueryObject = (obj: unknown, warn = true): obj is UserQueryOb
   ], warn);
 };
 
-export const isProjectUpdate = (obj: unknown, warn = true): obj is ProjectUpdate => {
+export const isProjectUpdate = (obj: unknown, warn = false): obj is ProjectUpdate => {
   if (!isObject(obj)) {
     if (warn) console.warn("[isProjectUpdate] expected object, got:", typeof obj, obj);
     return false;
