@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, MouseEvent } from "react";
 import styles from './ResultItemTag.module.scss';
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { joinClasses } from "@/features/Common/utils/utilities";
@@ -23,7 +23,8 @@ const ResultItemTag: FC<ResultItemTagProps> = ({
   const tag = availableFilters[fid];
   const isActive = (activeFilters.some((filter)=> filter.id === fid && filter.value === tag.name));
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     handleTagClick(fid, tag, handleFilter);
   }, [fid, tag, handleFilter, handleTagClick]);
 

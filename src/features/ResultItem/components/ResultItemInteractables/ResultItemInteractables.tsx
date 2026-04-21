@@ -52,7 +52,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
       onOutsideClick={handleOutsideClick}>
       {
         !!belowBreakpoint &&
-        <button className={`${styles.icon}`} onClick={()=>setIsOpen(prev=>!prev)}>
+        <button className={`${styles.icon}`} onClick={(e)=>{e.stopPropagation(); setIsOpen(prev=>!prev)}}>
           <MenuIcon/>
         </button>
       }
@@ -62,7 +62,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
             ? <>
                 <button 
                   className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}
-                  onClick={handleBookmarkClick}
+                  onClick={(e)=>{e.stopPropagation(); handleBookmarkClick()}}
                   data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} 
                   >
                   <BookmarkFilled 
@@ -87,7 +87,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                 </button>
                 <button 
                   className={`${styles.icon} ${styles.notesIcon} ${hasNotes ? styles.filled : ''}`}
-                  onClick={handleNotesClick}
+                  onClick={(e)=>{e.stopPropagation(); handleNotesClick()}}
                   data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`}
                   >
                   <NotesFilled 
@@ -110,7 +110,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
         }
         <button
           className={`${styles.icon} ${styles.shareResultIcon} ${ styles.closed } share-result-icon`}
-          onClick={handleOpenResultShare}
+          onClick={(e)=>{e.stopPropagation(); handleOpenResultShare()}}
           data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
           >
           <ShareIcon/>

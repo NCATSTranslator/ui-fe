@@ -28,9 +28,15 @@
       .tableBody {
         &>div:nth-child(odd){
           background-color: $lightGray;
+          &:hover {
+            background-color: $resultGrayRowHover;
+          }
         }
         &>div:first-child {
           background-color: $purpleTwo;
+          &:hover {
+            background-color: $purpleTwo;
+          }
         }
       }
       .tableHead {
