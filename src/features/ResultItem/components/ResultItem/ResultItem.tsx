@@ -121,9 +121,10 @@ const ResultItem: FC<ResultItemProps> = ({
       data-result-curie={result.subject}
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}
+      onClick={handleResultClick}
     >
       <div className={styles.top}>
-        <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleResultClick}>
+        <div className={`${styles.nameContainer} ${styles.resultSub}`}>
           <ResultItemName
             isPathfinder={isPathfinder}
             subjectNode={subjectNode}
