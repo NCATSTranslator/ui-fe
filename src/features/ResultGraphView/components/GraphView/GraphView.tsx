@@ -51,7 +51,7 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
     }
   };
 
-  const onPredicateClick = (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => {
+  const onPredicateClick = (e: MouseEvent<HTMLSpanElement>, edgeId: string) => {
     e.stopPropagation();
     // create a dummy edge, since we're really just passing the id to the onEdgeClick handler
     onEdgeClick({id: edgeId, subject: '', object: '', predicate: ''});
