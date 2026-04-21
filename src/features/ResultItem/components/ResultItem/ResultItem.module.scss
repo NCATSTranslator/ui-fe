@@ -6,6 +6,12 @@
   // padding: $m $s $m 0;
   // column-gap: $s;
   padding: 0 0 $m 0;
+  transition: $defaultAnim;
+  background-color: $white;
+  cursor: pointer;
+  &:hover {
+    background-color: $resultWhiteRowHover;
+  }
   &:nth-child(even) {
     &.highlighted {
       background-color: $lightYellow;
@@ -46,7 +52,6 @@
   .resultSub {
     display: flex;
     align-items: center;
-    cursor: default;
   }
   .tags {
     margin: $xs 0 0;
@@ -108,7 +113,6 @@
     flex-wrap: wrap;
     align-content: center;
     overflow: hidden;
-    cursor: pointer;
     span {
       line-height: 1.25;
     }
