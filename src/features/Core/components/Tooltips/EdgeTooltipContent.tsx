@@ -18,7 +18,7 @@ export interface EdgeTooltipContentProps {
   edges: EdgeTooltipEntry[];
   activeEntityFilters?: string[];
   inModal?: boolean;
-  onPredicateClick?: (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => void;
+  onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string) => void;
 }
 
 const renderDescription = (predicate: string, description?: string) => {
@@ -56,7 +56,7 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
     <div className={styles.predicatesList} onClick={(e) => e.stopPropagation()}>
       {sortedEdges.map((edge) => (
         <div key={edge.id} className={styles.tooltipPredicateContainer}>
-          <p
+          <span
             className={`${styles.tooltipPredicate} ${inModal ? styles.inModal : ''}`}
             onClick={(e) => onPredicateClick?.(e, edge.id)}
           >
@@ -69,7 +69,7 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
             {edge.predicate.includes('impact') &&
               <span className={styles.predicateImpact}> (either positively or negatively)</span>
             }
-          </p>
+          </span>
           {renderDescription(edge.predicate, edge.description)}
           {edge.predicate_url &&
             <a

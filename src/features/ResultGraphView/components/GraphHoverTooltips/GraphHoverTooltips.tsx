@@ -12,7 +12,7 @@ interface GraphHoverTooltipsProps {
   target: GraphHoverTarget;
   onTooltipEnter?: () => void;
   onTooltipLeave?: () => void;
-  onPredicateClick?: (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => void;
+  onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string) => void;
 }
 
 interface Slot {

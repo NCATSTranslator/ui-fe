@@ -21,12 +21,7 @@
     font-weight: 400;
     text-transform: none;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 12 !important;
-    line-clamp: 12 !important;
-    -webkit-box-orient: vertical;
     color: $white !important;
-    white-space: normal;
     svg {
       width: $s;
       height: $s;
