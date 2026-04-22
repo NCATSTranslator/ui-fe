@@ -86,10 +86,20 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
           {(edge.pubCount > 0 || edge.ctCount > 0) &&
             <div className={styles.tooltipEvidenceCounts}>
               {edge.pubCount > 0 &&
-                <span className={styles.count}><PubIcon />{edge.pubCount} Publication{edge.pubCount > 1 && 's'}</span>
+                <span
+                  className={styles.count}
+                  onClick={(e) => onPredicateClick?.(e, edge.id)}
+                >
+                  <PubIcon />{edge.pubCount} Publication{edge.pubCount > 1 && 's'}
+                </span>
               }
               {edge.ctCount > 0 &&
-                <span className={styles.count}><CTIcon />{edge.ctCount} Clinical Trial{edge.ctCount > 1 && 's'}</span>
+                <span
+                  className={styles.count}
+                  onClick={(e) => onPredicateClick?.(e, edge.id)}
+                >
+                  <CTIcon />{edge.ctCount} Clinical Trial{edge.ctCount > 1 && 's'}
+                </span>
               }
             </div>
           }
