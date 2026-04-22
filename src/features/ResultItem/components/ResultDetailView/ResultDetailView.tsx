@@ -233,6 +233,7 @@ const ResultDetailView: FC = () => {
           resultDescription && !isPathfinder && (
           <p className={styles.description}>
             <SafeHtmlHighlighter
+              stripHtml
               htmlString={resultDescription}
               searchWords={activeEntityFilters}
               highlightClassName="highlight"
