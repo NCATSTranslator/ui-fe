@@ -11,6 +11,9 @@
   cursor: pointer;
   &:hover {
     background-color: $resultWhiteRowHover;
+    .nameContainer span {
+      text-decoration: underline;
+    }
   }
   &:nth-child(even) {
     &.highlighted {
@@ -145,7 +148,6 @@
   .evidenceContainer {    
     .evidenceLink {
       font-size: $bodyTwoSize;
-      cursor: default;
       .viewAll {
         font-size: $bodyTwoSize;
         font-weight: 800;
