@@ -1,6 +1,7 @@
 import * as tc from "@/features/Common/types/checkers";
 import { Provenance, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
+import { EvidenceTabName } from "./navigation";
 
 /**
  * Type guard to check if an object is a Provenance object.
@@ -114,4 +115,14 @@ export const isPublicationDictionary = (publications: unknown, warn = false): pu
     }
   }
   return true;
+}
+
+/**
+ * Checks if a string is a valid evidence tab name.
+ *
+ * @param tab - The string to check.
+ * @returns {boolean} True if the string is a valid evidence tab name, otherwise false.
+ */
+export const isValidEvidenceTabName = (tab: string): tab is EvidenceTabName => {
+  return tab === 'Publications' || tab === 'Clinical Trials' || tab === 'Miscellaneous' || tab === 'Knowledge Sources';
 }

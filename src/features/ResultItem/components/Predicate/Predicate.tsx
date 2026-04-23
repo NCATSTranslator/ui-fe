@@ -20,6 +20,7 @@ import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/fe
 import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
+import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -127,14 +128,20 @@ const Predicate: FC<PredicateProps> = ({
     (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
   )
 
-  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string) => {
+  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string, options?: PredicateClickOptions) => {
     e.stopPropagation();
     handleEdgeClick?.([selectedEdgeId, ...compressedEdgeIds], targetPath);
     setLastViewedPathID(targetPath?.id || null);
     if(!inModal) {
       let allSets = extractCompressedEdgeSets(targetPath);
       if (allSets.length === 0 && edgeIds.length > 1) allSets = [edgeIds];
-      navigateToEvidenceView(selectedEdgeId, allSets, targetPath, targetFullPathKey);
+      navigateToEvidenceView({
+        edgeId: selectedEdgeId,
+        path: targetPath,
+        pathKey: targetFullPathKey,
+        compressedEdgeSets: allSets,
+        tab: options?.tab,
+      });
     }
   }
 
@@ -163,7 +170,7 @@ const Predicate: FC<PredicateProps> = ({
               edges={tooltipEdgeEntries}
               activeEntityFilters={activeEntityFilters}
               inModal={!!inModal}
-              onPredicateClick={(e, edgeId) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), path, fullPathKey)}
+              onPredicateClick={(e, edgeId, options) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), path, fullPathKey, options)}
             />
           }
         </Tooltip>

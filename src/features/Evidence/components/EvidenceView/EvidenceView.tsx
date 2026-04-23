@@ -18,7 +18,9 @@ import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTa
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import EvidenceViewSkeleton from '@/features/Evidence/components/EvidenceViewSkeleton/EvidenceViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
+import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from './EvidenceView.module.scss';
+import { isValidEvidenceTabName } from '../../types/checkers';
 
 const EvidenceView: FC = () => {
   const { resultId, edgeId, pathId } = useParams();
@@ -77,6 +79,9 @@ const EvidenceView: FC = () => {
     () => getDataFromQueryVar("pkey", decodedParams) ?? derivePathKey(resultSet, result, pathId) ?? "",
     [decodedParams, resultSet, result, pathId]
   );
+
+  const rawTabParam = getDataFromQueryVar("tab", decodedParams);
+  const initialTab = isValidEvidenceTabName(rawTabParam ?? "") ? rawTabParam as EvidenceTabName : undefined;
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
 
@@ -229,6 +234,7 @@ const EvidenceView: FC = () => {
           selectedEdge={selectedEdge}
           pk={pk}
           prefs={prefs}
+          initialTab={initialTab}
         />
       )}
     </div>

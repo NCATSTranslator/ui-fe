@@ -24,8 +24,11 @@
     justify-content: flex-start;
     gap: $xxs;
     & > span {
-      width: auto;
+      width: 100%;
       text-align: left;
+      &:first-child {
+        width: auto;
+      }
     }
   }
 }

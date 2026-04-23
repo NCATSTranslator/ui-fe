@@ -6,12 +6,14 @@ import { useSelector } from 'react-redux';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import GraphLayoutButtons from '@/features/ResultGraphView/components/GraphLayoutButtons/GraphLayoutButtons';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
+import useEvidenceViewNavigation from '@/features/ResultList/hooks/useEvidenceViewNavigation';
 import { useParams } from 'react-router-dom';
 import { ResultSet } from '@/features/ResultList/types/results.d';
 import { GraphHoverTarget } from '@/features/ResultGraphView/types/graphTypes';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
 import { resolveNodeTarget, resolveEdgeTarget, getInitialLayout } from '@/features/ResultGraphView/utils/graphFunctions';
 import { useDelayedHoverTarget } from '@/features/ResultGraphView/hooks/useDelayedHoverTarget';
+import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 
 interface GraphViewProps {
   graph: GraphData;
@@ -24,6 +26,7 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   const [layout, setLayout] = useState<LayoutType>(() => getInitialLayout(prefs));
   const resultsNavigate = useResultsNavigate();
   const { resultId } = useParams();
+  const { navigateToEvidenceView } = useEvidenceViewNavigation(resultId);
 
   const [pending, setPending] = useState<GraphHoverTarget>(null);
   const [tooltipHovered, setTooltipHovered] = useState(false);
@@ -44,17 +47,12 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   };
 
   const onEdgeClick = (edge: GraphEdgeType) => {
-    if(resultId) {
-      resultsNavigate(`/results/${resultId}/evidence/${edge.id}`);
-    } else {
-      console.warn('Could not navigate to edge, resultId is not set');
-    }
+    navigateToEvidenceView({ edgeId: edge.id });
   };
 
-  const onPredicateClick = (e: MouseEvent<HTMLSpanElement>, edgeId: string) => {
+  const onPredicateClick = (e: MouseEvent<HTMLSpanElement>, edgeId: string, options?: PredicateClickOptions) => {
     e.stopPropagation();
-    // create a dummy edge, since we're really just passing the id to the onEdgeClick handler
-    onEdgeClick({id: edgeId, subject: '', object: '', predicate: ''});
+    navigateToEvidenceView({ edgeId, tab: options?.tab });
   };
 
   const onNodeHover = (node: GraphNodeType | null, geometry: HoverGeometry | null) => {

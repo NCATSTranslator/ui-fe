@@ -11,7 +11,6 @@ import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { ExpandedPredicateContext } from '../PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
-import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 interface SupportPathProps {
   activeEntityFilters: string[];
@@ -82,7 +81,11 @@ const SupportPath: FC<SupportPathProps> = ({
             if(!!path?.id) {
               setLastViewedPathID(path.id);
               if (path.subgraph[1]) {
-                navigateToEvidenceView(path.subgraph[1], extractCompressedEdgeSets(path), path, fullPathKey);
+                navigateToEvidenceView({
+                  edgeId: path.subgraph[1],
+                  path,
+                  pathKey: fullPathKey,
+                });
               }
             }
           }}
