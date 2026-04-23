@@ -45,6 +45,9 @@ function getSortColumnAndDirection(sortName: string): { column: SortColumn; dire
     case 'scoreHighLow': return { column: 'score', direction: false };
     case 'pathsLowHigh': return { column: 'paths', direction: true };
     case 'pathsHighLow': return { column: 'paths', direction: false };
+    // pref values used to use 'path' instead of 'paths', so we need to handle both
+    case 'pathLowHigh': return { column: 'paths', direction: true };
+    case 'pathHighLow': return { column: 'paths', direction: false };
     case 'entityString': return { column: null, direction: null };
     default: return { column: null, direction: null };
   }
@@ -111,10 +114,14 @@ const useSortState = ({ scoreWeights, initSortString }: UseSortStateArgs): UseSo
       case 'scoreHighLow':
         newSortedResults = (isPathfinderArg) ? sortScorePathfinderHighLow(summary, newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
         break;
+      // pref values used to use 'path' instead of 'paths', so we need to handle both
       case 'pathsLowHigh':
+      case 'pathLowHigh':
         newSortedResults = sortPathsLowHigh(summary, newSortedResults);
         break;
+      // pref values used to use 'path' instead of 'paths', so we need to handle both
       case 'pathsHighLow':
+      case 'pathHighLow':
         newSortedResults = sortPathsHighLow(summary, newSortedResults);
         break;
       case 'entityString':

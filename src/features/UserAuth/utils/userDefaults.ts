@@ -8,7 +8,7 @@ export const defaultPrefs: Preferences = {
   result_sort: {
     name: "Default Results Sorting",
     pref_value: "scoreHighLow",
-    possible_values:["nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow", "scoreHighLow", "scoreLowHigh", "pathHighLow", "pathLowHigh"]
+    possible_values:["nameLowHigh", "nameHighLow", "evidenceLowHigh", "evidenceHighLow", "scoreHighLow", "scoreLowHigh", "pathsHighLow", "pathsLowHigh"]
   },
   results_per_page: {
     name: "Results Shown per Page",
