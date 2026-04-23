@@ -1,8 +1,9 @@
 import { createContext, useContext, FC, ReactNode, RefObject, Dispatch, SetStateAction } from 'react';
-import { Path, PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
+import { PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
+import { EvidenceNavigationOptions } from '@/features/Evidence/types/navigation';
 
 export interface ResultListContextValue {
   userSaves: SaveGroup | null;
@@ -15,7 +16,7 @@ export interface ResultListContextValue {
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
   isPathfinder: boolean;
-  navigateToEvidenceView: (selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => void;
+  navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;
   pathFilterState: PathFilterState | null;
   pk: string | null;
   resultId: string | undefined;

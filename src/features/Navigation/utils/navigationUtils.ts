@@ -104,6 +104,7 @@ interface EvidenceUrlOptions {
   primaryEdgeId: string;
   compressedEdgeSets?: string[][];
   pathKey?: string;
+  tab?: string;
 }
 /**
  * Builds the evidence URL and extraParams object for evidence navigation.
@@ -126,6 +127,7 @@ export const buildEvidenceUrl = ({
   primaryEdgeId,
   compressedEdgeSets,
   pathKey,
+  tab,
 }: EvidenceUrlOptions): { path: string; params?: Record<string, string> } => {
   const encodedEdgeId = encodeURIComponent(primaryEdgeId);
   const path = pathId
@@ -134,6 +136,7 @@ export const buildEvidenceUrl = ({
 
   const params: Record<string, string> = {};
   if (pathKey) params.pkey = pathKey;
+  if (tab) params.tab = tab;
   if (compressedEdgeSets && compressedEdgeSets.length > 0) {
     params.ceids = compressedEdgeSets
       .map(group => group.join(','))
