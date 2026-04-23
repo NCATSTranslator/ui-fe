@@ -284,8 +284,11 @@ export const checkEdgesForClinicalTrials = (edges: ResultEdge[]): boolean => {
  */
 export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
   for(const edge of edges) {
-    if(Object.values(edge.publications).length > 0)
-      return true;
+    const publications = Object.values(edge.publications);
+    for(const publication of publications) {
+      if(publication.some(pub => isPublication(pub, false)))
+        return true;
+    }
   }
   return false;
 }

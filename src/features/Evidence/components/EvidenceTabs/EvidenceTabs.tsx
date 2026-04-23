@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import Tabs from '@/features/Common/components/Tabs/Tabs';
 import Tab from '@/features/Common/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
@@ -9,6 +9,7 @@ import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { Preferences } from '@/features/UserAuth/types/user';
+import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 
 interface EvidenceTabsProps {
@@ -21,7 +22,28 @@ interface EvidenceTabsProps {
   selectedEdge: ResultEdge | null;
   pk: string;
   prefs: Preferences;
+  initialTab?: EvidenceTabName;
 }
+
+const tabHasData = (
+  tab: EvidenceTabName,
+  counts: { pubs: number; cts: number; misc: number; sources: number },
+): boolean => {
+  switch (tab) {
+    case 'Publications': return counts.pubs > 0;
+    case 'Clinical Trials': return counts.cts > 0;
+    case 'Miscellaneous': return counts.misc > 0;
+    case 'Knowledge Sources': return counts.sources > 0;
+    default: return false;
+  }
+};
+
+const getFirstTabHeading = (publicationsLength: number, clinicalTrialsLength: number, miscEvidenceLength: number): EvidenceTabName => {
+  if (publicationsLength > 0) return 'Publications';
+  if (clinicalTrialsLength > 0) return 'Clinical Trials';
+  if (miscEvidenceLength > 0) return 'Miscellaneous';
+  return 'Knowledge Sources';
+};
 
 const EvidenceTabs: FC<EvidenceTabsProps> = ({
   isOpen,
@@ -33,17 +55,35 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
   selectedEdge,
   pk,
   prefs,
+  initialTab,
 }) => {
+
+  const initialTabRef = useRef(initialTab);
+  initialTabRef.current = initialTab;
+
   const hasEvidence = useMemo(() => 
     clinicalTrials.length > 0 || publications.length > 0 || sources.length > 0,
     [clinicalTrials.length, publications.length, sources.length]
   );
 
-  const [activeTab, setActiveTab] = useState<'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources'>('Publications');
-  const firstTabHeading = publications.length > 0 ? 'Publications' : clinicalTrials.length > 0 ? 'Clinical Trials' : sources.length > 0 ? 'Knowledge Sources' : 'Miscellaneous';
+  const [activeTab, setActiveTab] = useState<EvidenceTabName>('Publications');
+  const firstTabHeading: EvidenceTabName = useMemo(() => 
+    getFirstTabHeading(publications.length, clinicalTrials.length, miscEvidence.length)
+  , [publications.length, clinicalTrials.length, miscEvidence.length]);
+  const firstTabHeadingRef = useRef(firstTabHeading);
+  firstTabHeadingRef.current = firstTabHeading;
   const handleTabSelection = (tabName: string) => {
-    setActiveTab(tabName as 'Publications' | 'Clinical Trials' | 'Miscellaneous' | 'Knowledge Sources');
+    setActiveTab(tabName as EvidenceTabName);
   };
+
+  const dataCounts = useMemo(() => ({
+    pubs: publications.length,
+    cts: clinicalTrials.length,
+    misc: miscEvidence.length,
+    sources: sources.length,
+  }), [publications.length, clinicalTrials.length, miscEvidence.length, sources.length]);
+  const dataCountsRef = useRef(dataCounts);
+  dataCountsRef.current = dataCounts;
 
   // reset active tab when component is closed
   useEffect(() => {
@@ -51,10 +91,14 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       setActiveTab(firstTabHeading);
   }, [isOpen, firstTabHeading]);
 
-  // reset active tab when selected edge changes
+  // reset active tab when selected edge changes, preferring initialTab if available
   useEffect(() => {
-    if(selectedEdge)
-      setActiveTab(firstTabHeading);
+    if (selectedEdge) {
+      const target = initialTabRef.current && tabHasData(initialTabRef.current, dataCountsRef.current)
+        ? initialTabRef.current
+        : firstTabHeadingRef.current;
+      setActiveTab(target);
+    }
   }, [selectedEdge]);
 
   return (

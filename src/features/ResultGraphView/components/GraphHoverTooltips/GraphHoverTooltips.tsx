@@ -2,7 +2,7 @@ import { FC, useRef, useState, useEffect, MouseEvent } from "react";
 import { ResultSet } from "@/features/ResultList/types/results";
 import { GraphHoverTarget } from "@/features/ResultGraphView/types/graphTypes";
 import { nodeToTooltipProps, edgeToTooltipEntry } from "@/features/Core/components/Tooltips/tooltipMappers";
-import EdgeTooltipContent from "@/features/Core/components/Tooltips/EdgeTooltipContent";
+import EdgeTooltipContent, { PredicateClickOptions } from "@/features/Core/components/Tooltips/EdgeTooltipContent";
 import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
 import NodeTooltipContent from "@/features/Core/components/Tooltips/NodeTooltipContent";
 
@@ -12,7 +12,7 @@ interface GraphHoverTooltipsProps {
   target: GraphHoverTarget;
   onTooltipEnter?: () => void;
   onTooltipLeave?: () => void;
-  onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string) => void;
+  onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string, options?: PredicateClickOptions) => void;
 }
 
 interface Slot {

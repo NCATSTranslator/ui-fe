@@ -16,7 +16,6 @@ import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resu
 import { useSelector } from 'react-redux';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
-import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 
 export const ExpandedPredicateContext = createContext<{
   expandedPredicateId: string | null;
@@ -129,7 +128,11 @@ const PathContainer: FC<PathContainerProps> = ({
               setLastViewedPathID(path.id);
               const pathKey = indexInFullCollection !== -1 ? (indexInFullCollection + 1).toString() : "-";
               if (path.subgraph[1]) {
-                navigateToEvidenceView(path.subgraph[1], extractCompressedEdgeSets(path), path, pathKey);
+                navigateToEvidenceView({
+                  edgeId: path.subgraph[1],
+                  path,
+                  pathKey,
+                });
               }
             }
           }}

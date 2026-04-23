@@ -208,6 +208,7 @@ const ResultItem: FC<ResultItemProps> = ({
               !!resultDescription && !isPathfinder &&
               <p className={styles.description}>
                 <SafeHtmlHighlighter
+                  stripHtml
                   htmlString={resultDescription}
                   searchWords={activeEntityFilters}
                   highlightClassName="highlight"
