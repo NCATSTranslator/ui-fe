@@ -31,6 +31,7 @@ interface AutocompleteInputProps {
   handleSubmit: (cxt: AutocompleteContext) => void;
   inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   handleSwapTerms?: () => void;
+  showDisclaimer?: boolean;
 }
 
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
@@ -52,6 +53,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   handleSubmit,
   inputRef,
   handleSwapTerms,
+  showDisclaimer = false,
 }) => {
   const location = useLocation();
   const autocompleteItemsRef = useRef<HTMLDivElement>(null);
@@ -202,6 +204,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
           autocompleteItemsRef={autocompleteItemsRef}
           itemsContainerRef={autocompleteItemsContainerRef}
           containerRef={autocompleteContainerRef}
+          showDisclaimer={showDisclaimer}
         />
       }
     </OutsideClickHandler>

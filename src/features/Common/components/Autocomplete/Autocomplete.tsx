@@ -5,6 +5,7 @@ import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { AutocompleteItem } from '@/features/Query/types/querySubmission';
 import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
+import AutocompleteDisclaimer from '@/features/Common/components/AutocompleteDisclaimer/AutocompleteDisclaimer';
 
 type AutocompleteProps = {
   isLoading: boolean;
@@ -19,6 +20,7 @@ type AutocompleteProps = {
   autocompleteItemsRef: RefObject<HTMLDivElement | null>;
   containerRef: RefObject<HTMLDivElement | null>;
   itemsContainerRef: RefObject<HTMLDivElement | null>;
+  showDisclaimer?: boolean;
 }
 
 const Autocomplete: FC<AutocompleteProps> = ({
@@ -34,6 +36,7 @@ const Autocomplete: FC<AutocompleteProps> = ({
   autocompleteItemsRef,
   containerRef,
   itemsContainerRef,
+  showDisclaimer = false,
 }) => {
   useEffect(() => handleScrolling(scrollingIndex), []);
 
@@ -50,18 +53,21 @@ const Autocomplete: FC<AutocompleteProps> = ({
       tabIndex={-1}
     >
       {
-        // isLoading &&
         <div className={styles.iconContainer}>
           <img src={loadingIcon} className={styles.loadingIcon} alt="loading icon" />
         </div>
       }
       {
         items && items.length === 0 && !isLoading &&
-        <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
+        <>
+          {showDisclaimer && <AutocompleteDisclaimer/>}
+          <p className={styles.noResults}>No matching terms were found, please adjust your search term and try again.</p>
+        </>
       }
       {
         items && items.length > 0 && !isLoading &&
         <div ref={itemsContainerRef}>
+          {showDisclaimer && <AutocompleteDisclaimer/>}
           {
             items.map((item, i) => {
               const type = (item?.types) ? item.types[0] : "";

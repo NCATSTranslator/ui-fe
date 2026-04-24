@@ -139,6 +139,26 @@
       margin-left: 8px;
     }
   }
+  .disclaimer {
+    display: flex;
+    gap: $xxs;
+    justify-content: flex-start;
+    background-color: $lightGray;
+    border-bottom: 1px solid $midGray;
+    margin-bottom: $xs;
+    &:hover {
+      background-color: $lightGray;
+    }
+    .disclaimerText {
+      font-size: $captionSize;
+      font-weight: 400;
+      color: $darkGray;
+    }
+    .betaTag {
+      margin-left: 0;
+      margin-right: $xxs;
+    }
+  }
   .sep {
     margin: 0 4px;
     border-bottom: 1px solid $midGray;

@@ -72,7 +72,17 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       annotate: queryTypeAnnotator,
       format: combinedQueryFormatter
     },
-    limitTypes: ["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"],
+    limitTypes: [
+      "Drug",
+      "ChemicalEntity",
+      "Disease",
+      "Gene",
+      "SmallMolecule",
+      "PhenotypicFeature",
+      "BiologicalProcess",
+      "AnatomicalEntity",
+      "CellLine"
+    ],
     limitPrefixes: [],
     excludePrefixes: ["UMLS"],
   }), []);
@@ -228,7 +238,6 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
         :
           <>
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
-            <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             {
               isError &&
               <p className={styles.error}>{errorText}</p>
@@ -259,6 +268,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefOne}
                 handleSwapTerms={swapTerms}
+                showDisclaimer
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
@@ -305,6 +315,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefTwo}
+                showDisclaimer
               />
               <Button
                 ref={submitRef}
