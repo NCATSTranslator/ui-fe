@@ -11,6 +11,7 @@ import PathologicalProcess from '@/assets/icons/queries/Pathological Process.svg
 import PhysiologicalProcess from '@/assets/icons/queries/Physiological Process.svg?react';
 import BiologicalEntity from '@/assets/icons/queries/Biological Entity.svg?react';
 import AnatomicalEntity from '@/assets/icons/queries/Anatomical Entity.svg?react';
+import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
@@ -53,10 +54,13 @@ export const getNodeIcon = (category: string): ReactNode => {
     case 'biolink:PathologicalProcess':
       icon = <PathologicalProcess/>;
       break;
-    case 'biolink:PhysiologicalProcess': case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity':
+    case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity':
+      icon = <BiologicalProcess/>;
+      break;
+    case 'biolink:PhysiologicalProcess':
       icon = <PhysiologicalProcess/>;
       break;
-    case 'biolink:BiologicalEntity':
+    case 'biolink:BiologicalEntity': case 'biolink:CellLine':
       icon = <BiologicalEntity/>;
       break;
     case 'biolink:AnatomicalEntity': case 'biolink:GrossAnatomicalStructure':
