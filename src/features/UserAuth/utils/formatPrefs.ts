@@ -48,6 +48,11 @@ export const getPrettyPrefValue = (value: string | number) => {
       return "Evidence Count (Low to High)";
     case "evidenceHighLow":
       return "Evidence Count (High to Low)";
+    case "pathsHighLow":
+      return "Path Count (High to Low)";
+    case "pathsLowHigh":
+      return "Path Count (Low to High)";
+    // pref values used to use 'path' instead of 'paths', so we need to handle both
     case "pathHighLow":
       return "Path Count (High to Low)";
     case "pathLowHigh":
