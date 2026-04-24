@@ -10,7 +10,7 @@ const AutocompleteDisclaimer: FC = () => {
     <div
       className={`${styles.item} ${styles.disclaimer}`}
     >
-      <BetaTag wrapperClassName={styles.betaTag}/>
+      <BetaTag tagClassName={styles.betaTag}/>
       <span className={styles.disclaimerText}>Limited search terms supported. </span>
       <InfoIcon data-tooltip-id="autocomplete-disclaimer-tooltip"/>
       <Tooltip id="autocomplete-disclaimer-tooltip">
