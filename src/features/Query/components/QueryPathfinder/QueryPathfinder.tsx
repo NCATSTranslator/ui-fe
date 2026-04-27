@@ -291,6 +291,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       <option value="biolink:Drug">Drug</option>
                       <option value="biolink:Gene">Gene</option>
                       <option value="biolink:PhenotypicFeature">Phenotype</option>
+                      <option value="biolink:BiologicalProcess">Biological Process</option>
+                      <option value="biolink:AnatomicalEntity">Anatomical Entity</option>
+                      <option value="biolink:CellLine">Cell Line</option>
                     </Select>
                   </>
                 : 
