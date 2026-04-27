@@ -79,6 +79,7 @@ const Autocomplete: FC<AutocompleteProps> = ({
                     key={i}
                     className={`${styles.item} ${isSelected ? styles.selected : ''}`}
                     onMouseEnter={() => setScrollingIndex(i)}
+                    data-node-id={item.id}
                   >
                     <span className={styles.icon} data-tooltip-id={`${type}${item.label}-${i}`}>
                       {icon}
@@ -86,13 +87,15 @@ const Autocomplete: FC<AutocompleteProps> = ({
                         <span className={styles.tooltip}>{typeString}</span>
                       </Tooltip>
                     </span>
-                    <span className={`${styles.term} autocomplete-item`}
-                          onClick={()=> {
-                            setSelectedIndex(scrollingIndex);
-                            handleSelect();
-                            handleItemClick(item)
-                          }}
-                          title={item.match ? `${item.label} (${item.match})` : item.label}>
+                    <span
+                      className={`${styles.term} autocomplete-item`}
+                      onClick={()=> {
+                        setSelectedIndex(scrollingIndex);
+                        handleSelect();
+                        handleItemClick(item)
+                      }}
+                      title={item.match ? `${item.label} (${item.match})` : item.label}
+                    >
                       {item.label}{item.match && <span className={styles.match}>{` (${item.match})`}</span>}
                     </span>
                     {
