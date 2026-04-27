@@ -58,7 +58,7 @@ export const getNodeIcon = (category: string): ReactNode => {
     case 'biolink:PathologicalProcess':
       icon = <PathologicalProcess/>;
       break;
-    case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity':
+    case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity': case 'biolink:Pathway': case 'biolink:PathologicalProcess':
       icon = <BiologicalProcess/>;
       break;
     case 'biolink:PhysiologicalProcess':
