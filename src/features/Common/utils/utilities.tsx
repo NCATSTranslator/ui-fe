@@ -13,6 +13,7 @@ import BiologicalEntity from '@/assets/icons/queries/Biological Entity.svg?react
 import AnatomicalEntity from '@/assets/icons/queries/Anatomical Entity.svg?react';
 import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
@@ -28,8 +29,11 @@ import { Location as RouterLocation } from 'react-router-dom';
  * @returns {ReactNode} - The icon for the category.
  */
 export const getNodeIcon = (category: string): ReactNode => {
-  var icon = <Chemical/>;
+  var icon = <InfoIcon/>;
   switch(category) {
+    case 'biolink:ChemicalEntity': case 'biolink:ChemicalMixture': case 'biolink:MolecularMixture': case 'biolink:ComplexMolecularMixture':
+      icon = <Chemical/>;
+      break;
     case 'biolink:Gene':
       icon = <Gene/>;
       break;
@@ -290,6 +294,13 @@ export const getUrlAndOrg = (id: string): (string | null)[] => {
   } else if(formattedID.includes('UNII')) {
     url = `https://precision.fda.gov/uniisearch/srs/unii/${id.replace('UNII:', '')}`;
     org = 'UNII';
+  } else if (formattedID.includes('MESH')) {
+    url = `https://www.ncbi.nlm.nih.gov/mesh/?term=${id.replace('MESH:', '')}`;
+    org = 'MeSH';
+  } else if (formattedID.includes('GO')) {
+    // https://www.ebi.ac.uk/QuickGO/GTerm?id=GO:0007552
+    url = `https://www.ebi.ac.uk/QuickGO/GTerm?id=${id}`;
+    org = 'GO';
   }
 
   return [url, org];
