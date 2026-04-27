@@ -13,7 +13,7 @@ import BiologicalEntity from '@/assets/icons/queries/Biological Entity.svg?react
 import AnatomicalEntity from '@/assets/icons/queries/Anatomical Entity.svg?react';
 import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
+import BlankIcon from '@/assets/icons/blank.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
@@ -29,7 +29,7 @@ import { Location as RouterLocation } from 'react-router-dom';
  * @returns {ReactNode} - The icon for the category.
  */
 export const getNodeIcon = (category: string): ReactNode => {
-  var icon = <InfoIcon/>;
+  var icon = <BlankIcon/>;
   switch(category) {
     case 'biolink:ChemicalEntity': case 'biolink:ChemicalMixture': case 'biolink:MolecularMixture': case 'biolink:ComplexMolecularMixture':
       icon = <Chemical/>;
@@ -58,7 +58,7 @@ export const getNodeIcon = (category: string): ReactNode => {
     case 'biolink:PathologicalProcess':
       icon = <PathologicalProcess/>;
       break;
-    case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity':
+    case 'biolink:BiologicalProcess': case 'biolink:BiologicalProcessOrActivity': case 'biolink:Pathway':
       icon = <BiologicalProcess/>;
       break;
     case 'biolink:PhysiologicalProcess':
