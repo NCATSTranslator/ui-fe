@@ -286,6 +286,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       noanimate
                       className={styles.middleTypeSelector}
                       >
+                      <option value="biolink:AnatomicalEntity">Anatomical Entity</option>
+                      <option value="biolink:BiologicalProcess">Biological Process</option>
+                      <option value="biolink:CellLine">Cell Line</option>
                       <option value="biolink:ChemicalEntity">Chemical</option>
                       <option value="biolink:Disease">Disease</option>
                       <option value="biolink:Drug">Drug</option>
