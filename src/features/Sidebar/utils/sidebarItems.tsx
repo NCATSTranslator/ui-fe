@@ -12,6 +12,7 @@ import QueriesPanel from "@/features/Sidebar/components/Panels/QueriesPanel/Quer
 import SettingsPanel from "@/features/Sidebar/components/Panels/SettingsPanel/SettingsPanel";
 import HelpPanel from "@/features/Sidebar/components/Panels/HelpPanel/HelpPanel";
 import FeedbackPanel from "@/features/Sidebar/components/Panels/FeedbackPanel/FeedbackPanel";
+import { Link } from "react-router-dom";
 
 const ViewProjectsButton = () => {
   return <Button iconLeft={<ExternalLink />} iconOnly href="/projects" link small variant="textOnly" title="View All Projects" />;
@@ -27,12 +28,12 @@ const HelpButton = () => {
 
 export const topItems: SidebarItem[] = [
   { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <SearchPlusIcon />, tooltipText: 'New Query' },
-  { id: 'projects', title: 'Projects', type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
-  { id: 'queries', title: 'Query History', type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
+  { id: 'projects', title: <Link to="/projects">Projects</Link>, type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
+  { id: 'queries', title: <Link to="/query-history">Query History</Link>, type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
 ];
 
 export const bottomItems: SidebarItem[] = [
   { id: 'feedback', title: 'Send Feedback', type: 'panel', icon: <Feedback />, tooltipText: 'Send Feedback', panelComponent: <FeedbackPanel /> },
-  { id: 'help', title: 'Help', type: 'panel', icon: <Question />, tooltipText: 'Help', panelComponent: <HelpPanel />, buttonComponent: <HelpButton />, reduceSpacing: true },
+  { id: 'help', title: <Link to="/frequently-asked-questions">Help</Link>, type: 'panel', icon: <Question />, tooltipText: 'Help', panelComponent: <HelpPanel />, buttonComponent: <HelpButton />, reduceSpacing: true },
   { id: 'settings', title: 'Account Settings', type: 'panel', icon: <UserIcon />, tooltipText: 'Account Settings', noUserTooltipText: 'Log In to Access Account Settings', panelComponent: <SettingsPanel />, reduceSpacing: true },
 ];
