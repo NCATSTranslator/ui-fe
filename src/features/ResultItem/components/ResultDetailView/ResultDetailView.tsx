@@ -17,7 +17,7 @@ import Tab from '@/features/Common/components/Tabs/Tab';
 import { resultToGraphData } from '@/features/ResultGraphView/utils/graphFunctions';
 import ResultDetailViewSkeleton from '@/features/ResultItem/components/ResultDetailViewSkeleton/ResultDetailViewSkeleton';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
-import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
+import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import styles from './ResultDetailView.module.scss';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
@@ -38,7 +38,7 @@ const ResultDetailView: FC = () => {
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
   const objectNode = useMemo(() => result ? getNodeById(resultSet, result.object) : undefined, [resultSet, result]);
-  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const {
     activateNotes,
@@ -218,6 +218,7 @@ const ResultDetailView: FC = () => {
               Object.keys(result.tags).map((fid) => {
                 return(
                   <ResultItemTag
+                    key={fid}
                     activeFilters={activeFilters}
                     availableFilters={availableFilters}
                     fid={fid}
@@ -231,14 +232,11 @@ const ResultDetailView: FC = () => {
         )}
         {
           resultDescription && !isPathfinder && (
-          <p className={styles.description}>
-            <SafeHtmlHighlighter
-              stripHtml
-              htmlString={resultDescription}
-              searchWords={activeEntityFilters}
-              highlightClassName="highlight"
-            />
-          </p>
+          <ClampedDescription
+            description={resultDescription}
+            searchWords={activeEntityFilters}
+            className={styles.description}
+          />
         )}
       </div>
       <Tabs
