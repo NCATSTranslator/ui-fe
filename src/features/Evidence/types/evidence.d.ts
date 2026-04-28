@@ -1,10 +1,3 @@
-export type EvidenceItem = {
-  edges: EdgeList;
-  id: string;
-}
-export type EvidenceObjectContainer = {
-  [key: string]: EvidenceItem;
-}
 export type EvidenceContainer = {
   distinctSources: any;
   length?: number;
@@ -36,7 +29,7 @@ export type RawPublicationObject = {
   support: PublicationSupport | null;
 }
 export type RawPublicationList = {
-  [key: string]: RawPublication[];
+  [key: string]: RawPublicationObject[];
 }
 export type EvidenceCountsContainer = {
   clinicalTrialCount: number;
