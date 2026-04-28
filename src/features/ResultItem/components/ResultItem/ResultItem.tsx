@@ -3,7 +3,7 @@ import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
 import { getARATagsFromResultTags, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
+import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
@@ -56,12 +56,12 @@ const ResultItem: FC<ResultItemProps> = ({
   } = useResultListContext();
   const currentQueryID = pk;
 
-  let resultSet = useSelector(getResultSetById(pk));
+  const resultSet = useSelector(getResultSetById(pk));
   const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
   const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
   const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
 
-  let roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
+  const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const user = useSelector(currentUser);
@@ -193,6 +193,7 @@ const ResultItem: FC<ResultItemProps> = ({
                   Object.keys(result.tags).map((fid) => {
                     return(
                       <ResultItemTag
+                        key={fid}
                         activeFilters={activeFilters}
                         availableFilters={availableFilters}
                         fid={fid}
@@ -206,14 +207,11 @@ const ResultItem: FC<ResultItemProps> = ({
             }
             {
               !!resultDescription && !isPathfinder &&
-              <p className={styles.description}>
-                <SafeHtmlHighlighter
-                  stripHtml
-                  htmlString={resultDescription}
-                  searchWords={activeEntityFilters}
-                  highlightClassName="highlight"
-                />
-              </p>
+              <ClampedDescription
+                description={resultDescription}
+                searchWords={activeEntityFilters}
+                className={styles.description}
+              />
             }
           </div>
         </div>
