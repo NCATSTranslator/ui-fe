@@ -450,27 +450,27 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   return (
     <ResultListProvider value={resultListContextValue}>
+      <ResultListModals
+        shareResultID={shareResultID.current ? shareResultID.current : ""}
+        presetTypeID={presetTypeID ? presetTypeID : ""}
+        handlePageClick={handlePageClick}
+        shareModalOpen={shareModalOpen}
+        setShareModalOpen={setShareModalOpen}
+        notesModalOpen={notesModalOpen}
+        onCloseNotesModal={closeNotes}
+        noteLabel={noteLabel}
+        currentBookmarkID={currentBookmarkID}
+        pk={currentQueryID ? currentQueryID : ""}
+        focusModalOpen={focusModalOpen}
+        setFocusModalOpen={setFocusModalOpen}
+        sharedItem={sharedItem}
+        formattedResultsLength={formattedResults.length}
+        setExpandSharedResult={setExpandSharedResult}
+        setAutoScrollToResult={setAutoScrollToResult}
+        shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
+        updateUserSaves={setUserSaves}
+      />
       <div className={hidden ? styles.hidden : ''}>
-        <ResultListModals
-          shareResultID={shareResultID.current ? shareResultID.current : ""}
-          presetTypeID={presetTypeID ? presetTypeID : ""}
-          handlePageClick={handlePageClick}
-          shareModalOpen={shareModalOpen}
-          setShareModalOpen={setShareModalOpen}
-          notesModalOpen={notesModalOpen}
-          onCloseNotesModal={closeNotes}
-          noteLabel={noteLabel}
-          currentBookmarkID={currentBookmarkID}
-          pk={currentQueryID ? currentQueryID : ""}
-          focusModalOpen={focusModalOpen}
-          setFocusModalOpen={setFocusModalOpen}
-          sharedItem={sharedItem}
-          formattedResultsLength={formattedResults.length}
-          setExpandSharedResult={setExpandSharedResult}
-          setAutoScrollToResult={setAutoScrollToResult}
-          shouldUpdateResultsAfterBookmark={shouldUpdateResultsAfterBookmark}
-          updateUserSaves={setUserSaves}
-        />
         <div className={styles.resultList}>
           {
             isPathfinder
