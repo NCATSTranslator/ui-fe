@@ -31,8 +31,6 @@ export const prefKeyToString = (prefKey: string): string => {
       return "Sort results by";
     case "results_per_page":
       return "Results to show per page";
-    case "graph_visibility":
-      return "Graph visibility";
     case "graph_layout":
       return "Graph layout";
     case "path_show_count":
@@ -847,7 +845,6 @@ export const isPreferences = (obj: unknown): obj is Preferences => {
     const requiredKeys: Array<keyof Preferences> = [
       'result_sort',
       'results_per_page',
-      'graph_visibility',
       'graph_layout',
       'path_show_count',
       'evidence_sort',

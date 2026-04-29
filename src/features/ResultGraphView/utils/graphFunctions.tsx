@@ -96,8 +96,8 @@ const legacyLayoutMap: Record<string, LayoutType> = {
   klay: 'hierarchicalLR',
   breadthfirst: 'hierarchical',
   concentric: 'force',
-  vertical: 'hierarchicalLR',
-  horizontal: 'hierarchical',
+  vertical: 'hierarchical',
+  horizontal: 'hierarchicalLR',
 };
 
 /**
