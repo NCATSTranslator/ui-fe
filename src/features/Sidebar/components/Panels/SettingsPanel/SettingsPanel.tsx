@@ -72,7 +72,6 @@ const SettingsPanel = () => {
 
   const graphPrefs = useMemo(()=> {
     return {
-      graph_visibility: userPrefs.graph_visibility,
       graph_layout: userPrefs.graph_layout,
     }
   }, [userPrefs]);

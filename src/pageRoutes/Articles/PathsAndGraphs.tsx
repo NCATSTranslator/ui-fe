@@ -68,7 +68,7 @@ export const PathsAndGraphs = () => {
       </p>
 
       <p>
-        A result’s graph can be viewed in a vertical, horizontal, or concentric layout. To{" "}
+        A result's graph can be viewed in a vertical, horizontal, or force layout. To{" "}
         <strong>change the default layout</strong> for all results, adjust your preferences in the sidebar{" "}
         <a href="#" onClick={(e) => { e.preventDefault(); togglePanel('settings'); }}>Account Settings</a> tab.
       </p>

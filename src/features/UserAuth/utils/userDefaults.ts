@@ -15,15 +15,10 @@ export const defaultPrefs: Preferences = {
     pref_value: 10,
     possible_values:[5, 10, 20]
   },
-  graph_visibility: {
-    name: "Graph Visibility",
-    pref_value: "never",
-    possible_values:["always", "never", "sometimes"]
-  },
   graph_layout: {
     name: "Default Graph Layout",
-    pref_value: "vertical",
-    possible_values:["vertical", "horizontal", "concentric"]
+    pref_value: "horizontal",
+    possible_values:["vertical", "horizontal", "force"]
   },
   path_show_count: {
     name: "Number of Paths to Show",
@@ -36,7 +31,7 @@ export const defaultPrefs: Preferences = {
     possible_values:["titleLowHigh", "titleHighLow", "sourceLowHigh", "sourceHighLow", "dateLowHigh", "dateHighLow"]
   },
   evidence_per_page: {
-    name: "Default Publications Shown per Page",
+    name: "Publications Shown per Page",
     pref_value: 5,
     possible_values:[5, 10, 20, 50]
   }

@@ -19,7 +19,6 @@ export type Preferences = {
   [key:string]: PrefObject;
   result_sort: PrefObject;
   results_per_page: PrefObject;
-  graph_visibility: PrefObject;
   graph_layout: PrefObject;
   path_show_count: PrefObject;
   evidence_sort: PrefObject;
@@ -27,7 +26,7 @@ export type Preferences = {
 }
 
 export type PrefType = "results" | "evidence" | "graphs";
-export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" 
+export type PrefKey = "result_sort" | "results_per_page" | "graph_layout" 
 | "path_show_count" | "evidence_sort" | "evidence_per_page";
 
 export type User = {

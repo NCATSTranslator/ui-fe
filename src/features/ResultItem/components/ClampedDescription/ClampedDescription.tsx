@@ -1,5 +1,5 @@
 import { FC, useRef, useState, useLayoutEffect, useEffect, useCallback, MouseEvent, CSSProperties } from 'react';
-import AnimateHeight, { Height } from 'react-animate-height';
+import AnimateHeight from 'react-animate-height';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 import Button from '@/features/Core/components/Button/Button';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
