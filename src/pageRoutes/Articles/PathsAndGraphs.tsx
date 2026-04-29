@@ -36,25 +36,12 @@ export const PathsAndGraphs = () => {
         </li>
       </ul>
 
-      <p>There are two different types of paths you will encounter in your results.</p>
-
-      <ul>
-        <li>
-          <strong>Direct Paths</strong> connect two biomedical entities without any intermediary objects.
-        </li>
-        <li>
-          <strong>Indirect Paths</strong> reveal inferred relationships between entities by identifying intermediary
-          concepts that link them together.
-        </li>
-      </ul>
-
       <p>
-        When two pieces of information aren&apos;t directly connected in our knowledge graph, Translator’s{" "}
+        When two pieces of information aren&apos;t directly connected in our knowledge graph, Translator's{" "}
         <Link to="/about-translator#reasoning-agents">reasoning agents</Link> look at{" "}
-        <strong>existing relationships and apply logical rules</strong> to suggest possible connections in the form of{" "}
-        <strong>indirect paths</strong>. For example, if <em>Gene A</em> affects <em>Protein B</em> and{" "}
-        <em>Protein B</em> is linked to <em>Disease C</em>, a connection between <em>Gene A</em> and <em>Disease C</em>{" "}
-        may be inferred.
+        <strong>existing relationships and apply logical rules</strong> to suggest possible connections. For example, 
+        if <em>Gene A</em> affects <em>Protein B</em> and{" "}<em>Protein B</em> is linked to <em>Disease C</em>, a 
+        connection between <em>Gene A</em> and <em>Disease C</em>{" "}may be inferred.
       </p>
 
       <p style={{textAlign: 'center', margin: '30px auto'}}><img src={HelpEdgeDiagram} style={{display: 'block'}} alt="Gene A to Protein B to Disease C indicates an indirect relationship between Gene A and Disease C" /></p>

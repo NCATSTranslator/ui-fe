@@ -6,7 +6,7 @@ import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Common/utils/utilities';
-import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred } from '@/features/ResultItem/utils/utilities';
+import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
@@ -117,31 +117,8 @@ const PathView: FC<PathViewProps> = ({
                 displayedPaths.map((path: Path, i: number)=> {
                   if(!path.id) 
                     return null;
-                  const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
-                  if(displayIndirectLabel)
-                    inferredLabelDisplayed = true;
-                  const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
-                  if(displayDirectLabel)
-                    directLabelDisplayed = true;
-                  
                   return (
                     <div key={path.id || i.toString()}>
-                      { displayDirectLabel && !inModal && (
-                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                          Direct <Information className={styles.infoIcon} />
-                          <Tooltip id='direct-label-tooltip'>
-                            <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
-                          </Tooltip>
-                        </p>
-                      )}
-                      { displayIndirectLabel && !inModal && (
-                        <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip">
-                          Indirect <Information className={styles.infoIcon} />
-                          <Tooltip id='inferred-label-tooltip'>
-                            <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them. <a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
-                          </Tooltip>
-                        </p>
-                      )}
                       <PathContainer
                         key={path.id}
                         path={path}

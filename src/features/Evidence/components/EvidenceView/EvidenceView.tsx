@@ -20,7 +20,7 @@ import EvidenceViewSkeleton from '@/features/Evidence/components/EvidenceViewSke
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from './EvidenceView.module.scss';
-import { isValidEvidenceTabName } from '../../types/checkers';
+import { isValidEvidenceTabName } from '@/features/Evidence/types/checkers';
 
 const EvidenceView: FC = () => {
   const { resultId, edgeId, pathId } = useParams();
@@ -197,7 +197,7 @@ const EvidenceView: FC = () => {
         {edgeLabel}
       </h5>
       <div className={styles.labelContainer}>
-        {edgeLabel && <p className={styles.subtitle}>{isInferred ? "Indirect" : pathKey.length > 1 ? "Supporting" : "Direct"} Path {pathKey} Evidence</p>}
+        {edgeLabel && <p className={styles.subtitle}> Path {pathKey} Evidence</p>}
         <span className={styles.sep}>·</span>
         <p className={styles.toggleSeen} onClick={handleToggleSeen}>
           Mark as {edgeSeen ? "Unseen" : "Seen"}
