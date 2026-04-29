@@ -11,10 +11,16 @@
     font-size: $bodyOneSize;
     font-weight: 800;
     color: $black;
+    a {
+      font-size: $bodyOneSize;
+    }
   }
   .bottomText {
     font-size: $captionSize;
     font-weight: 400;
     color: $darkGray;
+    a {
+      font-size: $captionSize;
+    }
   }
 }
