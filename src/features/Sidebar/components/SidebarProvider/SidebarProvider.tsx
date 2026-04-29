@@ -1,5 +1,6 @@
 import { FC, ReactNode, createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { SidebarContextValue, SidebarItemId, SidebarItem } from "@/features/Sidebar/types/sidebar";
+import { CUSTOM_EVENTS } from "@/features/Core/constants/customEvents";
 
 export const SidebarContext = createContext<SidebarContextValue>({
   collapsed: true,
@@ -121,11 +122,11 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return sidebarItem.panelComponent || null;
   }, []);
 
-  // event listener to open the feedback panel when non-component functions need to trigger it
+  // Listens for OPEN_FEEDBACK_PANEL — dispatched from toastMessages.tsx
   useEffect(() => {
     const handler = () => togglePanel('feedback');
-    window.addEventListener('open-feedback-panel', handler);
-    return () => window.removeEventListener('open-feedback-panel', handler);
+    window.addEventListener(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL, handler);
+    return () => window.removeEventListener(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL, handler);
   }, [togglePanel]);
 
   const value: SidebarContextValue = useMemo(() => ({
