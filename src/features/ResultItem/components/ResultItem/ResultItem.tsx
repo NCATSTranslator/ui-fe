@@ -1,7 +1,7 @@
 import { useCallback, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
-import { getARATagsFromResultTags, handleTagClick } from '@/features/ResultItem/utils/utilities';
+import { getARATagsFromResultTags, getNodeDescription, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
@@ -101,7 +101,7 @@ const ResultItem: FC<ResultItemProps> = ({
   const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
-  const resultDescription = subjectNode?.descriptions[0];
+  const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
 
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);

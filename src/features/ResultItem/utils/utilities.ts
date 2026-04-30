@@ -1,5 +1,5 @@
 import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
+import { Path, ResultSet, PathFilterState, Tags, ResultNode } from "@/features/ResultList/types/results.d";
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
@@ -510,4 +510,20 @@ export const handleTagClick = (filterID: string, filter: Filter, handleFilter: (
     value: filter.name
   };
   handleFilter(newObj);
+}
+
+/**
+ * Gets the description of a node from its annotations or descriptions.
+ * Prefers descriptions from annotations over descriptions attached to the node itself.
+ *
+ * @param {ResultNode} node - The node object.
+ * @returns {string | null} - The description of the node.
+ */
+export const getNodeDescription = (node: ResultNode) => {
+  for(const key in node.annotations) {
+    const annotation = node.annotations[key as keyof typeof node.annotations];
+    if(annotation.descriptions && annotation.descriptions.length > 0)
+      return annotation.descriptions[0];
+  }
+  return node.descriptions[0] || null;
 }
