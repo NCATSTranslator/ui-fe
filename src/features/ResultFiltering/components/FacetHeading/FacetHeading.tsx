@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useMemo, useId } from "react";
 import styles from "./FacetHeading.module.scss";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
@@ -6,7 +6,6 @@ import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?reac
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { getFilterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-
 
 // module level tooltip markup constants
 const roleTooltipMarkup = (
@@ -41,7 +40,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({
   tagFamily,
   activeFilters
 }) => {
-
+  const tooltipId = useId();
   const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
 
   const tooltipMarkup = useMemo(() => {
@@ -59,26 +58,31 @@ const FacetHeading: FC<FacetHeadingProps> = ({
     }
   }, [tagFamily]);
 
+  const matchingActiveFacetsMarkup = useMemo(() => {
+    return <span className={styles.filterCount}>{matchingActiveFacets}</span>
+  }, [matchingActiveFacets]);
+
   return (
     <div className={`${styles.labelContainer}`}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
-          <span data-tooltip-id={`${tagFamily}-type-tooltip`} className={styles.heading}>
+          <span data-tooltip-id={tooltipId} className={styles.heading}>
             <p className={`${styles.subTwo}`}>{title}</p>
             {
               tooltipMarkup !== null && <Alert className={styles.tooltipIcon}/>
             }
           </span>
-          { matchingActiveFacets > 0 && <span className={styles.filterCount}>{matchingActiveFacets}</span>}
+          { (matchingActiveFacets > 0 && includeArrow) && matchingActiveFacetsMarkup}
           {
             tooltipMarkup !== null &&
-            <Tooltip id={`${tagFamily}-type-tooltip`} place="bottom">
+            <Tooltip id={tooltipId} place="bottom">
               {
                 tooltipMarkup
               }
             </Tooltip>
           }
         </div>
+        { (matchingActiveFacets > 0 && !includeArrow) && matchingActiveFacetsMarkup}
         {
           (tagFamily !== "str" && includeArrow) &&
           <ChevRight className={styles.expansionSVG}/>

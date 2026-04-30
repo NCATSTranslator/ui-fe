@@ -123,16 +123,11 @@
   }
   .tagName {
     line-height: 15px;
-    max-width: 125px;
+    max-width: 115px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-  }
-  .roleFacet {
-    .tagName {
-      max-width: 115px;
-    }
   }
   .checkbox {
     margin-bottom: 0;

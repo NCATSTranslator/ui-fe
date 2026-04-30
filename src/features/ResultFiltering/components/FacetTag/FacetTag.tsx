@@ -71,7 +71,6 @@ const FacetTag: FC<FacetTagProps> = ({
     styles.facetContainer,
     positiveChecked ? styles.containerPositiveChecked : "",
     negativeChecked ? styles.containerNegativeChecked : "",
-    family === 'role' ? styles.roleFacet : ""
   );
 
   return (
