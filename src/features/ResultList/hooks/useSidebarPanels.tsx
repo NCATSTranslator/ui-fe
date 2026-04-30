@@ -12,6 +12,7 @@ import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/Filt
 import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
+import IconBadge from "@/features/Sidebar/components/IconBadge/IconBadge";
 
 interface UseSidebarPanelsArgs {
   styles: Record<string, string>;
@@ -111,7 +112,11 @@ const useSidebarPanels = ({
   // Register the filters sidebar item
   useSidebarRegistration({
     ariaLabel: "Filters",
-    icon: <FilterIcon />,
+    icon: (
+      <IconBadge count={activeFilters.length}>
+        <FilterIcon />
+      </IconBadge>
+    ),
     id: 'filters',
     title: "Filters",
     panelComponent: () => (
