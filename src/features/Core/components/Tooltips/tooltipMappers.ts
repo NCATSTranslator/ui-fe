@@ -4,12 +4,13 @@ import { getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';
 import { ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 import { NodeTooltipContentProps } from './NodeTooltipContent';
 import { EdgeTooltipEntry } from './EdgeTooltipContent';
+import { getNodeDescription } from '@/features/ResultItem/utils/utilities';
 
 export const nodeToTooltipProps = (node: ResultNode): NodeTooltipContentProps => {
   const type = node.types?.[0]?.replace('biolink:', '') ?? '';
   const nameString = formatBiolinkNode(node.names?.[0] ?? '', type, getNodeSpecies(node));
   const typeString = formatBiolinkEntity(type);
-  const description = node.descriptions?.[0] ?? '';
+  const description = getNodeDescription(node) ?? '';
   const provenance = (Array.isArray(node.provenance) && node.provenance.length > 0) ? node.provenance[0] : false;
   return { nameString, typeString, description, provenance };
 };

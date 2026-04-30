@@ -90,5 +90,5 @@ export const bookmarkErrorToast = () => {
 
 // Query Status
 export const queryStatusResultsCompleteToast = () => {
-  return toast(AppToast, { data: { topText: 'Results Complete', bottomText: <>Please <span onClick={() => window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL))} className="link">submit feedback</span> if you believe this is an error.</> } });
+  return toast(AppToast, { data: { topText: 'Results Complete' } });
 };

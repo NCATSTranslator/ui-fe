@@ -23,7 +23,7 @@ import ResultItemName from '@/features/ResultItem/components/ResultItemName/Resu
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { sortTagsBySelected, handleTagClick } from '@/features/ResultItem/utils/utilities';
+import { sortTagsBySelected, handleTagClick, getNodeDescription } from '@/features/ResultItem/utils/utilities';
 import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
@@ -84,7 +84,7 @@ const ResultDetailView: FC = () => {
   const pathCount = result && resultSet ? getPathCount(resultSet, result.paths) : 0;
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
-  const resultDescription = subjectNode?.descriptions[0];
+  const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
 
   const bookmarkItem = useMemo(
     () => (result ? userSaves?.saves.get(result.id) ?? null : null),
