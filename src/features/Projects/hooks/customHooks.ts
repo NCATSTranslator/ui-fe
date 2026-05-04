@@ -234,7 +234,7 @@ export const useFormattedProjects = (
  * @returns {Function} resetState - Function to reset the state
  */
 export const useSortSearchState = () => {
-  const [sortField, setSortField] = useState<SortField>('lastSeen');
+  const [sortField, setSortField] = useState<SortField>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const { searchTerm, handleSearch } = useSimpleSearch();
 
@@ -252,7 +252,7 @@ export const useSortSearchState = () => {
   }, [handleSearch]);
 
   const resetState = useCallback(() => {
-    setSortField('lastSeen');
+    setSortField('created');
     setSortDirection('desc');
     handleSearch('');
   }, [handleSearch]);

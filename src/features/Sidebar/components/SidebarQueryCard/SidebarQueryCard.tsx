@@ -42,7 +42,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   }, [query.data.deleted, currentPage]);
 
   const queryURL = getQueryLink(query);
-  const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
+  const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
   
   const leftIcon = <StatusIndicator status={query.status} />;
   
@@ -61,7 +61,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
   
   const bottomRight = (
       <span className={`${styles.date} ${styles.count}`}>
-        {queryTime}
+        {queryCreatedTime}
       </span>
   );
 
