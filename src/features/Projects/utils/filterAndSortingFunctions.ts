@@ -95,6 +95,10 @@ export const sortQueries = (queries: UserQueryObject[], sortField: SortField, so
         aValue = a.data.title?.toLowerCase() || '';
         bValue = b.data.title?.toLowerCase() || '';
         break;
+      case 'created':
+        aValue = a.data.time_created;
+        bValue = b.data.time_created;
+        break;
       case 'lastSeen':
         aValue = a.data.time_updated;
         bValue = b.data.time_updated;

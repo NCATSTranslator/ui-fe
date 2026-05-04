@@ -59,14 +59,14 @@ const QueriesTableHeader = ({
             Query Type
           </SortableHeader>
         </div>
-        <div className={styles.lastSeenColumn}>
+        <div className={styles.createdColumn}>
           <SortableHeader 
-            field="lastSeen" 
+            field="created" 
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={onSort}
           >
-            Last Seen
+            Created
           </SortableHeader>
         </div>
 
