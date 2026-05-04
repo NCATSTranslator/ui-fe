@@ -44,7 +44,8 @@ const ProjectCard: FC<ProjectCardProps> = ({
   const icon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
-  const date = getTimeRelativeDate(new Date(project.time_updated));
+  const createdTime = getTimeRelativeDate(new Date(project.time_created));
+  const lastSeenTime = getTimeRelativeDate(new Date(project.time_updated));
 
   const {
     isRenaming,
@@ -106,7 +107,8 @@ const ProjectCard: FC<ProjectCardProps> = ({
           queriesLoading={queriesLoading}
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
-          date={date}
+          createdTime={createdTime}
+          lastSeenTime={lastSeenTime}
         />
       </DroppableArea>
     </OutsideClickHandler>

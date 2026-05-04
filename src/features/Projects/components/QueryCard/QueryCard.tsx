@@ -42,7 +42,8 @@ const QueryCard: FC<QueryCardProps> = ({
   }, [query.data.deleted, currentPage, activePanelId]);
 
   const queryURL = getQueryLink(query);
-  const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
+  const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
+  const queryLastSeenTime = getTimeRelativeDate(new Date(query.data.time_updated));
   
   const icon = <StatusIndicator status={query.status} />;
 
@@ -97,7 +98,8 @@ const QueryCard: FC<QueryCardProps> = ({
         type="query"
         bookmarksCount={query.data.bookmark_ids.length}
         notesCount={query.data.note_count}
-        date={queryTime}
+        createdTime={queryCreatedTime}
+        lastSeenTime={queryLastSeenTime}
         queryType={query.data.query.type}
       />
     </DraggableCard>
