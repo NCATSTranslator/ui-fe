@@ -66,7 +66,17 @@ const QueriesTableHeader = ({
             sortDirection={sortDirection}
             onSort={onSort}
           >
-            Created
+            Submitted
+          </SortableHeader>
+        </div>
+        <div className={styles.lastSeenColumn}>
+          <SortableHeader 
+            field="lastSeen" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={onSort}
+          >
+            Last Seen
           </SortableHeader>
         </div>
 

@@ -43,8 +43,11 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
         }
       }
     }
-
-    return newGroupedFilters;
+    const sorted: GroupedFilters = {};
+    Object.keys(newGroupedFilters)
+      .sort((a, b) => (a === 'sv' ? -1 : b === 'sv' ? 1 : 0))
+      .forEach(key => { sorted[key as FilterFamily] = newGroupedFilters[key as FilterFamily]; });
+    return sorted;
   }
 
   const groupHasFilters = (filterGroup: GroupedFilters): boolean => {

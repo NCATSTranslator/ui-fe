@@ -17,6 +17,10 @@ export const sortProjects = (projects: Project[], sortField: SortField, sortDire
         aValue = a.data.title.toLowerCase();
         bValue = b.data.title.toLowerCase();
         break;
+      case 'created':
+        aValue = a.time_created;
+        bValue = b.time_created;
+        break;
       case 'lastSeen':
         aValue = a.time_updated;
         bValue = b.time_updated;

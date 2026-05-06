@@ -32,7 +32,8 @@ interface DataCardProps {
   queryCount?: number;
   queryType?: QueryTypeString;
   queriesLoading?: boolean;
-  date: string;
+  createdTime: string;
+  lastSeenTime: string;
 }
 
 const DataCard: FC<DataCardProps> = ({
@@ -56,7 +57,8 @@ const DataCard: FC<DataCardProps> = ({
   queryCount,
   queryType,
   queriesLoading,
-  date
+  createdTime,
+  lastSeenTime
 }) => {
 
   const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
@@ -121,7 +123,10 @@ const DataCard: FC<DataCardProps> = ({
           }
         </div>
         <div className={styles.date}>
-          {date}
+          {createdTime}
+        </div>
+        <div className={styles.date}>
+          {lastSeenTime}
         </div>
         {
           options &&
