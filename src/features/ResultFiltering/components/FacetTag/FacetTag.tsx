@@ -6,8 +6,7 @@ import { formatBiolinkEntity, joinClasses } from "@/features/Common/utils/utilit
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { getTagType } from '@/features/ResultFiltering/utils/filterFunctions';
-import { CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getTagType, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface FacetTagProps {
   activeFilters: Filter[];
@@ -65,7 +64,7 @@ const FacetTag: FC<FacetTagProps> = ({
   let positiveChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, false, filter);
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);
   const type = getTagType(tagKey);
-  const shouldShowCount = !isEntitySearch && type !== CONSTANTS.PATH;
+  const shouldShowCount = !isEntitySearch && type !== FILTERING_CONSTANTS.PATH;
 
   const classNames = joinClasses(
     styles.facetContainer,
