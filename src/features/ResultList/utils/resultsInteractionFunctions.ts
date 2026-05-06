@@ -8,6 +8,7 @@ import { MAX_SUPPORT_DEPTH, getPathKey } from "@/features/ResultList/utils/pathU
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
+import { FILTERING_CONSTANTS, makeFilter } from "@/features/ResultFiltering/utils/filterFunctions";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -86,9 +87,9 @@ export const findStringMatch = (
       const elementID = path.subgraph[i];
       const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
       if (depth === 1 && _checkItemForMatch(item)) {
-        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
+        pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
         if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY;
+          pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
           return false;
         }
         _cascadePathRank(resultSet, path, pathRank, new Set(visited), 0);
@@ -117,10 +118,10 @@ export const findStringMatch = (
       // Direct match
       if (depth !== 1 && _checkItemForMatch(item)) {
         if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY;
+          pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
           return false;
         }
-        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
+        pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
       }
     }
     return (!isExclusion && pathRank.rank < 0);
@@ -409,9 +410,9 @@ export const injectDynamicFilters = (
   for (let i = 0; i < formattedResults.length; i++) {
     const save = bookmarkSet.saves.get(formattedResults[i].id);
     if (save) {
-      tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
+      tagsAdded.push({index: i, tag: FILTERING_CONSTANTS.DYNAMIC_TAG.BOOKMARK});
       if (!isNotesEmpty(save.notes)) {
-        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
+        tagsAdded.push({index: i, tag: FILTERING_CONSTANTS.DYNAMIC_TAG.NOTE});
       }
     }
   }
@@ -515,8 +516,8 @@ export const calculateFacetCounts = (
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
         if (!countedTags[tag].count) {
-          countedTags[tag] = filtering.makeFilter(countedTags[tag].name, filtering.CONSTANTS.WEIGHT.LIGHT,
-            filtering.CONSTANTS.WEIGHT.HEAVY);
+          countedTags[tag] = makeFilter(countedTags[tag].name, FILTERING_CONSTANTS.WEIGHT.LIGHT,
+            FILTERING_CONSTANTS.WEIGHT.HEAVY);
         } else {
           countedTags[tag].count += 1;
         }

@@ -1,6 +1,7 @@
-import { Filter, FilterFamily, FilterType } from '@/features/ResultFiltering/types/filters';
+import { Filter, FilterFamily, FilterType, GroupedFilters } from '@/features/ResultFiltering/types/filters';
 
-export const CONSTANTS = {
+
+export const FILTERING_CONSTANTS = {
   RESULT: 'r' as const,
   PATH: 'p' as const,
   GLOBAL: 'g' as const,
@@ -31,8 +32,8 @@ export const makeEntitySearch = (): Filter => {
     value: '',
     negated: false,
     name: '',
-    includeWeight: CONSTANTS.WEIGHT.LIGHT,
-    excludeWeight: CONSTANTS.WEIGHT.HEAVY
+    includeWeight: FILTERING_CONSTANTS.WEIGHT.LIGHT,
+    excludeWeight: FILTERING_CONSTANTS.WEIGHT.HEAVY
   };
 }
 
@@ -48,22 +49,22 @@ export const makeFilter = (name: string, includeWeight: number, excludeWeight: n
 
 export const getFamiliesByType = (type: FilterType): FilterFamily[] => {
   switch(type) {
-    case CONSTANTS.RESULT: return getResultFamilies();
-    case CONSTANTS.PATH: return getPathFamilies();
+    case FILTERING_CONSTANTS.RESULT: return getResultFamilies();
+    case FILTERING_CONSTANTS.PATH: return getPathFamilies();
     default: throw new RangeError(`Invalid filter type: ${type}`);
   }
 }
 
 export const isResultTag = (tagID: string): boolean => {
-  return getTagType(tagID) === CONSTANTS.RESULT;
+  return getTagType(tagID) === FILTERING_CONSTANTS.RESULT;
 }
 
 export const isPathTag = (tagID: string): boolean => {
-  return getTagType(tagID) === CONSTANTS.PATH;
+  return getTagType(tagID) === FILTERING_CONSTANTS.PATH;
 }
 
 export const isGlobalTag = (tagID: string): boolean => {
-  return getTagType(tagID) === CONSTANTS.GLOBAL;
+  return getTagType(tagID) === FILTERING_CONSTANTS.GLOBAL;
 }
 
 export const isPathEvidenceTag = (tagID: string): boolean => {
@@ -170,4 +171,39 @@ export const getTagFamily = (tagID: string): FilterFamily => {
 
 const _splitTagID = (tagID: string): string[] => {
   return tagID.split('/');
+}
+
+/*
+ * Returns a new object with each tag grouped by its type
+ * @param {{[key: string]: Filter}} filters - The filters to group
+ * @param {FilterType} type - The type of filters to group
+ * @returns {GroupedFilters} A new object with each tag grouped by its type
+ */
+export const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
+  const newGroupedFilters: GroupedFilters = {};
+  // Skip 'sv' since it's manually added to the top of the results filter list
+  for (let family of getFamiliesByType(type)) {
+    if (family !== 'sv') {
+      newGroupedFilters[family] = {};
+    }
+  }
+
+  for (let [id, description] of Object.entries(filters)) {
+    if (getTagType(id) === type) {
+      const family = getTagFamily(id);
+      if (newGroupedFilters[family]) {
+        newGroupedFilters[family]![id] = { ...description };
+      }
+    }
+  }
+
+  return newGroupedFilters;
+}
+
+export const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
+  for (let categoryFilters of Object.values(filterGroup)) {
+    if (categoryFilters && Object.keys(categoryFilters).length > 0) return true;
+  }
+
+  return false;
 }

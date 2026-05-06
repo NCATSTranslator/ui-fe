@@ -90,8 +90,13 @@
     &::-webkit-scrollbar-track {
       background-color: $white;
     }
-    .noResults {
+    .noResultsContainer {
+      margin-top: $s;
+    }
+    .noResults, .noResultsLink {
       font-size: $captionSize;
+    }
+    .noResults {
       font-weight: 400;
       color: $darkGray;
       margin: 0;
@@ -99,6 +104,24 @@
       .searchTerm {
         font-size: $captionSize;
         font-weight: 800;
+      }
+    }
+    .noResultsTitle, .noResults {
+      text-align: center;
+    }
+    .noResultsTitle {
+      font-weight: 800;
+      margin-bottom: $xs;
+    }
+    .bookmarkNotesIcons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $xs;
+      margin-top: $xs;
+      svg {
+        width: $m;
+        height: $m;
       }
     }
   }
@@ -116,5 +139,5 @@
       outline-width: 0px;
       outline-style: solid;
     }
-  } 
+  }
 }

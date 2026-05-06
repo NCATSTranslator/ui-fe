@@ -1,12 +1,10 @@
 import { useMemo, FC, useState } from 'react';
 import styles from './ResultsFilter.module.scss';
-import { Filter, FilterType, GroupedFilters, FilterFamily } from '@/features/ResultFiltering/types/filters';
-import cloneDeep from 'lodash/cloneDeep';
+import { Filter, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import FacetGroup from '@/features/ResultFiltering/components/FacetGroup/FacetGroup';
 import EntitySearch from '@/features/ResultFiltering/components/EntitySearch/EntitySearch';
-import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
 import FacetHeading from '@/features/ResultFiltering/components/FacetHeading/FacetHeading';
-import { getFilterLabel } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getFilterLabel, groupFilters, groupHasFilters, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 
@@ -18,6 +16,11 @@ interface ResultsFilterProps {
   onClearAll: () => void;
 }
 
+const filterCompare: {[key: string]: (a: [string, Filter], b: [string, Filter]) => number} = {
+  // add custom filterCompare functions for a given family here, like so:
+  // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
+};
+
 const ResultsFilter: FC<ResultsFilterProps> = ({
   activeFilters,
   availableFilters,
@@ -28,43 +31,8 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
 
   const [activeFilterFamily, setActiveFilterFamily] = useState<FilterFamily | null>(null);
 
-  // returns a new object with each tag grouped by its type
-  const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
-    const newGroupedFilters: GroupedFilters = {};
-    for (let family of filtering.getFamiliesByType(type)) {
-      newGroupedFilters[family] = {};
-    }
-
-    for (let [id, description] of Object.entries(cloneDeep(filters))) {
-      if (filtering.getTagType(id) === type) {
-        const family = filtering.getTagFamily(id);
-        if (newGroupedFilters[family]) {
-          newGroupedFilters[family]![id] = description;
-        }
-      }
-    }
-    const sorted: GroupedFilters = {};
-    Object.keys(newGroupedFilters)
-      .sort((a, b) => (a === 'sv' ? -1 : b === 'sv' ? 1 : 0))
-      .forEach(key => { sorted[key as FilterFamily] = newGroupedFilters[key as FilterFamily]; });
-    return sorted;
-  }
-
-  const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
-    for (let categoryFilters of Object.values(filterGroup)) {
-      if (categoryFilters && Object.keys(categoryFilters).length > 0) return true;
-    }
-
-    return false;
-  }
-
-  const resultFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.RESULT), [availableFilters]);
-  const pathFilters = useMemo(() => groupFilters(availableFilters, filtering.CONSTANTS.PATH), [availableFilters]);
-
-  const filterCompare: {[key: string]: (a: [string, Filter], b: [string, Filter]) => number} = {
-    // add custom filterCompare functions for a given family here, like so:
-    // pt: (a: [string, Filter], b: [string, Filter]) => -(a[1].name.localeCompare(b[1].name))
-  };
+  const resultFilters = useMemo(() => groupFilters(availableFilters, FILTERING_CONSTANTS.RESULT), [availableFilters]);
+  const pathFilters = useMemo(() => groupFilters(availableFilters, FILTERING_CONSTANTS.PATH), [availableFilters]);
 
   return (
     <div className={`${styles.resultsFilter}`}>
@@ -91,6 +59,15 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
             groupHasFilters(resultFilters) && !isPathfinder &&
             <>
               <h5 className={styles.heading}>Results</h5>
+              <SidebarTransitionButton
+                handleClick={() => setActiveFilterFamily('sv')}
+              >
+                <FacetHeading
+                  activeFilters={activeFilters}
+                  tagFamily="sv"
+                  title={getFilterLabel("sv")}
+                />
+              </SidebarTransitionButton>
               {
                 Object.keys(resultFilters).map((filterFamily) => {
                   if(!resultFilters[filterFamily as FilterFamily] || !(Object.keys(resultFilters[filterFamily as FilterFamily]!).length > 0) ) 
