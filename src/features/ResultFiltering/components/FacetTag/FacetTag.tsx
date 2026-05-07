@@ -74,8 +74,6 @@ const FacetTag: FC<FacetTagProps> = ({
     negativeChecked ? styles.containerNegativeChecked : "",
   );
 
-  console.log(tagKey, filter, type);
-
   return (
     <div className={classNames} key={tagKey} data-facet-name={tagName}>
       <FacetCheckbox
