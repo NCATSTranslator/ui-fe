@@ -6,7 +6,7 @@ import { isPublicationObjectArray } from '@/features/Evidence/types/checkers';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
-import { getFilterFamily, getTagFamily, isEvidenceFilter, CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getFilterFamily, getTagFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { MAX_SUPPORT_DEPTH, getPathKey } from '@/features/ResultList/utils/pathUtils';
@@ -285,7 +285,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     if (!isIndirectEdge) {
       for (const ftr of otherFilters) {
         if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-          pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : CONSTANTS.WEIGHT.HEAVY);
+          pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
           return;
         }
       }
@@ -318,13 +318,13 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
         }
         const nonExcludedRanks = supportRanks.filter(rank => rank <= 0)
         if (nonExcludedRanks.length === 0) {
-          pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+          pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
           return;
         } else {
           const totalSupportRank = nonExcludedRanks.reduce((acc: number, rank: number): number => {
             return rank + acc;
           }, 0);
-          edgeRanks.push(includeRankBase * totalSupportRank * CONSTANTS.WEIGHT.LIGHT);
+          edgeRanks.push(includeRankBase * totalSupportRank * FILTERING_CONSTANTS.WEIGHT.LIGHT);
         }
       } else {
         edgeRanks.push(_calcEdgeRank(edge, evidenceFilters));
@@ -334,14 +334,14 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     let edgesUnmatched = true;
     for (const rank of edgeRanks) {
       if (rank > 0) {
-        pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+        pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
         return;
       }
       edgesUnmatched = edgesUnmatched && rank === 0;
       pathRank.rank += rank;
     }
     if (edgesUnmatched && evidenceFilters.some(ftr => !ftr.negated)) {
-      pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+      pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
       return;
     }
     if (isIndirectEdge) return;
@@ -360,11 +360,11 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
         }
       }
       if (include) {
-        pathRank.rank += includeRankBase * CONSTANTS.WEIGHT.LIGHT;
+        pathRank.rank += includeRankBase * FILTERING_CONSTANTS.WEIGHT.LIGHT;
       }
     }
     if (!include) {
-      pathRank.rank = excludeRankBase * CONSTANTS.WEIGHT.HEAVY;
+      pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
     }
   }
 

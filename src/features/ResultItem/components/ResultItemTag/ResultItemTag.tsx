@@ -2,7 +2,7 @@ import { FC, useCallback, MouseEvent } from "react";
 import styles from './ResultItemTag.module.scss';
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { joinClasses } from "@/features/Common/utils/utilities";
-import * as filtering from '@/features/ResultFiltering/utils/filterFunctions';
+import { FILTERING_CONSTANTS, getTagFamily } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface ResultItemTagProps {
   activeFilters: Filter[];
@@ -28,7 +28,7 @@ const ResultItemTag: FC<ResultItemTagProps> = ({
     handleTagClick(fid, tag, handleFilter);
   }, [fid, tag, handleFilter, handleTagClick]);
 
-  if (filtering.getTagFamily(fid) !== filtering.CONSTANTS.FAMILIES.ROLE) return null;
+  if (getTagFamily(fid) !== FILTERING_CONSTANTS.FAMILIES.ROLE) return null;
 
   if(!tag) {
     console.warn('No tag found for', fid);
