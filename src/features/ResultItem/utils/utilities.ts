@@ -166,9 +166,8 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
   subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**
- * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them.
- * The compressed paths are sorted by the PathFilterState, then have their highlighted status set according to the active
- * selected paths. The paths are then sorted by highlighted status and returned.
+ * Compresses paths, marks highlighted selections, and sorts them.
+ * Paths are sorted via sortArrayByIndirect (inferred status, length, highlighted, filter state).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
@@ -176,50 +175,55 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
  * @param {Set<Path> | null} selectedPaths - The currently selected paths
  * @returns {Path[]} - The array of properly formatted paths.
  */
-export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null, isTopLevel: boolean = false) => {
+export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
   if(!paths || !resultSet)
     return [];
 
   let newPaths = getCompressedPaths(resultSet, paths);
 
-  newPaths.sort((a: Path, b: Path) => {
-    if(b?.id && pathFilterState[b.id] === true)
-      return -1;
-    else
-      return 1;
-  });
-
-  if(selectedPaths!== null && selectedPaths.size > 0) {
+  if(selectedPaths !== null && selectedPaths.size > 0) {
     for(const selPath of selectedPaths) {
       for(const path of newPaths) {
         if(selPath?.id && path?.id && selPath.id === path.id)
           path.highlighted = true;
       }
     }
-    newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
   }
 
-  if(isTopLevel)
-    return sortArrayByIndirect(resultSet, newPaths);
-  else
-    return newPaths;
+  return sortArrayByIndirect(resultSet, newPaths, pathFilterState);
 }
 
 /**
- * Takes a ResultSet and an array of paths and sorts them by whether they contain any inferred edges.
- * Paths with inferred edges are sorted to the bottom of the array.
+ * Sorts paths for top-level display. Priority order:
+ * 1. Non-inferred before inferred
+ * 2. Shorter subgraph (fewer hops) before longer
+ * 3. Highlighted before non-highlighted
+ * 4. Non-filtered before filtered
  *
  * @param {ResultSet} resultSet - ResultSet Object.
- * @param {(Path)[]} paths - An array of paths or path IDs
- * @returns {Path[]} - The array of sorted paths.
+ * @param {Path[]} paths - An array of paths.
+ * @param {PathFilterState} [pathFilterState] - Optional filter state for tiebreaking.
+ * @returns {Path[]} - The sorted array of paths.
  */
-export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) => {
+export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], pathFilterState?: PathFilterState) => {
   if(!resultSet)
     return paths;
   return cloneDeep(paths).sort((a, b) => {
-      let inferredA = isPathInferred(resultSet, a) ? 1 : 0;
-      let inferredB = isPathInferred(resultSet, b) ? 1 : 0;
-      return inferredA - inferredB;
+      const inferredA = isPathInferred(resultSet, a) ? 1 : 0;
+      const inferredB = isPathInferred(resultSet, b) ? 1 : 0;
+      if(inferredA !== inferredB)
+        return inferredA - inferredB;
+      const lengthDiff = (a.subgraph?.length ?? 0) - (b.subgraph?.length ?? 0);
+      if(lengthDiff !== 0)
+        return lengthDiff;
+      if(a.highlighted !== b.highlighted)
+        return a.highlighted ? -1 : 1;
+      if(pathFilterState) {
+        const aFiltered = (a?.id && pathFilterState[a.id] === true) ? 1 : 0;
+        const bFiltered = (b?.id && pathFilterState[b.id] === true) ? 1 : 0;
+        return aFiltered - bFiltered;
+      }
+      return 0;
   });
 }
 

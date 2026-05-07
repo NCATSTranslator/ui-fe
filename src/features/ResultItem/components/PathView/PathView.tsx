@@ -61,7 +61,7 @@ const PathView: FC<PathViewProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const itemsPerPage: number = 10;
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
+  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
@@ -85,8 +85,6 @@ const PathView: FC<PathViewProps> = ({
   }
   const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
   const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
-  let directLabelDisplayed = false;
-  let inferredLabelDisplayed = false;
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     handleEdgeSpecificEvidence?.(edgeIDs, path);
