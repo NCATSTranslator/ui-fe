@@ -474,16 +474,3 @@ export const genRankedPaths = (resultSet: ResultSet | null, pathRanks: PathRank[
 
   return pathRanks.map((pr) => convertPathToRankedPath(resultSet, pr.path));
 }
-
-export const sortPathsByFilterState = (paths: Path[], pathFilterState: { [key: string]: boolean }): Path[] => {
-  return paths.sort((a: Path, b: Path) => {
-    const aState = pathFilterState[a.id || ""] ?? false;
-    const bState = pathFilterState[b.id || ""] ?? false;
-
-    // Keep original order if both have the same state
-    if (aState === bState)
-      return 0;
-
-    return aState ? -1 : 1;
-  });
-}
