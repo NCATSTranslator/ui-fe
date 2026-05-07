@@ -7,6 +7,7 @@ import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { getTagType, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import AcceptedOntologyTooltip from '@/features/ResultFiltering/components/AcceptedOntologyTooltip/AcceptedOntologyTooltip';
 
 interface FacetTagProps {
   activeFilters: Filter[];
@@ -65,12 +66,15 @@ const FacetTag: FC<FacetTagProps> = ({
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);
   const type = getTagType(tagKey);
   const shouldShowCount = !isEntitySearch && type !== FILTERING_CONSTANTS.PATH;
+  const isAcceptedOntology = tagKey.includes('p/ev/ontology');
 
   const classNames = joinClasses(
     styles.facetContainer,
     positiveChecked ? styles.containerPositiveChecked : "",
     negativeChecked ? styles.containerNegativeChecked : "",
   );
+
+  console.log(tagKey, filter, type);
 
   return (
     <div className={classNames} key={tagKey} data-facet-name={tagName}>
@@ -87,8 +91,14 @@ const FacetTag: FC<FacetTagProps> = ({
         labelLeft
         title="Include"
         >
-        <span className={styles.tagName} title={tagName}>
+        <span
+          className={`${styles.tagName} ${(tagKey.includes('r/role') || tagKey.includes('r/ara') ) ? styles.roleTagName: ''}`}
+          title={tagName}
+        >
           {tagName}
+          {
+            isAcceptedOntology && <AcceptedOntologyTooltip/>
+          }
         </span>
         {
           shouldShowCount &&
