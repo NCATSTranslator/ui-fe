@@ -109,6 +109,8 @@ const QueryResultsHeader: FC<QueryResultsHeaderProps> = ({
     !projectsError &&
     !queriesLoading &&
     !queriesError &&
+    !!query &&
+    !query.data.deleted &&
     config?.include_projects;
 
   const queryTitle = query ? generateQueryTitleFromQueryObject(query) : '';  
