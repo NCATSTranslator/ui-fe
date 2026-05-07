@@ -3,6 +3,7 @@ import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
 import CTIcon from '@/assets/icons/status/HasCT.svg?react';
+import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
 import Up from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
@@ -17,7 +18,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
-import { generatePredicateId } from '@/features/ResultItem/utils/utilities';
+import { generatePredicateId, isAcceptedOntologyEdge } from '@/features/ResultItem/utils/utilities';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
@@ -98,6 +99,7 @@ const Predicate: FC<PredicateProps> = ({
   const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
   const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
   const isInferred = formattedEdge?.inferred ?? false;
+  const isAcceptedOntology = isAcceptedOntologyEdge(formattedEdge);
 
   const handleSupportExpansion = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -169,6 +171,7 @@ const Predicate: FC<PredicateProps> = ({
             <EdgeTooltipContent
               edges={tooltipEdgeEntries}
               activeEntityFilters={activeEntityFilters}
+              isAcceptedOntology={isAcceptedOntology}
               inModal={!!inModal}
               onPredicateClick={(e, edgeId, options) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), path, fullPathKey, options)}
             />
@@ -190,13 +193,16 @@ const Predicate: FC<PredicateProps> = ({
             }
           </span>
           {
-            (hasPubs || hasCTs) &&
+            (hasPubs || hasCTs || isAcceptedOntology) &&
             <div className={styles.badges}>
               {
                 hasPubs && <PubIcon/>
               }
               {
                 hasCTs && <CTIcon/>
+              }
+              {
+                isAcceptedOntology && <AcceptedOntologyIcon/>
               }
             </div>
           }

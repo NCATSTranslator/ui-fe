@@ -2,6 +2,7 @@ import { ReactNode, FC } from 'react';
 import styles from './Tooltip.module.scss';
 import 'react-tooltip/dist/react-tooltip.css';
 import {PlacesType, PositionStrategy, Tooltip as ReactTooltip } from 'react-tooltip';
+import { createPortal } from 'react-dom';
 
 interface TooltipProps {
   anchorSelect?: string;
@@ -34,7 +35,7 @@ const Tooltip: FC<TooltipProps> = ({
   position,
   positionStrategy = "fixed"
 }) => {
-  return (
+  const tooltipPortal = createPortal(
     <ReactTooltip
       id={id}
       anchorSelect={anchorSelect}
@@ -50,8 +51,11 @@ const Tooltip: FC<TooltipProps> = ({
       {...(position !== undefined ? { position } : {})}
     >
       {children}
-    </ReactTooltip>
+    </ReactTooltip>,
+    document.body
   );
+
+  return tooltipPortal;
 };
 
 export default Tooltip;
