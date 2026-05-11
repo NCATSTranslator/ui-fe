@@ -6,8 +6,10 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: $m;
-  margin-bottom: 0;
   padding: $xl $xl 0 $xl;
+  max-width: $maxWidth;
+  margin: 0 auto;
+  width: 100%;
   
   .title, .titleInput, .titleInput input {
     font-size: $h5Size;
@@ -17,7 +19,7 @@
   }
 
   .title {
-    padding: 3.5px 0;
+    padding: 3.5px 0 3.5px 12px;
     &.titleClickable {
       cursor: pointer;
       transition: $defaultAnim;

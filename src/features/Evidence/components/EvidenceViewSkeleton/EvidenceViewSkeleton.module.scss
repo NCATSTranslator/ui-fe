@@ -6,7 +6,7 @@
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   gap: $xs;
-  max-width: $resultsViewMaxWidth;
+  max-width: $maxWidth;
   margin: 0 auto;
 }
 

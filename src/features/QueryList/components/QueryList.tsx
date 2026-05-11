@@ -83,6 +83,7 @@ const QueryList = () => {
                 handleTabSelection={() => {}}
                 defaultActiveTab={queriesTabHeading}
                 className={styles.queryTabs}
+                tabListWrapperClassName={styles.queryTabsTabListWrapper}
                 activeTab={queriesTabHeading}
                 controlled
               >

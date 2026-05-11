@@ -1,12 +1,12 @@
 @use "@/assets/styles/variables" as *;
 
-$maxWidth: calc(640px + ($m * 2));
+$nodeInformationViewMaxWidth: calc(640px + ($m * 2));
 
 .nodeInformationView {
   background-color: $white;
-  .top {
+  .top, .tabs {
     width: 100%;
-    max-width: $maxWidth;
+    max-width: $nodeInformationViewMaxWidth;
     margin: 0 auto;
   }
   .tabListWrapper > div {
@@ -14,7 +14,7 @@ $maxWidth: calc(640px + ($m * 2));
   }
   .tabList {
     width: 100%;
-    max-width: $maxWidth;
+    max-width: $nodeInformationViewMaxWidth;
     margin: 0 auto;
   }
   .tabs {
@@ -31,7 +31,7 @@ $maxWidth: calc(640px + ($m * 2));
   .tabContent {
     height: 100%;
     overflow: hidden;
-    max-width: $maxWidth;
+    max-width: $nodeInformationViewMaxWidth;
     margin: 0 auto;
   }
   .information {

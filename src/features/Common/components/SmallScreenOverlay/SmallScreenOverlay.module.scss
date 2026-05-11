@@ -12,7 +12,7 @@
     text-align: center;
     margin: 0 auto;
     padding: calc($xl * 3) 20px $xl $s;
-    max-width: $maxwidth;
+    max-width: $maxWidth;
     h4 {
       font-size: 18px;
       @media (min-width: $small) {
