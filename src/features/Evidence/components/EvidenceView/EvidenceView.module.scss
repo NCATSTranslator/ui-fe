@@ -5,7 +5,7 @@
   height: 100%;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  max-width: $resultsViewMaxWidth;
+  max-width: $maxWidth;
   margin: 0 auto;
 }
 

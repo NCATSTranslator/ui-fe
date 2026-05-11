@@ -185,6 +185,7 @@ const ProjectDetailInner = () => {
                   handleOutsideTabListClick={handleOutsideTabListClick}
                   defaultActiveTab={queriesTabHeading}
                   className={styles.projectTabs}
+                  tabListWrapperClassName={styles.projectTabsTabListWrapper}
                   activeTab={queriesTabHeading}
                   controlled
                 >

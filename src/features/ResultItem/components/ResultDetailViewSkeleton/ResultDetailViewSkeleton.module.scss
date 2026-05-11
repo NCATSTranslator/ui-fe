@@ -2,7 +2,7 @@
 
 .container {
   padding: $xs $l $m;
-  max-width: $resultsViewMaxWidth;
+  max-width: $maxWidth;
   margin: 0 auto;
 }
 
@@ -43,8 +43,5 @@
 }
 
 .tabContentItem {
-  margin: 0 0 $xs $l;
-  &:first-child {
-    margin-left: 0;
-  }
+  margin-left: 0;
 }
