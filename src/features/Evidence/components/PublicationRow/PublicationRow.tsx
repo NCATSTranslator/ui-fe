@@ -32,16 +32,18 @@ const PublicationRow: FC<{
     
     const objectNode = getNodeById(resultSet, selectedEdge?.object);
     const objectName = objectNode?.names[0] || "";
+    const objectPos = matchingEdgePub.support.object || null;
     const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
     const subjectName = subjectNode?.names[0] || "";
-    
+    const subjectPos = matchingEdgePub.support.subject || null;
+
     return (
       <EmphasizeWord
         text={matchingEdgePub.support.text}
         objectName={objectName}
-        objectPos={matchingEdgePub.support.object}
+        objectPos={objectPos}
         subjectName={subjectName}
-        subjectPos={matchingEdgePub.support.subject}
+        subjectPos={subjectPos}
       />
     );
     

@@ -5,8 +5,8 @@ interface EmphasizeWordProps {
   objectName: string | boolean;
   subjectName: string | boolean;
   text: string;
-  subjectPos: [number, number];
-  objectPos: [number, number];
+  subjectPos: [number, number] | null;
+  objectPos: [number, number] | null;
 }
 
 const EmphasizeWord: FC<EmphasizeWordProps> = ({ text, subjectPos, objectPos, subjectName, objectName }) => {
@@ -40,16 +40,16 @@ const EmphasizeWord: FC<EmphasizeWordProps> = ({ text, subjectPos, objectPos, su
     return newEmphasizedText;
   }
   
-  let emphasizedText = formatEmphasizedText(text, [subjectPos, objectPos]);
+  let emphasizedText = (subjectPos !== null && objectPos !== null) ? formatEmphasizedText(text, [subjectPos, objectPos]) : text;
 
   return (
     <>
       {
-        subjectName && subjectPos.length > 0 &&
+        subjectName && subjectPos !== null && subjectPos.length > 0 &&
         <Tooltip id={`${subjectPos[0]}-${subjectPos[1]}`}><span>Matched on: {subjectName}</span></Tooltip>
       }
       {
-        objectName && objectPos.length > 1 && 
+        objectName && objectPos !== null && objectPos.length > 1 && 
         <Tooltip id={`${objectPos[0]}-${objectPos[1]}`}><span>Matched on: {objectName}</span></Tooltip>
       }
       <span dangerouslySetInnerHTML={{ __html: emphasizedText }} />
