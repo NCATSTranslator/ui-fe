@@ -25,11 +25,10 @@ const PublicationRow: FC<{
     if(!matchingEdgePub || matchingEdgePub.support === null)
       return pub.snippet ?? 'No snippet available.';
 
-    // early returns aren't combined in order to log a specific warning for null positions
-    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null) {
+    // Just log a warning if no object or subject positions are found for the publication, 
+    // we still want to use the provided support text if it's available.
+    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null)
       console.warn('No object or subject positions found for publication:', pub, 'on edge:', selectedEdge, 'support:', matchingEdgePub.support);
-      return pub.snippet ?? 'No snippet available.';
-    }
     
     const objectNode = getNodeById(resultSet, selectedEdge?.object);
     const objectName = objectNode?.names[0] || "";
