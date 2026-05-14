@@ -1,4 +1,4 @@
-import { useState, useMemo, ReactNode, isValidElement } from 'react';
+import { useState, useEffect, useCallback, useMemo, ReactNode, isValidElement } from 'react';
 import Highlighter from 'react-highlight-words';
 import styles from './HelpPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
@@ -9,6 +9,7 @@ import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransi
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import { helpPanelItems } from '@/features/Sidebar/utils/helpPanelItems';
 import { HelpPanelItem } from '@/features/Sidebar/types/sidebar';
+import { setActiveHelpItem } from '@/features/Sidebar/hooks/useActiveHelpItem';
 
 const extractTextFromReactNode = (node: ReactNode): string => {
   if (typeof node === 'string') return node;
@@ -36,6 +37,16 @@ const helpPanelContentText = new Map(
 const HelpPanel = () => {
   const { searchTerm, handleSearch } = useSimpleSearch();
   const [activePanel, setActivePanel] = useState<HelpPanelItem | null>(null);
+
+  const handleSetActivePanel = useCallback((item: HelpPanelItem | null) => {
+    setActivePanel(item);
+    setActiveHelpItem(item?.id ?? null);
+  }, []);
+
+  // When the help panel unmounts, set the active help item to null
+  useEffect(() => {
+    return () => setActiveHelpItem(null);
+  }, []);
 
   const filteredItems = useMemo(() => {
     if (!searchTerm) {
@@ -85,7 +96,7 @@ const HelpPanel = () => {
           <SidebarTransitionButton
             key={item.id}
             className={styles.panelItem}
-            handleClick={() => setActivePanel(item)}
+            handleClick={() => handleSetActivePanel(item)}
             label={item.title}
           >
             <Highlighter
@@ -110,7 +121,7 @@ const HelpPanel = () => {
       {activePanel && (
         <InteriorPanelContainer 
           className={styles.activePanel}
-          handleBack={() => setActivePanel(null)}
+          handleBack={() => handleSetActivePanel(null)}
           backButtonLabel={activePanel.title}
         >
           <div className={styles.activePanelContent}>
