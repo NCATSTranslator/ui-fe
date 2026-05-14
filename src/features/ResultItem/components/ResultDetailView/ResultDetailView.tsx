@@ -23,8 +23,7 @@ import ResultItemName from '@/features/ResultItem/components/ResultItemName/Resu
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { sortTagsBySelected, handleTagClick, getNodeDescription } from '@/features/ResultItem/utils/utilities';
-import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
+import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -85,6 +84,7 @@ const ResultDetailView: FC = () => {
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
+  const resultTags = result?.tags && availableFilters ? getResultRoleTagsString(result.tags, availableFilters) : null;
 
   const bookmarkItem = useMemo(
     () => (result ? userSaves?.saves.get(result.id) ?? null : null),
@@ -148,7 +148,7 @@ const ResultDetailView: FC = () => {
   return (
     <div className={styles.resultDetailView}>
       <div className={styles.tableHeader}>
-        <span className={styles.tableHeaderRow}>Name</span>
+        <span className={styles.tableHeaderRow}></span>
         <span className={styles.tableHeaderRow}></span>
         <span className={styles.tableHeaderRow}>Evidence</span>
         <span className={styles.tableHeaderRow}>Paths</span>
@@ -156,15 +156,31 @@ const ResultDetailView: FC = () => {
       </div>
       <div className={styles.header}>
         <div className={styles.top}>
-          <div className={styles.nameContainer}>
-            <ResultItemName
-              isPathfinder={isPathfinder}
-              subjectNode={subjectNode}
-              objectNode={objectNode}
-              item={result}
-              activeEntityFilters={activeEntityFilters}
-              nameString={nameString}
-            />
+          <div className={styles.infoContainer}>
+            <div className={styles.nameContainer}>
+              <ResultItemName
+                isPathfinder={isPathfinder}
+                subjectNode={subjectNode}
+                objectNode={objectNode}
+                item={result}
+                activeEntityFilters={activeEntityFilters}
+                nameString={nameString}
+              />
+            </div>
+              {
+                resultTags && 
+                <div className={styles.tags}>
+                  <span className={styles.tagsList}>{resultTags}</span>
+                </div>
+              }
+              {
+                resultDescription && !isPathfinder && (
+                <ClampedDescription
+                  description={resultDescription}
+                  searchWords={activeEntityFilters}
+                  className={styles.description}
+                />
+              )}
           </div>
           <ResultItemInteractables
             handleBookmarkClick={handleBookmarkClick}
@@ -210,34 +226,7 @@ const ResultDetailView: FC = () => {
             </span>
           </div>
         </div>
-        {
-        result.tags && roleCount > 0 && availableFilters && (
-          <div className={styles.tags}>
-            {
-              // Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
-              Object.keys(result.tags).map((fid) => {
-                return(
-                  <ResultItemTag
-                    key={fid}
-                    activeFilters={activeFilters}
-                    availableFilters={availableFilters}
-                    fid={fid}
-                    handleFilter={handleFilter}
-                    handleTagClick={handleTagClick}
-                  />
-                )
-              })
-            }
-          </div>
-        )}
-        {
-          resultDescription && !isPathfinder && (
-          <ClampedDescription
-            description={resultDescription}
-            searchWords={activeEntityFilters}
-            className={styles.description}
-          />
-        )}
+
       </div>
       <Tabs
         isOpen

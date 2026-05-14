@@ -4,6 +4,7 @@ import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Filter } from "@/features/ResultFiltering/types/filters";
+import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -547,4 +548,15 @@ export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
   )
     return true;
   return false;
+}
+
+/**
+ * Gets a string of role tags from a ResultItem's tags object.
+ *
+ * @param {Tags} tags - The tags object from a ResultItem.
+ * @param {Filter[]} availableFilters - The available filters.
+ * @returns {string} - A string of role tags, comma separated.
+ */
+export const getResultRoleTagsString = (tags: Tags, availableFilters: { [key: string]: Filter }) => {
+  return Object.keys(tags).filter((fid) => availableFilters[fid] && getTagFamily(fid) === FILTERING_CONSTANTS.FAMILIES.ROLE).map((fid) => availableFilters[fid].name).join(', ');
 }

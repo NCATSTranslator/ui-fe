@@ -30,6 +30,12 @@
   margin-bottom: $s;
 }
 
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+}
+
 .nameContainer {
   display: flex;
   align-items: center;
@@ -61,8 +67,8 @@
 }
 
 .description, .description a, .description span, .description p {
-  font-size: $bodyTwoSize;
-  color: $darkGray;
+  font-size: $captionSize;
+  color: $black;
   margin: 0;
   a {
     color: $purpleOne;
@@ -90,12 +96,14 @@
   display: flex;
 }
 
-.tags, .description {
-  width: calc(100% - 450px);
-}
-
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: $xs;
+  .tagsList {
+    font-size: $bodyTwoSize;
+    font-weight: 400;
+    color: $darkGray;
+    margin: 0 0 $xs;
+  }
 }
