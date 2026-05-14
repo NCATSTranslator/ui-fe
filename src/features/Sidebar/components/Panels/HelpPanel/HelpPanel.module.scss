@@ -18,5 +18,7 @@
       }
     }
   }
-
+  .titleHighlight, .titleHighlight span {
+    font-size: $bodyTwoSize;
+  }
 }

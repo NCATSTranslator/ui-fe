@@ -93,6 +93,7 @@ const HelpPanel = () => {
               searchWords={searchTerm ? [searchTerm] : []}
               autoEscape={true}
               textToHighlight={item.title}
+              className={styles.titleHighlight}
             />
             {searchTerm && !item.titleMatches && item.contentMatches && (
               <Highlighter

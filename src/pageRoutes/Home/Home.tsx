@@ -10,11 +10,11 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
   const [showVideo, setShowVideo] = useState(false);
-  
+
   return (
     <div>
       <h1 className={styles.pageHeading}>Explore Biomedical Knowledge</h1>
-      <p className={styles.intro}>Translator integrates known relationships in research literature and hundreds of diverse data sources to reveal multi-step pathways between biomedical entities and novel connections that you can't find anywhere else. <Link to="/how-to-use-translator">Learn How to Use Translator</Link></p>
+      <p className={styles.intro}>Translator integrates known relationships in research literature and hundreds of diverse data sources to reveal multi-step pathways between biomedical entities and novel connections that you can't find anywhere else. <Link to="/how-to-use-translator" target="_blank" rel="noreferrer">Learn How to Use Translator</Link></p>
       <CombinedQueryInterface />
       <div className={styles.homePageContent}>
         <div className={`${styles.section} ${styles.iconSection}`}>
