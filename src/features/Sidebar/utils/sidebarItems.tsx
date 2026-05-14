@@ -13,6 +13,7 @@ import SettingsPanel from "@/features/Sidebar/components/Panels/SettingsPanel/Se
 import HelpPanel from "@/features/Sidebar/components/Panels/HelpPanel/HelpPanel";
 import FeedbackPanel from "@/features/Sidebar/components/Panels/FeedbackPanel/FeedbackPanel";
 import { Link } from "react-router-dom";
+import HelpButton from "@/features/Sidebar/components/HelpButton/HelpButton";
 
 const ViewProjectsButton = () => {
   return <Button iconLeft={<ExternalLink />} iconOnly href="/projects" link small variant="textOnly" title="View All Projects" />;
@@ -20,10 +21,6 @@ const ViewProjectsButton = () => {
 
 const ViewAllQueriesButton = () => {
   return <Button iconLeft={<ExternalLink />} iconOnly href="/query-history" link small variant="textOnly" title="View All Queries" />;
-};
-
-const HelpButton = () => {
-  return <Button iconRight={<ExternalLink />} href="/frequently-asked-questions" link variant="textOnly" title="Frequently Asked Questions" />;
 };
 
 export const topItems: SidebarItem[] = [
