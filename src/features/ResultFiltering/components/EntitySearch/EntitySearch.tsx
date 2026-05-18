@@ -7,6 +7,7 @@ import { isEntityFilter, makeEntitySearch } from '@/features/ResultFiltering/uti
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import FacetTag from '@/features/ResultFiltering/components/FacetTag/FacetTag';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 interface EntitySearchProps {
   activeFilters: Filter[];
@@ -58,8 +59,8 @@ const EntitySearch: FC<EntitySearchProps> = ({
   }
 
   return (
-    <div className={`${styles.entitySearch} ${!!className && className}`}>
-      <p className={`${styles.caption} caption`}>Include or exclude results or paths containing a word or phrase in the result name, description, or paths</p>
+    <div className={joinClasses(styles.entitySearch, className)}>
+      <p className={`${styles.caption} caption`}>Include or exclude words or phrases found in result names, descriptions, and path objects</p>
       <span className={styles.inputContainer}>
         <input
           type="text"
@@ -95,7 +96,7 @@ const EntitySearch: FC<EntitySearchProps> = ({
           activeEntityFilters.length > 0 &&
           activeEntityFilters.map((filter) => {
             return (
-              <FacetTag 
+              <FacetTag
                 key={filter.value}
                 activeFilters={activeEntityFilters}
                 family="str"
