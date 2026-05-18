@@ -1,18 +1,18 @@
-import { FC, useMemo, useId } from "react";
+import { FC, useMemo, useId, useCallback, MouseEvent } from "react";
 import styles from "./FacetHeading.module.scss";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { getFilterFamily } from "@/features/ResultFiltering/utils/filterFunctions";
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import { getFilterFamily, handleClearFamily } from "@/features/ResultFiltering/utils/filterFunctions";
+import { joinClasses } from "@/features/Common/utils/utilities";
 
 // module level tooltip markup constants
 const roleTooltipMarkup = (
-  <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more <ExternalLink/></a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
+  <span className={styles.roleSpan}>The Chemical Entities of Biological Interest Role Classification (ChEBI role ontology, <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ebi.ac.uk/chebi/chebiOntology.do?chebiId=CHEBI:50906&treeView=true#vizualisation" target="_blank" rel="noreferrer" className={styles.tooltipLink}>click to learn more</a>) is a chemical classification that categorizes chemicals according to their biological role, chemical role or application.</span>
 )
 const pcTooltipMarkup = (
-  <span className={styles.fdaSpan}>Click <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}> here <ExternalLink/></a> to learn more about the Biolink Model.</span>
+  <span className={styles.fdaSpan}>Click <a onClick={(e)=>{e.stopPropagation();}} href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9372416/" target="_blank" rel='noreferrer' className={styles.tooltipLink}> here</a> to learn more about the Biolink Model.</span>
 )
 const ccTooltipMarkup = (
   <>
@@ -23,25 +23,30 @@ const ccTooltipMarkup = (
     </span>
   </>
 )
-const txtTooltipMarkup = (
-  <span className={styles.tooltip}>Search all textual elements (result name, description, node names, edge names) for a given term.</span>
-)
 
 type FacetHeadingProps = {
+  className?: string;
+  titleClassName?: string;
   includeArrow?: boolean;
   title: string;
   tagFamily: string;
   activeFilters: Filter[];
+  onSetFilters: (filters: Filter[]) => void;
 }
 
 const FacetHeading: FC<FacetHeadingProps> = ({
+  className,
+  titleClassName,
   includeArrow = true,
   title,
   tagFamily,
-  activeFilters
+  activeFilters,
+  onSetFilters,
 }) => {
   const tooltipId = useId();
   const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
+  const shouldShowClearButton = matchingActiveFacets > 0 && tagFamily !== "str";
+  const isChebiRoleFamily = tagFamily === "role";
 
   const tooltipMarkup = useMemo(() => {
     switch(tagFamily) {
@@ -51,28 +56,42 @@ const FacetHeading: FC<FacetHeadingProps> = ({
         return pcTooltipMarkup;
       case 'cc':
         return ccTooltipMarkup;
-      case 'txt':
-        return txtTooltipMarkup;
       default:
         return null;
     }
   }, [tagFamily]);
 
-  const matchingActiveFacetsMarkup = useMemo(() => {
-    return <span className={styles.filterCount}>{matchingActiveFacets}</span>
-  }, [matchingActiveFacets]);
+  const matchingActiveFacetsMarkup = <span className={styles.filterCount}>{matchingActiveFacets}</span>;
+
+  const clearFamily = useCallback((e: MouseEvent<HTMLSpanElement>, family: string) => {
+    e.stopPropagation();
+    handleClearFamily(family, activeFilters, onSetFilters);
+  }, [activeFilters, onSetFilters]);
+
+  const classNames = joinClasses(
+    styles.labelContainer,
+    className,
+  );
+
+  const combinedTitleClassName = joinClasses(
+    styles.subTwo,
+    shouldShowClearButton && styles.hasClearButton,
+    isChebiRoleFamily && styles.chebiRoleFamily,
+    titleClassName,
+  );
 
   return (
-    <div className={`${styles.labelContainer}`}>
+    <div className={classNames}>
       <div className={styles.labelHeading}>
         <div className={styles.label}>
           <span data-tooltip-id={tooltipId} className={styles.heading}>
-            <p className={`${styles.subTwo}`}>{title}</p>
+            <p className={combinedTitleClassName}>{title}</p>
             {
               tooltipMarkup !== null && <Alert className={styles.tooltipIcon}/>
             }
           </span>
           { (matchingActiveFacets > 0 && includeArrow) && matchingActiveFacetsMarkup}
+          { shouldShowClearButton && <span className={styles.clearButton} onClick={(e) => clearFamily(e, tagFamily)}>Clear</span> }
           {
             tooltipMarkup !== null &&
             <Tooltip id={tooltipId} place="bottom">

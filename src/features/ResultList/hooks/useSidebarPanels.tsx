@@ -13,6 +13,7 @@ import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDown
 import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
 import IconBadge from "@/features/Sidebar/components/IconBadge/IconBadge";
+import Button from "@/features/Core/components/Button/Button";
 
 interface UseSidebarPanelsArgs {
   styles: Record<string, string>;
@@ -30,6 +31,7 @@ interface UseSidebarPanelsArgs {
   // Filters panel
   activeFilters: Filter[];
   handleFilter: (filter: Filter) => void;
+  handleSetFilters: (filters: Filter[]) => void;
   handleClearAllFilters: () => void;
   availableFilters: { [key: string]: Filter };
   isPathfinder: boolean;
@@ -53,6 +55,7 @@ const useSidebarPanels = ({
   isLoading,
   activeFilters,
   handleFilter,
+  handleSetFilters,
   handleClearAllFilters,
   availableFilters,
   isPathfinder,
@@ -67,7 +70,7 @@ const useSidebarPanels = ({
 
   useEffect(() => {
     setShowQueryStatusToast(hasFreshResults && activePanelId !== 'queryStatus');
-  }, [hasFreshResults]);
+  }, [hasFreshResults, activePanelId]);
 
   // Data for the loading button in the Query Status panel
   const loadingButtonData: ResultListLoadingData = useMemo(() => ({
@@ -112,6 +115,13 @@ const useSidebarPanels = ({
   // Register the filters sidebar item
   useSidebarRegistration({
     ariaLabel: "Filters",
+    buttonComponent: () => (
+      activeFilters.length > 0 ? (
+        <Button smallFont variant="textOnly" handleClick={handleClearAllFilters} className={styles.clearAllButton}>Clear All</Button>
+      ) : (
+        null
+      )
+    ),
     icon: (
       <IconBadge count={activeFilters.length}>
         <FilterIcon />
@@ -123,7 +133,7 @@ const useSidebarPanels = ({
       <FiltersPanel
         activeFilters={activeFilters}
         onFilter={handleFilter}
-        onClearAll={handleClearAllFilters}
+        onSetFilters={handleSetFilters}
         availableFilters={availableFilters}
         isPathfinder={isPathfinder}
       />
@@ -133,7 +143,10 @@ const useSidebarPanels = ({
     dependencies: [
       activeFilters,
       availableFilters,
-      isPathfinder
+      isPathfinder,
+      handleFilter,
+      handleSetFilters,
+      handleClearAllFilters,
     ],
   });
 

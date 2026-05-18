@@ -120,6 +120,9 @@
       }
     }
   }
+  .clearAllButton, .clearAllButton span {
+    font-size: $captionSize;
+  }
 }
 
 .pagination {
@@ -164,3 +167,4 @@
 .downloadIcon {
   transform: rotate(180deg);
 }
+

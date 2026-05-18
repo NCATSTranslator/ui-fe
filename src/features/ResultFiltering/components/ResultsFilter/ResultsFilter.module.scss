@@ -6,6 +6,14 @@
   transition: $defaultAnim;
   position: relative;
   height: 100%;
+  .entitySearchHeading {
+    padding: $s $s 0;
+    margin-bottom: $xxs;
+    width: auto;
+  }
+  .clearButton {
+    padding: 0;
+  }
   .entitySearch {
     span {
       overflow: hidden;
@@ -26,6 +34,7 @@
     padding: $s;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     border-bottom: 1px solid $midGray;
     span {
       user-select: none;

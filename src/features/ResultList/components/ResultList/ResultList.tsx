@@ -192,6 +192,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     pathFilterState,
     setPathFilterState,
     handleFilter,
+    handleSetFilters,
     handleClearAllFilters,
     resetFilters,
   } = useResultFiltering({
@@ -381,7 +382,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isFetchingResults,
     hasFreshResults, isError,
     handleResultsRefresh, setIsLoading, isLoading,
-    activeFilters, handleFilter, handleClearAllFilters, availableFilters,
+    activeFilters, handleFilter, handleSetFilters, handleClearAllFilters, availableFilters,
     isPathfinder, resultSet: resultSet ?? null, userSaves, queryTitle,
   });
 
