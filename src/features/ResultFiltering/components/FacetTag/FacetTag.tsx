@@ -57,10 +57,10 @@ const FacetTag: FC<FacetTagProps> = ({
   filterObject,
   handleInteractExistingEntity,
   isEntitySearch = false,
-  onFilter}) => {
+  onFilter,
+}) => {
 
-  let tagKey = filterObject[0];
-  let filter = filterObject[1];
+  let [tagKey, filter] = filterObject;
   let tagName: string = generateTagName(isEntitySearch, filter, family);
   let positiveChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, false, filter);
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);

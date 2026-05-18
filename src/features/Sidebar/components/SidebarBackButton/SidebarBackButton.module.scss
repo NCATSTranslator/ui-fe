@@ -8,8 +8,7 @@
   justify-content: flex-start;
   border-radius: 0;
   span {
-    color: $darkGray;
-    font-size: $bodyTwoSize;
+    text-decoration: none !important;
   }
   svg path {
     fill: $white;
