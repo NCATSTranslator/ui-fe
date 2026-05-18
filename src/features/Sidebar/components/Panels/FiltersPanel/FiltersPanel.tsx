@@ -7,7 +7,7 @@ interface FiltersPanelProps {
   availableFilters: {[key: string]: Filter};
   isPathfinder?: boolean;
   onFilter: (arg0: Filter) => void;
-  onClearAll: () => void;
+  onSetFilters: (filters: Filter[]) => void;
 }
 
 const FiltersPanel: FC<FiltersPanelProps> = ({
@@ -15,13 +15,13 @@ const FiltersPanel: FC<FiltersPanelProps> = ({
   availableFilters,
   isPathfinder = false,
   onFilter,
-  onClearAll
+  onSetFilters,
 }) => {
   return (
     <ResultsFilter
       activeFilters={activeFilters}
       onFilter={onFilter}
-      onClearAll={onClearAll}
+      onSetFilters={onSetFilters}
       availableFilters={availableFilters}
       isPathfinder={isPathfinder}
     />
