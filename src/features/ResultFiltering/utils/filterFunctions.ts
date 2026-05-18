@@ -155,7 +155,7 @@ export const getFilterLabel = (filter: Filter | FilterFamily): string => {
     case "otc":  return "Availability";
     case "tdl":  return "Target Development Level";
     case "ev":   return "Evidence Type";
-    case "txt":  return "Search";
+    case "str":  return "Search";
     case "sv":   return "Bookmarks & Notes";
     default: return defaultLabel;
   }
@@ -191,8 +191,9 @@ export const groupFilters = (filters: {[key: string]: Filter}, type: FilterType)
   for (let [id, description] of Object.entries(filters)) {
     if (getTagType(id) === type) {
       const family = getTagFamily(id);
-      if (newGroupedFilters[family]) {
-        newGroupedFilters[family]![id] = { ...description };
+      const group = newGroupedFilters[family];
+      if (group) {
+        group[id] = { ...description };
       }
     }
   }
@@ -200,6 +201,11 @@ export const groupFilters = (filters: {[key: string]: Filter}, type: FilterType)
   return newGroupedFilters;
 }
 
+/*
+ * Returns true if the filter group has any filters
+ * @param {GroupedFilters} filterGroup - The filter group to check
+ * @returns {boolean} True if the filter group has any filters, false otherwise
+ */
 export const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
   for (let categoryFilters of Object.values(filterGroup)) {
     if (categoryFilters && Object.keys(categoryFilters).length > 0) return true;
@@ -207,3 +213,45 @@ export const groupHasFilters = (filterGroup: GroupedFilters): boolean => {
 
   return false;
 }
+
+/*
+ * Returns true if the filter group has any active filters
+ * @param {GroupedFilters} filterGroup - The filter group to check
+ * @param {Filter[]} activeFilters - The active filters to check
+ * @returns {boolean} True if the active filters have any filters in the filter group, false otherwise
+ */
+export const groupHasActiveFilters = (filterGroup: GroupedFilters, activeFilters: Filter[]): boolean => {
+  return activeFilters.some((filter) => {
+    const family = getFilterFamily(filter);
+    return family in filterGroup;
+  });
+}
+
+/**
+ * Clear all filters for a given family
+ * @param family - The family to clear
+ * @param activeFilters - The active filters
+ * @returns void
+ */
+export const handleClearFamily = (family: string, activeFilters: Filter[], onSetFilters: (filters: Filter[]) => void) => {
+  const remaining = activeFilters.filter(filter => {
+    const filterFamily = getFilterFamily(filter);
+    return filterFamily !== family;
+  });
+  onSetFilters(remaining);
+}
+
+/**
+ * Clear all filters for a given group
+ * @param group - The group to clear
+ * @param activeFilters - The active filters
+ * @param onSetFilters - The function to set the filters
+ * @returns void
+ */
+export const handleClearGroup = (group: GroupedFilters, activeFilters: Filter[], onSetFilters: (filters: Filter[]) => void) => {
+  const remaining = activeFilters.filter(filter => {
+    const family = getFilterFamily(filter);
+    return !(family in group);
+  });
+  onSetFilters(remaining);
+};

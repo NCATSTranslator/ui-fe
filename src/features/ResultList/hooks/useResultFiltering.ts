@@ -27,6 +27,7 @@ export interface UseResultFilteringReturn {
   pathFilterState: PathFilterState | null;
   setPathFilterState: Dispatch<SetStateAction<PathFilterState | null>>;
   handleFilter: (filter: Filter) => void;
+  handleSetFilters: (filters: Filter[]) => void;
   handleClearAllFilters: () => void;
   resetFilters: () => void;
 }
@@ -128,6 +129,18 @@ const useResultFiltering = ({
     );
   }, [activeFilters, handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
 
+  const handleSetFilters = useCallback((filters: Filter[]) => {
+    handleApplyFilterAndCleanup(
+      filters,
+      activeEntityFilters,
+      rawResults.current,
+      originalResults.current,
+      currentSortString.current,
+      isPathfinder,
+      userSavesRef.current
+    );
+  }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+
   const handleClearAllFilters = useCallback(() => {
     handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, isPathfinder, userSavesRef.current);
   }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
@@ -149,6 +162,7 @@ const useResultFiltering = ({
     pathFilterState,
     setPathFilterState,
     handleFilter,
+    handleSetFilters,
     handleClearAllFilters,
     resetFilters,
   };
