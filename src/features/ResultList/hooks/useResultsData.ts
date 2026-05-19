@@ -118,9 +118,11 @@ const useResultsData = ({
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
 
-    if (resultSet === null || isEqual(resultSet, prevRawResults.current))
+    // If the result set is null or the result set is the same as the previous result set and doesn't have 0 results, early return
+    if (resultSet === null || (isEqual(resultSet, prevRawResults.current) && resultSet.data.results.length > 0))
       return;
 
+    // If the result set is an error or has no results, early return
     if (resultSet.status === 'error' || resultSet.data.results === undefined)
       return;
 
@@ -157,9 +159,11 @@ const useResultsData = ({
       [], false, currentSortString.current, currentIsPathfinder, userSavesRef.current
     );
 
+    // If the result set has results, set the loading state to false
     if (newFormattedResults.length > 0)
       setIsLoading(false);
 
+    // If the result set has no results and the ARA status is finished, set the loading state to false
     if (newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatusRef.current)
       setIsLoading(false);
   }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef]);
@@ -212,6 +216,7 @@ const useResultsData = ({
     currentQueryID,
     isFetchingARAStatus,
     setIsFetchingARAStatus,
+    isFetchingARAStatusRef,
     numberOfStatusChecks,
     formattedResults,
     setIsError,

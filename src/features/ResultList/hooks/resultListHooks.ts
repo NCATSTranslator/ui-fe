@@ -96,6 +96,7 @@ export const useResultsStatusQuery = (
   currentQueryID: string | null,
   isFetchingARAStatus: boolean | null,
   setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
+  isFetchingARAStatusRef: RefObject<boolean | null>,
   numberOfStatusChecks: RefObject<number>,
   formattedResults: Result[],
   setIsError: (value: boolean) => void,
@@ -140,6 +141,7 @@ export const useResultsStatusQuery = (
         // Check if status polling should stop
         if (shouldStopStatusPolling(data.status, numberOfStatusChecks.current)) {
           console.log(`Stopping ARA status polling. Status: ${data.status}, Checks: ${numberOfStatusChecks.current}`);
+          isFetchingARAStatusRef.current = false;
           setIsFetchingARAStatus(false);
           setIsFetchingResults(true);
         }

@@ -495,11 +495,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
           }
           <div className={`${styles.resultsContainer} container`}>
             {
-              isLoading &&
-              <ResultListLoadingArea />
-            }
-            {
-              !isLoading &&
+              isLoading
+              ?
+                <ResultListLoadingArea />
+              :
                 <div>
                   <ResultListHeader data={headerData} />
                   <div className={`${styles.resultsTableContainer} ${isPathfinder ? styles.pathfinder : ''}`}>

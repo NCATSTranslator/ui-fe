@@ -386,7 +386,10 @@ export const useUpdateQueryLastSeen = (sid?: string) => {
   return useMutation({
     mutationFn: async () => {
       if (!sid) {
-        console.log("No query save ID provided, skipping query last_seen timestamp update");
+        // console.log("No query save ID provided, skipping query last_seen timestamp update");
+        // if there's no save id, we can't update the last_seen timestamp
+        // instead, let's save the query 
+        
         return;
       }
       await touchQuery(
