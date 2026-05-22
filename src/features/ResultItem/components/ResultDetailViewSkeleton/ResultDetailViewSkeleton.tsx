@@ -6,7 +6,7 @@ const ResultDetailViewSkeleton: FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.tableHeader}>
-        <SkeletonBar width="40px" height="10px" />
+        <div />
         <div />
         <SkeletonBar width="60px" height="10px" />
         <SkeletonBar width="40px" height="10px" />
