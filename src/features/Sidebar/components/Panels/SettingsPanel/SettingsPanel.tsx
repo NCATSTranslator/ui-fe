@@ -14,6 +14,7 @@ import { Preferences} from '@/features/UserAuth/types/user';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import cloneDeep from 'lodash/cloneDeep';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
@@ -25,8 +26,10 @@ const SettingsPanel = () => {
   const [activePrefObject, setActivePrefObject] = useState<{prefObject: PrefObject, prefKey: PrefKey} | null>(null);
 
   const handleSetActivePrefObject = (prefId: PrefKey, prefs: Preferences) => {
-    setActivePrefObject({prefObject: prefs[prefId as keyof Preferences], prefKey: prefId});
-  }
+    const prefObject = prefs[prefId] ?? defaultPrefs[prefId];
+    if (!prefObject) return;
+    setActivePrefObject({ prefObject, prefKey: prefId });
+  };
 
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
@@ -57,23 +60,23 @@ const SettingsPanel = () => {
   
   const resultPrefs = useMemo(()=> {
     return {
-      result_sort: userPrefs.result_sort,
-      results_per_page: userPrefs.results_per_page,
-      path_show_count: userPrefs.path_show_count,
-    }
+      result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
+      results_per_page: userPrefs.results_per_page ?? defaultPrefs.results_per_page,
+      path_show_count: userPrefs.path_show_count ?? defaultPrefs.path_show_count,
+    };
   }, [userPrefs]);
 
   const evidencePrefs = useMemo(()=> {
     return {
-      evidence_sort: userPrefs.evidence_sort,
-      evidence_per_page: userPrefs.evidence_per_page,
-    }
+      evidence_sort: userPrefs.evidence_sort ?? defaultPrefs.evidence_sort,
+      evidence_per_page: userPrefs.evidence_per_page ?? defaultPrefs.evidence_per_page,
+    };
   }, [userPrefs]);
 
   const graphPrefs = useMemo(()=> {
     return {
-      graph_layout: userPrefs.graph_layout,
-    }
+      graph_layout: userPrefs.graph_layout ?? defaultPrefs.graph_layout,
+    };
   }, [userPrefs]);
 
   const prefsToDisplay = useMemo(()=> {
@@ -167,7 +170,7 @@ const SettingsPanel = () => {
               >
                 <div className={styles.activePrefTypeContent}>
                   {
-                    prefsToDisplay && Object.entries(prefsToDisplay).map(([key, pref]) => (
+                    prefsToDisplay && Object.entries(prefsToDisplay).filter(([, pref]) => !!pref).map(([key, pref]) => (
                       <div className={styles.activePref} key={key}>
                         <h6 className={styles.prefLabel}>{pref.name}</h6>
                         <Button 
@@ -185,7 +188,7 @@ const SettingsPanel = () => {
               </InteriorPanelContainer>
             }
             {
-              activePrefObject && activePrefObject.prefObject.possible_values &&
+              activePrefObject?.prefObject?.possible_values &&
               <InteriorPanelContainer
                 handleBack={() => setActivePrefObject(null)}
                 backButtonLabel={activePrefObject.prefObject.name}
@@ -194,7 +197,7 @@ const SettingsPanel = () => {
                   {activePrefObject.prefObject.possible_values.map((value) => (
                     <Button
                       key={value}
-                      className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
+                      className={`${styles.prefValueSelectorButton} ${(userPrefs[activePrefObject.prefKey] ?? defaultPrefs[activePrefObject.prefKey])?.pref_value === value ? styles.active : ''}`}
                       variant="secondary"
                       handleClick={() => handlePrefValueClick(activePrefObject.prefKey, value)}
                       >
