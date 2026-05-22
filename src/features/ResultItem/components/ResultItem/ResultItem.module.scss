@@ -113,9 +113,10 @@
   }
   .nameContainer {
     display: flex;
-    flex-wrap: wrap;
     align-content: center;
     overflow: hidden;
+    height: min-content;
+    align-self: center;
     span {
       line-height: 1.25;
     }
