@@ -1,36 +1,113 @@
-import { Preferences } from "@/features/UserAuth/types/user";
+import { PrefKey, PrefObject, Preferences } from "@/features/UserAuth/types/user";
 import cloneDeep from "lodash/cloneDeep";
 import { defaultPrefs } from "@/features/UserAuth/utils/userDefaults";
 import { capitalizeFirstLetter } from "@/features/Common/utils/utilities";
 
-export const formatPrefs = (prefs: Preferences) => {
-  let newPrefs: Preferences = cloneDeep(prefs);
+const LEGACY_PREF_KEY_MAP: Record<string, PrefKey> = {
+  results_per_screen: "results_per_page",
+  result_per_screen: "results_per_page",
+  evidence_per_screen: "evidence_per_page",
+};
 
-  for(const key of Object.keys(prefs)) {
-    const checkedKey = checkOldPrefKey(key);
-    if(!newPrefs[checkedKey])
-      newPrefs[checkedKey] = { name: "", pref_value: prefs[key].pref_value, possible_values: [] };
+/** Removed prefs with no canonical successor — ignored on read. */
+const DEPRECATED_PREF_KEYS = new Set(["graph_visibility"]);
 
-    newPrefs[checkedKey].name = getPrefName(checkedKey);
-    newPrefs[checkedKey].possible_values = getPrefPossibleValues(checkedKey);
+const CANONICAL_PREF_KEYS = Object.keys(defaultPrefs) as PrefKey[];
+
+const isPrefObject = (obj: unknown): obj is PrefObject =>
+  typeof obj === "object" &&
+  obj !== null &&
+  "pref_value" in obj &&
+  (typeof (obj as PrefObject).pref_value === "string" ||
+    typeof (obj as PrefObject).pref_value === "number");
+
+const ROOT_METADATA_KEYS = new Set(["user_id", "preferences"]);
+
+/**
+ * Normalizes API responses that may store prefs under `preferences`, at the root, or both.
+ * Resolves legacy/deprecated keys so downstream consumers receive only canonical keys.
+ */
+export const parsePreferencesResponse = (response: unknown): Preferences | null => {
+  if (!response || typeof response !== "object") return null;
+
+  const record = response as Record<string, unknown>;
+  const raw: Record<string, unknown> = {};
+
+  const nested = record.preferences;
+  if (nested && typeof nested === "object" && nested !== null) {
+    Object.assign(raw, nested);
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (ROOT_METADATA_KEYS.has(key)) continue;
+    raw[key] = value;
+  }
+
+  const merged: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const canonicalKey = toCanonicalKey(key);
+    if (!canonicalKey) {
+      warnIgnoredPrefKey(key);
+      continue;
+    }
+    if (!isPrefObject(value)) {
+      console.warn(`Ignoring invalid preference for "${key}":`, value);
+      continue;
+    }
+    if (canonicalKey !== key) {
+      warnLegacyPrefKey(key, canonicalKey);
+    }
+    merged[canonicalKey] = value;
+  }
+
+  if (Object.keys(merged).length === 0) return null;
+
+  return merged as Preferences;
+};
+
+const toCanonicalKey = (key: string): PrefKey | null => {
+  if (DEPRECATED_PREF_KEYS.has(key)) return null;
+  if (key in defaultPrefs) return key as PrefKey;
+  if (key in LEGACY_PREF_KEY_MAP) return LEGACY_PREF_KEY_MAP[key];
+  return null;
+};
+
+const warnIgnoredPrefKey = (key: string) => {
+  if (DEPRECATED_PREF_KEYS.has(key)) {
+    console.warn(`Ignoring deprecated preference key: "${key}"`);
+  } else {
+    console.warn(`Ignoring unknown preference key: "${key}"`);
+  }
+};
+
+const warnLegacyPrefKey = (key: string, canonicalKey: PrefKey) => {
+  console.warn(`Legacy preference key "${key}" mapped to "${canonicalKey}"`);
+};
+
+export const formatPrefs = (prefs: Preferences): Preferences => {
+  const newPrefs = cloneDeep(defaultPrefs);
+
+  for (const key of Object.keys(prefs)) {
+    if (key in newPrefs && isPrefObject(prefs[key])) {
+      newPrefs[key as PrefKey].pref_value = prefs[key].pref_value;
+    }
+  }
+
+  for (const key of CANONICAL_PREF_KEYS) {
+    newPrefs[key].name = getPrefName(key);
+    newPrefs[key].possible_values = getPrefPossibleValues(key);
   }
 
   return newPrefs;
-}
-
-const checkOldPrefKey = (key: string) => {
-  if(key === "results_per_screen" || key === "result_per_screen") return "results_per_page";
-  if(key === "evidence_per_screen") return "evidence_per_page";
-  return key;
-}
+};
 
 const getPrefPossibleValues = (key: string) => {
   return (!!defaultPrefs[key]) ? defaultPrefs[key].possible_values : [];
-}
+};
 
 export const getPrefName = (key: string) => {
   return (!!defaultPrefs[key]) ? defaultPrefs[key].name : key;
-}
+};
 
 export const getPrettyPrefValue = (value: string | number) => {
   if(value === -1) return "All";
@@ -73,4 +150,4 @@ export const getPrettyPrefValue = (value: string | number) => {
       return capitalizeFirstLetter(value.toString());
   }
 
-}
+};
