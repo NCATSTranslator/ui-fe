@@ -11,7 +11,7 @@ const NodeViewSkeleton: FC = () => {
   const queryStatus = useSelector(getQueryStatusById(queryId));
 
   const statusMessage = queryStatus && queryStatus.araCount > 0
-    ? `Loading results... ${queryStatus.araCount} sources responded`
+    ? `Loading results... ${queryStatus.araCount} source${queryStatus.araCount > 1 ? 's' : ''} responded`
     : 'Loading results...';
 
   return <ViewSkeleton statusMessage={statusMessage} />;
