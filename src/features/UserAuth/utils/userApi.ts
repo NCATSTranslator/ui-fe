@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/ResultList/slices/resultsSlice';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
-import { formatPrefs } from '@/features/UserAuth/utils/formatPrefs';
+import { formatPrefs, parsePreferencesResponse } from '@/features/UserAuth/utils/formatPrefs';
 import { getFullPathname } from '@/features/Common/utils/utilities';
 import { Location as RouterLocation } from 'react-router-dom';
 
@@ -624,14 +624,18 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         formattedPrefs = defaultPrefs;
         console.warn("no user available, setting to default prefs.");
       } else {
-        const prefs = await getUserPreferences(() => {
-          console.warn("no prefs found for this user, setting to default prefs.");
-        });
-        console.log("initial fetch of user prefs: ", prefs);
-        if(prefs === undefined) {
+        const prefsResponse = await fetchWithErrorHandling<PreferencesContainer>(
+          () => get(`${userApiPath}/preferences`),
+          (error) => console.warn("no prefs found for this user, setting to default prefs.", error.message),
+          (error) => console.warn("Fetch error getting user preferences:", error.message),
+        ).catch(() => undefined);
+        console.log("initial fetch of user prefs: ", prefsResponse);
+
+        const storedPrefs = parsePreferencesResponse(prefsResponse);
+        if(!storedPrefs) {
           formattedPrefs = defaultPrefs;
         } else {
-          formattedPrefs = formatPrefs(prefs.preferences);
+          formattedPrefs = formatPrefs(storedPrefs);
         }
       }
       if(!!formattedPrefs) 
