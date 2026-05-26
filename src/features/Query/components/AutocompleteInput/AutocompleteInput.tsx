@@ -11,6 +11,7 @@ import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import { getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
 import Button from '@/features/Core/components/Button/Button';
 import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
+import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 
 interface AutocompleteInputProps {
   id: string;
@@ -157,7 +158,15 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
 
   const IconLeft = (
     <>
-      {handleSwapTerms && <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" />}
+      {
+        handleSwapTerms &&
+        <>
+          <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" dataTooltipId="swap-terms-tooltip" />
+          <Tooltip id="swap-terms-tooltip">
+            <span>Swap Search Terms</span>
+          </Tooltip>
+        </>
+      }
       {!!selectedItem?.types ? getNodeIcon(selectedItem.types[0]) : <QuestionIcon/>}
     </>
   )
