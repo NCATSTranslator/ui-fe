@@ -1,5 +1,4 @@
 import { SidebarItem } from "@/features/Sidebar/types/sidebar";
-import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import HistoryIcon from '@/assets/icons/navigation/History.svg?react';
 import UserIcon from '@/assets/icons/projects/user.svg?react';
@@ -14,6 +13,7 @@ import HelpPanel from "@/features/Sidebar/components/Panels/HelpPanel/HelpPanel"
 import FeedbackPanel from "@/features/Sidebar/components/Panels/FeedbackPanel/FeedbackPanel";
 import { Link } from "react-router-dom";
 import HelpButton from "@/features/Sidebar/components/HelpButton/HelpButton";
+import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 
 const ViewProjectsButton = () => {
   return <Button iconLeft={<ExternalLink />} iconOnly href="/projects" link small variant="textOnly" title="View All Projects" />;
@@ -24,7 +24,7 @@ const ViewAllQueriesButton = () => {
 };
 
 export const topItems: SidebarItem[] = [
-  { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <SearchPlusIcon />, tooltipText: 'New Query' },
+  { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <CirclePlusIcon />, tooltipText: 'New Query' },
   { id: 'projects', title: <Link to="/projects">Projects</Link>, type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
   { id: 'queries', title: <Link to="/query-history">Query History</Link>, type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
 ];
