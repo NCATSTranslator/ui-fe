@@ -64,6 +64,9 @@
 }
 .tableHead {
   padding-right: 0;
+  .head {
+    justify-content: flex-start;
+  }
 }
 .tableBody {
   box-shadow: $dropShadow;
@@ -138,8 +141,6 @@
     }
     .source {
       display: flex;
-      justify-content: center;
-      align-items: center;
     }
     .tooltipSpan {
       margin: 0 2px;
@@ -179,9 +180,6 @@
     span {
       display: block;
     }
-  }
-  .link a {
-    justify-content: center;
   }
 }
 .pValueTable, .otherTable {
