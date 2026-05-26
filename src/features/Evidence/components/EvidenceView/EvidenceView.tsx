@@ -143,6 +143,8 @@ const EvidenceView: FC = () => {
 
     if (!isResultEdge(edge) || !selectedEdgeRef.current || !resultSet) return;
 
+    if (edge.id === selectedEdgeRef.current.id) return;
+
     setSelectedEdge(edge);
     handleEvidenceData(resultSet, edge);
     markEdgeSeen(edge.id);
