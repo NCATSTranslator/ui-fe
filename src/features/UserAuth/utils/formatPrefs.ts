@@ -84,6 +84,11 @@ const warnLegacyPrefKey = (key: string, canonicalKey: PrefKey) => {
   console.warn(`Legacy preference key "${key}" mapped to "${canonicalKey}"`);
 };
 
+/**
+ * Format the preferences object to the proper format. Expects a validated preferences object via parsePreferencesResponse.
+ * @param {Preferences} prefs - The preferences object to format.
+ * @returns {Preferences} The formatted preferences object.
+ */
 export const formatPrefs = (prefs: Preferences): Preferences => {
   const newPrefs = cloneDeep(defaultPrefs);
 

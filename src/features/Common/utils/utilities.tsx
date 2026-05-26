@@ -822,7 +822,14 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
       }
     }
   }
-  return compressedEdges;
+
+  // sort the compressed edges by publication count, trial count, and predicate
+  return compressedEdges.sort((a, b) =>
+    // count all publications from all keys in the publications object
+    Object.values(b.publications).reduce((acc, curr) => acc + curr.length, 0) - Object.values(a.publications).reduce((acc, curr) => acc + curr.length, 0)
+    || b.trials.length - a.trials.length
+    || b.predicate.localeCompare(a.predicate)
+  );
 }
 
 /**
