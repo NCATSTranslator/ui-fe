@@ -23,7 +23,7 @@ import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
 import CardList from '@/features/Projects/components/CardList/CardList';
 import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
-import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import AnimateHeight from 'react-animate-height';
 import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
@@ -172,7 +172,7 @@ const ProjectDetailInner = () => {
               </div>
               <div className={styles.projectTabsContainer}>
                 <Button 
-                  iconLeft={<SearchPlusIcon />}
+                  iconLeft={<CirclePlusIcon />}
                   iconRight={<ChevDownIcon className={styles.iconRight} />}
                   handleClick={handleAddNewQueryClick}
                   title="Add New Query"

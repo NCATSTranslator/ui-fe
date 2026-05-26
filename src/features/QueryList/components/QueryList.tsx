@@ -14,7 +14,7 @@ import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
 import CardList from "@/features/Projects/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
-import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
 import AnimateHeight from "react-animate-height";
@@ -60,7 +60,7 @@ const QueryList = () => {
       />
       <div className={styles.list}>
         <Button 
-          iconLeft={<SearchPlusIcon />}
+          iconLeft={<CirclePlusIcon />}
           iconRight={<ChevDownIcon className={styles.iconRight} />}
           handleClick={handleAddNewQueryClick}
           title="Add New Query"

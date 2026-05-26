@@ -5,6 +5,7 @@ import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { Provenance } from '@/features/Evidence/types/evidence.d';
 import evidenceStyles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import styles from './KnowledgeSourcesTable.module.scss';
+import { joinClasses } from '@/features/Common/utils/utilities';
 
 interface KnowledgeSourcesTableProps {
   sources: Provenance[];
@@ -44,18 +45,18 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
   }, [sources]);
 
   return (
-    <div className={`table-body ${styles.tableBody} ${evidenceStyles.tableBody} ${evidenceStyles.sources}`}>
-      <div className={`table-head ${evidenceStyles.tableHead}`}>
-        <div className={`head ${evidenceStyles.head}`}>Source</div>
-        <div className={`head ${evidenceStyles.head}`}>Rationale</div>
+    <div className={joinClasses("table-body", styles.tableBody, evidenceStyles.tableBody, evidenceStyles.sources)}>
+      <div className={joinClasses("table-head", evidenceStyles.tableHead)}>
+        <div className={joinClasses("head", evidenceStyles.head)}>Source</div>
+        <div className={joinClasses("head", evidenceStyles.head)}>Rationale</div>
       </div>
-      <div className={`table-items ${evidenceStyles.tableItems} scrollable`}>
+      <div className={joinClasses("table-items", evidenceStyles.tableItems, "scrollable")}>
         {groupedSources.map((src, i) => {
           const sourceKey = `${src.name}-${i}`;
           const tooltipId = `source-tooltip-${sourceKey}`;
 
           return (
-            <div className={`table-item ${styles.tableItem} ${evidenceStyles.tableItem}`} key={sourceKey}>
+            <div className={joinClasses("table-item", styles.tableItem, evidenceStyles.tableItem)} key={sourceKey}>
               {src.wiki ? (
                 <Tooltip id={tooltipId}>
                   <span className={evidenceStyles.tooltipSpan}>
@@ -66,13 +67,13 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                   </span>
                 </Tooltip>
               ) : null}
-              <span className={`table-cell ${styles.sourceName} ${evidenceStyles.cell} ${evidenceStyles.source} ${evidenceStyles.sourceItem}`}>
+              <span className={joinClasses("table-cell", styles.sourceName, evidenceStyles.cell, evidenceStyles.source, evidenceStyles.sourceItem)}>
                 <span className={styles.sourceNameText}>
                   {src.name}
                   {src.wiki && <InfoIcon className={evidenceStyles.infoIcon} data-tooltip-id={tooltipId} />}
                 </span>
               </span>
-              <span className={`table-cell ${evidenceStyles.cell} ${evidenceStyles.link} ${evidenceStyles.sourceItem}`}>
+              <span className={joinClasses("table-cell", evidenceStyles.cell, evidenceStyles.link, evidenceStyles.sourceItem)}>
                 {src.urls.length > 0 ? (
                   <div className={styles.urlGrid}>
                     {src.urls.map((url) => (
@@ -81,7 +82,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                         href={url}
                         target="_blank"
                         rel="noreferrer"
-                        className={`url ${evidenceStyles.edgeProvenanceLink}`}
+                        className={joinClasses("url", evidenceStyles.edgeProvenanceLink)}
                       >
                         {url}
                         <ExternalLink />
