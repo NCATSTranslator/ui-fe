@@ -47,6 +47,8 @@ const FacetHeading: FC<FacetHeadingProps> = ({
   const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
   const shouldShowClearButton = matchingActiveFacets > 0 && tagFamily !== "str";
   const isChebiRoleFamily = tagFamily === "role";
+  const isCTIndicationsFamily = tagFamily === "di";
+  const isDevelopmentStageFamily = tagFamily === "cc";
 
   const tooltipMarkup = useMemo(() => {
     switch(tagFamily) {
@@ -77,6 +79,8 @@ const FacetHeading: FC<FacetHeadingProps> = ({
     styles.subTwo,
     shouldShowClearButton && styles.hasClearButton,
     isChebiRoleFamily && styles.chebiRoleFamily,
+    isCTIndicationsFamily && styles.ctIndicationsFamily,
+    isDevelopmentStageFamily && styles.developmentStageFamily,
     titleClassName,
   );
 
@@ -90,8 +94,10 @@ const FacetHeading: FC<FacetHeadingProps> = ({
               tooltipMarkup !== null && <Alert className={styles.tooltipIcon}/>
             }
           </span>
-          { (matchingActiveFacets > 0 && includeArrow) && matchingActiveFacetsMarkup}
-          { shouldShowClearButton && <span className={styles.clearButton} onClick={(e) => clearFamily(e, tagFamily)}>Clear</span> }
+          <div className={styles.filterCountContainer}>
+            { (matchingActiveFacets > 0 && includeArrow) && matchingActiveFacetsMarkup}
+            { shouldShowClearButton && <span className={styles.clearButton} onClick={(e) => clearFamily(e, tagFamily)}>Clear</span> }
+          </div>
           {
             tooltipMarkup !== null &&
             <Tooltip id={tooltipId} place="bottom">

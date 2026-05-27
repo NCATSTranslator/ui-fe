@@ -59,8 +59,11 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      &.chebiRoleFamily {
-        max-width: 145px;
+      &.chebiRoleFamily, &.developmentStageFamily {
+        max-width: 125px;
+      }
+      &.ctIndicationsFamily {
+        max-width: 153px;
       }
     }
   }
@@ -78,6 +81,11 @@
       stroke: $darkGray;
       transition: $defaultAnim;
     }
+  }
+  .filterCountContainer {
+    display: flex;
+    align-items: center;
+    gap: $xs;
   }
   .clearButton {
     cursor: pointer;
