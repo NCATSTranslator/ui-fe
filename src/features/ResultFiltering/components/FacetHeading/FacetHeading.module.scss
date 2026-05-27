@@ -4,9 +4,11 @@
   width: 100%;
   .labelHeading {
     display: grid;
-    grid-template-columns: 1fr $m;
     align-items: center;
     width: 100%;
+    &.includeArrow {
+      grid-template-columns: 1fr $m;
+    }
   }
   .filterCount {
     background-color: $midGray;
@@ -59,11 +61,8 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      &.chebiRoleFamily, &.developmentStageFamily {
-        max-width: 125px;
-      }
-      &.ctIndicationsFamily {
-        max-width: 153px;
+      &.chebiRoleFamily {
+        max-width: 150px;
       }
     }
   }

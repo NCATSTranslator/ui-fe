@@ -32,6 +32,7 @@ type FacetHeadingProps = {
   tagFamily: string;
   activeFilters: Filter[];
   onSetFilters: (filters: Filter[]) => void;
+  isBackButton?: boolean;
 }
 
 const FacetHeading: FC<FacetHeadingProps> = ({
@@ -42,13 +43,12 @@ const FacetHeading: FC<FacetHeadingProps> = ({
   tagFamily,
   activeFilters,
   onSetFilters,
+  isBackButton = false,
 }) => {
   const tooltipId = useId();
   const matchingActiveFacets = activeFilters.filter((filter)=> getFilterFamily(filter) === tagFamily).length;
-  const shouldShowClearButton = matchingActiveFacets > 0 && tagFamily !== "str";
+  const shouldShowClearButton = matchingActiveFacets > 0 && (isBackButton || tagFamily === "str");
   const isChebiRoleFamily = tagFamily === "role";
-  const isCTIndicationsFamily = tagFamily === "di";
-  const isDevelopmentStageFamily = tagFamily === "cc";
 
   const tooltipMarkup = useMemo(() => {
     switch(tagFamily) {
@@ -79,14 +79,17 @@ const FacetHeading: FC<FacetHeadingProps> = ({
     styles.subTwo,
     shouldShowClearButton && styles.hasClearButton,
     isChebiRoleFamily && styles.chebiRoleFamily,
-    isCTIndicationsFamily && styles.ctIndicationsFamily,
-    isDevelopmentStageFamily && styles.developmentStageFamily,
     titleClassName,
+  );
+
+  const labelHeadingClassName = joinClasses(
+    styles.labelHeading,
+    includeArrow && styles.includeArrow,
   );
 
   return (
     <div className={classNames}>
-      <div className={styles.labelHeading}>
+      <div className={labelHeadingClassName}>
         <div className={styles.label}>
           <span data-tooltip-id={tooltipId} className={styles.heading}>
             <p className={combinedTitleClassName}>{title}</p>
@@ -95,7 +98,7 @@ const FacetHeading: FC<FacetHeadingProps> = ({
             }
           </span>
           <div className={styles.filterCountContainer}>
-            { (matchingActiveFacets > 0 && includeArrow) && matchingActiveFacetsMarkup}
+            { (matchingActiveFacets > 0) && matchingActiveFacetsMarkup}
             { shouldShowClearButton && <span className={styles.clearButton} onClick={(e) => clearFamily(e, tagFamily)}>Clear</span> }
           </div>
           {
@@ -107,7 +110,6 @@ const FacetHeading: FC<FacetHeadingProps> = ({
             </Tooltip>
           }
         </div>
-        { (matchingActiveFacets > 0 && !includeArrow) && matchingActiveFacetsMarkup}
         {
           (tagFamily !== "str" && includeArrow) &&
           <ChevRight className={styles.expansionSVG}/>
