@@ -146,6 +146,7 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
                 title={getFilterLabel(activeFilterFamily as FilterFamily)}
                 includeArrow={false}
                 onSetFilters={onSetFilters}
+                isBackButton
               />}
             >
               {
