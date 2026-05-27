@@ -75,7 +75,7 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
               textToHighlight={edge.predicate}
             />
             {edge.predicate.includes('impact') &&
-              <span className={styles.predicateImpact}> (either positively or negatively)</span>
+              <span className={styles.predicateImpact}>(either positively or negatively)</span>
             }
           </span>
           {renderDescription(edge.predicate, edge.description)}
