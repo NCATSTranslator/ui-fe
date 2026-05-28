@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState, RefObject, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
+import { API_PATH_PREFIX, useUser } from "@/features/UserAuth/utils/userApi";
 import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
@@ -256,10 +256,14 @@ export const useResultsDataQuery = (
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   sid?: string
 ) => {
+  const [user] = useUser();
   const { mutate: touchQueryLastSeen } = useUpdateQueryLastSeen(sid);
   const { mutate: copyQueryMutate } = useCopyQuery();
 
   const handleQuerySeen = () => {
+    // if user isn't logged in, don't do anything
+    if (!user)
+      return;
     if (sid)
       touchQueryLastSeen();
     else if (currentQueryID)
