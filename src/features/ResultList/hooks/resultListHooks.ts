@@ -5,7 +5,7 @@ import { fetchWithErrorHandling } from "@/features/Common/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
-import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
+import { useUpdateQueryLastSeen, useCopyQuery } from "@/features/Projects/hooks/customHooks";
 
 
 // Constants
@@ -256,7 +256,16 @@ export const useResultsDataQuery = (
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
   sid?: string
 ) => {
-  const { mutate: updateQueryLastSeen } = useUpdateQueryLastSeen(sid);
+  const { mutate: touchQueryLastSeen } = useUpdateQueryLastSeen(sid);
+  const { mutate: copyQueryMutate } = useCopyQuery();
+
+  const handleQuerySeen = () => {
+    if (sid)
+      touchQueryLastSeen();
+    else if (currentQueryID)
+      copyQueryMutate(currentQueryID);
+  };
+
   return useQuery({
     queryKey: ['resultsData', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -283,7 +292,7 @@ export const useResultsDataQuery = (
           numberOfStatusChecks,
           setIsFetchingARAStatus,
           setIsFetchingResults,
-          updateQueryLastSeen
+          handleQuerySeen
         );
       } catch (error) {
         handleResultsDataError(

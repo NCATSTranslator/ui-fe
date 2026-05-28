@@ -211,6 +211,25 @@ export const updateQuery = async (
 };
 
 /**
+ * POST /api/v1/users/me/queries/copy
+ * Copies an existing query to the current user's queries.
+ */
+export const copyQuery = async (
+  pk: string,
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<"OK"> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries/copy`;
+
+  return fetchWithErrorHandling<"OK">(
+    () => post(url, { pk }),
+    httpErrorHandler,
+    fetchErrorHandler,
+    (data: unknown): data is "OK" => true
+  );
+};
+
+/**
  * PUT /api/v1/users/me/queries/touch
  * Updates the last_seen timestamp for a query.
  */

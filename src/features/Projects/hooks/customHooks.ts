@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useCallback } from 'react';
-import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
+import { copyQuery, createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries,
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
@@ -158,6 +158,20 @@ export const useRestoreQueries = () => {
     mutationFn: (queryIds: string[]) => restoreQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
+    },
+  });
+};
+
+/**
+ * Hook to copy an existing query to the current user's queries
+ */
+export const useCopyQuery = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (pk: string) => copyQuery(pk),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
     },
   });
@@ -386,14 +400,10 @@ export const useUpdateQueryLastSeen = (sid?: string) => {
   return useMutation({
     mutationFn: async () => {
       if (!sid) {
-        console.log("No query save ID provided, skipping query last_seen timestamp update");
+        console.warn("No query save ID provided, skipping query last_seen timestamp update");
         return;
       }
-      await touchQuery(
-        sid, 
-        () => console.warn('http error updating query last_seen timestamp'), 
-        () => console.warn('fetch error updating query last_seen timestamp')
-      );
+      return await touchQuery(sid);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
