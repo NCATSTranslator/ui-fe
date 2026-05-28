@@ -51,7 +51,7 @@ export const defaultHttpErrorHandler: ErrorHandler = (error: Error): void => {
 
     // TODO: redirect to login page
   if (error.message.includes('403'))
-    forbiddenErrorToast();
+    // forbiddenErrorToast();
 
     // TODO: redirect to login page
   if (error.message.includes('404'))
