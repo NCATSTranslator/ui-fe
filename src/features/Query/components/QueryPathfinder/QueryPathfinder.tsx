@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, FC, Dispatch, SetStateAction, useMemo } from 'react';
+import { useState, useCallback, useRef, FC, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
@@ -15,7 +15,6 @@ import Select from '@/features/Common/components/Select/Select';
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
-import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ProjectRaw } from '@/features/Projects/types/projects';
@@ -24,8 +23,6 @@ import { getDecodedParams } from '@/features/Common/utils/web';
 
 type QueryPathfinderProps = {
   isResults?: boolean;
-  pk?: string;
-  setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
   shouldNavigate?: boolean;
   submissionCallback?: () => void;
@@ -34,8 +31,6 @@ type QueryPathfinderProps = {
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({
   isResults = false,
-  pk,
-  setShareModalFunction = ()=>{},
   selectedProject = null,
   shouldNavigate = true,
   submissionCallback = () => {},
@@ -220,21 +215,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
       { isResults
-        ?
-          <QueryResultsHeader
-            questionText={""}
-            entityId={idOne || undefined}
-            entityLabel={labelOne || undefined}
-            entityIdTwo={idTwo || undefined}
-            entityLabelTwo={labelTwo || undefined}
-            onShare={() => setShareModalFunction(true)}
-            pk={pk || ""}
-            className={styles.resultsHeader}
-            searchedTermClassName={styles.searchedTerm}
-            shareButtonClassName={styles.shareButton}
-            isPathfinder
-            constraintText={constraintText || undefined}
-          />
+        ? null
         :
           <>
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
@@ -292,7 +273,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       <option value="biolink:ChemicalEntity">Chemical</option>
                       <option value="biolink:Disease">Disease</option>
                       <option value="biolink:Drug">Drug</option>
-                      <option value="biolink:Gene">Gene</option>
+                      <option value="biolink:Gene">Gene/Protein</option>
                       <option value="biolink:PhenotypicFeature">Phenotype</option>
                     </Select>
                   </>
