@@ -24,6 +24,7 @@ import ResultItemInteractables from '@/features/ResultItem/components/ResultItem
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
+import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -147,6 +148,7 @@ const ResultDetailView: FC = () => {
 
   return (
     <div className={styles.resultDetailView}>
+      <ResultListTopBar/>
       <div className={styles.tableHeader}>
         <span className={styles.tableHeaderRow}></span>
         <span className={styles.tableHeaderRow}></span>

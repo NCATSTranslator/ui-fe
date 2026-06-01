@@ -15,6 +15,7 @@ import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeView
 import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
+import ResultListTopBar from "@/features/ResultList/components/ResultListTopBar/ResultListTopBar";
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -88,6 +89,7 @@ const NodeInformationView: FC = () => {
 
   return (
     <div className={styles.nodeInformationView}>
+      <ResultListTopBar/>
       <div className={styles.top}>
         <div className={styles.nodeName}>
           <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
