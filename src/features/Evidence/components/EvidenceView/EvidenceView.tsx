@@ -21,6 +21,7 @@ import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotF
 import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from './EvidenceView.module.scss';
 import { isValidEvidenceTabName } from '@/features/Evidence/types/checkers';
+import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
 
 const EvidenceView: FC = () => {
   const { resultId, edgeId, pathId } = useParams();
@@ -195,6 +196,7 @@ const EvidenceView: FC = () => {
 
   return (
     <div className={styles.evidenceView}>
+      <ResultListTopBar/>
       <h5 className={styles.title}>
         {edgeLabel}
       </h5>

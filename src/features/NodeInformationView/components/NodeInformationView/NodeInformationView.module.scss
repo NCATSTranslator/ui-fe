@@ -4,6 +4,9 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
 
 .nodeInformationView {
   background-color: $white;
+  max-width: $maxWidth;
+  margin: 0 auto;
+  padding: 0 $l;
   .top, .tabs {
     width: 100%;
     max-width: $nodeInformationViewMaxWidth;

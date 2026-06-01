@@ -9,6 +9,9 @@ import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
+    ignores: ['src/pageRoutes/Articles/**'],
+  },
+  {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,

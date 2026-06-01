@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction, useEffect } from "react";
+import { FC, useEffect } from "react";
 import styles from './CombinedQueryInterface.module.scss';
 import Tabs from "@/features/Common/components/Tabs/Tabs";
 import Tab from "@/features/Common/components/Tabs/Tab";
@@ -21,14 +21,11 @@ interface CombinedQueryInterfaceProps {
   className?: string;
   defaultProject?: ProjectRaw | null;
   isResults?: boolean;
-  setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
-  pk?: string;
-  projectPage?: boolean;  
+  projectPage?: boolean;
   // Query-specific props
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
-  nodeDescription?: string | null;
   submissionCallback?: () => void;
 }
 
@@ -36,14 +33,11 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   className = '',
   defaultProject = null,
   isResults = false,
-  setShareModalFunction = () => {},
-  pk = "",
   projectPage = false,
   // Query-specific props
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
-  nodeDescription = null,
   submissionCallback = () => {},
 }) => {
   const config = useSelector(currentConfig);
@@ -141,9 +135,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             initPresetTypeObject={initPresetTypeObject}
             initNodeLabelParam={initNodeLabelParam}
             initNodeIdParam={initNodeIdParam}
-            nodeDescription={nodeDescription}
-            setShareModalFunction={setShareModalFunction}
-            pk={pk}
             selectedProject={selectedProject}
             combinedStyles={styles}
             shouldNavigate={shouldNavigate}
@@ -158,8 +149,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             className={styles.pathfinderTab}>
             <QueryPathfinder
               isResults={isResults}
-              setShareModalFunction={setShareModalFunction}
-              pk={pk}
               selectedProject={selectedProject}
               user={user}
               shouldNavigate={shouldNavigate}
