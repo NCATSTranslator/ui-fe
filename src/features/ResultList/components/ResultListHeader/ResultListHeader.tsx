@@ -34,9 +34,8 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
   return(
     <div className={styles.resultsHeader}>
-      <div className={styles.top}>
+      <div className={styles.bottom}>
         <div>
-          <h5 className={styles.heading}>Results</h5>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>
@@ -84,16 +83,18 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
           />
         </div>
       </div>
-      <div className={styles.activeFilters}>
-        {
-          activeFilters.length > 0 &&
-          activeFilters.map((activeFilter, i)=> {
-            return(
-              <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
-            )
-          })
-        }
-      </div>
+      {
+        activeFilters.length > 0 &&
+        <div className={styles.activeFilters}>
+          {
+            activeFilters.map((activeFilter, i)=> {
+              return(
+                <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
+              )
+            })
+          }
+        </div>
+      }
     </div>
   )
 }

@@ -4,12 +4,13 @@ import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
+import ResultListSubheading from "@/features/ResultList/components/ResultListSubheading/ResultListSubheading";
 import cloneDeep from "lodash/cloneDeep";
 import { useSelector, useDispatch } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
 import { applyFilters, injectDynamicFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar, formatBiolinkTypeString } from "@/features/Common/utils/utilities";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
@@ -67,6 +68,11 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
   const nodeIdParam = getDataFromQueryVar("i", decodedParams);
+  const pathfinderIdOne = getDataFromQueryVar("ione", decodedParams);
+  const pathfinderLabelOne = getDataFromQueryVar("lone", decodedParams);
+  const pathfinderIdTwo = getDataFromQueryVar("itwo", decodedParams);
+  const pathfinderLabelTwo = getDataFromQueryVar("ltwo", decodedParams);
+  const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
 
   // Build query title for downloads - use resolved title if available, otherwise build from URL params
   const queryTitle = useMemo(() => {
@@ -440,13 +446,19 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setShowHiddenPaths,
     shouldUpdateResultsAfterBookmark,
     updateUserSaves: setUserSaves,
+    pathfinderIdOne,
+    pathfinderLabelOne,
+    pathfinderIdTwo,
+    pathfinderLabelTwo,
+    constraintText,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
     handleFilter, isPathfinder, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     nodeIdParam, nodeLabelParam, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,
-    showHiddenPaths
+    showHiddenPaths, pathfinderIdOne, pathfinderLabelOne,
+    pathfinderIdTwo, pathfinderLabelTwo, constraintText,
   ]);
 
   return (
@@ -473,26 +485,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       />
       <div className={hidden ? styles.hidden : ''}>
         <div className={styles.resultList}>
-          {
-            isPathfinder
-            ?
-              <QueryPathfinder
-                isResults
-                setShareModalFunction={setShareModalOpen}
-                pk={!!currentQueryID ? currentQueryID : ""}
-              />
-            :
-              <Query
-                isResults
-                loading={isLoading}
-                initPresetTypeObject={presetTypeObject}
-                initNodeIdParam={nodeIdParam}
-                initNodeLabelParam={nodeLabelParam}
-                nodeDescription={nodeDescription}
-                setShareModalFunction={setShareModalOpen}
-                pk={!!currentQueryID ? currentQueryID : ""}
-              />
-          }
+          <ResultListSubheading isLoading={isLoading} />
           <div className={`${styles.resultsContainer} container`}>
             {
               isLoading

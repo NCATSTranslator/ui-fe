@@ -34,6 +34,11 @@ export interface ResultListContextValue {
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   shouldUpdateResultsAfterBookmark: RefObject<boolean>;
   updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
+  pathfinderIdOne: string | null;
+  pathfinderLabelOne: string | null;
+  pathfinderIdTwo: string | null;
+  pathfinderLabelTwo: string | null;
+  constraintText: string | null;
 }
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
