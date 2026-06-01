@@ -1,7 +1,7 @@
 @use "@/assets/styles/variables" as *;
 
 .breadcrumbs {
-  padding: $m $l $l;
+  padding: $l 0;
   font-size: $bodyTwoSize;
   display: flex;
   align-items: center;
