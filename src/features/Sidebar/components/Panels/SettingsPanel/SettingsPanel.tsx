@@ -130,7 +130,7 @@ const SettingsPanel = () => {
                       ref={idpLogoutFormRef}
                       method="post"
                       action={idpLogoutProvider.logout_uri}
-                      style={{ display: 'none' }}
+                      className={styles.idpLogoutForm}
                     >
                       <input type="hidden" name="client_id" value={idpLogoutProvider.client_id} />
                       <input type="hidden" name="show_prompt" value="false" />

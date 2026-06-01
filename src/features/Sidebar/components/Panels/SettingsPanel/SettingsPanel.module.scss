@@ -1,6 +1,9 @@
 @use "@/assets/styles/variables" as *;
 
 .settingsPanel {
+  .idpLogoutForm {
+    display: none;
+  }
   .top {
     display: flex;
     flex-direction: column;
