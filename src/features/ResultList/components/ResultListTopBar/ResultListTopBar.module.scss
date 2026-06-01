@@ -1,0 +1,24 @@
+@use "@/assets/styles/variables" as *;
+
+.resultListTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: $l 0;
+  nav {
+    padding: 0;
+  }
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: $s;
+    button {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+      white-space: nowrap;
+    }
+  }
+}
