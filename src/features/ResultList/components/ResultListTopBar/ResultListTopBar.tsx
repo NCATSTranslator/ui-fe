@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react';
 import styles from './ResultListTopBar.module.scss';
 import Breadcrumbs from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs';
 import Button from '@/features/Core/components/Button/Button';
-import FolderIcon from '@/assets/icons/projects/folder.svg?react';
+import FolderPlusIcon from '@/assets/icons/projects/folderplus2.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { useUserProjects, useUserQueries } from '@/features/Projects/hooks/customHooks';
@@ -10,6 +10,8 @@ import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import { useSelector } from 'react-redux';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { useMatches } from 'react-router-dom';
+import { BreadcrumbHandle } from '@/features/Navigation/types/navigation.d';
 
 const ResultListTopBar: FC = () => {
 
@@ -25,6 +27,15 @@ const ResultListTopBar: FC = () => {
   const query = useMemo(() => queries.find(q => q.data.qid === pk), [queries, pk]);
   const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
 
+  const matches = useMatches();
+  const breadCrumbs = matches
+    .filter((match) => (match.handle as BreadcrumbHandle)?.breadcrumb)
+    .map((match) => ({
+      label: (match.handle as BreadcrumbHandle).breadcrumb,
+      path: match.pathname,
+    }));
+  const isBaseView = breadCrumbs.length === 1;
+
   const handleAddToProject = () => {
     if (!query) return;
     setAddToProjectMode(query);
@@ -34,15 +45,21 @@ const ResultListTopBar: FC = () => {
   const showAddToProjectButton =
     !!user && !userLoading && !projectsLoading && !projectsError &&
     !queriesLoading && !queriesError && !!query && !query.data.deleted &&
-    config?.include_projects;
+    isBaseView && config?.include_projects;
 
   return (
     <div className={styles.resultListTopBar}>
       <Breadcrumbs hideBaseView={false} />
       <div className={styles.buttons}>
         {
-          showAddToProjectButton &&
-          <Button variant="secondary" handleClick={handleAddToProject} className={styles.addButton} small iconLeft={<FolderIcon/>}>
+          <Button
+            variant="secondary"
+            handleClick={handleAddToProject}
+            className={styles.addButton}
+            small
+            iconLeft={<FolderPlusIcon/>}
+            disabled={!showAddToProjectButton}
+          >
             Project
           </Button>
         }
