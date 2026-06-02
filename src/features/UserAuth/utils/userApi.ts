@@ -795,6 +795,7 @@ export const generateSafeResultSet = (resultSet: ResultSet, result: Result): Res
       meta: resultSet.data.meta,
       nodes: allSubgraphItems.nodes,
       paths: allPaths,
+      provenance: resultSet.data.provenance,
       publications: allPubs,
       results: [result],
       tags: resultSet.data.tags,

@@ -1,10 +1,12 @@
 import { FC } from 'react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import styles from './EvidenceViewSkeleton.module.scss';
+import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
 
 const EvidenceViewSkeleton: FC = () => {
   return (
     <div className={styles.container}>
+      <ResultListTopBar/>
       <SkeletonBar width="260px" height="28px" />
       <div className={styles.labelRow}>
         <SkeletonBar width="180px" height="16px" />

@@ -1,5 +1,5 @@
 import * as tc from "@/features/Common/types/checkers";
-import { isProvenance } from "@/features/Evidence/types/checkers";
+import { isEdgeProvenance } from "@/features/Evidence/types/checkers";
 import { ResultEdge, ResultNode, Path, Tags, Annotation, ChemicalAnnotation, 
   DiseaseAnnotation, GeneAnnotation, EdgeMetadata } from "./results";
 
@@ -29,7 +29,7 @@ export const isResultEdge = (obj: unknown, warn = false): obj is ResultEdge => {
     ["object", tc.isString(obj.object), "string", obj.object],
     ["predicate", tc.isString(obj.predicate), "string", obj.predicate],
     ["predicate_url", tc.isString(obj.predicate_url), "string", obj.predicate_url],
-    ["provenance", tc.makeIsHomogeneousArray((p: unknown) => isProvenance(p, warn))(obj.provenance), "Provenance[]", obj.provenance],
+    ["provenance", tc.makeIsHomogeneousArray((p: unknown) => isEdgeProvenance(p, warn))(obj.provenance), "EdgeProvenance[]", obj.provenance],
     ["publications", tc.isObject(obj.publications), "object", obj.publications],
     ["subject", tc.isString(obj.subject), "string", obj.subject],
     ["support", tc.isStringArray(obj.support), "string[]", obj.support],
