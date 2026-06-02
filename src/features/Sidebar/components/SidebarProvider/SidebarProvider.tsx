@@ -14,6 +14,7 @@ export const SidebarContext = createContext<SidebarContextValue>({
   clearSelectedProject: () => {},
   setCollapsed: () => {},
   togglePanel: () => {},
+  openPanel: () => {},
   closePanel: () => {},
   setAddToProjectMode: () => {},
   clearAddToProjectMode: () => {},
@@ -74,7 +75,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const setSelectedProjectMode = useCallback((setOpen?: boolean) => {
     setIsSelectedProjectMode(prev => setOpen ?? !prev);
-  }, [togglePanel, openPanel, closePanel, setIsSelectedProjectMode, setSelectedProject]);
+  }, []);
 
   const clearSelectedProject = useCallback(() => {
     setSelectedProject(null);
@@ -141,6 +142,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     clearSelectedProject,
     setCollapsed,
     togglePanel,
+    openPanel,
     closePanel,
     setAddToProjectMode,
     clearAddToProjectMode,
@@ -161,6 +163,7 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     clearSelectedProject,
     setCollapsed,
     togglePanel,
+    openPanel,
     closePanel,
     setAddToProjectMode,
     clearAddToProjectMode,

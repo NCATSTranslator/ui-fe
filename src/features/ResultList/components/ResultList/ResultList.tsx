@@ -390,6 +390,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handleResultsRefresh, setIsLoading, isLoading,
     activeFilters, handleFilter, handleSetFilters, handleClearAllFilters, availableFilters,
     isPathfinder, resultSet: resultSet ?? null, userSaves, queryTitle,
+    currentQueryID,
   });
 
   // Extracted callback for sort-triggered updates (avoids inline arrow in JSX)

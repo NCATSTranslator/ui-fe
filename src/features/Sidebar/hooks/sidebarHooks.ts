@@ -21,7 +21,6 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
   const {
     registerSidebarItem,
     unregisterSidebarItem,
-    togglePanel
   } = useSidebar();
   
   // Track the sidebar item ID for cleanup
@@ -38,8 +37,8 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 
   // Update the item content on initial registration and whenever dependencies change
   useEffect(() => {
-    const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel, 
-      autoOpen, title, className, disabled, reduceSpacing } = options;
+    const { id, to, onClick, panelComponent, buttonComponent, icon, tooltipText, ariaLabel,
+      title, className, disabled, reduceSpacing } = options;
     // Determine the type based on whether it has a panel component or navigation
     const type: 'link' | 'panel' = panelComponent ? 'panel' : 'link';
     
@@ -69,12 +68,8 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 
     // Register/update the sidebar item
     registerSidebarItem(id, sidebarItem);
-    
-    // Auto-open the panel if specified
-    if (autoOpen && type === 'panel')
-      togglePanel(id);
-      
-  }, [registerSidebarItem, togglePanel, ...options.dependencies || []]);
+
+  }, [registerSidebarItem, ...options.dependencies || []]);
 
   // Hook to handle cleanup on unmount or id change
   useEffect(() => {
