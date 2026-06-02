@@ -1,5 +1,5 @@
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
-import { getNodeSpecies } from "@/features/ResultList/slices/resultsSlice";
+import { getNodeSpecies, getEdgeProvenance, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import {
@@ -203,14 +203,14 @@ const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
  * @param edge The edge object
  * @param edgeId The edge ID (from dictionary key, used if edge.id is undefined)
  */
-const cleanEdge = (edge: ResultEdge, edgeId: string): ExportedEdge => ({
+const cleanEdge = (edge: ResultEdge, edgeId: string, resultSet: ResultSet): ExportedEdge => ({
   id: edge.id || edgeId,
   subject: edge.subject,
   object: edge.object,
   predicate: edge.predicate,
   predicate_url: edge.predicate_url,
   knowledge_level: edge.knowledge_level,
-  provenance: edge.provenance,
+  provenance: getEdgeProvenance(resultSet, edge),
   publications: edge.publications,
   trials: edge.trials,
   support: Array.isArray(edge.support)
@@ -248,10 +248,10 @@ const cleanPath = (path: Path, pathId: string): ExportedPath => ({
  * @param pub The publication object
  * @param pubId The publication ID (from dictionary key, used if pub.id is undefined)
  */
-const cleanPublication = (pub: PublicationObject, pubId: string): ExportedPublication => ({
+const cleanPublication = (pub: PublicationObject, pubId: string, resultSet: ResultSet): ExportedPublication => ({
   id: pub.id || pubId,
   url: pub.url,
-  source: pub.source,
+  source: pub.source ?? getPublicationSource(resultSet, pub.infores?.[0]),
   support: pub.support,
   knowledgeLevel: pub.knowledgeLevel,
 });
@@ -296,7 +296,7 @@ export const cleanResultSet = (
 
   // Clean edges
   Object.entries(entities.edges).forEach(([id, edge]) => {
-    cleanedEdges[id] = cleanEdge(edge, id);
+    cleanedEdges[id] = cleanEdge(edge, id, resultSet);
     // replace any instances of "treats" or "treat" with "impacts" or "impact" in the predicate
     cleanedEdges[id].predicate = replaceTreatWithImpact(cleanedEdges[id].predicate);
   });
@@ -308,7 +308,7 @@ export const cleanResultSet = (
 
   // Clean publications
   Object.entries(entities.publications).forEach(([id, pub]) => {
-    cleanedPublications[id] = cleanPublication(pub, id);
+    cleanedPublications[id] = cleanPublication(pub, id, resultSet);
   });
 
   // Clean trials

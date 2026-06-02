@@ -1,5 +1,5 @@
 import * as tc from "@/features/Common/types/checkers";
-import { Provenance, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
+import { EdgeProvenance, Provenance, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
 import { EvidenceTabName } from "./navigation";
 
@@ -21,6 +21,24 @@ export const isProvenance = (obj: unknown, warn = false): obj is Provenance => {
     ["name", tc.isString(obj.name), "string", obj.name],
     ["url", tc.nullable(obj.url, tc.isString), "string | null", obj.url],
     ["wiki", tc.nullable(obj.wiki, tc.isString), "string | null", obj.wiki],
+  ], warn);
+}
+
+/**
+ * Type guard to check if an object is an EdgeProvenance reference
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not an EdgeProvenance.
+ * @returns {boolean} - True if the object is an EdgeProvenance, otherwise false.
+ */
+export const isEdgeProvenance = (obj: unknown, warn = false): obj is EdgeProvenance => {
+  if (!tc.isObject(obj)) {
+    if (warn) console.warn("[isEdgeProvenance] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  return tc.checkProperties("isEdgeProvenance", obj, [
+    ["infores", tc.isString(obj.infores), "string", obj.infores],
+    ["records", tc.isStringArray(obj.records), "string[]", obj.records],
   ], warn);
 }
 
@@ -56,7 +74,7 @@ export const isPublicationObject = (obj: unknown, warn = false): obj is Publicat
   }
   const o = obj as Record<string, unknown>;
   return tc.checkProperties("isPublicationObject", obj, [
-    ["source", tc.isObject(o.source), "object", o.source],
+    ["infores", Array.isArray(o.infores) && o.infores.length > 0 && o.infores.every(tc.isString), "non-empty string[]", o.infores],
     ["type", tc.isString(o.type), "string", o.type],
     ["url", tc.isString(o.url), "string", o.url],
   ], warn);

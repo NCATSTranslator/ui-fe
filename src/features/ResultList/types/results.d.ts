@@ -1,5 +1,5 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
-  Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
+  EdgeProvenance, ProvenanceCatalogEntry, PublicationSupport } from "@/features/Evidence/types/evidence";
 import * as tc from "@/features/Common/types/checkers";
 import { isProvenance } from "@/features/Evidence/types/checkers";
 
@@ -11,6 +11,7 @@ export type ResultSet = {
     meta: Meta,
     nodes: {[key: string]: ResultNode},
     paths: {[key: string]: Path},
+    provenance: {[infores: string]: ProvenanceCatalogEntry},
     publications: {[key: string]: PublicationObject},
     results: Result[],
     tags: Tags,
@@ -93,8 +94,8 @@ export interface ResultEdge {
   predicate: string;
   predicate_url: string;
   description?: string | null;
-  provenance: Provenance[];
-  publications: {[key: string]: {id: string; support: PublicationSupport}[]};
+  provenance: EdgeProvenance[];
+  publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
   // nodeID
   subject: string;
   // array of path ids or Path objects

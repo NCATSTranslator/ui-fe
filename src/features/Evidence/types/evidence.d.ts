@@ -6,10 +6,11 @@ export type EvidenceContainer = {
 }
 export type PublicationObject = {
   id?: string;
+  infores?: string[];
   journal?: string;
   knowledgeLevel?: string;
   pubdate?: string;
-  source: SourceObject;
+  source?: SourceObject;
   snippet?: string;
   support: PublicationSupport | null;
   title?: string;
@@ -24,8 +25,10 @@ export type SourceObject = {
   name: string;
   url: string;
 }
+
 export type RawPublicationObject = {
   id: string;
+  infores: string;
   support: PublicationSupport | null;
 }
 export type RawPublicationList = {
@@ -50,6 +53,18 @@ export type Provenance = {
   name: string | null;
   url: string | null;
   wiki: string | null;
+}
+
+export type ProvenanceCatalogEntry = {
+  knowledge_level: KnowledgeLevel;
+  name: string | null;
+  url: string | null;
+  wiki: string | null;
+}
+
+export type EdgeProvenance = {
+  infores: string;
+  records: string[];
 }
 
 export type PublicationSupport = {
