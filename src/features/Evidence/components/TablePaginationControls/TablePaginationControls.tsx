@@ -1,18 +1,30 @@
 import { FC } from "react";
-import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
+import styles from "@/features/Evidence/components/TablePaginationControls/TablePaginationControls.module.scss";
 import Select from "@/features/Common/components/Select/Select";
 import ReactPaginate from "react-paginate";
+import NextIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
+import PreviousIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 
-const PublicationPaginationControls: FC<{
+interface TablePaginationControlsProps {
+  label: string;
   itemsPerPage: number;
   currentPage: number;
   pageCount: number;
   onItemsPerPageChange: (value: number) => void;
   onPageChange: (event: { selected: number }) => void;
-}> = ({ itemsPerPage, currentPage, pageCount, onItemsPerPageChange, onPageChange }) => (
-  <div className={styles.bottom}>
+}
+
+const TablePaginationControls: FC<TablePaginationControlsProps> = ({
+  label,
+  itemsPerPage,
+  currentPage,
+  pageCount,
+  onItemsPerPageChange,
+  onPageChange,
+}) => (
+  <div className={styles.tablePagination}>
     <div className={styles.perPage}>
-      <p className={styles.label}>Publications per Page</p>
+      <p className={styles.label}>{label}</p>
       <Select
         label=""
         name="Items Per Page"
@@ -27,8 +39,8 @@ const PublicationPaginationControls: FC<{
     <div className={styles.pagination}>
       <ReactPaginate
         breakLabel="..."
-        nextLabel="Next"
-        previousLabel="Previous"
+        nextLabel={<NextIcon />}
+        previousLabel={<PreviousIcon />}
         onPageChange={onPageChange}
         pageRangeDisplayed={2}
         marginPagesDisplayed={2}
@@ -37,8 +49,8 @@ const PublicationPaginationControls: FC<{
         className={styles.pageNums}
         pageClassName={styles.pageNum}
         activeClassName={styles.current}
-        previousLinkClassName={`${styles.prev} ${styles.button}`}
-        nextLinkClassName={`${styles.prev} ${styles.button}`}
+        previousLinkClassName={styles.button}
+        nextLinkClassName={styles.button}
         disabledLinkClassName={styles.disabled}
         forcePage={currentPage}
       />
@@ -46,4 +58,4 @@ const PublicationPaginationControls: FC<{
   </div>
 );
 
-export default PublicationPaginationControls;
+export default TablePaginationControls;

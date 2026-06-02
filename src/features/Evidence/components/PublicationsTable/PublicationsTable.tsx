@@ -1,16 +1,18 @@
-import { useEffect, useCallback, useMemo, FC, Dispatch, SetStateAction } from 'react';
+import { useEffect, useCallback, useRef, FC, Dispatch, SetStateAction } from 'react';
 import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
-import { handleEvidenceSort, getInitItemsPerPage } from "@/features/Evidence/utils/evidenceModalFunctions";
+import { handleEvidenceSort } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { Preferences } from '@/features/UserAuth/types/user';
 import { PublicationObject, EvidenceSortState } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-import { DEFAULT_ITEMS_PER_PAGE, usePubmedDataFetch, usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
+import { usePubmedDataFetch, usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
+import { usePagination } from '@/features/Evidence/hooks/usePagination';
 import PublicationsTableHeader from '@/features/Evidence/components/PublicationsTableHeader/PublicationsTableHeader';
 import PublicationRow from '@/features/Evidence/components/PublicationRow/PublicationRow';
-import PublicationPaginationControls from '@/features/Evidence/components/PublicationPaginationControls/PublicationPaginationControls';
+import TablePaginationControls from '@/features/Evidence/components/TablePaginationControls/TablePaginationControls';
+import PaginationSummary from '@/features/Evidence/components/PaginationSummary/PaginationSummary';
 
 interface PublicationsTableProps {
   isOpen: boolean;
@@ -31,7 +33,18 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
   const selectedEdgeId = selectedEdge?.id || null;
-  const [state, updateState] = usePubTableState(prefs);
+  const [state, updateState] = usePubTableState();
+  const {
+    itemsPerPage,
+    currentPage,
+    itemOffset,
+    endOffset,
+    displayedItems: displayedPublications,
+    pageCount,
+    handlePageClick,
+    handleItemsPerPageChange,
+    resetPage,
+  } = usePagination(publications, prefs);
   usePubmedDataFetch(
     isOpen,
     publications,
@@ -41,24 +54,12 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     updateState
   );
 
-  const endOffset = Math.min(state.itemOffset + state.itemsPerPage, publications.length);
-  const displayedPublications = useMemo(() => {
-    return publications.slice(state.itemOffset, endOffset);
-  }, [publications, state.itemOffset, endOffset]);
-
-  const pageCount = useMemo(() => {
-    return Math.ceil(publications.length / state.itemsPerPage);
-  }, [publications.length, state.itemsPerPage]);
-
-  // Event handlers
-  const handlePageClick = useCallback((event: { selected: number }) => {
-    const newOffset = (event.selected * state.itemsPerPage) % publications.length;
-    updateState({ currentPage: event.selected, itemOffset: newOffset });
-  }, [state.itemsPerPage, publications.length, updateState]);
-
-  const handleItemsPerPageChange = useCallback((value: number) => {
-    updateState({ itemsPerPage: value, currentPage: 0, itemOffset: 0 });
-  }, [updateState]);
+  // Reset to the first page whenever the selected edge changes (skip initial mount).
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (didMountRef.current) resetPage();
+    else didMountRef.current = true;
+  }, [selectedEdgeId, resetPage]);
 
   const handleSort = useCallback((sortKey: string) => {
     const sortType = sortKey === 'title' 
@@ -84,11 +85,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     );
   }, [state.sortingState, publications, handlePageClick, updateState, setPublications]);
 
-  useEffect(() => {
-    const value = getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE);
-    updateState({ itemsPerPage: value });
-  }, [prefs, updateState]);
-
   if (!resultSet) {
     console.warn('Unable to display publications table, no result set available');
     return null;
@@ -97,12 +93,13 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
   return (
     <div className={styles.publicationsTableContainer}>
       <div className={styles.top}>
-        <p className={styles.evidenceCount}>
-          {publications.length > 0
-            ? `Showing ${state.itemOffset + 1}-${endOffset} of ${publications.length} Publications`
-            : `Showing 0-0 of 0 (${publications.length}) Publications`
-          }
-        </p>
+        <PaginationSummary
+          itemOffset={itemOffset}
+          endOffset={endOffset}
+          totalCount={publications.length}
+          label="Publications"
+          className={styles.evidenceCount}
+        />
       </div>
 
       <table className={`table-body ${styles.pubsTable}`}>
@@ -131,9 +128,10 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
         )}
       </table>
 
-      <PublicationPaginationControls
-        itemsPerPage={state.itemsPerPage}
-        currentPage={state.currentPage}
+      <TablePaginationControls
+        label="Publications per Page"
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
         pageCount={pageCount}
         onItemsPerPageChange={handleItemsPerPageChange}
         onPageChange={handlePageClick}

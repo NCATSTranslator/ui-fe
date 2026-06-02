@@ -13,17 +13,20 @@ const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence }) => (
       <div className={`head ${styles.head} ${styles.link}`}>Link</div>
     </div>
     <div className={`table-items ${styles.tableItems} scrollable`}>
-      {miscEvidence.map((item, i) => (
-        <div className={`table-item ${styles.tableItem}`} key={item.id || i}>
-          <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-            {item.url && (
-              <a href={item.url} rel="noreferrer" target="_blank">
-                {item.url} <ExternalLink />
-              </a>
-            )}
+      {miscEvidence.map((item, i) => {
+        const url = item.url || item.source?.url;
+        return (
+          <div className={`table-item ${styles.tableItem}`} key={item.id || i}>
+            <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+              {url && (
+                <a href={url} rel="noreferrer" target="_blank">
+                  {url} <ExternalLink />
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   </div>
 );

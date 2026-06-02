@@ -120,9 +120,6 @@ export type KnowledgeLevelFilterType = 'all' | 'trusted' | 'ml';
 export type SortPreference = 'dateHighLow' | 'dateLowHigh' | 'journalHighLow' | 'journalLowHigh' | 'titleHighLow' | 'titleLowHigh';
 
 export type TableState = {
-  itemsPerPage: number;
-  currentPage: number;
-  itemOffset: number;
   knowledgeLevelFilter: KnowledgeLevelFilterType;
   sortingState: SortingState;
   isLoading: boolean;
