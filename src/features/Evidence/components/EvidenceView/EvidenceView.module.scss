@@ -59,8 +59,6 @@
 }
 .tab {
   display: grid;
-  grid-template-rows: auto 1fr;
-  overflow-y: auto;
 }
 .tableHead {
   padding-right: 0;
@@ -135,9 +133,6 @@
     .tableHead, .tableItem {
       display: grid;
       grid-template-columns: 1.25fr 3.75fr;
-    }
-    .source, .link {
-      text-align: center;
     }
     .source {
       display: flex;
@@ -225,9 +220,6 @@
 .title {
   margin-bottom: 0;
   font-weight: 800;
-}
-.evidenceCount {
-  margin-bottom: $m;
 }
 .pathViewContainer {
   background-color: $palePurple;
