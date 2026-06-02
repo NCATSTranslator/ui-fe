@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, useMemo, useRef, Dispatch, SetStateAction } from "react";
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useResultsCompleteToast } from "@/features/ResultList/hooks/resultListHooks";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
@@ -35,6 +35,7 @@ interface UseSidebarPanelsArgs {
   handleClearAllFilters: () => void;
   availableFilters: { [key: string]: Filter };
   isPathfinder: boolean;
+  currentQueryID: string | null;
   // Download panel
   resultSet: ResultSet | null;
   userSaves: SaveGroup | null;
@@ -62,8 +63,25 @@ const useSidebarPanels = ({
   resultSet,
   userSaves,
   queryTitle,
+  currentQueryID,
 }: UseSidebarPanelsArgs): void => {
-  const { togglePanel, activePanelId } = useSidebar();
+  const { togglePanel, openPanel, activePanelId } = useSidebar();
+
+  // Auto-open the filters panel at the moment results first appear for a query.
+  // Storing the query ID (rather than a bool) re-arms the auto-open when a new
+  // query loads. We mark the query handled as soon as results land — so if
+  // another panel is open at that moment we skip the auto-open and never retry.
+  const autoOpenedForQuery = useRef<string | null>(null);
+  const availableFilterCount = Object.keys(availableFilters).length;
+  useEffect(() => {
+    if (!currentQueryID || autoOpenedForQuery.current === currentQueryID)
+      return;
+    if (formattedResults.length > 0 && availableFilterCount > 0) {
+      if (activePanelId === 'none')
+        openPanel('filters');
+      autoOpenedForQuery.current = currentQueryID;
+    }
+  }, [currentQueryID, formattedResults.length, availableFilterCount, activePanelId, openPanel]);
 
   // Toast state — only used by sidebar status icon
   const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
