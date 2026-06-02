@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
   getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { isPublication } from "@/features/Evidence/types/checkers";
+import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
 import { getInitItemsPerPage, getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
@@ -475,9 +476,9 @@ export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
       trials: new Set<TrialObject>()
     };
 
-    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications));
+    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications, selEdge));
     filteredEvidence.trials = new Set(flattenTrialObject(resultSet, selEdge.trials));
-    filteredEvidence.sources = new Set(selEdge.provenance);
+    filteredEvidence.sources = new Set(getEdgeProvenance(resultSet, selEdge));
 
     processEvidence(filteredEvidence);
     

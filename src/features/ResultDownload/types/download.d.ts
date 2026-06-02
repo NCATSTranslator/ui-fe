@@ -79,7 +79,7 @@ export interface ExportedTrial {
 export interface ExportedPublication {
   id?: string;
   url: string;
-  source: {
+  source?: {
     knowledge_level: string;
     name: string;
     url: string;

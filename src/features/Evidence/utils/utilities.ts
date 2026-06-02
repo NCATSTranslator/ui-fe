@@ -3,7 +3,7 @@
 import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from "@/features/Common/utils/utilities";
-import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
+import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 
@@ -63,9 +63,10 @@ export const getEvidenceFromEdge = (
 
     // Process sources
     // don't process sources for inferred edges, only for direct edges
-    if(edgeToProcess.provenance && !edgeToProcess.inferred) { 
-      for(const source of edgeToProcess.provenance)
-        sources.add(source.name ?? "");
+    if(edgeToProcess.provenance && !edgeToProcess.inferred) {
+      for(const source of edgeToProcess.provenance) {
+        sources.add(source.infores);
+      }
     }
   };
 
@@ -396,22 +397,23 @@ export const generatePubmedURL = (id: string): string => {
  *
  * @param {ResultSet | null} resultSet - The dataset containing publication information.
  * @param {RawPublicationList} pubs - A structured object mapping knowledge levels to publication entries.
+ * @param {ResultEdge} [edge] - The edge the publications belong to, used to resolve per source record links.
  * @returns {PublicationObject[]} - An array of publication objects with relevant metadata.
  */
-export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList): PublicationObject[] => {
+export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList, edge?: ResultEdge): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
   if(!resultSet)
     return pubArray;
 
-  for (const key in pubs) {
-    const entries = pubs[key];
-    for (const entryID of entries) {
-      const pub = getPubById(resultSet, entryID.id);
-      if(!!pub) {
+  for (const kl in pubs) {
+    const pubEntries = pubs[kl];
+    for (const pubEntry of pubEntries) {
+      const pub = getPubById(resultSet, pubEntry.id);
+      if (!!pub) {
         pubArray.push({
-          knowledgeLevel: key, 
-          id: entryID.id,
-          source: pub.source,
+          knowledgeLevel: kl,
+          id: pubEntry.id,
+          source: getPublicationSource(resultSet, pubEntry.infores, edge),
           support: pub.support || null,
           type: pub.type,
           url: pub.url
