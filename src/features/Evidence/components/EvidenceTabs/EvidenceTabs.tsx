@@ -112,7 +112,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       fadeClassName={styles.fade}
     >
       {publications.length > 0 ? (
-        <Tab heading="Publications" className={`${styles.tab} scrollable`}>
+        <Tab heading="Publications" className={styles.tab}>
           <PublicationsTable
             selectedEdge={selectedEdge}
             publications={publications}
@@ -125,13 +125,13 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       ) : null}
 
       {clinicalTrials.length > 0 ? (
-        <Tab heading="Clinical Trials" className={`${styles.tab} scrollable`}>
-          <ClinicalTrialsTable clinicalTrials={clinicalTrials} />
+        <Tab heading="Clinical Trials" className={styles.tab}>
+          <ClinicalTrialsTable clinicalTrials={clinicalTrials} prefs={prefs} />
         </Tab>
       ) : null}
 
       {miscEvidence.length > 0 ? (
-        <Tab heading="Miscellaneous" className={`${styles.tab} scrollable`}>
+        <Tab heading="Miscellaneous" className={styles.tab}>
           <MiscEvidenceTable miscEvidence={miscEvidence} />
         </Tab>
       ) : null}
@@ -141,7 +141,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
           heading="Knowledge Sources"
           tooltipIcon={<InfoIcon className={styles.infoIcon} />}
           dataTooltipId="knowledge-sources-tooltip"
-          className={`${styles.tab} scrollable`}
+          className={styles.tab}
         >
           <KnowledgeSourcesTable sources={sources} />
         </Tab>
