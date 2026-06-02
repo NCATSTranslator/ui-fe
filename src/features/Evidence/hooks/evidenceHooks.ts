@@ -11,7 +11,7 @@ import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateT
   getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
-import { getInitItemsPerPage, getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
+import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 
@@ -318,8 +318,6 @@ export const usePubmedDataFetch = (
     }
 
     updateState({
-      currentPage: 0,
-      itemOffset: 0,
       sortingState: { title: null, journal: null, date: null },
       knowledgeLevelFilter: 'all',
       isLoading: true,
@@ -387,16 +385,13 @@ export const usePubmedDataFetch = (
 };
 
 /**
- * Custom hook to manage the publication table state including pagination, sorting, and filtering.
+ * Custom hook to manage the publication table state including sorting and filtering.
+ * Pagination is handled separately by usePagination.
  *
- * @param {Preferences} prefs - User preferences container.
  * @returns {[TableState, (updates: Partial<TableState>) => void]} Returns a tuple containing the current table state and a function to update it.
  */
-export const usePubTableState = (prefs: Preferences): [TableState, (updates: Partial<TableState>) => void] => {
+export const usePubTableState = (): [TableState, (updates: Partial<TableState>) => void] => {
   const [state, setState] = useState<TableState>({
-    itemsPerPage: getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE),
-    currentPage: 0,
-    itemOffset: 0,
     knowledgeLevelFilter: 'all',
     sortingState: { title: null, journal: null, date: null },
     isLoading: true,
