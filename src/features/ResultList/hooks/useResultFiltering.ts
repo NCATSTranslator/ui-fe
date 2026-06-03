@@ -1,5 +1,6 @@
 import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
 import { filterCompare } from '@/features/Common/utils/sortingFunctions';
+import { isSameFilterValue } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
@@ -78,7 +79,7 @@ const useResultFiltering = ({
     const exactMatchIndex = activeFilters.findIndex(
       (f) =>
         f.id === filter.id &&
-        f.value === filter.value &&
+        isSameFilterValue(f.value, filter.value) &&
         f.negated === filter.negated
     );
 
@@ -101,7 +102,7 @@ const useResultFiltering = ({
     const sameIdValueIndex = activeFilters.findIndex(
       (f) =>
         f.id === filter.id &&
-        f.value === filter.value &&
+        isSameFilterValue(f.value, filter.value) &&
         f.negated !== filter.negated
     );
 

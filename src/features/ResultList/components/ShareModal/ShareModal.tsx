@@ -16,27 +16,26 @@ const SHARE_CONTENT: Record<ShareContext, { heading: string; body: ReactNode }> 
     heading: "Share this result set",
     body: (
       <>
-        <p>Easily return to this result set without needing to ask this question again.</p>
-        <p>This link is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
+        <p>Share a direct link to this result set.</p>
       </>
     ),
   },
   result: {
     heading: "Share this result",
     body: (
-      <p>It is unique to your question and will return results for up to 30 days, after which time your question will need to be run again.</p>
+      <p>Share a direct link to this result.</p>
     ),
   },
   evidence: {
     heading: "Share this evidence",
     body: (
-      <p>Share a direct link to this relationship evidence. This link is unique to your question and will remain active for up to 30 days.</p>
+      <p>Share a direct link to this relationship's evidence.</p>
     ),
   },
   node: {
-    heading: "Share this node",
+    heading: "Share this object",
     body: (
-      <p>Share a direct link to this node&apos;s information. This link is unique to your question and will remain active for up to 30 days.</p>
+      <p>Share a direct link to this object&apos;s information.</p>
     ),
   },
 };

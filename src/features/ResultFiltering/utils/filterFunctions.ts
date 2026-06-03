@@ -26,6 +26,29 @@ export const FILTERING_CONSTANTS = {
   },
 } as const;
 
+/**
+ * Normalizes a free-text search term for storage and matching: trims surrounding
+ * whitespace and collapses internal runs of whitespace to a single space.
+ * @param {string} value - The raw search term.
+ * @returns {string} The normalized term.
+ */
+export const normalizeSearchTerm = (value: string): string => {
+  return value.trim().replace(/\s+/g, ' ');
+}
+
+/**
+ * Normalizes and lowercases a search term for matching purposes.
+ */
+export const normalizeSearchTermForMatch = (value: string): string => {
+  return normalizeSearchTerm(value).toLowerCase();
+}
+
+/**
+ * Case-insensitive, whitespace-normalized comparison of two filter values.
+ */
+export const isSameFilterValue = (a?: string, b?: string): boolean =>
+  normalizeSearchTermForMatch(a || '') === normalizeSearchTermForMatch(b || '');
+
 export const makeEntitySearch = (): Filter => {
   return {
     id: 'g/str',

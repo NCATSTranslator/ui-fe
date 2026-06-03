@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { PublicationObject } from '@/features/Evidence/types/evidence.d';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
@@ -38,7 +38,7 @@ const formatMiscEvidence = (miscEvidence: PublicationObject[]): FormattedMiscEvi
 }
 
 const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence }) => {
-  const formattedMiscEvidence = formatMiscEvidence(miscEvidence);
+  const formattedMiscEvidence = useMemo(() => formatMiscEvidence(miscEvidence), [miscEvidence]);
 
   return (
     <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
@@ -48,7 +48,7 @@ const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence }) => {
       <div className={`table-items ${styles.tableItems} scrollable`}>
         {formattedMiscEvidence.map((item, i) => {
           return (
-            <div className={`table-item ${styles.tableItem}`} key={item.id || i}>
+            <div className={`table-item ${styles.tableItem}`} key={item.id}>
               <div className={`table-cell ${styles.cell} ${styles.link} link`}>
                 {item.url && (
                   <a href={item.url} rel="noreferrer" target="_blank">
