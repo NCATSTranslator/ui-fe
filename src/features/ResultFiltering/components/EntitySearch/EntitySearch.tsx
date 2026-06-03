@@ -3,7 +3,7 @@ import styles from './EntitySearch.module.scss';
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import cloneDeep from 'lodash/cloneDeep';
-import { isEntityFilter, makeEntitySearch } from '@/features/ResultFiltering/utils/filterFunctions';
+import { isEntityFilter, makeEntitySearch, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import FacetTag from '@/features/ResultFiltering/components/FacetTag/FacetTag';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
@@ -39,8 +39,10 @@ const EntitySearch: FC<EntitySearchProps> = ({
   }
 
   const handleActivateFilter = (negated: boolean, filter?: Filter) => {
-    if (entitySearch.value === '' && !filter) return;
-    const newEntitySearch = (!!filter) ? filter : cloneDeep(entitySearch);
+    const newEntitySearch = cloneDeep(filter ?? entitySearch);
+    newEntitySearch.value = normalizeSearchTerm(newEntitySearch.value || '');
+    // Ignore empty / whitespace-only terms
+    if (newEntitySearch.value === '') return;
     newEntitySearch.negated = negated;
     onFilter(newEntitySearch);
     setEntitySearch(makeEntitySearch());
