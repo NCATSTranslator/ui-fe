@@ -7,7 +7,7 @@ import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { MAX_SUPPORT_DEPTH, getPathKey } from "@/features/ResultList/utils/pathUtils";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
-import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
+import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/utilities";
 import { FILTERING_CONSTANTS, makeFilter } from "@/features/ResultFiltering/utils/filterFunctions";
 
 /**
@@ -33,12 +33,13 @@ export const findStringMatch = (
   result: Result,
   filter: Filter,
   pathRanks: Map<string, PathRank>): boolean => {
-  const normalizedTerm = (filter.value || '').toLowerCase();
+  const normalizedTerm = filtering.normalizeSearchTermForMatch(filter.value || '');
   const isExclusion = filtering.isExclusion(filter);
   // Shallow properties: drug name and subject node description
   const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
   const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
+  const descriptionMatch = (subjectNode ? getNodeDescription(subjectNode) : null)
+    ?.toLowerCase().includes(normalizedTerm) ?? false;
   let matched = !normalizedTerm || nameMatch || descriptionMatch;
   if (isExclusion && matched) return true;
   for (let i = 0; i < result.paths.length; i++) {
@@ -69,9 +70,7 @@ export const findStringMatch = (
     return (item.names &&
         item.names.length > 0 &&
         item.names[0].toLowerCase().includes(normalizedTerm)) ||
-      (item.descriptions &&
-        item.descriptions.length > 0 &&
-        item.descriptions[0].toLowerCase().includes(normalizedTerm)) ||
+      (getNodeDescription(item)?.toLowerCase().includes(normalizedTerm) ?? false) ||
       item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
   }
 
@@ -83,45 +82,53 @@ export const findStringMatch = (
       depth: number,
       visited: Set<string>): boolean {
     if (depth > MAX_SUPPORT_DEPTH) return false;
+
+    // Look for direct matches on any node/edge of this path, accumulating rank
+    // for every matching element (not just the first).
+    let hasDirectMatch = false;
     for (let i = 0; i < path.subgraph.length; i++) {
-      const elementID = path.subgraph[i];
-      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
-      if (depth === 1 && _checkItemForMatch(item)) {
-        pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-        if (isExclusion) {
-          pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
-          return false;
-        }
-        _cascadePathRank(resultSet, path, pathRank, new Set(visited), 0);
-        return true;
+      const item = isNodeIndex(i)
+        ? getNodeById(resultSet, path.subgraph[i])
+        : getEdgeById(resultSet, path.subgraph[i]);
+      if (!_checkItemForMatch(item)) continue;
+
+      if (isExclusion) {
+        // rank this path heavily so it is filtered
+        // out by the path filter state without excluding the whole result.
+        pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
+        return false;
       }
-      // Recursive support path checking
-      if (isResultEdge(item) && item.inferred) {
-        for (let j = 0; j < item.support.length; j++) {
-          const support = item.support[j];
-          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
-          const supportRank = pathRank.support?.[j];
-          if (supportPath && typeof supportPath !== "string" && supportRank) {
-            // Skip support paths already on the current traversal stack to
-            // avoid infinite recursion when the support graph has cycles.
-            const key = getPathKey(supportPath);
-            if (visited.has(key)) continue;
-            visited.add(key);
-            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth+1, visited);
-            visited.delete(key);
-            if (subMatch && supportRank.rank < 0) {
-              pathRank.rank += supportRank.rank;
-            }
+      // This path is relevant, so mark it and propagate relevance to its
+      // support paths so they are not filtered out from under it.
+      pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+      hasDirectMatch = true;
+    }
+    if (hasDirectMatch) {
+      _cascadePathRank(resultSet, path, pathRank, new Set(visited), 0);
+      return true;
+    }
+
+    // No direct match on this path: recurse into the support paths of any
+    // inferred edges to look for a deeper match.
+    for (let i = 1; i < path.subgraph.length; i += 2) {
+      const item = getEdgeById(resultSet, path.subgraph[i]);
+      if (!isResultEdge(item) || !item.inferred) continue;
+      for (let j = 0; j < item.support.length; j++) {
+        const support = item.support[j];
+        const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
+        const supportRank = pathRank.support?.[j];
+        if (supportPath && typeof supportPath !== "string" && supportRank) {
+          // Skip support paths already on the current traversal stack to
+          // avoid infinite recursion when the support graph has cycles.
+          const key = getPathKey(supportPath);
+          if (visited.has(key)) continue;
+          visited.add(key);
+          const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth + 1, visited);
+          visited.delete(key);
+          if (subMatch && supportRank.rank < 0) {
+            pathRank.rank += supportRank.rank;
           }
         }
-      }
-      // Direct match
-      if (depth !== 1 && _checkItemForMatch(item)) {
-        if (isExclusion) {
-          pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
-          return false;
-        }
-        pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
       }
     }
     return (!isExclusion && pathRank.rank < 0);
