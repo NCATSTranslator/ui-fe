@@ -25,7 +25,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
 import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
-import Button from '@/features/Core/components/Button/Button';
+import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -149,26 +149,15 @@ const ResultDetailView: FC = () => {
     return <ViewNotFound entity="result" id={resultId || 'unknown'} />;
   }
 
-  const isFilteredOut = visibleResultIds.size > 0 && !visibleResultIds.has(result.id);
+  const isFilteredOut = !visibleResultIds.has(result.id);
 
   return (
     <div className={styles.resultDetailView}>
       <ResultListTopBar/>
-      {isFilteredOut && (
-        <div className={styles.filteredBanner} role="status">
-          <span>This result has been filtered out.</span>
-          <Button
-            handleClick={handleClearAllFilters}
-            variant="textOnly"
-            smallFont
-          >
-            Clear filters
-          </Button>
-        </div>
-      )}
-      <div
-        className={isFilteredOut ? styles.filteredOut : undefined}
-        aria-hidden={isFilteredOut ? true : undefined}
+      <FilteredOutWrapper
+        isFilteredOut={isFilteredOut}
+        message="This result has been filtered out."
+        onClearFilters={handleClearAllFilters}
       >
         <div className={styles.tableHeader}>
           <span className={styles.tableHeaderRow}></span>
@@ -280,7 +269,7 @@ const ResultDetailView: FC = () => {
             </Suspense>
           </Tab>
         </Tabs>
-      </div>
+      </FilteredOutWrapper>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}

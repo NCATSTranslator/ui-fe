@@ -7,32 +7,6 @@
   overflow-x: auto;
 }
 
-.filteredBanner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $s;
-  margin: -$s 0 $s;
-  padding: $xs $s;
-  background-color: $lightGray;
-  border: 1px solid $midGray;
-  border-radius: $defaultBorderRadius;
-  span {
-    color: $darkGray;
-    font-size: $bodyTwoSize;
-    font-weight: 400;
-  }
-  button span {
-    color: $purpleOne;
-  }
-}
-
-.filteredOut {
-  opacity: 0.4;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
 .tableHeader, .top {
   display: grid;
   grid-template-columns: 1fr 112px 110px 90px 90px;
