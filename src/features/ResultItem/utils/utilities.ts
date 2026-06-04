@@ -5,6 +5,7 @@ import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
+import { Preferences } from "@/features/UserAuth/types/user";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
@@ -559,4 +560,15 @@ export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
  */
 export const getResultRoleTagsString = (tags: Tags, availableFilters: { [key: string]: Filter }) => {
   return Object.keys(tags).filter((fid) => availableFilters[fid] && getTagFamily(fid) === FILTERING_CONSTANTS.FAMILIES.ROLE).map((fid) => availableFilters[fid].name).join(', ');
+}
+
+/**
+ * Gets the number of paths to show per page from the user preferences.
+ *
+ * @param {Preferences} prefs - The user preferences.
+ * @returns {number} - The number of paths to show per page.
+ */
+export const getPathsPerPage = (prefs: Preferences) => {
+  const value = prefs?.path_show_count?.pref_value || 10;
+  return typeof value === "string" ? parseInt(value) : value;
 }

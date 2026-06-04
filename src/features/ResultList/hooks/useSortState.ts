@@ -24,12 +24,14 @@ function sortReducer(state: SortState, action: SortAction): SortState {
         direction: action.direction,
         sortString: action.sortString,
       };
-    case 'RESET':
+    case 'RESET': {
+      const { column, direction } = getSortColumnAndDirection(action.sortString);
       return {
-        activeColumn: 'score',
-        direction: false,
+        activeColumn: column,
+        direction,
         sortString: action.sortString,
       };
+    }
     default:
       return state;
   }
