@@ -1,5 +1,5 @@
 import styles from './PathView.module.scss';
-import { useMemo, useCallback, useRef, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
+import { useMemo, useCallback, useEffect, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
 import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
@@ -67,26 +67,26 @@ const PathView: FC<PathViewProps> = ({
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState(0)
-  const endResultIndex = useRef<number>(pathsPerPage);
+  const [currentPage, setCurrentPage] = useState(0);
   const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / pathsPerPage) : Math.ceil((formattedPaths.length) / pathsPerPage);
   const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
   const { hoveredIndex } = useHoverPathObject(setHoveredItem);
   
+  useEffect(() => {
+    setCurrentPage(0);
+    setItemOffset(0);
+  }, [pathsPerPage]);
+
   const handlePageClick = (event: {selected: number} ) => {
     let pathsLength = formattedPaths.length;
     if(!pathsLength)
       return;
     setCurrentPage(event.selected);
     const newOffset:number = isNaN((event.selected * pathsPerPage) % pathsLength) ? 0 : (event.selected * pathsPerPage) % pathsLength;
-    const endOffset:number = (newOffset + pathsPerPage) > pathsLength
-      ? pathsLength
-      : newOffset + pathsPerPage;
     setItemOffset(newOffset);
-    endResultIndex.current = endOffset;
   }
   const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
-  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
+  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, itemOffset + pathsPerPage);
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     handleEdgeSpecificEvidence?.(edgeIDs, path);
