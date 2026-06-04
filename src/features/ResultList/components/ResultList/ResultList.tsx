@@ -420,6 +420,11 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     onToggleNoveltyBoost: handleToggleNoveltyBoost,
   }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
 
+  const visibleResultIds = useMemo(
+    () => new Set(formattedResults.map(r => r.id)),
+    [formattedResults]
+  );
+
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
     userSaves,
     navigateToEvidenceView,
@@ -428,6 +433,8 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     activeFilters,
     availableFilters,
     handleFilter,
+    handleClearAllFilters,
+    visibleResultIds,
     bookmarkAddedToast,
     bookmarkRemovedToast,
     handleBookmarkError: bookmarkErrorToast,
@@ -456,7 +463,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     constraintText,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
-    handleFilter, isPathfinder, pathFilterState, currentQueryID,
+    handleFilter, handleClearAllFilters, visibleResultIds, isPathfinder, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     nodeIdParam, nodeLabelParam, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,

@@ -1,4 +1,4 @@
-import { FC, useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { FC, useState, useRef, useMemo, useCallback, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getPathById } from '@/features/ResultList/slices/resultsSlice';
@@ -22,9 +22,17 @@ import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from './EvidenceView.module.scss';
 import { isValidEvidenceTabName } from '@/features/Evidence/types/checkers';
 import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
+import ResultListContext from '@/features/ResultList/context/ResultListContext';
+
+const NOOP = () => { return; };
 
 const EvidenceView: FC = () => {
   const { resultId, edgeId, pathId } = useParams();
+  // Read the context non-throwingly: EvidenceView can render on the canvas route
+  // (`/evidence/:edgeId`) which is outside the ResultListProvider context.
+  // This is as opposed to using useResultListContext(), which could throw an error.
+  const resultListContext = useContext(ResultListContext);
   const resultsNavigate = useResultsNavigate();
   const decodedParams = useDecodedParams();
   const decodedParamsRef = useRef(decodedParams);
@@ -194,53 +202,66 @@ const EvidenceView: FC = () => {
     return <EvidenceViewSkeleton />;
   }
 
+  const isFilteredOut = !!pathId
+    && resultListContext?.pathFilterState?.[pathId] === true
+    && !resultListContext.showHiddenPaths;
+
   return (
-    <div className={styles.evidenceView}>
+    <div className={styles.evidenceViewWrapper}>
       <ResultListTopBar/>
-      <h5 className={styles.title}>
-        {edgeLabel}
-      </h5>
-      <div className={styles.labelContainer}>
-        {edgeLabel && <p className={styles.subtitle}> Path {pathKey} Evidence</p>}
-        <span className={styles.sep}>·</span>
-        <p className={styles.toggleSeen} onClick={handleToggleSeen}>
-          Mark as {edgeSeen ? "Unseen" : "Seen"}
-        </p>
-      </div>
-      <Tooltip id="knowledge-sources-tooltip">
-        <span>The resources that provided the information supporting the selected relationship.</span>
-      </Tooltip>
-      {path && (
-        <PathViewSection
-          path={path}
-          compressedSubgraph={compressedSubgraph}
-          handleEdgeClick={handleEdgeClick}
-          isOpen={true}
-          pk={pk}
-          selectedEdge={selectedEdge}
-          selectedEdgeRef={selectedEdgeDomRef}
-        />
-      )}
-      {isInferred ? (
-        <div className={styles.inferredDisclaimer}>
-          <p>Supporting evidence for this relationship, including intermediary connections, can be found in the next path(s).</p>
-          <p>Reasoning agents that use logic and pattern recognition to find connections between objects identified this path as a possible connection between this result and your search term.</p>
-          <Link to="/help#reasoner" target="_blank" rel="noreferrer">Learn More about Reasoning Agents</Link>
+      <FilteredOutWrapper
+        isFilteredOut={isFilteredOut}
+        message="This path has been filtered out."
+        onClearFilters={resultListContext?.handleClearAllFilters ?? NOOP}
+        className={styles.evidenceContent}
+      >
+        <div className={styles.evidenceView}>
+          <h5 className={styles.title}>
+            {edgeLabel}
+          </h5>
+          <div className={styles.labelContainer}>
+            {edgeLabel && <p className={styles.subtitle}> Path {pathKey} Evidence</p>}
+            <span className={styles.sep}>·</span>
+            <p className={styles.toggleSeen} onClick={handleToggleSeen}>
+              Mark as {edgeSeen ? "Unseen" : "Seen"}
+            </p>
+          </div>
+          <Tooltip id="knowledge-sources-tooltip">
+            <span>The resources that provided the information supporting the selected relationship.</span>
+          </Tooltip>
+          {path && (
+            <PathViewSection
+              path={path}
+              compressedSubgraph={compressedSubgraph}
+              handleEdgeClick={handleEdgeClick}
+              isOpen={true}
+              pk={pk}
+              selectedEdge={selectedEdge}
+              selectedEdgeRef={selectedEdgeDomRef}
+            />
+          )}
+          {isInferred ? (
+            <div className={styles.inferredDisclaimer}>
+              <p>Supporting evidence for this relationship, including intermediary connections, can be found in the next path(s).</p>
+              <p>Reasoning agents that use logic and pattern recognition to find connections between objects identified this path as a possible connection between this result and your search term.</p>
+              <Link to="/help#reasoner" target="_blank" rel="noreferrer">Learn More about Reasoning Agents</Link>
+            </div>
+          ) : (
+            <EvidenceTabs
+              isOpen={true}
+              publications={publications}
+              setPublications={setPublications}
+              clinicalTrials={clinicalTrials}
+              miscEvidence={miscEvidence}
+              sources={sources}
+              selectedEdge={selectedEdge}
+              pk={pk}
+              prefs={prefs}
+              initialTab={initialTab}
+            />
+          )}
         </div>
-      ) : (
-        <EvidenceTabs
-          isOpen={true}
-          publications={publications}
-          setPublications={setPublications}
-          clinicalTrials={clinicalTrials}
-          miscEvidence={miscEvidence}
-          sources={sources}
-          selectedEdge={selectedEdge}
-          pk={pk}
-          prefs={prefs}
-          initialTab={initialTab}
-        />
-      )}
+      </FilteredOutWrapper>
     </div>
   );
 };
