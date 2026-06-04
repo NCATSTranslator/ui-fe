@@ -12,6 +12,8 @@ export interface ResultListContextValue {
   activeFilters: Filter[];
   availableFilters: { [key: string]: Filter };
   handleFilter: (filter: Filter) => void;
+  handleClearAllFilters: () => void;
+  visibleResultIds: Set<string>;
   bookmarkAddedToast: () => void;
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
