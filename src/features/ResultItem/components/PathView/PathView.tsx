@@ -6,7 +6,7 @@ import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Common/utils/utilities';
-import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
+import { getFilteredPathCount, getIsPathFiltered, getPathsPerPage, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 
 export const SupportPathDepthContext = createContext<number>(1);
 export const HoverContext = createContext<{
@@ -56,18 +57,19 @@ const PathView: FC<PathViewProps> = ({
   selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
-
+  
+  const prefs = useSelector(currentPrefs);
   const { resultId } = useResultListContext();
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
-  const itemsPerPage: number = 10;
+  const pathsPerPage: number = getPathsPerPage(prefs);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
   const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
   const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0)
-  const endResultIndex = useRef<number>(itemsPerPage);
-  const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : Math.ceil((formattedPaths.length) / itemsPerPage);
+  const endResultIndex = useRef<number>(pathsPerPage);
+  const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / pathsPerPage) : Math.ceil((formattedPaths.length) / pathsPerPage);
   const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
   const { hoveredIndex } = useHoverPathObject(setHoveredItem);
   
@@ -76,10 +78,10 @@ const PathView: FC<PathViewProps> = ({
     if(!pathsLength)
       return;
     setCurrentPage(event.selected);
-    const newOffset:number = isNaN((event.selected * itemsPerPage) % pathsLength) ? 0 : (event.selected * itemsPerPage) % pathsLength;
-    const endOffset:number = (newOffset + itemsPerPage) > pathsLength
+    const newOffset:number = isNaN((event.selected * pathsPerPage) % pathsLength) ? 0 : (event.selected * pathsPerPage) % pathsLength;
+    const endOffset:number = (newOffset + pathsPerPage) > pathsLength
       ? pathsLength
-      : newOffset + itemsPerPage;
+      : newOffset + pathsPerPage;
     setItemOffset(newOffset);
     endResultIndex.current = endOffset;
   }
