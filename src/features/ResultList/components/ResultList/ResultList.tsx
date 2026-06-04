@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useMemo, FC, ReactNode } from "react";
+import { useRef, useCallback, useEffect, useLayoutEffect, useMemo, FC, ReactNode } from "react";
 import styles from './ResultList.module.scss';
 import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
@@ -124,12 +124,12 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     currentSortString,
     activeEntityFiltersRef,
     getSortedResults,
-    resetSort,
   } = useSortState({ scoreWeights, initSortString });
 
   // Shared refs — created before hooks that need them, synced via effects after hook calls return
   const userSavesRef = useRef<SaveGroup | null>(null);
   const handleUpdateResultsRef = useRef<HandleUpdateResultsFn | null>(null);
+  const handleSortUpdateRef = useRef<(() => void) | null>(null);
   const activeFiltersRef = useRef<Filter[]>([]);
   const resultIdParamRef = useRef<string | null>(null);
   const itemsPerPageRef = useRef<number>(0);
@@ -268,11 +268,12 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // update defaults when prefs change
   useEffect(() => {
     const newSortString = (prefs?.result_sort?.pref_value) ? prefs.result_sort.pref_value as string : 'scoreHighLow';
-    resetSort(newSortString);
+    currentSortString.current = newSortString;
+    handleSortUpdateRef.current?.();
     const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value as string | number);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, calculateItemsPerPage, resetSort]);
+  }, [prefs, calculateItemsPerPage]);
 
   const handleUpdateResults = useCallback((
     filters: Filter[],
@@ -376,9 +377,9 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     return newFormattedResults;
   }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen,]);
 
-  // Wire up the handleUpdateResults ref — runs synchronously during render
-  // to ensure the ref is available before any callbacks fire.
-  handleUpdateResultsRef.current = handleUpdateResults;
+  // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
+  // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
+  useLayoutEffect(() => { handleUpdateResultsRef.current = handleUpdateResults; });
 
   // Sidebar panel registrations (status, filters, download)
   useSidebarPanels({
@@ -401,6 +402,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       isPathfinder, userSaves, pathFilterState, formattedResults
     );
   }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState, formattedResults]);
+  useLayoutEffect(() => { handleSortUpdateRef.current = handleSortUpdate; }); // see handleUpdateResultsRef comment
 
   // Memoized data prop for ResultListHeader
   // Note: currentPage is a ref — it updates in sync with itemOffset/endResultIndex
