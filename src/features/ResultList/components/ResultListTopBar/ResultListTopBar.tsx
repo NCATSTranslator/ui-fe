@@ -42,23 +42,24 @@ const ResultListTopBar: FC = () => {
     if (activePanelId !== 'projects') togglePanel('projects');
   };
 
-  const showAddToProjectButton =
-    !!user && !userLoading && !projectsLoading && !projectsError &&
-    !queriesLoading && !queriesError && !!query && !query.data.deleted &&
-    isBaseView && config?.include_projects;
+  const showAddToProjectButton = !!(isBaseView && config?.include_projects);
+
+  const disableAddToProjectButton = !!(!user || userLoading || projectsLoading || projectsError ||
+    queriesLoading || queriesError || !query || query.data.deleted);
 
   return (
     <div className={styles.resultListTopBar}>
       <Breadcrumbs hideBaseView={false} />
       <div className={styles.buttons}>
         {
+          showAddToProjectButton &&
           <Button
             variant="secondary"
             handleClick={handleAddToProject}
             className={styles.addButton}
             small
             iconLeft={<FolderPlusIcon/>}
-            disabled={!showAddToProjectButton}
+            disabled={disableAddToProjectButton}
           >
             Project
           </Button>
