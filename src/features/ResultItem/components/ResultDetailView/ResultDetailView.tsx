@@ -25,6 +25,7 @@ import BookmarkConfirmationModal from '@/features/ResultItem/components/Bookmark
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
 import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import Button from '@/features/Core/components/Button/Button';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -48,6 +49,7 @@ const ResultDetailView: FC = () => {
     bookmarkAddedToast,
     bookmarkRemovedToast,
     handleBookmarkError,
+    handleClearAllFilters,
     handleFilter,
     isPathfinder,
     pathFilterState,
@@ -65,6 +67,7 @@ const ResultDetailView: FC = () => {
     shouldUpdateResultsAfterBookmark,
     updateUserSaves,
     userSaves,
+    visibleResultIds,
   } = useResultListContext();
 
 
@@ -146,119 +149,138 @@ const ResultDetailView: FC = () => {
     return <ViewNotFound entity="result" id={resultId || 'unknown'} />;
   }
 
+  const isFilteredOut = visibleResultIds.size > 0 && !visibleResultIds.has(result.id);
+
   return (
     <div className={styles.resultDetailView}>
       <ResultListTopBar/>
-      <div className={styles.tableHeader}>
-        <span className={styles.tableHeaderRow}></span>
-        <span className={styles.tableHeaderRow}></span>
-        <span className={styles.tableHeaderRow}>Evidence</span>
-        <span className={styles.tableHeaderRow}>Paths</span>
-        <span className={styles.tableHeaderRow}>Score</span>
-      </div>
-      <div className={styles.header}>
-        <div className={styles.top}>
-          <div className={styles.infoContainer}>
-            <div className={styles.nameContainer}>
-              <ResultItemName
-                isPathfinder={isPathfinder}
-                subjectNode={subjectNode}
-                objectNode={objectNode}
-                item={result}
-                activeEntityFilters={activeEntityFilters}
-                nameString={nameString}
-              />
-            </div>
-              {
-                resultTags && 
-                <div className={styles.tags}>
-                  <span className={styles.tagsList}>{resultTags}</span>
-                </div>
-              }
-              {
-                resultDescription && !isPathfinder && (
-                <ClampedDescription
-                  description={resultDescription}
-                  searchWords={activeEntityFilters}
-                  className={styles.description}
-                />
-              )}
-          </div>
-          <ResultItemInteractables
-            handleBookmarkClick={handleBookmarkClick}
-            handleNotesClick={handleNotesClick}
-            handleOpenResultShare={handleOpenResultShare}
-            hasNotes={itemHasNotes}
-            hasUser={!!user}
-            isBookmarked={isBookmarked}
-            isEven={false}
-            isPathfinder={isPathfinder}
-            nameString={nameString}
-          />
-          <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-            <span className={styles.evidenceLink}>
-              <div>
-                {
-                  evidenceCounts && evidenceCounts.publicationCount > 0  &&
-                  <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
-                }
-                {
-                  evidenceCounts && evidenceCounts.clinicalTrialCount > 0  &&
-                  <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-                }
-                {
-                  evidenceCounts && evidenceCounts.miscCount > 0  &&
-                  <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
-                }
-                {
-                  evidenceCounts && evidenceCounts.sourceCount > 0  &&
-                  <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
-                }
-              </div>
-            </span>
-          </div>
-          <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
-            <span className={styles.paths}>
-              <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
-            </span>
-          </div>
-          <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-            <span className={styles.score}>
-              <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
-            </span>
-          </div>
+      {isFilteredOut && (
+        <div className={styles.filteredBanner} role="status">
+          <span>This result has been filtered out.</span>
+          <Button
+            handleClick={handleClearAllFilters}
+            variant="textOnly"
+            smallFont
+          >
+            Clear filters
+          </Button>
         </div>
-
-      </div>
-      <Tabs
-        isOpen
-        className={styles.tabs}
-        handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
+      )}
+      <div
+        className={isFilteredOut ? styles.filteredOut : undefined}
+        aria-hidden={isFilteredOut ? true : undefined}
       >
-        <Tab heading="Paths" className={styles.pathsTab}>
-          <PathView
-            active
-            activeEntityFilters={activeEntityFilters}
-            activeFilters={activeFilters}
-            isEven={false}
-            pathArray={result.paths}
-            pathFilterState={pathFilterState ?? {}}
-            pk={pk ?? ''}
-            selectedPaths={selectedPaths}
-            setShowHiddenPaths={setShowHiddenPaths}
-            showHiddenPaths={showHiddenPaths}
-          />
-        </Tab>
-        <Tab heading="Graph">
-          <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
-            <GraphView
-              graph={graph}
-              active={graphActive}
-              resultSet={resultSet ?? undefined}
+        <div className={styles.tableHeader}>
+          <span className={styles.tableHeaderRow}></span>
+          <span className={styles.tableHeaderRow}></span>
+          <span className={styles.tableHeaderRow}>Evidence</span>
+          <span className={styles.tableHeaderRow}>Paths</span>
+          <span className={styles.tableHeaderRow}>Score</span>
+        </div>
+        <div className={styles.header}>
+          <div className={styles.top}>
+            <div className={styles.infoContainer}>
+              <div className={styles.nameContainer}>
+                <ResultItemName
+                  isPathfinder={isPathfinder}
+                  subjectNode={subjectNode}
+                  objectNode={objectNode}
+                  item={result}
+                  activeEntityFilters={activeEntityFilters}
+                  nameString={nameString}
+                />
+              </div>
+                {
+                  resultTags && 
+                  <div className={styles.tags}>
+                    <span className={styles.tagsList}>{resultTags}</span>
+                  </div>
+                }
+                {
+                  resultDescription && !isPathfinder && (
+                  <ClampedDescription
+                    description={resultDescription}
+                    searchWords={activeEntityFilters}
+                    className={styles.description}
+                  />
+                )}
+            </div>
+            <ResultItemInteractables
+              handleBookmarkClick={handleBookmarkClick}
+              handleNotesClick={handleNotesClick}
+              handleOpenResultShare={handleOpenResultShare}
+              hasNotes={itemHasNotes}
+              hasUser={!!user}
+              isBookmarked={isBookmarked}
+              isEven={false}
+              isPathfinder={isPathfinder}
+              nameString={nameString}
             />
-          </Suspense>
-        </Tab>
-      </Tabs>
+            <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+              <span className={styles.evidenceLink}>
+                <div>
+                  {
+                    evidenceCounts && evidenceCounts.publicationCount > 0  &&
+                    <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
+                  }
+                  {
+                    evidenceCounts && evidenceCounts.clinicalTrialCount > 0  &&
+                    <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
+                  }
+                  {
+                    evidenceCounts && evidenceCounts.miscCount > 0  &&
+                    <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
+                  }
+                  {
+                    evidenceCounts && evidenceCounts.sourceCount > 0  &&
+                    <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
+                  }
+                </div>
+              </span>
+            </div>
+            <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+              <span className={styles.paths}>
+                <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
+              </span>
+            </div>
+            <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
+              <span className={styles.score}>
+                <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+        <Tabs
+          isOpen
+          className={styles.tabs}
+          handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
+        >
+          <Tab heading="Paths" className={styles.pathsTab}>
+            <PathView
+              active
+              activeEntityFilters={activeEntityFilters}
+              activeFilters={activeFilters}
+              isEven={false}
+              pathArray={result.paths}
+              pathFilterState={pathFilterState ?? {}}
+              pk={pk ?? ''}
+              selectedPaths={selectedPaths}
+              setShowHiddenPaths={setShowHiddenPaths}
+              showHiddenPaths={showHiddenPaths}
+            />
+          </Tab>
+          <Tab heading="Graph">
+            <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
+              <GraphView
+                graph={graph}
+                active={graphActive}
+                resultSet={resultSet ?? undefined}
+              />
+            </Suspense>
+          </Tab>
+        </Tabs>
+      </div>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
         onApprove={handleBookmarkRemovalApproval}
