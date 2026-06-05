@@ -83,8 +83,14 @@ const ResultDetailView: FC = () => {
     : null;
 
   const user = useSelector(currentUser);
-  const evidenceCounts = result ? (result.evidenceCount ?? getEvidenceCounts(resultSet, result)) : null;
-  const pathCount = result && resultSet ? getPathCount(resultSet, result.paths) : 0;
+  const evidenceCounts = useMemo(
+    () => result ? (result.evidenceCount ?? getEvidenceCounts(resultSet, result)) : null,
+    [resultSet, result]
+  );
+  const pathCount = useMemo(
+    () => result && resultSet ? getPathCount(resultSet, result.paths) : 0,
+    [resultSet, result]
+  );
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
@@ -131,9 +137,9 @@ const ResultDetailView: FC = () => {
   }, [result, setShareResultID, setShareModalOpen]);
 
   const graph = useMemo(() => {
-    if (!resultSet?.data || !result) return { nodes: {}, edges: {} };
-    return resultToGraphData(result, resultSet.data);
-  }, [result, resultSet?.data]);
+    if (!graphActive || !resultSet?.data || !result) return { nodes: {}, edges: {} };
+      return resultToGraphData(result, resultSet.data);
+  }, [graphActive, result, resultSet?.data]);
 
   if (!queryId) {
     return <ViewNotFound entity="query" id="missing" />;

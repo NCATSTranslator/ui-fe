@@ -652,29 +652,55 @@ export const intToNumeral = (num: number): string => {
 };
 
 /**
- * Calculates the total number of paths for a provided array of PathObjectContainer objects.
+ * Maps a subgraph to a sequence where node IDs are preserved and edge IDs are
+ * replaced with "direct" or "indirect" based on support status. Used as a
+ * grouping key for path compression and counting.
  *
- * @param {string[]} paths - An array of paths to count.
- * @returns {number} - The total number of paths, including support paths.
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {string[]} subgraph - A subgraph array of alternating node/edge IDs.
+ * @returns {string[]} - The path sequence with edges replaced by support status.
+ */
+export const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
+  return subgraph.map((item, i) => {
+    if(isNodeIndex(i))
+      return item;
+    const edge = getEdgeById(resultSet, item);
+    return (edge?.inferred ?? false) ? "indirect" : "direct";
+  });
+};
+
+/**
+ * Resolves a path (by ID or object) and returns a stable grouping key based on
+ * its node IDs and edge support status. Returns null if the path cannot be resolved.
  *
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {string | Path} path - A path ID or Path object.
+ * @returns {string | null} - A stable grouping key, or null if unresolvable.
+ */
+export const getPathSequenceKey = (resultSet: ResultSet, path: string | Path): string | null => {
+  const resolved = (typeof path === "string") ? getPathById(resultSet, path) : path;
+  if (!resolved) return null;
+  return JSON.stringify(extractPathSequence(resultSet, resolved.subgraph));
+};
+
+/**
+ * Counts the number of visible path rows by grouping paths that share the same
+ * node sequence and edge support status (matching the compression in PathView).
+ *
+ * @param {ResultSet} resultSet - ResultSet Object.
+ * @param {(string | Path)[]} paths - An array of paths or path IDs to count.
+ * @returns {number} - The number of compressed (visible) path rows.
  */
 export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): number => {
-  let count = paths.length;
-  for(const p of paths) {
-    const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
-    if(!path)
-      continue;
-    for(const [i, subgraphItemID] of path.subgraph.entries()) {
-      if(isNodeIndex(i))
-        continue;
-      const edge = getEdgeById(resultSet, subgraphItemID);
-      if(isResultEdge(edge, true) && edge.support.length > 0) {
-        count += getPathCount(resultSet, edge.support);
-      }
+  const sequences = new Set<string>();
+  for (const p of paths) {
+    const key = getPathSequenceKey(resultSet, p);
+    if (key) {
+      sequences.add(key);
     }
   }
-  return count;
-}
+  return sequences.size;
+};;
 
 /**
  * Takes a ResultEdge object and returns a boolean value based on whether the edge has any support paths.
