@@ -117,6 +117,8 @@
     overflow: hidden;
     height: min-content;
     align-self: center;
+    flex-wrap: wrap;
+    gap: $xs 0px;
     span {
       line-height: 1.25;
     }
