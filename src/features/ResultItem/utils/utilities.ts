@@ -3,6 +3,7 @@ import { Path, ResultSet, PathFilterState, Tags, ResultNode, ResultEdge } from "
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getPathSequenceKey } from "@/features/Common/utils/utilities";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 import { Preferences } from "@/features/UserAuth/types/user";
@@ -254,26 +255,13 @@ export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) 
 
 /**
  * Takes a list of paths/path IDs and compresses them if any paths have the same nodes and their edges have
- * the same support status (provided by the extractPathSequence helper function).
+ * the same support status (provided by the getPathSequenceKey helper function).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @returns {Path[]} - The array of compressed paths.
  */
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
-  // Helper function to extract the path sequence from a subgraph
-  const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
-    return subgraph.map((item, i) => {
-      if(isNodeIndex(i)) {
-        return item;
-      } else {
-        const edge = getEdgeById(resultSet, item);
-        // edges return 'indirect' or 'direct' based on presence of support
-        return (edge?.inferred ?? false) ? "indirect" : "direct";
-      }
-    })
-  };
-
   const mergeTags = (tags1: Tags, tags2: Tags): Tags => {
     const mergedTags: Tags = { ...tags1 };
 
@@ -307,8 +295,9 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
     const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
     if(!checkedPath)
       continue;
-    // Use the path sequence as the key
-    const pathSequence = extractPathSequence(resultSet, checkedPath.subgraph).join(",");
+    const pathSequence = getPathSequenceKey(resultSet, checkedPath);
+    if(!pathSequence)
+      continue;
     const existingPath = groupedPaths.get(pathSequence);
 
     // check for existing path in groupedPaths
