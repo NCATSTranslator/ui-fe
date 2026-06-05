@@ -23,7 +23,7 @@ export const defaultPrefs: Preferences = {
   path_show_count: {
     name: "Number of Paths to Show",
     pref_value: 10,
-    possible_values:[5, 10, 20, -1]
+    possible_values:[5, 10, 20]
   },
   evidence_sort: {
     name: "Default Evidence Sorting",
