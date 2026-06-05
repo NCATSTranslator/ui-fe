@@ -29,7 +29,9 @@ interface ResultListHeaderProps {
 const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
   const config = useSelector(currentConfig);
-  const showNoveltyBoost = config?.show_novelty_boost;
+  // TODO: Reenable novelty boost toggle once scoring is updated to properly use novelty weights
+  // const showNoveltyBoost = config?.show_novelty_boost;
+  const showNoveltyBoost = false;
   const { activeFilters, handleFilter } = useResultListContext();
 
   return(
