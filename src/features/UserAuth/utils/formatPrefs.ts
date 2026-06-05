@@ -94,7 +94,11 @@ export const formatPrefs = (prefs: Preferences): Preferences => {
 
   for (const key of Object.keys(prefs)) {
     if (key in newPrefs && isPrefObject(prefs[key])) {
-      newPrefs[key as PrefKey].pref_value = prefs[key].pref_value;
+      const storedValue = prefs[key].pref_value;
+      const allowed = newPrefs[key as PrefKey].possible_values as (string | number)[];
+      newPrefs[key as PrefKey].pref_value = allowed.includes(storedValue)
+        ? storedValue
+        : defaultPrefs[key as PrefKey].pref_value;
     }
   }
 
@@ -115,8 +119,6 @@ export const getPrefName = (key: string) => {
 };
 
 export const getPrettyPrefValue = (value: string | number) => {
-  if(value === -1) return "All";
-
   switch(value) {
     case "scoreHighLow":
       return "Score (High to Low)";
