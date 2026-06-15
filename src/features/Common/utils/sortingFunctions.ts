@@ -273,6 +273,9 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       otherFilters.push(ftr);
     }
   }
+  const hasAraInclusion = otherFilters.some(
+    (ftr) => !ftr.negated && getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
+  );
   const visited = new Set<string>([getPathKey(path)]);
   _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters, visited, 0);
 
@@ -285,6 +288,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     if (!isIndirectEdge) {
       for (const ftr of otherFilters) {
         if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+          if (getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA && hasAraInclusion) continue;
           pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
           return;
         }
