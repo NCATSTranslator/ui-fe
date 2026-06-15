@@ -9,7 +9,7 @@ const tagCaptions: Record<string, string> = {
   cc: "Filter on different categories of chemicals.",
   pc: "Include or exclude paths from results that contain a particular type of object",
   role: "Include or exclude results according to their biological or chemical role or application",
-  ara: "Include or exclude reasoning agents used to return results",
+  ara: "Include or exclude paths from results based on which reasoning agents provided them",
   di: "Include or exclude results based on whether they have been tested in clinical trials for treatment of the indicated disease",
   pt: "Include or exclude paths from results that contain a set number of connections",
   otc: "Include or exclude results in various development stages and with desired availability",

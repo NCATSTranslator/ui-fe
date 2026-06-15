@@ -6,7 +6,8 @@ export const FILTERING_CONSTANTS = {
   PATH: 'p' as const,
   GLOBAL: 'g' as const,
   FAMILIES: {
-    ROLE: 'role' as const
+    ROLE: 'role' as const,
+    ARA: 'ara' as const
   },
   DYNAMIC_TAG: {
     BOOKMARK: {
@@ -99,11 +100,11 @@ export const getValidFamilies = (): FilterFamily[] => {
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'role', 'ara', 'otc', 'tdl', 'sv'];
+  return ['cc', 'di', 'role', 'otc', 'tdl', 'sv'];
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pt', 'ev'];
+  return ['pc', 'pt', 'ev', 'ara'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
