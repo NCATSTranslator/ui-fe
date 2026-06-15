@@ -1,7 +1,6 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
 import { Link } from 'react-router-dom';
-import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
@@ -14,7 +13,6 @@ import OutsideClickHandler from '@/features/Common/components/OutsideClickHandle
 interface ResultItemInteractablesProps {
   handleBookmarkClick: () => Promise<string | number | false | null>;
   handleNotesClick: () => Promise<void>;
-  handleOpenResultShare: () => void;
   hasNotes: boolean;
   hasUser: boolean;
   isBookmarked: boolean;
@@ -26,7 +24,6 @@ interface ResultItemInteractablesProps {
 const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   handleBookmarkClick,
   handleNotesClick,
-  handleOpenResultShare,
   hasNotes,
   hasUser,
   isBookmarked,
@@ -108,17 +105,6 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
               </>
             : <></>
         }
-        <button
-          className={`${styles.icon} ${styles.shareResultIcon} ${ styles.closed } share-result-icon`}
-          onClick={(e)=>{e.stopPropagation(); handleOpenResultShare()}}
-          data-tooltip-id={`share-tooltip-${nameString.replaceAll("'", "")}`}
-          >
-          <ShareIcon/>
-          <Tooltip id={`share-tooltip-${nameString.replaceAll("'", "")}`}>
-            <span className={styles.tooltip}>Generate a sharable link for this result.</span>
-          </Tooltip>
-          <span className={styles.label}>Share</span>
-        </button>
       </div>
     </OutsideClickHandler>
 

@@ -93,20 +93,20 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
           }
           {(edge.pubCount > 0 || edge.ctCount > 0 || isAcceptedOntology) &&
             <div className={styles.tooltipEvidenceCounts}>
-              {edge.pubCount > 0 &&
-                <span
-                  className={styles.count}
-                  onClick={(e) => onPredicateClick?.(e, edge.id, { tab: 'Publications' })}
-                >
-                  <PubIcon />{edge.pubCount} Publication{edge.pubCount > 1 && 's'}
-                </span>
-              }
               {edge.ctCount > 0 &&
                 <span
                   className={styles.count}
                   onClick={(e) => onPredicateClick?.(e, edge.id, { tab: 'Clinical Trials' })}
                 >
                   <CTIcon />{edge.ctCount} Clinical Trial{edge.ctCount > 1 && 's'}
+                </span>
+              }
+              {edge.pubCount > 0 &&
+                <span
+                  className={styles.count}
+                  onClick={(e) => onPredicateClick?.(e, edge.id, { tab: 'Publications' })}
+                >
+                  <PubIcon />{edge.pubCount} Publication{edge.pubCount > 1 && 's'}
                 </span>
               }
               {

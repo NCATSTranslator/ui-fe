@@ -17,7 +17,6 @@ import BlankIcon from '@/assets/icons/blank.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { cloneDeep } from 'lodash';
 import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { isResultEdge } from '@/features/ResultList/types/checkers';
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Location as RouterLocation } from 'react-router-dom';
@@ -64,7 +63,7 @@ export const getNodeIcon = (category: string): ReactNode => {
     case 'biolink:PhysiologicalProcess':
       icon = <PhysiologicalProcess/>;
       break;
-    case 'biolink:BiologicalEntity': case 'biolink:CellLine':
+    case 'biolink:BiologicalEntity': case 'biolink:CellLine':  case 'biolink:CellularComponent' : case 'biolink:Cell' :
       icon = <BiologicalEntity/>;
       break;
     case 'biolink:AnatomicalEntity': case 'biolink:GrossAnatomicalStructure':

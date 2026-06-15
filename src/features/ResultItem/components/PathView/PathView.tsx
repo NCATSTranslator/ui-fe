@@ -6,7 +6,7 @@ import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Common/utils/utilities';
-import { getFilteredPathCount, getIsPathFiltered, getPathsPerPage, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
+import { getIsPathFiltered, getPathsPerPage, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
@@ -64,29 +64,41 @@ const PathView: FC<PathViewProps> = ({
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const pathsPerPage: number = getPathsPerPage(prefs);
   const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
-  const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
-  const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / pathsPerPage) : Math.ceil((formattedPaths.length) / pathsPerPage);
   const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
   const { hoveredIndex } = useHoverPathObject(setHoveredItem);
   
+  const { formattedPathsToDisplay, filteredPathCount } = useMemo(() => {
+    let filteredCount = 0;
+    const visible = formattedPaths.filter(path => {
+      const isFiltered = getIsPathFiltered(path, pathFilterState);
+      if (isFiltered) filteredCount++;
+      return !isFiltered;
+    });
+    return {
+      formattedPathsToDisplay: showHiddenPaths ? formattedPaths : visible,
+      filteredPathCount: filteredCount
+    };
+  }, [formattedPaths, pathFilterState, showHiddenPaths]);
+
+  const hasFilteredPaths = filteredPathCount > 0;
+  const pageCount = Math.ceil(formattedPathsToDisplay.length / pathsPerPage);
+  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, itemOffset + pathsPerPage);
+
   useEffect(() => {
     setCurrentPage(0);
     setItemOffset(0);
   }, [pathsPerPage]);
 
-  const handlePageClick = (event: {selected: number} ) => {
-    let pathsLength = formattedPaths.length;
-    if(!pathsLength)
+  const handlePageClick = useCallback((event: {selected: number}) => {
+    const pathsLength = formattedPathsToDisplay.length;
+    if (!pathsLength)
       return;
     setCurrentPage(event.selected);
-    const newOffset:number = isNaN((event.selected * pathsPerPage) % pathsLength) ? 0 : (event.selected * pathsPerPage) % pathsLength;
-    setItemOffset(newOffset);
-  }
-  const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
-  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, itemOffset + pathsPerPage);
+    const newOffset = (event.selected * pathsPerPage) % pathsLength;
+    setItemOffset(isNaN(newOffset) ? 0 : newOffset);
+  }, [formattedPathsToDisplay.length, pathsPerPage]);
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     handleEdgeSpecificEvidence?.(edgeIDs, path);
@@ -144,16 +156,15 @@ const PathView: FC<PathViewProps> = ({
               }
             </div>
             {
-              Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
+              Object.keys(activeFilters).length > 0 && hasFilteredPaths && 
               <Button
-                handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
-                variant="secondary"
+                handleClick={() => { setShowHiddenPaths(prev => !prev); setCurrentPage(0); setItemOffset(0); }}                variant="secondary"
                 small
                 dataTooltipId={`${resultId}-excluded-paths-toggle`}
                 className={`${!!isEven && styles.evenButton}`}
                 iconRight={<Information/>}
                 >
-                {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
+                {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
                 <Tooltip id={`${resultId}-excluded-paths-toggle`}>
                   {
                     showHiddenPaths 
