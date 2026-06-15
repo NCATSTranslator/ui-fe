@@ -39,7 +39,6 @@ const ResultDetailView: FC = () => {
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
   const objectNode = useMemo(() => result ? getNodeById(resultSet, result.object) : undefined, [resultSet, result]);
-  const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
 
   const {
     activateNotes,
@@ -50,7 +49,6 @@ const ResultDetailView: FC = () => {
     bookmarkRemovedToast,
     handleBookmarkError,
     handleClearAllFilters,
-    handleFilter,
     isPathfinder,
     pathFilterState,
     pk,
@@ -60,8 +58,6 @@ const ResultDetailView: FC = () => {
     queryType,
     resultsComplete,
     scoreWeights,
-    setShareModalOpen,
-    setShareResultID,
     setShowHiddenPaths,
     showHiddenPaths,
     shouldUpdateResultsAfterBookmark,
@@ -130,12 +126,6 @@ const ResultDetailView: FC = () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
-  const handleOpenResultShare = useCallback(() => {
-    if (!result) return;
-    setShareResultID(result.id);
-    setShareModalOpen(true);
-  }, [result, setShareResultID, setShareModalOpen]);
-
   const graph = useMemo(() => {
     if (!graphActive || !resultSet?.data || !result) return { nodes: {}, edges: {} };
       return resultToGraphData(result, resultSet.data);
@@ -203,7 +193,6 @@ const ResultDetailView: FC = () => {
             <ResultItemInteractables
               handleBookmarkClick={handleBookmarkClick}
               handleNotesClick={handleNotesClick}
-              handleOpenResultShare={handleOpenResultShare}
               hasNotes={itemHasNotes}
               hasUser={!!user}
               isBookmarked={isBookmarked}

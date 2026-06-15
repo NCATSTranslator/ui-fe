@@ -48,8 +48,6 @@ const ResultItem: FC<ResultItemProps> = ({
     queryType,
     resultsComplete,
     scoreWeights,
-    setShareModalOpen,
-    setShareResultID,
     resultsNavigate,
     shouldUpdateResultsAfterBookmark,
     updateUserSaves,
@@ -107,11 +105,6 @@ const ResultItem: FC<ResultItemProps> = ({
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
-  const handleOpenResultShare = () => {
-    setShareResultID(result.id);
-    setShareModalOpen(true);
-  }
-
   if(!resultSet)
     return null;
 
@@ -137,7 +130,6 @@ const ResultItem: FC<ResultItemProps> = ({
         <ResultItemInteractables
           handleBookmarkClick={handleBookmarkClick}
           handleNotesClick={handleNotesClick}
-          handleOpenResultShare={handleOpenResultShare}
           hasNotes={itemHasNotes}
           hasUser={!!user}
           isBookmarked={isBookmarked}
@@ -189,7 +181,6 @@ const ResultItem: FC<ResultItemProps> = ({
               result.tags && roleCount > 0 && availableFilters &&
               <div className={styles.tags}>
                 {
-                  // Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
                   Object.keys(result.tags).map((fid) => {
                     return(
                       <ResultItemTag

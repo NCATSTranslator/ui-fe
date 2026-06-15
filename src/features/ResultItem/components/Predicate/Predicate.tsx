@@ -196,10 +196,10 @@ const Predicate: FC<PredicateProps> = ({
             (hasPubs || hasCTs || isAcceptedOntology) &&
             <div className={styles.badges}>
               {
-                hasPubs && <PubIcon/>
+                hasCTs && <CTIcon/>
               }
               {
-                hasCTs && <CTIcon/>
+                hasPubs && <PubIcon/>
               }
               {
                 isAcceptedOntology && <AcceptedOntologyIcon/>
