@@ -108,7 +108,7 @@
         fill: $white;
       }
     }
-    span {
+    span, mark {
       font-size: $subTwoSize;
       font-weight: 800;
       line-height: 1.25;
@@ -117,6 +117,9 @@
       &:hover {
         text-decoration: underline;
       }
+    }
+    mark {
+      color: $black;
     }
     .predicateImpact {
       font-size: $captionSize;
