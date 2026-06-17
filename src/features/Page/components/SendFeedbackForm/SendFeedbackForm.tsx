@@ -191,7 +191,7 @@ const SendFeedbackForm = () => {
                 <>
                   <TextInput
                     label="Steps to Reproduce *"
-                    subtitle="Please be as detailed as you can to help us identify this bug."
+                    subtitle="Please be as detailed as you can to help us identify this bug and avoid sharing personal information."
                     rows={3}
                     maxLength={1500}
                     handleChange={(value) => {
@@ -213,6 +213,7 @@ const SendFeedbackForm = () => {
 
               <TextInput
                 label="Comments *"
+                subtitle="Please avoid sharing personal information."
                 rows={5}
                 maxLength={1500}
                 handleChange={(value) => {
@@ -238,6 +239,8 @@ const SendFeedbackForm = () => {
                 handleChange={handleFileChange}
                 multiple
               />
+
+              <p className="caption">Your anonymous feedback will be stored for the sole use of improving Translator.</p>
 
               <Button 
                 type="submit"
