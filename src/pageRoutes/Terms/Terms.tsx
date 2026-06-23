@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 
 const Terms = () => {

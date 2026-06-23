@@ -12,7 +12,7 @@ import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import { useTextStream } from "@/features/Core/hooks/useTextStream";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {
