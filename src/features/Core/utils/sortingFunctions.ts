@@ -1,4 +1,3 @@
-import { equal } from 'mathjs';
 import { getPathCount, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
@@ -86,7 +85,7 @@ export const sortScoreLowHigh = (items: Result[], scoreWeights: ScoreWeights) =>
   return items.sort((a: Result, b: Result) => {
     const aScore: ScorePair = (!!a?.score) ? a.score as ScorePair : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore: ScorePair = (!!b?.score) ? b.score as ScorePair : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    if (equal(aScore.main, bScore.main))
+    if (aScore.main === bScore.main)
       return aScore.secondary - bScore.secondary;
 
     return aScore.main - bScore.main;
@@ -105,7 +104,7 @@ export const sortScoreHighLow = (items: Result[], scoreWeights: ScoreWeights) =>
   return items.sort((a: Result, b: Result) => {
     const aScore: ScorePair = (!!a?.score) ? a.score as ScorePair : generateScore(a.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
     const bScore: ScorePair = (!!b?.score) ? b.score as ScorePair : generateScore(b.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
-    if (equal(aScore.main, bScore.main))
+    if (aScore.main === bScore.main)
       return bScore.secondary - aScore.secondary;
 
     return bScore.main - aScore.main;
