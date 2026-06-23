@@ -21,7 +21,7 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import useSortState from "@/features/ResultList/hooks/useSortState";
-import usePagination from "@/features/ResultList/hooks/usePagination";
+import useResultPagination from "@/features/ResultList/hooks/useResultPagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
@@ -119,7 +119,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isSortedByName,
     isSortedByEvidence,
     isSortedByPaths,
-    isSortedByScore,
     currentSortString,
     activeEntityFiltersRef,
     getSortedResults,
@@ -167,7 +166,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handlePageClick,
     handlePageReset,
     calculateItemsPerPage,
-  } = usePagination({ formattedResults, initialItemsPerPage });
+  } = useResultPagination({ formattedResults, initialItemsPerPage });
 
   // Share state management via hook
   const {
@@ -509,10 +508,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                         <ResultListTableHead
                           parentStyles={styles}
                           currentSortString={currentSortString}
+                          defaultSortString={initSortString}
                           isSortedByEvidence={isSortedByEvidence}
                           isSortedByName={isSortedByName}
                           isSortedByPaths={isSortedByPaths}
-                          isSortedByScore={isSortedByScore}
                           handleUpdateResults={handleSortUpdate}
                         />
                         {

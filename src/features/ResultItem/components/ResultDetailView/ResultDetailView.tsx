@@ -7,7 +7,6 @@ import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
 import { getPathCount } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
@@ -58,8 +57,6 @@ const ResultDetailView: FC = () => {
     queryNodeID,
     queryNodeLabel,
     queryType,
-    resultsComplete,
-    scoreWeights,
     setShowHiddenPaths,
     showHiddenPaths,
     shouldUpdateResultsAfterBookmark,
@@ -71,14 +68,6 @@ const ResultDetailView: FC = () => {
 
   const [graphActive, setGraphActive] = useState(false);
   const [selectedPaths] = useState<Set<Path> | null>(null);
-
-  const firstPath = result?.paths[0];
-  const firstPathObj = typeof firstPath === 'string' ? null : firstPath;
-  const score = result
-    ? isPathfinder && firstPathObj
-      ? getPathfinderMetapathScore(firstPathObj)
-      : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight)
-    : null;
 
   const user = useSelector(currentUser);
   const evidenceCounts = useMemo(
@@ -162,7 +151,6 @@ const ResultDetailView: FC = () => {
           <span className={styles.tableHeaderRow}></span>
           <span className={styles.tableHeaderRow}>Evidence</span>
           <span className={styles.tableHeaderRow}>Paths</span>
-          <span className={styles.tableHeaderRow}>Score</span>
         </div>
         <div className={styles.header}>
           <div className={styles.top}>
@@ -227,11 +215,6 @@ const ResultDetailView: FC = () => {
             <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
               <span className={styles.paths}>
                 <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
-              </span>
-            </div>
-            <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-              <span className={styles.score}>
-                <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
               </span>
             </div>
           </div>
