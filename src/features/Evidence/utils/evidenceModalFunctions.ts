@@ -86,8 +86,9 @@ export const handleEvidenceSort = (
 export const getInitItemsPerPage = (prefs: Preferences, defaultItemsPerPage: number): number => {
   const value = prefs?.evidence_per_page?.pref_value;
   if (!value) return defaultItemsPerPage;
-  
-  return typeof value === "string" ? parseInt(value) : value;
+
+  const parsed = typeof value === "string" ? parseInt(value, 10) : value;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultItemsPerPage;
 };
 
 /**

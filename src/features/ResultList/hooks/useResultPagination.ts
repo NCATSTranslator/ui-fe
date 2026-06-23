@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, Dispatch, SetStateAction, RefObject } from 'react';
 import { Result } from '@/features/ResultList/types/results.d';
 
-export interface UsePaginationReturn {
+export interface UseResultPaginationReturn {
   itemOffset: number;
   setItemOffset: Dispatch<SetStateAction<number>>;
   itemsPerPage: number;
@@ -16,12 +16,19 @@ export interface UsePaginationReturn {
   calculateItemsPerPage: (prefValue: string | number) => number;
 }
 
-interface UsePaginationArgs {
+interface UseResultPaginationArgs {
   formattedResults: Result[];
   initialItemsPerPage: number;
 }
 
-const usePagination = ({ formattedResults, initialItemsPerPage }: UsePaginationArgs): UsePaginationReturn => {
+/**
+ * Custom hook to handle pagination of a list of results.
+ * 
+ * @param {Result[]} formattedResults - The list of results to paginate.
+ * @param {number} initialItemsPerPage - The number of items per page to display.
+ * @returns {UseResultPaginationReturn} The pagination return object.
+ */
+const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResultPaginationArgs): UseResultPaginationReturn => {
   const currentPage = useRef(0);
   const [itemOffset, setItemOffset] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(initialItemsPerPage);
@@ -77,4 +84,4 @@ const usePagination = ({ formattedResults, initialItemsPerPage }: UsePaginationA
   };
 };
 
-export default usePagination;
+export default useResultPagination;
