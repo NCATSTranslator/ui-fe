@@ -139,7 +139,7 @@
       text-transform: none;
     }
   }
-  .scoreNum, .pathsNum, .info {
+  .pathsNum, .info {
     font-size: 12px;
     line-height: 1.25;
     color: $darkGray;
@@ -204,12 +204,12 @@
   }
   .top {
     display: grid;
-    grid-template-columns: 1fr 112px 110px 90px 90px 24px;
+    grid-template-columns: 1fr 112px 110px 90px 24px;
     column-gap: $s;
     padding: $m $s 0 $s;
   }
   .accordionPanel {
-    grid-column: 1/7;
+    grid-column: 1/6;
     grid-row: 2;
     padding: 0;
     .container, .resultTabs > div > div {

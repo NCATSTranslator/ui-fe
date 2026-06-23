@@ -1,8 +1,9 @@
 import { redirect } from 'react-router-dom';
-import { decodeBase64Param, encodeParams } from '@/features/Common/utils/web';
+import { decodeBase64Param, encodeParams } from '@/features/Core/utils/web';
 import { getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { Result, ResultEdge, ResultSet, Path } from '@/features/ResultList/types/results.d';
-import { getCompressedEdge, intToChar, intToNumeral } from '@/features/Common/utils/utilities';
+import { intToChar, intToNumeral } from '@/features/Core/utils/stringFormatters';
+import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 
 export const MAIN_CONTENT_ELEMENT_ID = 'main';
 

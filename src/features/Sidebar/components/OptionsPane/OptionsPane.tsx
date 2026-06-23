@@ -1,6 +1,6 @@
 import { FC, ReactNode, MouseEvent } from "react";
 import styles from "./OptionsPane.module.scss";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface OptionsPaneProps {
   children: ReactNode;

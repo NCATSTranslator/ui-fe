@@ -111,7 +111,7 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
     queryClient.setQueryData(queryKey, (oldData: Project[]) => {
       if (!oldData) return oldData;
       return oldData.map((project: Project) =>
-        project.id === id
+        project.id === parseInt(id.toString())
           ? {
               ...project,
               data: {
@@ -165,7 +165,7 @@ export const useEditProjectHandlers = (): EditProjectHandlers => {
         queryClient.setQueryData(queryKey, (oldData: Project[]) => {
           if (!oldData) return oldData;
           return oldData.map((project: Project) =>
-            project.id === id
+            project.id === parseInt(id.toString())
               ? {
                   ...project,
                   data: {

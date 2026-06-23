@@ -1,10 +1,12 @@
 import { FC } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { getFormattedDate } from '@/features/Common/utils/utilities';
+import { getFormattedDate } from '@/features/Core/utils/dateHelpers';
 import { TrialObject } from '@/features/Evidence/types/evidence.d';
 import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { Preferences } from '@/features/UserAuth/types/user';
-import { usePagination } from '@/features/Evidence/hooks/usePagination';
+import { usePagination } from '@/features/Core/hooks/usePagination';
+import { getInitItemsPerPage } from '@/features/Evidence/utils/evidenceModalFunctions';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/features/Evidence/hooks/evidenceHooks';
 import TablePaginationControls from '@/features/Evidence/components/TablePaginationControls/TablePaginationControls';
 import PaginationSummary from '@/features/Evidence/components/PaginationSummary/PaginationSummary';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
@@ -24,7 +26,7 @@ const ClinicalTrialsTable: FC<ClinicalTrialsTableProps> = ({ clinicalTrials, pre
     pageCount,
     handlePageClick,
     handleItemsPerPageChange,
-  } = usePagination(clinicalTrials, prefs);
+  } = usePagination(clinicalTrials, getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE));
 
   return (
     <>

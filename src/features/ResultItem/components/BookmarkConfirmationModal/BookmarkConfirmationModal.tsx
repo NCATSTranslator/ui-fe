@@ -1,6 +1,6 @@
 import { useEffect, useState, FC } from "react";
 import styles from './BookmarkConfirmationModal.module.scss';
-import Modal from "@/features/Common/components/Modal/Modal";
+import Modal from "@/features/Core/components/Modal/Modal";
 import Button from "@/features/Core/components/Button/Button";
 
 interface BookmarkConfirmationModalProps {

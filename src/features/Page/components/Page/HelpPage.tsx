@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useCallback } from "react";
 import HelpSidebar from "@/features/Page/components/HelpSidebar/HelpSidebar";
-import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
-import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
+import DisclaimerModal from "@/features/Core/components/DisclaimerModal/DisclaimerModal";
+import { useDisclaimersApproved } from "@/features/Core/hooks/useDisclaimersApproved";
 import styles from './HelpPage.module.scss';
 
 export interface HelpPageProps {

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { pivotSort } from '@/features/Common/utils/sortingFunctions';
+import { pivotSort } from '@/features/Core/utils/sortingFunctions';
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import styles from '@/features/ResultFiltering/components/FacetGroup/FacetGroup.module.scss';
 import { Filter, FilterFamily, GroupedFilters } from '@/features/ResultFiltering/types/filters';

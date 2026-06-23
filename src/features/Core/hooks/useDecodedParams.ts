@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { getDecodedParamsFromSearch } from "@/features/Common/utils/web";
+import { getDecodedParamsFromSearch } from "@/features/Core/utils/web";
 
 /**
  * React hook that returns decoded URL query parameters.

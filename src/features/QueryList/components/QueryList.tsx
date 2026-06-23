@@ -7,11 +7,11 @@ import { useSortSearchState, useUserQueries } from "@/features/Projects/hooks/cu
 import QueriesTableHeader from "@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader";
 import QueryCard from "@/features/Projects/components/QueryCard/QueryCard";
 import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
-import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
+import { useSimpleSearch } from "@/features/Core/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
-import Tabs from "@/features/Common/components/Tabs/Tabs";
-import Tab from "@/features/Common/components/Tabs/Tab";
+import Tabs from "@/features/Core/components/Tabs/Tabs";
+import Tab from "@/features/Core/components/Tabs/Tab";
 import CardList from "@/features/Projects/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
@@ -20,7 +20,7 @@ import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
 import AnimateHeight from "react-animate-height";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
 

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { post, fetchWithErrorHandling } from "@/features/Common/utils/web";
+import { post, fetchWithErrorHandling } from "@/features/Core/utils/web";
 import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
 
 type NodeDescriptionsResponse = Record<string, string>;

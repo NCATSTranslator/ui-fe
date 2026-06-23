@@ -1,4 +1,4 @@
-import { equal, larger, format, polynomialRoot, largerEq, min, max, round, isComplex, type Complex } from 'mathjs';
+import { polynomialRoot, isComplex, type Complex } from 'mathjs';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { Path, Result, ResultSet, Score, ScoreWeights } from '@/features/ResultList/types/results.d';
 
@@ -9,12 +9,20 @@ export interface ScorePair {
 
 type WeightSets = Record<string, number>;
 
+// Toggles the result score source. Set to `true` to score results by their
+// confidence value, or `false` to use the legacy Sugeno calculation (kept
+// below in case we revert). Affects default score sorting across the app.
+const USE_CONFIDENCE_SCORE = true;
+
 export const generateScore = (
   scoreComponents: Score[],
   confidenceWeight: number,
   noveltyWeight: number,
   clinicalWeight: number
 ): ScorePair => {
+  if (USE_CONFIDENCE_SCORE)
+    return maxConfidenceScore(scoreComponents);
+  
   return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 };
 
@@ -33,7 +41,8 @@ export const generatePathfinderScore = (resultSet: ResultSet | null, result: Res
 };
 
 export const displayScore = (score: ScorePair | number, decimalPlaces: number = 2): string => {
-  return format((typeof score === "number") ? score || 0 : score.main || 0, {notation: 'fixed', precision: decimalPlaces});
+  const value = (typeof score === "number") ? score || 0 : score.main || 0;
+  return value.toFixed(decimalPlaces);
 };
 
 export const maxNormalizedScore = (scoreComponents: Score[]): ScorePair => {
@@ -46,6 +55,18 @@ export const maxNormalizedScore = (scoreComponents: Score[]): ScorePair => {
   });
 
   return maxScorePair(normalizedScorePairs);
+};
+
+const maxConfidenceScore = (scoreComponents: Score[]): ScorePair => {
+  const confidencePairs: ScorePair[] = scoreComponents.map((s) => {
+    const scaledConfidence = 5 * s.confidence;
+    return {
+      main: scaledConfidence,
+      secondary: scaledConfidence,
+    };
+  });
+
+  return maxScorePair(confidencePairs);
 };
 
 const maxSugenoScore = (
@@ -68,11 +89,12 @@ const maxSugenoScore = (
 };
 
 const maxScorePair = (scorePairs: ScorePair[]): ScorePair => {
+  if (scorePairs.length === 0) return { main: 0, secondary: 0 };
   let maxScore: ScorePair = scorePairs[0];
   for (let i = 1; i < scorePairs.length; i++) {
-    if (larger(scorePairs[i].main, maxScore.main) ||
-        (equal(scorePairs[i].main, maxScore.main) &&
-         larger(scorePairs[i].secondary, maxScore.secondary))) {
+    if (scorePairs[i].main > maxScore.main ||
+        (scorePairs[i].main === maxScore.main &&
+         scorePairs[i].secondary > maxScore.secondary)) {
       maxScore = scorePairs[i];
     }
   }
@@ -108,7 +130,7 @@ const computeSugeno = (
         val = s as number;
       }
 
-      if (!(equal(val, 0)) && largerEq(val, -1)) {
+      if (val !== 0 && val >= -1) {
         lambda = val;
       }
     });
@@ -135,11 +157,11 @@ const computeSugeno = (
   const weightKeys = Object.keys(weightsSorted);
   const mins: number[] = [];
   for (let i = 0; i < weightKeys.length; ++i) {
-    mins.push(min(allScores[i].score, weightsSorted[weightKeys[i]]));
+    mins.push(Math.min(allScores[i].score, weightsSorted[weightKeys[i]]));
   }
 
   // Sugeno score
-  return max(...mins);
+  return Math.max(...mins);
 };
 
 const computeWeightSets = (
@@ -171,7 +193,7 @@ const computeWeightSets = (
           tf = `${tf}${p[j]}`;
         }
       }
-      ws[t] = round(ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf]), 2) as number;
+      ws[t] = Math.round((ws[tl] + ws[tf] + (lambda * ws[tl] * ws[tf])) * 100) / 100;
     }
   }
 

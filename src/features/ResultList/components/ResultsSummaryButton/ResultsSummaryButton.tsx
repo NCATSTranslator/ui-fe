@@ -4,15 +4,15 @@ import Button from "@/features/Core/components/Button/Button";
 import SparkleIcon from '@/assets/icons/buttons/Sparkles.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import ResultsSummaryModal from "@/features/ResultList/components/ResultsSummaryModal/ResultsSummaryModal";
 import { genTopNResultsContext } from "@/features/ResultList/utils/llm";
 import { Result } from "@/features/ResultList/types/results.d";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
-import { useTextStream } from "@/features/Common/hooks/customHooks";
+import { useTextStream } from "@/features/Core/hooks/useTextStream";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import { useSelector } from "react-redux";
 
 interface ResultsSummaryButtonProps {

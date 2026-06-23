@@ -1,5 +1,6 @@
 import { closest as closestStrMatch, distance } from 'fastest-levenshtein';
-import { capitalizeAllWords, removeDuplicateObjects } from "@/features/Common/utils/utilities";
+import { capitalizeAllWords } from "@/features/Core/utils/stringFormatters";
+import { removeDuplicateObjects } from "@/features/Core/utils/arrayHelpers";
 import { AutocompleteItem, FormatData, GenericItem, GeneItem } from '@/features/Query/types/querySubmission';
 
 /**

@@ -1,4 +1,4 @@
-import * as tc from "@/features/Common/types/checkers";
+import * as tc from "@/features/Core/types/checkers";
 import { EdgeProvenance, Provenance, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
 import { EvidenceTabName } from "./navigation";

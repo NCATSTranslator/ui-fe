@@ -1,7 +1,8 @@
 import { FC, ReactNode } from "react";
 import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
-import { formatBiolinkNode, getNodeIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
+import { formatBiolinkNode, getFormattedPathfinderName } from "@/features/Core/utils/stringFormatters";
+import { getNodeIcon } from "@/features/Core/utils/entityLinks";
 import Highlighter from "react-highlight-words";
 import ArrowIcon from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 

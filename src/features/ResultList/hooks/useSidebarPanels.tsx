@@ -10,7 +10,7 @@ import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
-import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
+import BetaTag from "@/features/Core/components/BetaTag/BetaTag";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
 import IconBadge from "@/features/Sidebar/components/IconBadge/IconBadge";
 import Button from "@/features/Core/components/Button/Button";

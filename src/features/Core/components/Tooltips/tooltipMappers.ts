@@ -1,4 +1,4 @@
-import { formatBiolinkEntity, formatBiolinkNode, replaceTreatWithImpact } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode, replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { getEvidenceFromEdge } from '@/features/Evidence/utils/utilities';
 import { ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';

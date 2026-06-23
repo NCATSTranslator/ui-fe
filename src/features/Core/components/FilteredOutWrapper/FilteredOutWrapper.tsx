@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import styles from './FilteredOutWrapper.module.scss';
 import FilteredOutBanner from '@/features/Core/components/FilteredOutBanner/FilteredOutBanner';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface FilteredOutWrapperProps {
   isFilteredOut: boolean;

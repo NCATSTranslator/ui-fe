@@ -15,7 +15,7 @@ import {
   ExportFormat,
 } from "@/features/ResultDownload/types/download.d";
 import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
-import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
 
 /**

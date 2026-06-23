@@ -1,7 +1,7 @@
 import { useReducer, useCallback, useRef, useEffect, RefObject } from 'react';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
-  sortByNamePathfinderHighLow, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Common/utils/sortingFunctions";
+  sortByNamePathfinderHighLow, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Core/utils/sortingFunctions";
 import { ResultSet, Result, ScoreWeights } from '@/features/ResultList/types/results.d';
 
 type SortColumn = 'name' | 'evidence' | 'paths' | 'score' | null;
@@ -24,14 +24,8 @@ function sortReducer(state: SortState, action: SortAction): SortState {
         direction: action.direction,
         sortString: action.sortString,
       };
-    case 'RESET': {
-      const { column, direction } = getSortColumnAndDirection(action.sortString);
-      return {
-        activeColumn: column,
-        direction,
-        sortString: action.sortString,
-      };
-    }
+    case 'RESET':
+      return createSortState(action.sortString);
     default:
       return state;
   }
@@ -55,6 +49,15 @@ function getSortColumnAndDirection(sortName: string): { column: SortColumn; dire
   }
 }
 
+function createSortState(sortString: string): SortState {
+  const { column, direction } = getSortColumnAndDirection(sortString);
+  return {
+    activeColumn: column,
+    direction,
+    sortString,
+  };
+}
+
 export interface UseSortStateReturn {
   isSortedByName: boolean | null;
   isSortedByEvidence: boolean | null;
@@ -72,11 +75,7 @@ interface UseSortStateArgs {
 }
 
 const useSortState = ({ scoreWeights, initSortString }: UseSortStateArgs): UseSortStateReturn => {
-  const [state, dispatch] = useReducer(sortReducer, {
-    activeColumn: 'score',
-    direction: false,
-    sortString: initSortString,
-  });
+  const [state, dispatch] = useReducer(sortReducer, initSortString, createSortState);
 
   const currentSortString = useRef(initSortString);
   // Keep the ref in sync with reducer state

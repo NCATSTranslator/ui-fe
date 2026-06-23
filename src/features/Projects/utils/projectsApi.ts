@@ -1,4 +1,4 @@
-import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Core/utils/web';
 import { ProjectCreate, ProjectUpdate, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
 import { isProjectRaw, isProjectRawArray, isUserQueryObject, isUserQueryObjectArray } from '@/features/Projects/types/checkers';
 

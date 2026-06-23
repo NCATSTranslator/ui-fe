@@ -5,21 +5,22 @@ import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
 import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { formatBiolinkTypeString, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { formatBiolinkTypeString } from '@/features/Core/utils/stringFormatters';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
-import Select from '@/features/Common/components/Select/Select';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Select from '@/features/Core/components/Select/Select';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
-import { getDecodedParams } from '@/features/Common/utils/web';
+import { getDecodedParams } from '@/features/Core/utils/web';
 
 type QueryPathfinderProps = {
   isResults?: boolean;

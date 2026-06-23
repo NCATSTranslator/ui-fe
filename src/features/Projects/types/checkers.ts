@@ -1,5 +1,5 @@
-import { isObject } from "@/features/Common/types/checkers";
-import { checkProperties } from "@/features/Common/types/checkers";
+import { isObject } from "@/features/Core/types/checkers";
+import { checkProperties } from "@/features/Core/types/checkers";
 import { ProjectRaw, Project, UserQueryObject, ProjectUpdate } from "./projects.d";
 
 export const isProjectRaw = (obj: unknown, warn = false): obj is ProjectRaw => {

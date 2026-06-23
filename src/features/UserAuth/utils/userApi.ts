@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
-import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Common/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Core/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import { Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config } from '@/features/UserAuth/types/user';
@@ -11,7 +11,7 @@ import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/Re
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { formatPrefs, parsePreferencesResponse } from '@/features/UserAuth/utils/formatPrefs';
-import { getFullPathname } from '@/features/Common/utils/utilities';
+import { getFullPathname } from '@/features/Core/utils/urlHelpers';
 import { Location as RouterLocation } from 'react-router-dom';
 
 // Base API path prefix

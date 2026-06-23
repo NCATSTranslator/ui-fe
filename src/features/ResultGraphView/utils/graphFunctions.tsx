@@ -1,5 +1,5 @@
 import { GraphData, GraphNodeType, GraphEdgeType, LayoutType, HoverGeometry } from 'translator-graph-view';
-import { replaceTreatWithImpact } from '@/features/Common/utils/utilities';
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Preferences } from '@/features/UserAuth/types/user';

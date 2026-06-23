@@ -1,4 +1,4 @@
-import { checkProperties } from "@/features/Common/types/checkers";
+import { checkProperties } from "@/features/Core/types/checkers";
 import { Config } from "./user.d";
 
 export const isConfig = (obj: unknown, warn = false): obj is Config => {

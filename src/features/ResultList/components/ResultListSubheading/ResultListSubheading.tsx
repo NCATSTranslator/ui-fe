@@ -1,9 +1,9 @@
 import { FC, useMemo } from 'react';
 import styles from './ResultListSubheading.module.scss';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
-import { generateEntityLink, getEntityLink } from '@/features/Common/utils/utilities';
+import { generateEntityLink, getEntityLink } from '@/features/Core/utils/entityLinks';
 import { useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
 import { generateQueryTitleFromQueryObject } from '@/features/Projects/utils/queryTitleUtils';

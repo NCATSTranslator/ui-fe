@@ -1,25 +1,37 @@
 import { FC, RefObject } from "react";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ArrowUp from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
 
 interface ResultListTableHeadProps {
   parentStyles: {[key: string]: string};
   currentSortString: RefObject<string | number>;
+  defaultSortString: string;
   isSortedByName: boolean | null;
   isSortedByEvidence: boolean | null;
   isSortedByPaths: boolean | null;
-  isSortedByScore: boolean | null;
   handleUpdateResults: () => void
 }
 
+const getNextSortString = (
+  isSorted: boolean | null,
+  firstDir: boolean,
+  lowHighString: string,
+  highLowString: string,
+  defaultSortString: string,
+): string => {
+  if (isSorted === null) return lowHighString;
+  if (isSorted === firstDir) return highLowString;
+  return defaultSortString;
+};
+
 const ResultListTableHead: FC<ResultListTableHeadProps> = ({ 
   currentSortString,
+  defaultSortString,
   handleUpdateResults,
   isSortedByName,
   isSortedByEvidence,
   isSortedByPaths,
-  isSortedByScore,
   parentStyles }) => {
 
   return(
@@ -27,7 +39,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
       <div
         className={`${parentStyles.head} ${parentStyles.nameHead} ${isSortedByName ? parentStyles.true : (isSortedByName === null) ? '' : parentStyles.false}`}
         onClick={()=>{
-          let sortString = (isSortedByName === null) ? 'nameLowHigh' : (isSortedByName) ? 'nameHighLow' : 'nameLowHigh';
+          const sortString = getNextSortString(isSortedByName, true, 'nameLowHigh', 'nameHighLow', defaultSortString);
           currentSortString.current = sortString;
           handleUpdateResults();
         }}
@@ -39,7 +51,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
       <div
         className={`${parentStyles.head} ${parentStyles.evidenceHead} ${isSortedByEvidence ? parentStyles.true : (isSortedByEvidence === null) ? '': parentStyles.false}`}
         onClick={()=>{
-          let sortString = (isSortedByEvidence === null) ? 'evidenceHighLow' : (isSortedByEvidence) ? 'evidenceHighLow' : 'evidenceLowHigh';
+          const sortString = getNextSortString(isSortedByEvidence, false, 'evidenceHighLow', 'evidenceLowHigh', defaultSortString);
           currentSortString.current = sortString;
           handleUpdateResults();
         }}
@@ -50,7 +62,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
       <div
         className={`${parentStyles.head} ${parentStyles.pathsHead} ${isSortedByPaths ? parentStyles.true : (isSortedByPaths === null) ? '': parentStyles.false}`}
         onClick={()=>{
-          let sortString = (isSortedByPaths === null) ? 'pathsHighLow' : (isSortedByPaths) ? 'pathsHighLow' : 'pathsLowHigh';
+          const sortString = getNextSortString(isSortedByPaths, false, 'pathsHighLow', 'pathsLowHigh', defaultSortString);
           currentSortString.current = sortString;
           handleUpdateResults();
         }}
@@ -61,22 +73,6 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
         <ArrowUp className={parentStyles.chev}/>
         <Tooltip id="paths-tooltip" place="bottom">
           <span className={parentStyles.scoreSpan}>Number of paths that support the result.</span>
-        </Tooltip>
-      </div>
-      <div
-        className={`${parentStyles.head} ${parentStyles.scoreHead} ${isSortedByScore ? parentStyles.true : (isSortedByScore === null) ? '': parentStyles.false}`}
-        onClick={()=>{
-          let sortString = (isSortedByScore === null) ? 'scoreHighLow' : (isSortedByScore) ? 'scoreHighLow' : 'scoreLowHigh';
-          currentSortString.current = sortString;
-          handleUpdateResults();
-        }}
-        data-tooltip-id="score-tooltip"
-      >
-        Score
-        <Alert/>
-        <ArrowUp className={parentStyles.chev}/>
-        <Tooltip id="score-tooltip" place="bottom">
-          <span className={parentStyles.scoreSpan}>A result's score is a multimodal calculation considering the strength of relationships supporting it. Scores range from 0 to 5 and are shown once all results are synced.</span>
         </Tooltip>
       </div>
       <div></div>
