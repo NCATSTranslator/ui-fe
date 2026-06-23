@@ -121,38 +121,38 @@ export const getPrefName = (key: string) => {
 export const getPrettyPrefValue = (value: string | number) => {
   switch(value) {
     case "scoreHighLow":
-      return "Score (High to Low)";
+      return "Confidence: High to Low";
     case "scoreLowHigh":
-      return "Score (Low to High)";
+      return "Confidence: Low to High";
     case "nameLowHigh":
-      return "Name (A to Z)";
+      return "Name: A to Z";
     case "nameHighLow":
-      return "Name (Z to A)";
+      return "Name: Z to A";
     case "evidenceLowHigh":
-      return "Evidence Count (Low to High)";
+      return "Evidence Count: Low to High";
     case "evidenceHighLow":
-      return "Evidence Count (High to Low)";
+      return "Evidence Count: High to Low";
     case "pathsHighLow":
-      return "Path Count (High to Low)";
+      return "Path Count: High to Low";
     case "pathsLowHigh":
-      return "Path Count (Low to High)";
+      return "Path Count: Low to High";
     // pref values used to use 'path' instead of 'paths', so we need to handle both
     case "pathHighLow":
-      return "Path Count (High to Low)";
+      return "Path Count: High to Low";
     case "pathLowHigh":
-      return "Path Count (Low to High)";
+      return "Path Count: Low to High";
     case "titleHighLow":
-      return "Title (A to Z)";
+      return "Title: A to Z";
     case "titleLowHigh":
-      return "Title (Z to A)";
+      return "Title: Z to A";
     case "sourceHighLow":
-      return "Source (A to Z)";
+      return "Source: A to Z";
     case "sourceLowHigh":
-      return "Source (Z to A)";
+      return "Source: Z to A";
     case "dateHighLow":
-      return "Date (New to Old)";
+      return "Date: New to Old";
     case "dateLowHigh":
-      return "Date (Old to New)";
+      return "Date: Old to New";
     default:
       return capitalizeFirstLetter(value.toString());
   }
