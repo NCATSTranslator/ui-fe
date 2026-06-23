@@ -381,8 +381,8 @@ export const getKnowledgeLevelString = (knowledgeLevel: string): string => {
  *
  */
 export const generatePubmedURL = (id: string): string => {
-  if(id.includes("PMC")) 
-    return `https://www.ncbi.nlm.nih.gov/pmc/${id}`;
+  if(id.includes("PMC"))
+    return `https://pmc.ncbi.nlm.nih.gov/articles/${id}`;
   if(id.includes("PMID"))
     return `http://www.ncbi.nlm.nih.gov/pubmed/${id.replace("PMID:", "")}`;
 
