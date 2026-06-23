@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { getFormattedDate } from '@/features/Common/utils/utilities';
+import { getFormattedDate } from '@/features/Core/utils/dateHelpers';
 import { TrialObject } from '@/features/Evidence/types/evidence.d';
 import { getUrlByType } from '@/features/Evidence/utils/utilities';
 import { Preferences } from '@/features/UserAuth/types/user';

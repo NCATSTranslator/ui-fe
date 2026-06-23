@@ -1,14 +1,16 @@
 import { useState, ReactNode } from 'react';
 import './App.scss';
-import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/hooks/customHooks';
+import { useGoogleAnalytics } from '@/features/Core/hooks/useGoogleAnalytics';
+import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
+import { useWindowSize } from '@/features/Core/hooks/useWindowSize';
+import { useScrollToHash } from '@/features/Core/hooks/useScrollToHash';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
-import { commonQueryClientOptions, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { commonQueryClientOptions } from '@/features/Core/utils/queryClientConfig';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
 import Footer from '@/features/Page/components/Footer/Footer';
-import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
-import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
+import SmallScreenOverlay from '@/features/Core/components/SmallScreenOverlay/SmallScreenOverlay';
 import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/SidebarProvider';
 import Sidebar from '@/features/Sidebar/components/Sidebar/Sidebar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -42,11 +44,6 @@ const App = ({children}: {children?: ReactNode}) => {
   if(location.pathname.includes('/projects/'))
     additionalClasses += 'project-detail';
 
-  const initFeedbackModalOpen = getDataFromQueryVar("fm", window.location.search) === "true";
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(initFeedbackModalOpen);
-  const handleModalClose = () => {
-    setFeedbackModalOpen(false);
-  }
 
   const [sessionStatus] = useGetSessionStatus();
   useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
@@ -86,7 +83,6 @@ const App = ({children}: {children?: ReactNode}) => {
         <ProjectModalsProvider>
           <div className={`app ${pathnameClass} ${additionalClasses}`}>
             <AppToastContainer />
-            <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               <div className="layout">
                 <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
@@ -98,7 +94,7 @@ const App = ({children}: {children?: ReactNode}) => {
                   {
                     isSmallScreen && <SmallScreenOverlay /> 
                   }
-                  <Outlet context={setFeedbackModalOpen}/>
+                  <Outlet />
                   <Footer>
                     <nav>
                       <a

@@ -15,7 +15,7 @@ import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { Project } from "@/features/Projects/types/projects";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface SidebarProjectListProps {
   className?: string;

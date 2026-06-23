@@ -1,7 +1,7 @@
 import { useReducer, useCallback, useRef, useEffect, RefObject } from 'react';
 import { sortNameLowHigh, sortNameHighLow, sortEvidenceLowHigh, sortEvidenceHighLow, sortScoreLowHigh,
   sortScoreHighLow, sortByEntityStrings, sortPathsHighLow, sortPathsLowHigh, sortByNamePathfinderLowHigh,
-  sortByNamePathfinderHighLow, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Common/utils/sortingFunctions";
+  sortByNamePathfinderHighLow, sortScorePathfinderLowHigh, sortScorePathfinderHighLow } from "@/features/Core/utils/sortingFunctions";
 import { ResultSet, Result, ScoreWeights } from '@/features/ResultList/types/results.d';
 
 type SortColumn = 'name' | 'evidence' | 'paths' | 'score' | null;

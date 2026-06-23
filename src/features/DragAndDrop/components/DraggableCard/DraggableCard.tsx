@@ -1,6 +1,6 @@
 import { FC, ReactNode, CSSProperties } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import styles from './DraggableCard.module.scss';
 import { DraggableData } from '@/features/DragAndDrop/types/types';
 

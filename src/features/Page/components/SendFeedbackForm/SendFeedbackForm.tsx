@@ -1,13 +1,12 @@
-import { useCallback, FormEvent, useState, ReactNode } from "react";
+import { FormEvent, useState, ReactNode } from "react";
 import styles from "./SendFeedbackForm.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
-import FileInput from "@/features/Common/components/FileInput/FileInput";
-import Select from "@/features/Common/components/Select/Select";
+import FileInput from "@/features/Core/components/FileInput/FileInput";
+import Select from "@/features/Core/components/Select/Select";
 import { Fade } from "react-awesome-reveal";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
-import { useFeedbackForm } from "@/features/Common/hooks/customHooks";
-import { CustomFile } from "@/features/Common/types/global";
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
+import { useFeedbackForm } from "@/features/Core/hooks/useFeedbackForm";
 import Feedback from "@/assets/icons/navigation/Feedback.svg?react";
 
 const SendFeedbackForm = () => {
@@ -21,61 +20,21 @@ const SendFeedbackForm = () => {
     showFieldError,
     validateForm,
     resetForm,
+    handleFileChange,
     setIsSubmitting,
     setSubmitError,
   } = useFeedbackForm();
 
   const [createdIssueURL, setCreatedIssueURL] = useState<string | null>(null);
-  const currentARSpk = (getDataFromQueryVar("q", window.location.search) !== null) ? getDataFromQueryVar("q", window.location.search) : "";
+  const currentARSpk = getDataFromQueryVar('q', window.location.search) ?? '';
+  const feedbackLink = getDataFromQueryVar('link', window.location.search);
+  const feedbackUrl = feedbackLink ? encodeURI(decodeURIComponent(feedbackLink)) : '';
 
   const errorMessages = {
     category: "Please select a category.",
     comments: "Please provide a comment.",
     steps: "Please detail the steps you took to produce the error.",
   };
-
-  const getBase64 = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
-      reader.onload = () => {
-        if (reader.result) {
-          const baseString = (reader.result as string).replace(/^data:image\/(jpeg|png);base64,/, "");
-          resolve(baseString);
-        } else {
-          reject('Failed to convert file to base64');
-        }
-      };
-      
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const processFiles = useCallback(async (files: CustomFile[]) => {
-    const base64Promises = files.map(async (file) => {
-      try {
-        return await getBase64(file.file);
-      } catch (error) {
-        console.error('Failed to process file:', error);
-        return null;
-      }
-    });
-
-    const base64Results = await Promise.all(base64Promises);
-    const validBase64s = base64Results.filter(Boolean) as string[];
-    
-    updateField('base64Screenshots', validBase64s);
-  }, [updateField]);
-
-  const handleFileChange = useCallback((files: CustomFile[]) => {
-    updateField('screenshots', files);
-    if (files.length > 0) {
-      processFiles(files);
-    } else {
-      updateField('base64Screenshots', []);
-    }
-  }, [processFiles, updateField]);
 
   const handleSubmission = async (e: FormEvent) => {
     e.preventDefault();
@@ -92,7 +51,7 @@ const SendFeedbackForm = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: encodeURI(decodeURIComponent(getDataFromQueryVar("link", window.location.search) as string)),
+          url: feedbackUrl,
           ars_pk: currentARSpk,
           description: form.comments,
           reproduction_steps: form.steps,

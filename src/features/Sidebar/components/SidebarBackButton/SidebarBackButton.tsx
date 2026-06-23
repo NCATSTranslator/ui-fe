@@ -2,7 +2,7 @@ import { FC, ReactNode } from "react";
 import styles from "./SidebarBackButton.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import ChevLeftIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface SidebarBackButtonProps {
   children?: ReactNode;

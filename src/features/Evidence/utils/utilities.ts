@@ -2,7 +2,7 @@
 
 import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import { isPublication } from "@/features/Evidence/types/checkers";
-import { capitalizeAllWords } from "@/features/Common/utils/utilities";
+import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";

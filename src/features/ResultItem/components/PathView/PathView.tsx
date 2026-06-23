@@ -1,11 +1,11 @@
 import styles from './PathView.module.scss';
 import { useMemo, useCallback, useEffect, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
-import { isStringArray } from '@/features/Common/utils/utilities';
+import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getIsPathFiltered, getPathsPerPage, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';

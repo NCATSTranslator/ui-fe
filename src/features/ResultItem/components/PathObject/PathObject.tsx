@@ -1,10 +1,11 @@
 import styles from './PathObject.module.scss';
 import { FC, RefObject, useCallback, useContext, useId } from 'react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import NodeTooltipContent from '@/features/Core/components/Tooltips/NodeTooltipContent';
 import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipMappers';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
-import { getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
 import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results.d';

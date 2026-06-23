@@ -7,7 +7,7 @@ import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWra
 import { getFormattedLoginURL, useUser } from '@/features/UserAuth/utils/userApi';
 import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
-import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
+import { capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
 import { useDispatch, useSelector } from 'react-redux';
 import { currentPrefs, setCurrentPrefs, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';

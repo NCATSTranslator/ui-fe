@@ -14,7 +14,8 @@ import Button from "@/features/Core/components/Button/Button";
 import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import { getTimeRelativeDate, joinClasses } from "@/features/Common/utils/utilities";
+import { getTimeRelativeDate } from "@/features/Core/utils/dateHelpers";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 

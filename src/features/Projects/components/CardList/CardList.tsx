@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 import styles from "./CardList.module.scss";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface CardListProps {
   children: ReactNode;

@@ -1,10 +1,10 @@
 import { useMemo, useCallback, FC, ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import styles from "./ShareModal.module.scss";
-import Modal from "@/features/Common/components/Modal/Modal";
+import Modal from "@/features/Core/components/Modal/Modal";
 import Button from "@/features/Core/components/Button/Button";
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath, getDecodedParams } from "@/features/Common/utils/web";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath, getDecodedParams } from "@/features/Core/utils/web";
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";

@@ -1,7 +1,7 @@
 import { FC, useMemo } from "react";
 import styles from "./ProjectsPanel.module.scss";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import SidebarProjectList from "@/features/Sidebar/components/SidebarProjectList/SidebarProjectList";
 import SidebarBackButton from "@/features/Sidebar/components/SidebarBackButton/SidebarBackButton";
 

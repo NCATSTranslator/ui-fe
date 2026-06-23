@@ -1,6 +1,7 @@
 import { useCallback, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
+import { getPathCount } from '@/features/Core/utils/resultHelpers';
 import { getARATagsFromResultTags, getNodeDescription, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';

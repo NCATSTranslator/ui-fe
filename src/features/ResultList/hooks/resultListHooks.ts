@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState, RefObject, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { API_PATH_PREFIX, useUser } from "@/features/UserAuth/utils/userApi";
-import { fetchWithErrorHandling } from "@/features/Common/utils/web";
+import { fetchWithErrorHandling } from "@/features/Core/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";

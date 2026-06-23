@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
 import { PublicationObject, Provenance, SourceObject, TrialObject } from "@/features/Evidence/types/evidence";
-import { cloneDeep } from "lodash";
-import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
+import cloneDeep from "lodash/cloneDeep";
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 
 type ResultState = {
   [key: string]: ResultSet

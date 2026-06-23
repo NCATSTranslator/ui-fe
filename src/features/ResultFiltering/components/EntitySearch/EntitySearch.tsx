@@ -7,7 +7,7 @@ import { isEntityFilter, makeEntitySearch, normalizeSearchTerm } from '@/feature
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import FacetTag from '@/features/ResultFiltering/components/FacetTag/FacetTag';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface EntitySearchProps {
   activeFilters: Filter[];

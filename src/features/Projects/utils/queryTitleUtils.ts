@@ -1,4 +1,4 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
+import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Core/utils/stringFormatters';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 /**

@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
-import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Common/utils/web';
+import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';

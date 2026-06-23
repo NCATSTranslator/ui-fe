@@ -2,16 +2,17 @@ import { FC, useRef, useState, useCallback, useEffect, KeyboardEvent, RefObject 
 import { useLocation } from 'react-router-dom';
 import styles from './AutocompleteInput.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
-import Autocomplete from '@/features/Common/components/Autocomplete/Autocomplete';
+import Autocomplete from '@/features/Core/components/Autocomplete/Autocomplete';
 import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
+import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import QuestionIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
-import { getNodeIcon, joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import Button from '@/features/Core/components/Button/Button';
 import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 
 interface AutocompleteInputProps {
   id: string;

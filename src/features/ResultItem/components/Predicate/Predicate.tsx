@@ -7,9 +7,10 @@ import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?r
 import Up from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import InferredBorder from '@/assets/icons/connectors/Double Lines.svg?react';
 import Highlighter from 'react-highlight-words';
-import { getCompressedEdge, joinClasses } from '@/features/Common/utils/utilities';
+import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { checkEdgesForClinicalTrials, checkEdgesForPubs } from '@/features/Evidence/utils/utilities';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import EdgeTooltipContent from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 import { edgesToTooltipEntries } from '@/features/Core/components/Tooltips/tooltipMappers';
 import SupportPathGroup from '@/features/ResultItem/components/SupportPathGroup/SupportPathGroup';

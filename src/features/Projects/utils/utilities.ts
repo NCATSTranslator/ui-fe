@@ -1,9 +1,9 @@
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Core/utils/web";
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
-import { getFormattedNodeName } from "@/features/Common/utils/utilities";
+import { getFormattedNodeName } from '@/features/Core/utils/stringFormatters';
 
 /**
  * Get the status of a project based on the most recent query's status

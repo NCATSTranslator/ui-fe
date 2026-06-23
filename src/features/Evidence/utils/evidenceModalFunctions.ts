@@ -1,7 +1,7 @@
 // Focus: Evidence modal-specific functionality and UI state management
 import { Dispatch, SetStateAction } from 'react';
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
-  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Common/utils/sortingFunctions';
+  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Core/utils/sortingFunctions';
 import cloneDeep from 'lodash/cloneDeep';
 import { EvidenceSortState, PublicationObject, SortingState, SortPreference } from '@/features/Evidence/types/evidence';
 import { Preferences } from '@/features/UserAuth/types/user';
