@@ -1,7 +1,7 @@
 import { CSSProperties, FC, MouseEvent, ReactNode, RefObject } from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface ButtonProps {
   ariaLabel?: string;

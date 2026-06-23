@@ -1,6 +1,6 @@
 import { ChangeEvent, FocusEvent, FC, KeyboardEvent, ReactNode, RefObject, useRef } from 'react';
 import styles from "./TextInput.module.scss";
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import InputLabel from '@/features/Core/components/InputLabel/InputLabel';
 import Warning from '@/assets/icons/status/Alerts/Warning.svg?react';
 

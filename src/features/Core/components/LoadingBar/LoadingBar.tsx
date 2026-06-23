@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
-import TextCrossfade from '@/features/Common/components/TextCrossfade/TextCrossfade';
+import TextCrossfade from '@/features/Core/components/TextCrossfade/TextCrossfade';
 import styles from './LoadingBar.module.scss';
 
 interface LoadingBarProps {
