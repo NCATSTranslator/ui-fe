@@ -7,7 +7,7 @@ import ProjectModals from '@/features/Projects/components/ProjectModals/ProjectM
 import { projectDeletedToast, queryDeletedToast, errorToast } from '@/features/Core/utils/toastMessages';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 
 interface EditQueryModalData {
   currentEditingQueryItem?: QueryEditingItem;

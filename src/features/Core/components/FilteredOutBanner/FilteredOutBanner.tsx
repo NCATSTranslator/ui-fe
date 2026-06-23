@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import styles from './FilteredOutBanner.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface FilteredOutBannerProps {
   message: string;

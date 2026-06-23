@@ -3,7 +3,7 @@ import { PublicationObject, PublicationSupport } from "@/features/Evidence/types
 import { ResultEdge, ResultSet } from "@/features/ResultList/types/results";
 import { getNodeById } from "@/features/ResultList/slices/resultsSlice";
 import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
-import EmphasizeWord from "@/features/Common/components/EmphasizeWord/EmphasizeWord";
+import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWord";
 import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 
 const PublicationRow: FC<{

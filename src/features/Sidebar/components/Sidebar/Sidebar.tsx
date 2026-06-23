@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo } from "react";
 import styles from "./Sidebar.module.scss";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { topItems, bottomItems } from "@/features/Sidebar/utils/sidebarItems";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/SidebarLinkList";
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
 

@@ -1,5 +1,6 @@
 import { CSSProperties, FC } from 'react';
 import styles from './SkeletonBar.module.scss';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface SkeletonBarProps {
   borderRadius?: CSSProperties['borderRadius'];
@@ -18,7 +19,7 @@ const SkeletonBar: FC<SkeletonBarProps> = ({
 }) => {
   return (
     <div
-      className={`${styles.skeletonBar}${className ? ` ${className}` : ''}`}
+      className={joinClasses(styles.skeletonBar, className)}
       // eslint-disable-next-line no-restricted-syntax
       style={{ width, height, borderRadius, ...style }}
     />

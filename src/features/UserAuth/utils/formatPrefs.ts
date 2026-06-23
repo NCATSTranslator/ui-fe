@@ -1,7 +1,7 @@
 import { PrefKey, PrefObject, Preferences } from "@/features/UserAuth/types/user";
 import cloneDeep from "lodash/cloneDeep";
 import { defaultPrefs } from "@/features/UserAuth/utils/userDefaults";
-import { capitalizeFirstLetter } from "@/features/Common/utils/utilities";
+import { capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
 
 const LEGACY_PREF_KEY_MAP: Record<string, PrefKey> = {
   results_per_screen: "results_per_page",

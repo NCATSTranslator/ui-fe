@@ -1,4 +1,4 @@
-import * as tc from "@/features/Common/types/checkers";
+import * as tc from "@/features/Core/types/checkers";
 import { isEdgeProvenance } from "@/features/Evidence/types/checkers";
 import { ResultEdge, ResultNode, Path, Tags, Annotation, ChemicalAnnotation, 
   DiseaseAnnotation, GeneAnnotation, EdgeMetadata } from "./results";

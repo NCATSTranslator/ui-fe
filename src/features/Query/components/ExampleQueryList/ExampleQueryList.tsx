@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styles from './ExampleQueryList.module.scss';
-import { getResultsShareURLPath } from '@/features/Common/utils/web';
+import { getResultsShareURLPath } from '@/features/Core/utils/web';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight from 'react-animate-height';
 import Button from '@/features/Core/components/Button/Button';
@@ -9,7 +9,7 @@ import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
 type ExampleQueryListProps = {

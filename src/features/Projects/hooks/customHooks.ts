@@ -10,7 +10,7 @@ import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, 
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
-import { useSimpleSearch } from '@/features/Common/hooks/simpleSearchHook';
+import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 
 /**
  * Hook to fetch user projects with React Query

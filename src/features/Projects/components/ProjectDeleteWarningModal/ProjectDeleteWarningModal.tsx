@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
+import WarningModal from "@/features/Core/components/WarningModal/WarningModal";
 
 interface ProjectDeleteWarningModalProps {
   cancelButtonText: string;

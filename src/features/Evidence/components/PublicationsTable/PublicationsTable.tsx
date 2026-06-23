@@ -8,7 +8,9 @@ import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { usePubmedDataFetch, usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
-import { usePagination } from '@/features/Evidence/hooks/usePagination';
+import { usePagination } from '@/features/Core/hooks/usePagination';
+import { getInitItemsPerPage } from '@/features/Evidence/utils/evidenceModalFunctions';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/features/Evidence/hooks/evidenceHooks';
 import PublicationsTableHeader from '@/features/Evidence/components/PublicationsTableHeader/PublicationsTableHeader';
 import PublicationRow from '@/features/Evidence/components/PublicationRow/PublicationRow';
 import TablePaginationControls from '@/features/Evidence/components/TablePaginationControls/TablePaginationControls';
@@ -44,7 +46,7 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     handlePageClick,
     handleItemsPerPageChange,
     resetPage,
-  } = usePagination(publications, prefs);
+  } = usePagination(publications, getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE));
   usePubmedDataFetch(
     isOpen,
     publications,

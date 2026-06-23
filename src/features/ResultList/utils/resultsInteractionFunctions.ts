@@ -2,7 +2,7 @@ import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/sli
 import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
+import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Core/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import { MAX_SUPPORT_DEPTH, getPathKey } from "@/features/ResultList/utils/pathUtils";
 import cloneDeep from "lodash/cloneDeep";

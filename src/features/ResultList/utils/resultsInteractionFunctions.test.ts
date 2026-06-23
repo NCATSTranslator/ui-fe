@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { findStringMatch } from '@/features/ResultList/utils/resultsInteractionFunctions';
-import { makePathRank } from '@/features/Common/utils/sortingFunctions';
+import { makePathRank } from '@/features/Core/utils/sortingFunctions';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';

@@ -3,7 +3,7 @@ import { ResultSet } from "@/features/ResultList/types/results";
 import { GraphHoverTarget } from "@/features/ResultGraphView/types/graphTypes";
 import { nodeToTooltipProps, edgeToTooltipEntry } from "@/features/Core/components/Tooltips/tooltipMappers";
 import EdgeTooltipContent, { PredicateClickOptions } from "@/features/Core/components/Tooltips/EdgeTooltipContent";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import NodeTooltipContent from "@/features/Core/components/Tooltips/NodeTooltipContent";
 
 interface GraphHoverTooltipsProps {

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { getQueryStatusById } from '@/features/ResultList/slices/queryStatusSlice';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkeleton';

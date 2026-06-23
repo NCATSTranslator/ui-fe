@@ -1,5 +1,5 @@
 import { createListenerMiddleware } from '@reduxjs/toolkit';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import type { RootState, AppDispatch } from './store';
 import { SEEN_STATUS_STORAGE_KEY, QUERY_HISTORY_STORAGE_KEY} from './storageKeys';
 

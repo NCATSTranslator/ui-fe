@@ -1,6 +1,6 @@
 import { FC, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./EditQueryModal.module.scss";
-import Modal from "@/features/Common/components/Modal/Modal";
+import Modal from "@/features/Core/components/Modal/Modal";
 import TextInput from "@/features/Core/components/TextInput/TextInput";
 import { ProjectCreate, ProjectRaw, ProjectUpdate, QueryEditingItem, UserQueryObject } from "@/features/Projects/types/projects";
 import Button from "@/features/Core/components/Button/Button";
@@ -16,7 +16,7 @@ import Highlighter from "react-highlight-words";
 import { filterProjects } from "@/features/Projects/utils/filterAndSortingFunctions";
 import { projectCreatedToast } from "@/features/Core/utils/toastMessages";
 import { useEditProjectHandlers, useEditQueryHandlers } from "@/features/Projects/utils/editUpdateFunctions";
-import WarningModal from "@/features/Common/components/WarningModal/WarningModal";
+import WarningModal from "@/features/Core/components/WarningModal/WarningModal";
 import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
 
 const getAttachedProjects = (projects: ProjectRaw[], queryId?: string) => {

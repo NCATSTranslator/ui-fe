@@ -1,11 +1,11 @@
 import { FC, useMemo } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import { Provenance } from '@/features/Evidence/types/evidence.d';
 import evidenceStyles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import styles from './KnowledgeSourcesTable.module.scss';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface KnowledgeSourcesTableProps {
   sources: Provenance[];

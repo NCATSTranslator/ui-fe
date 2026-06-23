@@ -11,8 +11,8 @@ import { useCreateProject, useSortSearchState } from "@/features/Projects/hooks/
 import { projectCreatedToast } from "@/features/Core/utils/toastMessages";
 import ProjectCard from "@/features/Projects/components/ProjectCard/ProjectCard";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
-import Tab from "@/features/Common/components/Tabs/Tab";
-import Tabs from "@/features/Common/components/Tabs/Tabs";
+import Tab from "@/features/Core/components/Tabs/Tab";
+import Tabs from "@/features/Core/components/Tabs/Tabs";
 import ProjectsTableHeader from "../TableHeader/ProjectsTableHeader/ProjectsTableHeader";
 import CardList from "@/features/Projects/components/CardList/CardList";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";

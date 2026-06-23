@@ -12,7 +12,7 @@ import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateT
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
 import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
-import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Common/utils/sortingFunctions";
+import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 
 const QUERY_AMOUNT = 200;

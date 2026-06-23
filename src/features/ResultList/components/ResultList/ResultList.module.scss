@@ -18,7 +18,7 @@
     padding: 0 $l $l;
     .resultsTableContainer.pathfinder {
       .tableHead {
-        grid-template-columns: 1fr 112px 110px 90px 90px 24px;
+        grid-template-columns: 1fr 112px 110px 90px 24px;
       }
     }
     .resultsTable {
@@ -45,7 +45,7 @@
         padding: 12px $s;
         border-radius: 5px 5px 0 0;
         user-select: none;
-        grid-template-columns: 1fr 112px 110px 90px 90px 24px;
+        grid-template-columns: 1fr 112px 110px 90px 24px;
         column-gap: $s;
         .head {
           display: flex;
@@ -71,7 +71,7 @@
           cursor: default;
           position: relative;
         }
-        .fdaHead, .evidenceHead, .scoreHead, .pathsHead, .nameHead {
+        .fdaHead, .evidenceHead, .pathsHead, .nameHead {
           svg {
             margin-left: 2px;
             width: 24px;
@@ -91,7 +91,7 @@
           font-size: 12px;
           text-transform: none;
         }
-        .nameHead, .evidenceHead, .scoreHead, .pathsHead {
+        .nameHead, .evidenceHead, .pathsHead {
           &:hover {
             cursor: pointer;
           }

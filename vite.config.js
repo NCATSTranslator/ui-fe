@@ -13,35 +13,32 @@ export default defineConfig(() => {
       sourcemap: true,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'graph-vendor': [
-              'translator-graph-view',
-              '@xyflow/react'
-            ],
-            'ui-vendor': [
-              'react-select',
-              'react-paginate',
-              'react-range',
-              'react-tooltip',
-              'react-toastify',
-              'react-animate-height',
-              'react-awesome-reveal',
-              'react-responsive-carousel'
-            ],
-            'utils-vendor': [
-              'lodash',
-              'mathjs',
-              'fraction.js',
-              'fastest-levenshtein'
-            ],
-            'redux-vendor': [
-              'react-redux',
-              '@reduxjs/toolkit',
-              'redux'
-            ],
-            'query-vendor': [
-              '@tanstack/react-query'
-            ]
+          manualChunks(id) {
+            if (id.includes('node_modules/react-dom/') || id.includes('node_modules/react/')) {
+              return 'react-vendor';
+            }
+            if (id.includes('node_modules/scheduler/')) {
+              return 'react-vendor';
+            }
+            const graphVendor = ['translator-graph-view', '@xyflow/react'];
+            if (graphVendor.some(pkg => id.includes(`node_modules/${pkg}/`))) {
+              return 'graph-vendor';
+            }
+            const uiVendor = ['react-select', 'react-paginate', 'react-range', 'react-tooltip', 'react-toastify', 'react-animate-height', 'react-awesome-reveal', 'react-responsive-carousel'];
+            if (uiVendor.some(pkg => id.includes(`node_modules/${pkg}/`))) {
+              return 'ui-vendor';
+            }
+            const utilsVendor = ['lodash', 'mathjs', 'fraction.js', 'fastest-levenshtein'];
+            if (utilsVendor.some(pkg => id.includes(`node_modules/${pkg}/`))) {
+              return 'utils-vendor';
+            }
+            const reduxVendor = ['react-redux', '@reduxjs/toolkit', 'redux'];
+            if (reduxVendor.some(pkg => id.includes(`node_modules/${pkg}/`))) {
+              return 'redux-vendor';
+            }
+            if (id.includes('node_modules/@tanstack/react-query/')) {
+              return 'query-vendor';
+            }
           }
         }
       }

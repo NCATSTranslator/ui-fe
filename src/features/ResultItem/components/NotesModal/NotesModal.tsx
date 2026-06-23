@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, FC, RefObject, Dispatch, SetStateAction, useRef } from "react";
 import styles from "./NotesModal.module.scss";
-import Modal from "@/features/Common/components/Modal/Modal";
-import TextEditor from "@/features/Common/components/TextEditor/TextEditor";
+import Modal from "@/features/Core/components/Modal/Modal";
+import TextEditor from "@/features/Core/components/TextEditor/TextEditor";
 import Button from "@/features/Core/components/Button/Button";
 import { getUserSave, Save, SaveGroup, updateUserSave } from "@/features/UserAuth/utils/userApi";
 import { updateUserSavesState } from "@/features/ResultItem/utils/bookmarkFunctions";

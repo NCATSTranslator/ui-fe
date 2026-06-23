@@ -1,7 +1,7 @@
 import { FC, useId } from "react";
 import styles from './AcceptedOntologyTooltip.module.scss';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 
 const AcceptedOntologyTooltip: FC = () => {
   const tooltipId = useId();

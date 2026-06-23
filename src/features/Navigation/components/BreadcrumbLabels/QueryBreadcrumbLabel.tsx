@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { generateQueryTitle } from '@/features/Projects/utils/queryTitleUtils';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';

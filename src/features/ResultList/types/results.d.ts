@@ -1,6 +1,6 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   EdgeProvenance, ProvenanceCatalogEntry, PublicationSupport } from "@/features/Evidence/types/evidence";
-import * as tc from "@/features/Common/types/checkers";
+import * as tc from "@/features/Core/types/checkers";
 import { isProvenance } from "@/features/Evidence/types/checkers";
 
 export type ResultSet = {

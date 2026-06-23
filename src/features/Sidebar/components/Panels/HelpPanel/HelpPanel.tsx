@@ -4,7 +4,7 @@ import styles from './HelpPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import { useSimpleSearch } from '@/features/Common/hooks/simpleSearchHook';
+import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import { helpPanelItems } from '@/features/Sidebar/utils/helpPanelItems';

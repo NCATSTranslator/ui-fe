@@ -1,5 +1,5 @@
 import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
-import { filterCompare } from '@/features/Common/utils/sortingFunctions';
+import { filterCompare } from '@/features/Core/utils/sortingFunctions';
 import { isSameFilterValue } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';

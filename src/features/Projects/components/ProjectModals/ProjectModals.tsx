@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import ProjectDeleteWarningModal from '@/features/Projects/components/ProjectDeleteWarningModal/ProjectDeleteWarningModal';
-import WarningModal from '@/features/Common/components/WarningModal/WarningModal';
+import WarningModal from '@/features/Core/components/WarningModal/WarningModal';
 import EditQueryModal from '@/features/Projects/components/EditQueryModal/EditQueryModal';
 import { Project, UserQueryObject, QueryEditingItem, ProjectRaw } from '@/features/Projects/types/projects.d';
 import ShareModal from '@/features/ResultList/components/ShareModal/ShareModal';

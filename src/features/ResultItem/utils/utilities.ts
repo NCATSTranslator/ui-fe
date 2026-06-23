@@ -3,7 +3,7 @@ import { Path, ResultSet, PathFilterState, Tags, ResultNode, ResultEdge } from "
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getPathSequenceKey } from "@/features/Common/utils/utilities";
+import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 import { Preferences } from "@/features/UserAuth/types/user";

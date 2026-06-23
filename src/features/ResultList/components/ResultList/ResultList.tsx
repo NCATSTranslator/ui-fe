@@ -1,6 +1,5 @@
 import { useRef, useCallback, useEffect, useLayoutEffect, useMemo, FC, ReactNode } from "react";
 import styles from './ResultList.module.scss';
-import Query from "@/features/Query/components/Query/Query";
 import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
 import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
@@ -10,10 +9,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById }from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
 import { applyFilters, injectDynamicFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "@/features/ResultList/utils/resultsInteractionFunctions";
-import { getDataFromQueryVar, formatBiolinkTypeString } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar } from "@/features/Core/utils/urlHelpers";
+import { formatBiolinkTypeString } from "@/features/Core/utils/stringFormatters";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
-import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
@@ -22,7 +21,7 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import useSortState from "@/features/ResultList/hooks/useSortState";
-import usePagination from "@/features/ResultList/hooks/usePagination";
+import useResultPagination from "@/features/ResultList/hooks/useResultPagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
@@ -120,7 +119,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isSortedByName,
     isSortedByEvidence,
     isSortedByPaths,
-    isSortedByScore,
     currentSortString,
     activeEntityFiltersRef,
     getSortedResults,
@@ -168,7 +166,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handlePageClick,
     handlePageReset,
     calculateItemsPerPage,
-  } = usePagination({ formattedResults, initialItemsPerPage });
+  } = useResultPagination({ formattedResults, initialItemsPerPage });
 
   // Share state management via hook
   const {
@@ -510,10 +508,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                         <ResultListTableHead
                           parentStyles={styles}
                           currentSortString={currentSortString}
+                          defaultSortString={initSortString}
                           isSortedByEvidence={isSortedByEvidence}
                           isSortedByName={isSortedByName}
                           isSortedByPaths={isSortedByPaths}
-                          isSortedByScore={isSortedByScore}
                           handleUpdateResults={handleSortUpdate}
                         />
                         {

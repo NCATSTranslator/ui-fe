@@ -1,7 +1,7 @@
 // Focus: Evidence modal-specific functionality and UI state management
 import { Dispatch, SetStateAction } from 'react';
 import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
-  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Common/utils/sortingFunctions';
+  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Core/utils/sortingFunctions';
 import cloneDeep from 'lodash/cloneDeep';
 import { EvidenceSortState, PublicationObject, SortingState, SortPreference } from '@/features/Evidence/types/evidence';
 import { Preferences } from '@/features/UserAuth/types/user';
@@ -86,8 +86,9 @@ export const handleEvidenceSort = (
 export const getInitItemsPerPage = (prefs: Preferences, defaultItemsPerPage: number): number => {
   const value = prefs?.evidence_per_page?.pref_value;
   if (!value) return defaultItemsPerPage;
-  
-  return typeof value === "string" ? parseInt(value) : value;
+
+  const parsed = typeof value === "string" ? parseInt(value, 10) : value;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultItemsPerPage;
 };
 
 /**

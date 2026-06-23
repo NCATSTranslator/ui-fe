@@ -1,7 +1,7 @@
 import { FC, useCallback, MouseEvent } from "react";
 import styles from './ResultItemTag.module.scss';
 import { Filter } from "@/features/ResultFiltering/types/filters";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { FILTERING_CONSTANTS, getTagFamily } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface ResultItemTagProps {

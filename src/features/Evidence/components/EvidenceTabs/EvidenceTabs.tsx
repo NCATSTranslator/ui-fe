@@ -1,6 +1,6 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
-import Tabs from '@/features/Common/components/Tabs/Tabs';
-import Tab from '@/features/Common/components/Tabs/Tab';
+import Tabs from '@/features/Core/components/Tabs/Tabs';
+import Tab from '@/features/Core/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
 import ClinicalTrialsTable from '@/features/Evidence/components/ClinicalTrialsTable/ClinicalTrialsTable';
 import MiscEvidenceTable from '@/features/Evidence/components/MiscEvidenceTable/MiscEvidenceTable';
