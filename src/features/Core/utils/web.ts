@@ -251,15 +251,28 @@ export const encodeParams = (params: string): string => {
  * @returns {string} The share URL path — either `results?{params}` when
  *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
-export const getResultsShareURLPath = (label: string, nodeID: string, typeID: string | number, resultID: string, pk: string | number, shouldHash: boolean = false) => {
+/**
+ * Builds a results share URL path from a raw query string, optionally hashing
+ * the parameters and appending the query id.
+ *
+ * @param {string} rawParams - The unencoded query parameters (without the `q` param).
+ * @param {string} resultID - The result id. Pass `'0'` for list-only links.
+ * @param {string | number} pk - The id of the query.
+ * @param {boolean} shouldHash - Whether to hash the parameters.
+ * @returns {string} `results?{params}` when resultID is `'0'`, otherwise `results/{resultID}?{params}`.
+ */
+const buildResultsShareURLPath = (rawParams: string, resultID: string, pk: string | number, shouldHash: boolean): string => {
   const params = shouldHash
-    ? `${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}`)}&q=${pk}`
-    : `l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
+    ? `${encodeParams(rawParams)}&q=${pk}`
+    : `${rawParams}&q=${pk}`;
 
-  if (resultID === '0')
-    return `results?${params}`;
+  return resultID === '0'
+    ? `results?${params}`
+    : `results/${resultID}?${params}`;
+}
 
-  return `results/${resultID}?${params}`;
+export const getResultsShareURLPath = (label: string, nodeID: string, typeID: string | number, resultID: string, pk: string | number, shouldHash: boolean = false) => {
+  return buildResultsShareURLPath(`l=${label}&i=${nodeID}&t=${typeID}`, resultID, pk, shouldHash);
 }
 
 /**
@@ -281,12 +294,11 @@ export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, item
   const idOne = (itemOne.id) ? itemOne.id : null;
   const idTwo = (itemTwo.id) ? itemTwo.id : null;
   const constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  const params = shouldHash
-    ? `${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`)}&q=${pk}`
-    : `lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&q=${pk}`;
+  return buildResultsShareURLPath(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`, resultID, pk, shouldHash);
+}
 
-  if (resultID === '0')
-    return `results?${params}`;
-
-  return `results/${resultID}?${params}`;
+export const getLookupResultsShareURLPath = (item: AutocompleteItem, objectCategory: string, resultID: string, pk: string, shouldHash: boolean = false) => {
+  const label = item.label || '';
+  const id = item.id || '';
+  return buildResultsShareURLPath(`lone=${label}&ione=${id}&cat=${objectCategory}&t=l`, resultID, pk, shouldHash);
 }
