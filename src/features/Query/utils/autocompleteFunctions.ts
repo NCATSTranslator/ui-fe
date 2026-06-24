@@ -6,6 +6,20 @@ interface Node {
   synonyms: string[];
 }
 
+/**
+ * Returns a copy of the autocomplete item with the species match appended to its
+ * label for NCBIGene entries. Returns the item unchanged when not applicable.
+ * Never mutates the input item.
+ *
+ * @param {AutocompleteItem} item - The autocomplete item to label.
+ * @returns {AutocompleteItem} The labeled item (a new object when modified).
+ */
+export const withGeneMatchLabel = (item: AutocompleteItem): AutocompleteItem => {
+  if (item.id.includes("NCBIGene") && item.match && !item.label.includes(`(${item.match})`))
+    return { ...item, label: `${item.label} (${item.match})` };
+  return item;
+};
+
 // Function to get autocomplete terms based on user input
 export const getAutocompleteTerms = (
   inputText: string,
