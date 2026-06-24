@@ -1,0 +1,70 @@
+@use "@/assets/styles/variables" as *;
+
+.queryLookup {
+  height: 100%;
+  position: relative;
+  &.results {
+    padding: $l;
+    background-color: $palePurple;
+  }
+  .blurb {
+    margin-bottom: $s;
+  }
+  .error {
+    color: $red;
+    text-align: center;
+  }
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 24px 268px 40px;
+  gap: $xs;
+  align-items: center;
+  box-shadow: $dropShadow;
+  border-radius: $largeBorderRadius;
+  padding: $xs;
+  background-color: $white;
+  margin: 0 auto;
+  position: relative;
+  .categoryIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      height: 24px;
+      width: 24px;
+      path {
+        fill: $black;
+      }
+    }
+  }
+  .categorySelector {
+    margin: 0;
+    width: 100%;
+    select {
+      padding: $xs 12px $xs 0;
+    }
+    & > div {
+      border: none;
+      box-shadow: none !important;
+      & > div {
+        top: calc(100% + 9px) !important;
+        max-height: 265px;
+        overflow: auto !important;
+        scrollbar-width: none;
+      }
+    }
+  }
+  .submitButton {
+    margin: 0;
+    border: none;
+    padding: $xs;
+    svg {
+      height: 24px;
+      width: 24px;
+      path {
+        stroke: $white;
+      }
+    }
+  }
+}
