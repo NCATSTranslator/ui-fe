@@ -17,6 +17,7 @@ export interface ResultListContextValue {
   bookmarkAddedToast: () => void;
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
+  isLookup: boolean;
   isPathfinder: boolean;
   navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;
   pathFilterState: PathFilterState | null;
@@ -41,6 +42,7 @@ export interface ResultListContextValue {
   pathfinderIdTwo: string | null;
   pathfinderLabelTwo: string | null;
   constraintText: string | null;
+  lookupCategory: string | null;
 }
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
