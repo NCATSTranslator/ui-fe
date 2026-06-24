@@ -4,6 +4,7 @@ import Tabs from "@/features/Core/components/Tabs/Tabs";
 import Tab from "@/features/Core/components/Tabs/Tab";
 import Query from "@/features/Query/components/Query/Query";
 import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
+import QueryLookup from "@/features/Query/components/QueryLookup/QueryLookup";
 import BetaTag from "@/features/Core/components/BetaTag/BetaTag";
 import Button from "@/features/Core/components/Button/Button";
 import { useSelector } from "react-redux";
@@ -103,7 +104,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
                     handleClick={handleAddToProject}
                     iconLeft={<FolderIcon/>}
                   >
-                    <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
+                    <span className={styles.projectName}>{selectedProject?.data.title || 'Project'}</span>
                   </Button>
                 </>
               )
@@ -156,6 +157,19 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             />
           </Tab>
           : null}
+        <Tab
+          heading="Lookup"
+          headingOverride={<BetaTag heading="Lookup" tagClassName={projectPage ? styles.betaTag : ''} />}
+          className={styles.lookupTab}
+        >
+          <QueryLookup
+            isResults={isResults}
+            selectedProject={selectedProject}
+            user={user}
+            shouldNavigate={shouldNavigate}
+            submissionCallback={onSubmitCallback}
+          />
+        </Tab>
       </Tabs>
     </div>
   );

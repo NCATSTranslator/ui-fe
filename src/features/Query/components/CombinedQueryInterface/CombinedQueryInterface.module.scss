@@ -79,7 +79,8 @@
     }
   }
   .queryTab,
-  .pathfinderTab {
+  .pathfinderTab,
+  .lookupTab {
     overflow: visible;
     padding: $xs $m $m;
   }
@@ -101,7 +102,7 @@
   &.projectPage {
     position: relative;
     z-index: 10;
-    .queryTab, .pathfinderTab {
+    .queryTab, .pathfinderTab, .lookupTab {
       padding: 0;
     }
     .tabsContainer {
