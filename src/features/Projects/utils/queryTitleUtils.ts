@@ -1,6 +1,7 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Core/utils/stringFormatters';
+import { capitalizeAllWords, capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
 /**
  * Generates the title of a query based on the query object
  * @param {UserQueryObject} query - The query to generate the title for
@@ -13,7 +14,9 @@ export const generateQueryTitleFromQueryObject = (query: UserQueryObject): strin
   const queryType = query.data.query.type;
   const nodeOneLabel = query.data.query.node_one_label || query.data.query.subject?.id || '';
   const nodeTwoLabel = query.data.query.node_two_label || query.data.query.object?.id || '';
-  const constraint = query.data.query.constraint || null;
+  const constraint = queryType === 'lookup'
+    ? query.data.query.object?.category || null
+    : query.data.query.constraint || null;
 
   return generateQueryTitle(queryType, nodeOneLabel, nodeTwoLabel, constraint);
 }
@@ -30,9 +33,15 @@ export const generateQueryTitle = (queryTypeId: string | null, nodeOneLabel: str
   let title = 'No title available';
 
   if(queryTypeId === 'p' || queryTypeId === 'pathfinder') {
-    title = constraint
-      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${formatBiolinkTypeString(constraint)} Connections`
+    const constraintLabel = constraint ? getBiolinkCategoryDisplay(constraint) : null;
+    title = constraintLabel
+      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${constraintLabel} Connections`
       : `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)}`;
+  } else if(queryTypeId === 'l' || queryTypeId === 'lookup') {
+    const constraintLabel = constraint ? getBiolinkCategoryDisplay(constraint, true) : null;
+    title = constraintLabel
+      ? `${capitalizeAllWords(nodeOneLabel)} — ${constraintLabel} Lookup`
+      : `${capitalizeAllWords(nodeOneLabel)} — Lookup`;
   } else {
     const queryTypeObject = queryTypes.find(type => type.targetType === queryTypeId || type.id === parseInt(queryTypeId || '0'));
     if(queryTypeObject)

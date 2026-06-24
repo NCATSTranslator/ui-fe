@@ -44,7 +44,7 @@ export type PathfinderNodeObject = {
   category: string,
 }
 
-export type QueryTypeString = 'drug' | 'gene' | 'chemical' | 'pathfinder';
+export type QueryTypeString = 'drug' | 'gene' | 'chemical' | 'pathfinder' | 'lookup';
 
 export interface UserQueryObject {
   data: {
