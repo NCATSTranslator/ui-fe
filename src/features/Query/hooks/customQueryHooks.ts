@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
-import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Core/utils/web';
+import { getResultsShareURLPath, getPathfinderResultsShareURLPath, getLookupResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
@@ -23,6 +23,25 @@ import { errorToast } from '@/features/Core/utils/toastMessages';
  *   - exampleGenesUp: Chemical queries with 'increased' direction
  *   - exampleGenesDown: Chemical queries with 'decreased' direction
  */
+export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
+
+/**
+ * Custom hook that resolves the name resolver lookup endpoint from config,
+ * falling back to the default public endpoint when config is unavailable.
+ *
+ * @returns {string} The name resolver lookup endpoint URL.
+ */
+export const useNameResolverEndpoint = (): string => {
+  const config = useSelector(currentConfig);
+  const endpoint = config?.name_resolver.endpoint;
+  return useMemo(
+    () => endpoint
+      ? `${endpoint}/lookup`
+      : NAME_RESOLVER_FALLBACK_ENDPOINT,
+    [endpoint]
+  );
+};
+
 export const useExampleQueries = (cachedQueries: Example[] | undefined): ExampleQueries  => {
   return useMemo(() => {
     if (!cachedQueries) return {
@@ -56,7 +75,7 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
  *   - submitQuery: Async function to submit a query item to the API
  *   - submitPathfinderQuery: Async function to submit a pathfinder query with two items
  */
-export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
+export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -183,11 +202,60 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
     }
   }, [navigate, config]);
 
+  const submitLookupQuery = useCallback(async (
+    item: AutocompleteItem,
+    objectCategory: string,
+    projectId?: string,
+  ) => {
+    setIsLoading(true);
+
+    try {
+      const rawCategory = objectCategory.replace("biolink:", "");
+      const subjectType = item.types?.[0] || "";
+      const queryJson = JSON.stringify({
+        type: 'lookup',
+        subject: { id: item.id, category: subjectType },
+        object: { category: rawCategory },
+        node_one_label: item.label,
+        pid: projectId || null,
+      });
+
+      const response = await fetch(`${API_PATH_PREFIX}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: queryJson,
+      });
+
+      const data = await response.json();
+      const newQueryPath = getLookupResultsShareURLPath(
+        item,
+        rawCategory,
+        '0',
+        data.data,
+        config?.include_hashed_parameters
+      );
+      submissionCallback();
+
+      if (!shouldNavigate) {
+        setIsLoading(false);
+        return;
+      }
+      navigate(`/${newQueryPath}`);
+
+    } catch (error) {
+      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
+      setIsLoading(false);
+      console.error(error);
+      throw error;
+    }
+  }, [navigate, config, shouldNavigate]);
+
   return {
     isLoading,
     setIsLoading,
     submitQuery: queryType === 'single' ? submitQuery : undefined,
-    submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined
+    submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined,
+    submitLookupQuery: queryType === 'lookup' ? submitLookupQuery : undefined,
   };
 };
 
