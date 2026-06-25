@@ -28,6 +28,31 @@ interface ButtonProps {
   style?: CSSProperties;
 }
 
+const getButtonClasses = (props: ButtonProps): string =>
+  joinClasses(
+    'button',
+    styles.button,
+    props.variant === "secondary" && styles.secondary,
+    props.variant === "textOnly" && styles.textOnly,
+    props.iconOnly && styles.iconOnly,
+    props.small && styles.small,
+    !!props.iconLeft && styles.iconLeft,
+    !!props.iconRight && styles.iconRight,
+    props.smallFont && styles.smallFont,
+    props.inline && styles.inline,
+    props.className
+  );
+
+const ButtonContent: FC<Pick<ButtonProps, 'iconOnly' | 'iconLeft' | 'iconRight' | 'children'>> = ({
+  iconOnly, iconLeft, iconRight, children
+}) => (
+  <>
+    {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
+    {iconOnly ? children : <span className={styles.label}>{children}</span>}
+    {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
+  </>
+);
+
 const Button: FC<ButtonProps> = ({
   title,
   ariaLabel,
@@ -52,19 +77,8 @@ const Button: FC<ButtonProps> = ({
   ref,
   style
 }) => {
-  const buttonStyle = joinClasses(
-    'button',
-    styles.button,
-    variant === "secondary" && styles.secondary,
-    variant === "textOnly" && styles.textOnly,
-    iconOnly && styles.iconOnly,
-    small && styles.small,
-    !!iconLeft && styles.iconLeft,
-    !!iconRight && styles.iconRight,
-    smallFont && styles.smallFont,
-    inline && styles.inline,
-    className
-  )
+  const buttonStyle = getButtonClasses({ variant, inline, iconOnly, small, iconLeft, iconRight, smallFont, className });
+  const content = <ButtonContent iconOnly={iconOnly} iconLeft={iconLeft} iconRight={iconRight}>{children}</ButtonContent>;
 
   const commonProps = {
     title: title,
@@ -83,16 +97,8 @@ const Button: FC<ButtonProps> = ({
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link
-    ? <Link {...linkProps} to={href}>
-        {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {iconOnly ? children : <span className={styles.label}>{children}</span>}
-        {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
-      </Link>
-    : <a {...linkProps} href={href}>
-        {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-        {iconOnly ? children : <span className={styles.label}>{children}</span>}
-        {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
-      </a>;
+    ? <Link {...linkProps} to={href}>{content}</Link>
+    : <a {...linkProps} href={href}>{content}</a>;
   }
 
   return (
@@ -102,9 +108,7 @@ const Button: FC<ButtonProps> = ({
       type={type}
       disabled={disabled}
     >
-      {iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-      {iconOnly ? children : <span className={styles.label}>{children}</span>}
-      {iconRight && <span className={styles.iconRight}>{iconRight}</span>}
+      {content}
     </button>
   );
 }
