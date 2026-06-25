@@ -15,26 +15,30 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
+const INITIAL_FORM: FeedbackForm = {
+  category: 'Suggestion',
+  comments: '',
+  steps: '',
+  screenshots: [],
+  base64Screenshots: [],
+};
+
+const INITIAL_ERRORS: FormErrors = {
+  category: false,
+  comments: false,
+  steps: false,
+};
+
+const INITIAL_TOUCHED: Record<keyof FormErrors, boolean> = {
+  category: false,
+  comments: false,
+  steps: false,
+};
+
 export const useFeedbackForm = () => {
-  const [form, setForm] = useState<FeedbackForm>({
-    category: 'Suggestion',
-    comments: '',
-    steps: '',
-    screenshots: [],
-    base64Screenshots: [],
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({
-    category: false,
-    comments: false,
-    steps: false,
-  });
-
-  const [touched, setTouched] = useState<Record<keyof FormErrors, boolean>>({
-    category: false,
-    comments: false,
-    steps: false,
-  });
+  const [form, setForm] = useState<FeedbackForm>(INITIAL_FORM);
+  const [errors, setErrors] = useState<FormErrors>(INITIAL_ERRORS);
+  const [touched, setTouched] = useState<Record<keyof FormErrors, boolean>>(INITIAL_TOUCHED);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -68,23 +72,9 @@ export const useFeedbackForm = () => {
 
   const resetForm = () => {
     fileChangeGenerationRef.current += 1;
-    setForm({
-      category: 'Suggestion',
-      comments: '',
-      steps: '',
-      screenshots: [],
-      base64Screenshots: [],
-    });
-    setErrors({
-      category: false,
-      comments: false,
-      steps: false,
-    });
-    setTouched({
-      category: false,
-      comments: false,
-      steps: false,
-    });
+    setForm(INITIAL_FORM);
+    setErrors(INITIAL_ERRORS);
+    setTouched(INITIAL_TOUCHED);
     setSubmitError(null);
   };
 
