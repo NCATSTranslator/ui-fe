@@ -1,13 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
 
 export const useSimpleSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const debouncedSearch = useCallback(
-    debounce((searchTerm: string) => {
-      setSearchTerm(searchTerm);
-    }, 500),
+  const debouncedSearch = useMemo(
+    () => debounce((term: string) => { setSearchTerm(term); }, 500),
     []
   );
 
