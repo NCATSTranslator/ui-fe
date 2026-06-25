@@ -19,7 +19,7 @@ export const handleQueryDrop = (
   if (draggedItem.type === 'query') {
     // if query does not exist in project, add it
     const isQueryInProject = projectQIds.some((q: string) => q === draggedItem.data.data.qid);
-    if(isQueryInProject) {
+    if(isQueryInProject && draggedItem.data.data.title) {
       queryAlreadyInProjectToast(draggedItem.data.data.title, project.data.title);
       return;
     }
