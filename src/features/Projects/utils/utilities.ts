@@ -124,7 +124,7 @@ export const getQueryLink = (query: UserQueryObject) => {
       score: 0
     }
     const constraint = query.data.query.constraint || undefined;
-    const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+    const path = getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: "0", constraint, pk: qid });
     return encodeURI(`${window.location.origin}/${path}`);
   } else {
     const curie = query.data.query.curie || '';
@@ -132,7 +132,7 @@ export const getQueryLink = (query: UserQueryObject) => {
     const type = query.data.query.type;
     const direction = query.data.query.direction || null;
     const typeID = getTypeIDFromType(type, direction);
-    const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+    const path = getResultsShareURLPath({ label, nodeID: curie, typeID, resultID: "0", pk: qid });
     return encodeURI(`${window.location.origin}/${path}`);
   }
 }

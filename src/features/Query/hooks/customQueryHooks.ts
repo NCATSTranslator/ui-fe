@@ -123,14 +123,14 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
 
         const nodeLabel = item.node?.label || "";
         const nodeID = item.node?.id || "";
-        const newQueryPath = getResultsShareURLPath(
-          nodeLabel,
+        const newQueryPath = getResultsShareURLPath({
+          label: nodeLabel,
           nodeID,
-          item.type.id,
-          '0',
-          data.data,
-          config?.include_hashed_parameters
-        );
+          typeID: item.type.id,
+          resultID: '0',
+          pk: data.data,
+          shouldHash: config?.include_hashed_parameters,
+        });
 
         submissionCallback();
 
@@ -182,14 +182,14 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       });
 
       const data = await response.json();
-      let newQueryPath = getPathfinderResultsShareURLPath(
+      let newQueryPath = getPathfinderResultsShareURLPath({
         itemOne,
         itemTwo,
-        '0',
-        middleType?.replace("biolink:", ""),
-        data.data,
-        config?.include_hashed_parameters
-      );
+        resultID: '0',
+        constraint: middleType?.replace("biolink:", ""),
+        pk: data.data,
+        shouldHash: config?.include_hashed_parameters,
+      });
       submissionCallback();
       if(shouldNavigate)
         navigate(`/${newQueryPath}`);

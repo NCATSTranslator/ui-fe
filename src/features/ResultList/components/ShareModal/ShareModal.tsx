@@ -91,7 +91,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
         score: Infinity
       };
       const constraint = getDataFromQueryVar('c', decodedParams) || "";
-      path = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid, shouldHash);
+      path = getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: queryResultID, constraint, pk: qid, shouldHash });
     } else if (isLookup) {
       const item: AutocompleteItem = {
         id: getDataFromQueryVar('ione', decodedParams) || "",
@@ -102,7 +102,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
       const objectCategory = getDataFromQueryVar('cat', decodedParams) || "";
       path = getLookupResultsShareURLPath(item, objectCategory, queryResultID, qid, shouldHash);
     } else {
-      path = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid, shouldHash);
+      path = getResultsShareURLPath({ label: queryLabel, nodeID: queryItemID, typeID: queryTypeID, resultID: queryResultID, pk: qid, shouldHash });
     }
 
     return encodeURI(`${window.location.origin}/${path}`);

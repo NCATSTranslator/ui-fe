@@ -62,9 +62,9 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                 return (
                   <Button
                     className={`${styles.button} example-query`}
-                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters))}
+                    handleClick={() => setPresetURL(getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters }))}
                     data-testid={item.name}
-                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters)}
+                    data-url={getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters })}
                     key={item.id}
                     iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
                     smallFont
