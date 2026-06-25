@@ -9,7 +9,10 @@ import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
-    ignores: ['src/pageRoutes/Articles/**'],
+    ignores: [
+      'src/pageRoutes/Articles/**',
+      'src/stories/**',
+    ],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
