@@ -93,6 +93,27 @@ const mergePublications = (target: ResultEdge, source: ResultEdge) => {
   }
 };
 
+const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void => {
+  if (currentEdge.predicate === baseEdge.predicate) {
+    baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
+    baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
+    mergeSupport(baseEdge, currentEdge);
+    mergePublications(baseEdge, currentEdge);
+    return;
+  }
+  const compressedEdge = baseEdge.compressed_edges?.find(e => e.predicate === currentEdge.predicate);
+  if (compressedEdge) {
+    compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
+    compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
+    mergeSupport(compressedEdge, currentEdge);
+    mergePublications(compressedEdge, currentEdge);
+  } else {
+    if (currentEdge.support.length > 0 && baseEdge.support.length > 0)
+      mergeSupport(baseEdge, currentEdge);
+    baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: [] });
+  }
+};
+
 export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
   const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
 
@@ -101,31 +122,11 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
     return getDefaultEdge(undefined);
   }
 
-  const emptyCompressedEdgesArray: ResultEdge[] = [];
-  const baseEdge: ResultEdge = { ...getDefaultEdge(edges[0]), compressed_edges: emptyCompressedEdgesArray };
+  const baseEdge: ResultEdge = { ...getDefaultEdge(edges[0]), compressed_edges: [] };
 
   for (const edge of edges.slice(1)) {
     if (!edge) continue;
-    const currentEdge = getDefaultEdge(edge);
-
-    if (currentEdge.predicate === baseEdge.predicate) {
-      baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
-      baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
-      mergeSupport(baseEdge, currentEdge);
-      mergePublications(baseEdge, currentEdge);
-    } else {
-      const compressedEdge = baseEdge.compressed_edges?.find(e => e.predicate === currentEdge.predicate);
-      if (compressedEdge) {
-        compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
-        compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-        mergeSupport(compressedEdge, currentEdge);
-        mergePublications(compressedEdge, currentEdge);
-      } else {
-        if(currentEdge.support.length > 0 && baseEdge.support.length > 0)
-          mergeSupport(baseEdge, currentEdge);
-        baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: emptyCompressedEdgesArray });
-      }
-    }
+    mergeEdgeIntoBase(baseEdge, getDefaultEdge(edge));
   }
 
   baseEdge.inferred = hasSupport(baseEdge);
@@ -166,23 +167,18 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
 
 export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
-  for(const [i, ID] of subgraph.entries()) {
-    if(isNodeIndex(i)) {
-      if(Array.isArray(ID))
-        continue;
+  for (const [i, ID] of subgraph.entries()) {
+    if (isNodeIndex(i)) {
+      if (Array.isArray(ID)) continue;
       const node = getNodeById(resultSet, ID);
-      if(!!node)
-        compressedSubgraph.push(node);
+      if (node) compressedSubgraph.push(node);
+      continue;
+    }
+    if (!Array.isArray(ID)) {
+      const edge = getEdgeById(resultSet, ID);
+      if (edge) compressedSubgraph.push(edge);
     } else {
-      if(!Array.isArray(ID)) {
-        const edge = getEdgeById(resultSet, ID);
-        if(!!edge)
-          compressedSubgraph.push(edge);
-      } else {
-        const edges: ResultEdge[] = getEdgesByIds(resultSet, ID);
-        const compressedEdges = getCompressedEdges(resultSet, edges);
-        compressedSubgraph.push(compressedEdges);
-      }
+      compressedSubgraph.push(getCompressedEdges(resultSet, getEdgesByIds(resultSet, ID)));
     }
   }
   return compressedSubgraph;
