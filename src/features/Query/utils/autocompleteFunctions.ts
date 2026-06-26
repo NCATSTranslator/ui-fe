@@ -1,10 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { AutocompleteItem, AutocompleteFunctions, Example } from '@/features/Query/types/querySubmission';
-
-interface Node {
-  curie: string;
-  synonyms: string[];
-}
+import { AutocompleteItem, AutocompleteFunctions, Example, NormalizedNode } from '@/features/Query/types/querySubmission';
 
 /**
  * Returns a copy of the autocomplete item with the species match appended to its
@@ -38,7 +33,7 @@ export const getAutocompleteTerms = (
 
     newFetchNodesFromInputText(inputText, limitTypes, limitPrefixes, excludePrefixes, endpoint)
       .then((response) => response.json())
-      .then((nodes: Node[]) => {
+      .then((nodes: NormalizedNode[]) => {
         let newNodes: { [key: string]: string[] } = {};
         for (const node of nodes) {
           newNodes[node.curie] = node.synonyms;
