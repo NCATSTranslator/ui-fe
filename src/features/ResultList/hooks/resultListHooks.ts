@@ -254,7 +254,7 @@ export const useResultsDataQuery = (
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  sid?: string
+  sid?: number
 ) => {
   const [user] = useUser();
   const { mutate: touchQueryLastSeen } = useUpdateQueryLastSeen(sid);
@@ -264,7 +264,7 @@ export const useResultsDataQuery = (
     // if user isn't logged in, don't do anything
     if (!user)
       return;
-    if (sid)
+    if (sid !== undefined)
       touchQueryLastSeen();
     else if (currentQueryID)
       copyQueryMutate(currentQueryID);

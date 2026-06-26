@@ -15,7 +15,7 @@ import { AppDispatch } from "@/redux/store";
 
 interface UseResultsDataArgs {
   currentQueryID: string | null;
-  currentQuerySid: string | undefined;
+  currentQuerySid: number | undefined;
   isPathfinder: boolean;
   presetIsLoading: boolean;
   initialResultSet: ResultSet | null;

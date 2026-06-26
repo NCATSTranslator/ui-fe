@@ -63,7 +63,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     : null;
 
   const { data: queries = [] } = useUserQueries();
-  const currentQuerySid: string | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
+  const currentQuerySid: number | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
   const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
   const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
 

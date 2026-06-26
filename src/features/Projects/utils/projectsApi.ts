@@ -139,7 +139,7 @@ export const restoreProjects = async (
  * Updates a list of query IDs by setting the deleted flag to true.
  */
 export const deleteQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -158,7 +158,7 @@ export const deleteQueries = async (
  * Permanently deletes a list of query IDs.
  */
 export const permanentDeleteQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -177,7 +177,7 @@ export const permanentDeleteQueries = async (
  * Updates a list of query IDs by setting the deleted flag to false.
  */
 export const restoreQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -234,15 +234,15 @@ export const copyQuery = async (
  * Updates the last_seen timestamp for a query.
  */
 export const touchQuery = async (
-  sid: string,
+  sid: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<{ sid: string; data: { last_seen: Date } }> => {
+): Promise<{ sid: number; data: { last_seen: Date } }> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/touch`;
-  return fetchWithErrorHandling<{ sid: string; data: { last_seen: Date } }>(
+  return fetchWithErrorHandling<{ sid: number; data: { last_seen: Date } }>(
     () => put(url, { sid }),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is { sid: string; data: { last_seen: Date } } => 
+    (data: unknown): data is { sid: number; data: { last_seen: Date } } => 
       typeof data === 'object' && data !== null && 'sid' in data && 'data' in data );
 };
