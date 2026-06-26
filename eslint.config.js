@@ -105,6 +105,12 @@ export default [
         .map(([rule]) => [rule, 'warn'])
     ),
   },
+  {
+    rules: {
+      'sonarjs/no-commented-code': 'off',
+      'sonarjs/todo-tag': 'off',
+    },
+  },
   ...tanstackQuery.configs['flat/recommended'],
   ...storybook.configs["flat/recommended"],
 ];
