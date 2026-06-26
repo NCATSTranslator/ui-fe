@@ -107,19 +107,21 @@ export const getQueryLink = (query: UserQueryObject) => {
   const qid = query.data.qid;
 
   if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
-    if(!query.data.query.subject || !query.data.query.object) {
+    if(!query.data.query.subject.id || !query.data.query.object.id) {
       unableToReachLinkToast();
       return "";
     }
+    const subjectId = query.data.query.subject.id || '';
+    const objectId = query.data.query.object.id || '';
     const itemOne: AutocompleteItem = {
-      id: query.data.query.subject.id,
-      label: query.data.query.node_one_label || query.data.query.subject.id,
+      id: subjectId,
+      label: query.data.query.node_one_label || subjectId,
       isExact: false,
       score: 0
     }
     const itemTwo: AutocompleteItem = {
-      id: query.data.query.object.id,
-      label: query.data.query.node_two_label || query.data.query.object.id,
+      id: objectId,
+      label: query.data.query.node_two_label || objectId,
       isExact: false,
       score: 0
     }
