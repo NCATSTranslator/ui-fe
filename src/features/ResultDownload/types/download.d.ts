@@ -1,4 +1,4 @@
-import { PublicationObject, TrialObject, Provenance, KnowledgeLevel, PublicationSupport } from "@/features/Evidence/types/evidence";
+import { Provenance, KnowledgeLevel, PublicationSupport } from "@/features/Evidence/types/evidence";
 import { Species } from "@/features/ResultList/types/results.d.ts";
 
 export type DownloadScope = 'full' | 'filtered' | 'bookmarked';
