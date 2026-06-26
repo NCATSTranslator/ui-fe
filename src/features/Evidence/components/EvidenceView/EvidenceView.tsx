@@ -12,6 +12,7 @@ import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useEvidenceData, useEdgeInitialization } from '@/features/Evidence/hooks/evidenceHooks';
+import { resolveClickedEdge } from '@/features/Evidence/utils/utilities';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 import { derivePathKey, resolveEdgeFromPath, buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
@@ -46,16 +47,13 @@ const EvidenceView: FC = () => {
   const queryStatus = useSelector(getQueryStatusById(queryId));
 
   const selectedEdgeDomRef = useRef<HTMLElement | null>(null);
-
   const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
   const selectedEdgeRef = useRef(selectedEdge);
   selectedEdgeRef.current = selectedEdge;
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
 
   const pk = queryId || "";
-
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
-
   const path = useMemo(() => {
     if (!resultSet || !pathId) return null;
     return getPathById(resultSet, pathId);
@@ -137,23 +135,8 @@ const EvidenceView: FC = () => {
   const handleEdgeClick = useCallback((edgeIDs: string[]) => {
     if (!resultSet) return;
 
-    let edge;
-    if (compressedSubgraph) {
-      for (let i = 1; i < compressedSubgraph.length; i += 2) {
-        const edgeItem = compressedSubgraph[i];
-        if (Array.isArray(edgeItem)) {
-          const found = edgeItem.find(e => e.id === edgeIDs[0]);
-          if (found) { edge = found; break; }
-        } else if (isResultEdge(edgeItem) && edgeItem.id === edgeIDs[0]) {
-          edge = edgeItem; break;
-        }
-      }
-    } else {
-      edge = getCompressedEdge(resultSet, edgeIDs);
-    }
-
-    if (!isResultEdge(edge) || !selectedEdgeRef.current || !resultSet) return;
-
+    const edge = resolveClickedEdge(resultSet, compressedSubgraph, edgeIDs);
+    if (!isResultEdge(edge) || !selectedEdgeRef.current) return;
     if (edge.id === selectedEdgeRef.current.id) return;
 
     setSelectedEdge(edge);
@@ -204,9 +187,7 @@ const EvidenceView: FC = () => {
     return <EvidenceViewSkeleton />;
   }
 
-  const isFilteredOut = !!pathId
-    && resultListContext?.pathFilterState?.[pathId] === true
-    && !resultListContext.showHiddenPaths;
+  const isFilteredOut = !!pathId && resultListContext?.pathFilterState?.[pathId] === true && !resultListContext.showHiddenPaths;
 
   return (
     <div className={styles.evidenceViewWrapper}>

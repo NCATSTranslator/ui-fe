@@ -1,11 +1,13 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
+import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport } from "@/features/Evidence/types/evidence";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
-import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
+import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
+import { getCompressedEdge } from "@/features/Core/utils/resultHelpers";
+import { isResultEdge } from "@/features/ResultList/types/checkers";
 
 /**
  * Generates evidence ids for a provided edge, optionally including support edges
@@ -192,14 +194,10 @@ export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): numbe
  */
 export const formatPublicationSourceName = (sourceName: string): string => {
   let newSourceName = sourceName;
-  if(typeof sourceName === 'string')
-  switch (sourceName.toLowerCase()) {
-    case "semantic medline database":
+  if(typeof sourceName === 'string') {
+    if(sourceName.toLowerCase() === "semantic medline database") {
       newSourceName = "SemMedDB"
-      break;
-
-    default:
-      break;
+    }
   }
   return newSourceName;
 }
@@ -262,6 +260,53 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
 
   return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
 }
+
+/**
+ * Finds the publication entry (with its support data) matching a given publication ID on an edge.
+ *
+ * @param {string} pubID - The publication ID to look for.
+ * @param {ResultEdge} edge - The edge whose publications should be searched.
+ * @returns {{id: string; support: PublicationSupport;} | false} - The matching publication entry, or false if none is found.
+ */
+export const findPublicationOnEdge = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
+  for (const pubTypeArr of Object.values(edge.publications)) {
+    const match = pubTypeArr.find(publication => publication.id === pubID);
+    if (match) return match;
+  }
+  return false;
+};
+
+/**
+ * Resolves the edge that was clicked within a path's (optionally compressed) subgraph.
+ *
+ * When a compressed subgraph is available, the matching edge is located within it (handling
+ * grouped/compressed edges). Otherwise, a freshly compressed edge is built from the provided IDs.
+ *
+ * @param {ResultSet} resultSet - Result Set used to build a compressed edge when no subgraph is available.
+ * @param {(ResultNode | ResultEdge | ResultEdge[])[] | false} compressedSubgraph - The compressed subgraph to search, or false if unavailable.
+ * @param {string[]} edgeIDs - The clicked edge IDs (the first is used to match within the subgraph).
+ * @returns {ResultEdge | undefined} - The resolved edge, or undefined if none could be resolved.
+ */
+export const resolveClickedEdge = (
+  resultSet: ResultSet,
+  compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false,
+  edgeIDs: string[]
+): ResultEdge | undefined => {
+  if (!compressedSubgraph) {
+    const edge = getCompressedEdge(resultSet, edgeIDs);
+    return isResultEdge(edge) ? edge : undefined;
+  }
+  for (let i = 1; i < compressedSubgraph.length; i += 2) {
+    const edgeItem = compressedSubgraph[i];
+    if (Array.isArray(edgeItem)) {
+      const found = edgeItem.find(e => e.id === edgeIDs[0]);
+      if (found) return found;
+    } else if (isResultEdge(edgeItem) && edgeItem.id === edgeIDs[0]) {
+      return edgeItem;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Checks if any edge in the provided array has clinical trials attached.

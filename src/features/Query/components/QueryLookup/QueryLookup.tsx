@@ -100,6 +100,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
     setInputText("");
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAutocompleteSelect = useCallback((_cxt: AutocompleteContext) => {
     submitRef.current?.focus();
   }, []);
