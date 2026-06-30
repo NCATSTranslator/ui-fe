@@ -4,7 +4,6 @@ import { ResultEdge, ResultSet } from "@/features/ResultList/types/results";
 import { getNodeById } from "@/features/ResultList/slices/resultsSlice";
 import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
 import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWord";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { findPublicationOnEdge } from "@/features/Evidence/utils/utilities";
 
@@ -62,7 +61,7 @@ const PublicationRow: FC<{
         <span>{getSupportTextOrSnippet()}</span>
         {pub.url && (
           <a href={pub.url} className={joinClasses('url', styles.url)} target="_blank" rel="noreferrer">
-            Read More <ExternalLink/>
+            Read More
           </a>
         )}
       </td>
