@@ -11,11 +11,12 @@ const useEvidenceViewNavigation = (resultId?: string): UseEvidenceViewNavigation
   const resultsNavigate = useResultsNavigate();
 
   const navigateToEvidenceView = useCallback((options: EvidenceNavigationOptions) => {
-    if (!resultId) return;
+    const effectiveResultId = options.resultId ?? resultId;
+    if (!effectiveResultId) return;
     const sets = options.compressedEdgeSets
       ?? (options.path ? extractCompressedEdgeSets(options.path) : []);
     const { path: url, params } = buildEvidenceUrl({
-      resultId,
+      resultId: effectiveResultId,
       pathId: options.path?.id,
       primaryEdgeId: options.edgeId,
       compressedEdgeSets: sets,

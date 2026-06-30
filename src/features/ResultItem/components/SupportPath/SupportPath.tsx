@@ -8,7 +8,7 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { numberToWords } from '@/features/Core/utils/stringFormatters';
 import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
-import { useLastViewedPath, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useLastViewedPath, useResultItemId, useSeenStatus, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { ExpandedPredicateContext } from '../PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
@@ -23,7 +23,6 @@ interface SupportPathProps {
   pathFilterState: PathFilterState;
   pathViewStyles: {[key: string]: string;} | null;
   pk: string;
-  selectedPaths: Set<Path> | null;
   showHiddenPaths: boolean;
 }
 
@@ -37,12 +36,12 @@ const SupportPath: FC<SupportPathProps> = ({
   pathFilterState,
   pathViewStyles,
   pk,
-  selectedPaths,
   showHiddenPaths }) => {
 
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { isPathSeen } = useSeenStatus(pk);
   const { navigateToEvidenceView } = useResultListContext();
+  const itemResultId = useResultItemId();
   const supportPathKey = useSupportPathKey();
   const fullPathKey = supportPathKey ? `${supportPathKey}.${character}` : character;
   const tooltipID = path.id;
@@ -64,8 +63,7 @@ const SupportPath: FC<SupportPathProps> = ({
   const pathClass = joinClasses(
     'path',
     numberToWords(path.subgraph.length),
-    !!pathViewStyles && pathViewStyles.tableItem,
-    (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted && !!pathViewStyles) && pathViewStyles.unhighlighted
+    !!pathViewStyles && pathViewStyles.tableItem
   )
   return (
     <ExpandedPredicateContext.Provider value={{ expandedPredicateId, setExpandedPredicateId }}>
@@ -86,6 +84,7 @@ const SupportPath: FC<SupportPathProps> = ({
                   edgeId: path.subgraph[1],
                   path,
                   pathKey: fullPathKey,
+                  resultId: itemResultId,
                 });
               }
             }
@@ -130,7 +129,6 @@ const SupportPath: FC<SupportPathProps> = ({
                     key={key}
                     handleEdgeClick={handleEdgeClick}
                     activeEntityFilters={activeEntityFilters}
-                    selectedPaths={selectedPaths}
                     pathFilterState={pathFilterState}
                     activeFilters={activeFilters}
                     pk={pk}
@@ -153,7 +151,6 @@ const SupportPath: FC<SupportPathProps> = ({
                     key={subgraphItemID}
                     handleEdgeClick={handleEdgeClick}
                     activeEntityFilters={activeEntityFilters}
-                    selectedPaths={selectedPaths}
                     pathFilterState={pathFilterState}
                     activeFilters={activeFilters}
                     pk={pk}

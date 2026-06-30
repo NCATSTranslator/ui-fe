@@ -27,7 +27,7 @@ export interface EditProjectHandlers {
 
 export interface EditQueryHandlers {
   handleEditQuery: (query: UserQueryObject) => void;
-  handleUpdateQuery: (id: number | string, newName?: string) => void;
+  handleUpdateQuery: (id: number, newName?: string) => void;
   handleCancelEdit: () => void;
   handleRestoreQuery: (query: UserQueryObject) => void;
   handleDeleteQuery: (query: UserQueryObject) => void;
@@ -291,7 +291,7 @@ export const useEditQueryHandlers = (
     });
   };
 
-  const handleUpdateQuery = (id: number | string, newName?: string) => {
+  const handleUpdateQuery = (id: number, newName?: string) => {
     if(!queries) {
       console.warn("queries is undefined");
       return;
@@ -365,7 +365,7 @@ export const useEditQueryHandlers = (
       });
     });
 
-    restoreQueriesMutation.mutate([query.sid.toString()], {
+    restoreQueriesMutation.mutate([query.sid], {
       onSuccess: () => {
         queryRestoredToast();
       },

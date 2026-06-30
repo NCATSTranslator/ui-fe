@@ -140,7 +140,7 @@ export const useDeleteQueries = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (queryIds: string[]) => deleteQueries(queryIds),
+    mutationFn: (queryIds: number[]) => deleteQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
@@ -155,7 +155,7 @@ export const useRestoreQueries = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (queryIds: string[]) => restoreQueries(queryIds),
+    mutationFn: (queryIds: number[]) => restoreQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
@@ -395,11 +395,11 @@ export const useGetQueriesUpdatedTitles = (queryObjects: UserQueryObject[]): { q
  * 
  * @param sid - The query save ID
  */
-export const useUpdateQueryLastSeen = (sid?: string) => {
+export const useUpdateQueryLastSeen = (sid?: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      if (!sid) {
+      if (sid === undefined) {
         console.warn("No query save ID provided, skipping query last_seen timestamp update");
         return;
       }

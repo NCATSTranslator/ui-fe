@@ -37,10 +37,21 @@ export type AutocompleteItem = {
   types?: string[]
 }
 
+export type AutocompleteFilterItem = {
+  type: string[];
+  id: {
+    label: string;
+    identifier?: string;
+  };
+};
+
+export type AutocompleteFilterFn = (item: AutocompleteFilterItem) => boolean | AutocompleteFilterItem;
+export type AutocompleteFilterFactory = (type: string | false) => AutocompleteFilterFn;
+
 export type AutocompleteFunctions = {
-  filter: (type: any) => (item: any) => any;
-  annotate: (normalizedNodes: any) => Promise<any>;
-  format: (items: any, formatData: any) => Promise<any[]>;
+  filter: AutocompleteFilterFactory | AutocompleteFilterFn;
+  annotate: (normalizedNodes: NormalizedNode[]) => Promise<GenericItem[]>;
+  format: (items: GenericItem[], formatData: FormatData) => Promise<AutocompleteItem[]>;
 }
 
 export type AutocompleteConfig = {
@@ -63,7 +74,9 @@ export type GeneAnnotation = {
 
 export type NormalizedNode = {
   curie: string;
-  [key: string]: any;
+  label: string;
+  synonyms: string[];
+  types: string[];
 }
 
 export type FormatData = {

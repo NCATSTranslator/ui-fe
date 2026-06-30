@@ -46,7 +46,7 @@ const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence }) => {
         <div className={`head ${styles.head} ${styles.link}`}>Link</div>
       </div>
       <div className={`table-items ${styles.tableItems} scrollable`}>
-        {formattedMiscEvidence.map((item, i) => {
+        {formattedMiscEvidence.map((item) => {
           return (
             <div className={`table-item ${styles.tableItem}`} key={item.id}>
               <div className={`table-cell ${styles.cell} ${styles.link} link`}>

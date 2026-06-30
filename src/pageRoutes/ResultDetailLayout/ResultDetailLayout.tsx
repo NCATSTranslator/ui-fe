@@ -3,6 +3,7 @@ import { Outlet, useMatch } from 'react-router-dom';
 import { LastViewedPathIDContext } from '@/features/ResultItem/hooks/resultHooks';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import useScrollPreservation from '@/features/Navigation/hooks/useScrollPreservation';
+import styles from './ResultDetailLayout.module.scss';
 
 const ResultDetailView = lazy(() => import('@/features/ResultItem/components/ResultDetailView/ResultDetailView'));
 
@@ -13,7 +14,7 @@ const ResultDetailLayout: FC = () => {
 
   return (
     <LastViewedPathIDContext.Provider value={{ lastViewedPathID, setLastViewedPathID }}>
-      <div style={isBaseView ? undefined : { display: 'none' }}>
+      <div className={isBaseView ? undefined : styles.hidden}>
         <Suspense fallback={<LoadingWrapper />}>
           <ResultDetailView />
         </Suspense>

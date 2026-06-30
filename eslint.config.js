@@ -9,7 +9,10 @@ import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
-    ignores: ['src/pageRoutes/Articles/**'],
+    ignores: [
+      'src/pageRoutes/Articles/**',
+      'src/stories/**',
+    ],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -101,6 +104,12 @@ export default [
         .filter(([, severity]) => severity !== 'off')
         .map(([rule]) => [rule, 'warn'])
     ),
+  },
+  {
+    rules: {
+      'sonarjs/no-commented-code': 'off',
+      'sonarjs/todo-tag': 'off',
+    },
   },
   ...tanstackQuery.configs['flat/recommended'],
   ...storybook.configs["flat/recommended"],

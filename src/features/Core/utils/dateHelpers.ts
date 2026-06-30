@@ -12,7 +12,7 @@ export const isValidDate = (date: string | number | Date): boolean => {
   return !isNaN(parsedDate.getTime());
 };
 
-export const getFormattedDate = (date: Date, includeTime: boolean = true): string | boolean => {
+export const getFormattedDate = (date: Date, includeTime: boolean = true): string | false => {
   if (!isValidDate(date))
     return false;
 

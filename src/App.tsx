@@ -21,6 +21,7 @@ import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
+import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -36,13 +37,7 @@ const App = ({children}: {children?: ReactNode}) => {
   const [gtmID, setGtmID] = useState<string | null>(null);
   useGoogleTagManager(gtmID ?? undefined);
 
-  let pathnameClass = location.pathname.replace('/', '');
-  pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
-  pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
-
-  let additionalClasses = '';
-  if(location.pathname.includes('/projects/'))
-    additionalClasses += 'project-detail';
+  const { pathnameClass, additionalClasses } = getPathnameClasses(location.pathname);
 
 
   const [sessionStatus] = useGetSessionStatus();
@@ -81,16 +76,14 @@ const App = ({children}: {children?: ReactNode}) => {
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
-          <div className={`app ${pathnameClass} ${additionalClasses}`}>
+          <div className={joinClasses('app', pathnameClass, additionalClasses)}>
             <AppToastContainer />
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               <div className="layout">
                 <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
                 <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
                   <Header />
-                  {
-                    children && children
-                  }
+                  {children}
                   {
                     isSmallScreen && <SmallScreenOverlay /> 
                   }
@@ -103,7 +96,7 @@ const App = ({children}: {children?: ReactNode}) => {
                         target="_blank"
                       >About Translator</a>
                       <NavLink to={`/terms-of-use`}
-                        className={({isActive}) => {return (isActive) ? 'active' : '' }}
+                        className={({isActive}) => joinClasses(isActive && 'active')}
                       >Terms of Use</NavLink>
                       <a
                         href="https://ncats.nih.gov/privacy"

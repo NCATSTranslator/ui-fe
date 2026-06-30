@@ -170,7 +170,6 @@ export const isPath = (obj: unknown, warn = false): obj is Path => {
     ["aras", tc.isStringArray(obj.aras), "string[]", obj.aras],
     ["compressedIDs", tc.missable(obj.compressedIDs, tc.isStringArray), "string[] | undefined | null", obj.compressedIDs],
     ["compressedSubgraph", tc.missable(obj.compressedSubgraph, tc.makeIsHomogeneousArray((e: unknown) => tc.isString(e) || tc.isStringArray(e))), "(string | string[])[] | undefined | null", obj.compressedSubgraph],
-    ["highlighted", tc.missable(obj.highlighted, tc.isBoolean), "boolean | undefined | null", obj.highlighted],
     ["id", tc.missable(obj.id, tc.isString), "string | undefined | null", obj.id],
     ["score", tc.missable(obj.score, tc.isNumber), "number | undefined | null", obj.score],
     ["subgraph", tc.isStringArray(obj.subgraph), "string[]", obj.subgraph],

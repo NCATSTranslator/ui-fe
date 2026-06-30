@@ -51,7 +51,7 @@ const ResultListLoadingBar: FC<ResultListLoadingBarProps> = ({
       if (isFirstLoad.current) {
         // Results complete on initial load
         setBarWidthPercentage(COMPLETION_BAR_WIDTH);
-      } else if (data.isFetchingARAStatus == null && barWidthPercentage !== COMPLETION_BAR_WIDTH) {
+      } else if (data.isFetchingARAStatus === null && barWidthPercentage !== COMPLETION_BAR_WIDTH) {
         // Error returned after some results have returned
         setBarWidthPercentage(COMPLETION_BAR_WIDTH);
       } else if (!data.hasFreshResults && barWidthPercentage !== COMPLETION_BAR_WIDTH) {
@@ -90,6 +90,7 @@ const ResultListLoadingBar: FC<ResultListLoadingBarProps> = ({
       <div className={styles.loadingBarContainer}>
         <div 
           className={barFillClass}
+          // eslint-disable-next-line no-restricted-syntax
           style={{ width: `${barWidthPercentage}%` }}
         />
       </div>

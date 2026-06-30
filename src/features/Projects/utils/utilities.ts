@@ -107,24 +107,26 @@ export const getQueryLink = (query: UserQueryObject) => {
   const qid = query.data.qid;
 
   if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
-    if(!query.data.query.subject || !query.data.query.object) {
+    if(!query.data.query.subject.id || !query.data.query.object.id) {
       unableToReachLinkToast();
       return "";
     }
+    const subjectId = query.data.query.subject.id || '';
+    const objectId = query.data.query.object.id || '';
     const itemOne: AutocompleteItem = {
-      id: query.data.query.subject.id,
-      label: query.data.query.node_one_label || query.data.query.subject.id,
+      id: subjectId,
+      label: query.data.query.node_one_label || subjectId,
       isExact: false,
       score: 0
     }
     const itemTwo: AutocompleteItem = {
-      id: query.data.query.object.id,
-      label: query.data.query.node_two_label || query.data.query.object.id,
+      id: objectId,
+      label: query.data.query.node_two_label || objectId,
       isExact: false,
       score: 0
     }
     const constraint = query.data.query.constraint || undefined;
-    const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
+    const path = getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: "0", constraint, pk: qid });
     return encodeURI(`${window.location.origin}/${path}`);
   } else {
     const curie = query.data.query.curie || '';
@@ -132,7 +134,7 @@ export const getQueryLink = (query: UserQueryObject) => {
     const type = query.data.query.type;
     const direction = query.data.query.direction || null;
     const typeID = getTypeIDFromType(type, direction);
-    const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
+    const path = getResultsShareURLPath({ label, nodeID: curie, typeID, resultID: "0", pk: qid });
     return encodeURI(`${window.location.origin}/${path}`);
   }
 }

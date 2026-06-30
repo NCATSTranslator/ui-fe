@@ -50,11 +50,9 @@ export const isEdgeProvenance = (obj: unknown, warn = false): obj is EdgeProvena
  * @returns {boolean} - True if the object is a publication (PMID or PMC), false otherwise.
  */
 export const isPublication = (obj: PublicationObject | RawPublicationObject, warn = false): boolean => {
-  if(isPublicationObject(obj, false) && (obj.type === "PMID" || obj.type === "PMC")) {
+  const isPub = (isPublicationObject(obj, false) && (obj.type === "PMID" || obj.type === "PMC")) || (obj.id?.includes("PMID") || obj.id?.includes("PMC"));
+  if (isPub)
     return true;
-  } else if(obj.id?.includes("PMID") || obj.id?.includes("PMC")) {
-    return true;
-  }
 
   if(warn) console.warn("[isPublication] expected publication, got:", typeof obj, obj);
 

@@ -12,6 +12,7 @@ import { applyFilters, injectDynamicFilters, genPathFilterState, areEntityFilter
 import { getDataFromQueryVar } from "@/features/Core/utils/urlHelpers";
 import { formatBiolinkTypeString } from "@/features/Core/utils/stringFormatters";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
+import { getBiolinkCategoryDisplay } from "@/features/Query/utils/biolinkCategories";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
@@ -56,12 +57,13 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const prevQueryID = useRef<string | null>(currentQueryID);
   const presetTypeID = getDataFromQueryVar("t", decodedParams);
   const isPathfinder = (presetTypeID === "p");
+  const isLookup = (presetTypeID === "l");
   const presetTypeObject = (!!presetTypeID)
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
 
   const { data: queries = [] } = useUserQueries();
-  const currentQuerySid: string | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
+  const currentQuerySid: number | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
   const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
   const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
 
@@ -72,17 +74,25 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const pathfinderIdTwo = getDataFromQueryVar("itwo", decodedParams);
   const pathfinderLabelTwo = getDataFromQueryVar("ltwo", decodedParams);
   const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
+  const lookupCategory = getDataFromQueryVar("cat", decodedParams);
+
+  const effectiveNodeLabel = isLookup ? pathfinderLabelOne : nodeLabelParam;
+  const effectiveNodeId = isLookup ? pathfinderIdOne : nodeIdParam;
 
   // Build query title for downloads - use resolved title if available, otherwise build from URL params
   const queryTitle = useMemo(() => {
     if (resolvedQueryTitle) return resolvedQueryTitle;
+    if (isLookup && pathfinderLabelOne) {
+      const catDisplay = getBiolinkCategoryDisplay(lookupCategory || '', true);
+      return `${pathfinderLabelOne} — ${catDisplay} Lookup`;
+    }
     // Fallback: construct title from URL parameters
     if (nodeLabelParam) {
       const typeLabel = isPathfinder ? 'Pathfinder' : (presetTypeObject?.targetType || 'Query');
       return `${nodeLabelParam} — ${typeLabel}s`;
     }
     return '';
-  }, [resolvedQueryTitle, nodeLabelParam, isPathfinder, presetTypeObject]);
+  }, [resolvedQueryTitle, nodeLabelParam, isPathfinder, isLookup, pathfinderLabelOne, lookupCategory, presetTypeObject]);
   const resultSet = useSelector(getResultSetById(currentQueryID));
   const loading = (loadingParam === 'true') ? true : false;
   const presetIsLoading = (currentQueryID) ? true : loading;
@@ -436,13 +446,15 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     bookmarkAddedToast,
     bookmarkRemovedToast,
     handleBookmarkError: bookmarkErrorToast,
+    isLookup,
     isPathfinder,
+    lookupCategory,
     pathFilterState,
     pk: currentQueryID,
     resultId,
     resultsNavigate,
-    queryNodeID: nodeIdParam,
-    queryNodeLabel: nodeLabelParam,
+    queryNodeID: effectiveNodeId,
+    queryNodeLabel: effectiveNodeLabel,
     queryNodeDescription: nodeDescription,
     queryType: presetTypeObject,
     resultsComplete,
@@ -461,9 +473,9 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     constraintText,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
-    handleFilter, handleClearAllFilters, visibleResultIds, isPathfinder, pathFilterState, currentQueryID,
+    handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
-    nodeIdParam, nodeLabelParam, nodeDescription,
+    effectiveNodeId, effectiveNodeLabel, nodeDescription,
     presetTypeObject, resultsComplete, scoreWeights,
     showHiddenPaths, pathfinderIdOne, pathfinderLabelOne,
     pathfinderIdTwo, pathfinderLabelTwo, constraintText,

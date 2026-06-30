@@ -16,6 +16,10 @@ import { useResultListContext } from '@/features/ResultList/context/ResultListCo
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import PathView from '@/features/ResultItem/components/PathView/PathView';
+import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
@@ -41,6 +45,9 @@ const ResultItem: FC<ResultItemProps> = ({
     bookmarkRemovedToast,
     handleBookmarkError,
     isPathfinder,
+    pathFilterState,
+    setShowHiddenPaths,
+    showHiddenPaths,
     pk,
     queryNodeID,
     queryNodeLabel,
@@ -51,13 +58,12 @@ const ResultItem: FC<ResultItemProps> = ({
     updateUserSaves,
   } = useResultListContext();
   const currentQueryID = pk;
-
   const resultSet = useSelector(getResultSetById(pk));
-
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
-
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const user = useSelector(currentUser);
+  const decodedParams = useDecodedParams();
+  const isLookup = getDataFromQueryVar("t", decodedParams) === 'l';
 
   const {
     isBookmarked,
@@ -89,12 +95,18 @@ const ResultItem: FC<ResultItemProps> = ({
   }, [resultsNavigate, result.id]);
 
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-  const pathCount: number = (result?.pathCount !== undefined) ? result.pathCount : (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
-  const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
-  const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
+  const pathCount: number = useMemo(() => {
+    if(result?.pathCount !== undefined) return result.pathCount;
+    if(!resultSet) return 0;
+    return getPathCount(resultSet, newPaths);
+  }, [result?.pathCount, resultSet, newPaths]);
+  const subjectNode = useMemo(() => getNodeById(resultSet, result.subject), [resultSet, result.subject]);
+  const objectNode = useMemo(() => getNodeById(resultSet, result.object), [resultSet, result.object]);
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
+
+  const accordionPanelClass = joinClasses(styles.accordionPanel, roleCount > 0 && !isInUserSave && styles.hasTags, (!!resultDescription && !isPathfinder) && styles.hasDescription, !!isInUserSave && styles.inUserSave);
 
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
@@ -103,16 +115,17 @@ const ResultItem: FC<ResultItemProps> = ({
   if(!resultSet)
     return null;
 
+
   return (
     <div
-      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
+      className={joinClasses('result', styles.result, isPathfinder && styles.pathfinder)}
       data-result-curie={result.subject}
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}
       onClick={handleResultClick}
     >
       <div className={styles.top}>
-        <div className={`${styles.nameContainer} ${styles.resultSub}`}>
+        <div className={joinClasses(styles.nameContainer, styles.resultSub)}>
           <ResultItemName
             isPathfinder={isPathfinder}
             subjectNode={subjectNode}
@@ -132,7 +145,7 @@ const ResultItem: FC<ResultItemProps> = ({
           isPathfinder={isPathfinder}
           nameString={nameString}
         />
-        <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+        <div className={joinClasses(styles.evidenceContainer, styles.resultSub)}>
           <span className={styles.evidenceLink}>
             <div>
               {
@@ -154,16 +167,14 @@ const ResultItem: FC<ResultItemProps> = ({
             </div>
           </span>
         </div>
-        <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+        <div className={joinClasses(styles.pathsContainer, styles.resultSub)}>
           <span className={styles.paths}>
             <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
           </span>
         </div>
       </div>
       <div
-        className={`${styles.accordionPanel} ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
-          ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' } ${!!isInUserSave && styles.inUserSave}
-        `}
+        className={accordionPanelClass}
         >
         <div className={styles.container}>
           <div>
@@ -193,6 +204,24 @@ const ResultItem: FC<ResultItemProps> = ({
                 searchWords={activeEntityFilters}
                 className={styles.description}
               />
+            }
+            {
+              isLookup &&
+              <div className={styles.lookupPathViewContainer}>
+                <PathView
+                  active
+                  activeEntityFilters={activeEntityFilters}
+                  activeFilters={activeFilters}
+                  isEven={isEven}
+                  isLookup
+                  pathArray={result.paths}
+                  pathFilterState={pathFilterState ?? {}}
+                  pk={pk ?? ''}
+                  resultId={result.id}
+                  setShowHiddenPaths={setShowHiddenPaths}
+                  showHiddenPaths={showHiddenPaths}
+                />
+              </div>
             }
           </div>
         </div>

@@ -21,6 +21,7 @@
 **/*.swp
 **/*.swo
 *.cpuprofile
+lint-warnings.txt
 
 npm-debug.log*
 yarn-debug.log*

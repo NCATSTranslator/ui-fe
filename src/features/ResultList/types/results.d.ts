@@ -1,7 +1,5 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   EdgeProvenance, ProvenanceCatalogEntry, PublicationSupport } from "@/features/Evidence/types/evidence";
-import * as tc from "@/features/Core/types/checkers";
-import { isProvenance } from "@/features/Evidence/types/checkers";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -55,7 +53,6 @@ export interface Path {
   compressedIDs?: string[];
   // Compressed subgraph with edges as arrays
   compressedSubgraph?: (string | string[])[] | null;
-  highlighted?: boolean;
   id?: string;
   score?: number;
   // Original subgraph

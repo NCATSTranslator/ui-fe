@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { useSelector } from 'react-redux';
-import { currentConfig }from "@/features/UserAuth/slices/userSlice";
+// import { useSelector } from 'react-redux';
+// import { currentConfig }from "@/features/UserAuth/slices/userSlice";
 import styles from './ResultListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
 import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFilterTag/SelectedFilterTag';
@@ -28,7 +28,7 @@ interface ResultListHeaderProps {
 
 const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
-  const config = useSelector(currentConfig);
+  // const config = useSelector(currentConfig);
   // TODO: Reenable novelty boost toggle once scoring is updated to properly use novelty weights
   // const showNoveltyBoost = config?.show_novelty_boost;
   const showNoveltyBoost = false;

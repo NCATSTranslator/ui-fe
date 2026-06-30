@@ -6,7 +6,7 @@ import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
-import { getIsPathFiltered, getPathsPerPage, getPathsWithSelectionsSet } from '@/features/ResultItem/utils/utilities';
+import { getIsPathFiltered, getPathsPerPage, getFormattedPaths } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
@@ -16,12 +16,16 @@ import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 export const SupportPathDepthContext = createContext<number>(1);
 export const HoverContext = createContext<{
   hoveredItem: HoverTarget;
   setHoveredItem: (target: HoverTarget) => void;
 } | null>(null);
+// Supplies the id of the result this PathView belongs to, so node/edge navigation
+// works even when the route has no result id (e.g. the results list view).
+export const ResultItemIdContext = createContext<string | undefined>(undefined);
 
 interface PathViewProps {
   active: boolean;
@@ -31,12 +35,13 @@ interface PathViewProps {
   handleEdgeSpecificEvidence?:(edgeIDs: string[], path: Path) => void;
   inModal?: boolean;
   isEven: boolean;
+  isLookup?: boolean;
   pathArray: string[] | Path[];
   pathFilterState: PathFilterState;
   pk: string;
+  resultId?: string;
   selectedEdge?: ResultEdge | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
-  selectedPaths: Set<Path> | null;
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
 }
@@ -49,21 +54,23 @@ const PathView: FC<PathViewProps> = ({
   handleEdgeSpecificEvidence,
   inModal = false,
   isEven,
+  isLookup = false,
   pathArray,
   pathFilterState,
   pk,
+  resultId: resultItemId,
   selectedEdge,
   selectedEdgeRef,
-  selectedPaths,
   setShowHiddenPaths,
   showHiddenPaths }) => {
   
   const prefs = useSelector(currentPrefs);
   const { resultId } = useResultListContext();
+  const effectiveResultId = resultItemId ?? resultId;
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const pathsPerPage: number = getPathsPerPage(prefs);
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths), [paths, selectedPaths, pathFilterState, resultSet]);
+  const formattedPaths = useMemo(() => getFormattedPaths(resultSet, paths, pathFilterState), [paths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
@@ -113,7 +120,7 @@ const PathView: FC<PathViewProps> = ({
         <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
       </Tooltip>
       {
-        !inModal && 
+        (!inModal && !isLookup) && 
         <div className={styles.header}>
           <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
         </div>
@@ -122,9 +129,10 @@ const PathView: FC<PathViewProps> = ({
         (!active)
         ? <></>
         :
+        <ResultItemIdContext.Provider value={resultItemId}>
         <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
           <SupportPathDepthContext.Provider value={0}>
-            <div className={`${styles.paths} ${inModal && styles.inModal}`}>
+            <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
                 displayedPaths.map((path: Path, i: number)=> {
                   if(!path.id) 
@@ -138,7 +146,6 @@ const PathView: FC<PathViewProps> = ({
                         compressedSubgraph={compressedSubgraph}
                         handleEdgeClick={handleEdgeClick}
                         activeEntityFilters={activeEntityFilters}
-                        selectedPaths={selectedPaths}
                         pathFilterState={pathFilterState}
                         activeFilters={activeFilters}
                         pk={pk}
@@ -160,12 +167,12 @@ const PathView: FC<PathViewProps> = ({
               <Button
                 handleClick={() => { setShowHiddenPaths(prev => !prev); setCurrentPage(0); setItemOffset(0); }}                variant="secondary"
                 small
-                dataTooltipId={`${resultId}-excluded-paths-toggle`}
-                className={`${!!isEven && styles.evenButton}`}
+                dataTooltipId={`${effectiveResultId}-excluded-paths-toggle`}
+                className={joinClasses(isEven && styles.evenButton)}
                 iconRight={<Information/>}
                 >
                 {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
-                <Tooltip id={`${resultId}-excluded-paths-toggle`}>
+                <Tooltip id={`${effectiveResultId}-excluded-paths-toggle`}>
                   {
                     showHiddenPaths 
                     ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
@@ -176,6 +183,7 @@ const PathView: FC<PathViewProps> = ({
             }
           </SupportPathDepthContext.Provider>
         </HoverContext.Provider>
+        </ResultItemIdContext.Provider>
       }
       {
         pageCount > 1 &&

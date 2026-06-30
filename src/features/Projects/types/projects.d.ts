@@ -11,7 +11,7 @@ export type ProjectUpdate = {
 }
 
 export type QueryUpdate = {
-  id: string;
+  id: number;
   title: string;
 }
 
@@ -40,11 +40,11 @@ export type Project = ProjectRaw & {
 export type QueryStatus = 'complete' | 'running' | 'error' | 'unknown' | 'noQueries' | 'noResults';
 
 export type PathfinderNodeObject = {
-  id: string,
+  id?: string,
   category: string,
 }
 
-export type QueryTypeString = 'drug' | 'gene' | 'chemical' | 'pathfinder';
+export type QueryTypeString = 'drug' | 'gene' | 'chemical' | 'pathfinder' | 'lookup';
 
 export interface UserQueryObject {
   data: {
@@ -65,12 +65,17 @@ export interface UserQueryObject {
       subject?: PathfinderNodeObject,
       type: QueryTypeString
     },
+    statistics: {
+      result_count: number | null;
+      aux_graph_count: number | null;
+    }
     time_created: Date,
     time_updated: Date,
+    time_viewed: Date | null,
     title: string | null,
   }
   // save ID
-  sid: string,
+  sid: number,
   status: QueryStatus,
 }
 
