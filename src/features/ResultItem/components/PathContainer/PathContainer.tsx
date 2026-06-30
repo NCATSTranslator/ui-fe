@@ -9,7 +9,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
 import { extractEdgeIDsFromSubgraph, generatePathD, generatePredicateId, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
-import { useLastViewedPath, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useLastViewedPath, useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { numberToWords } from '@/features/Core/utils/stringFormatters';
 import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
@@ -29,7 +29,6 @@ interface PathContainerProps {
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   activeEntityFilters: string[];
-  selectedPaths: Set<Path> | null;
   pathFilterState: PathFilterState;
   activeFilters: Filter[];
   pk: string;
@@ -48,7 +47,6 @@ const PathContainer: FC<PathContainerProps> = ({
   compressedSubgraph,
   handleEdgeClick,
   activeEntityFilters,
-  selectedPaths,
   pathFilterState,
   activeFilters,
   pk,
@@ -63,6 +61,7 @@ const PathContainer: FC<PathContainerProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
+  const itemResultId = useResultItemId();
   const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
   const initialExpandedPredicateIdSet = useRef(false);
 
@@ -90,8 +89,7 @@ const PathContainer: FC<PathContainerProps> = ({
     (inModal && compressedSubgraph) && styles.compressedTableItem,
     styles.tableItem,
     'path',
-    numberToWords(path.subgraph.length),
-    (selectedPaths !== null && selectedPaths.size > 0 && !path.highlighted) && styles.unhighlighted
+    numberToWords(path.subgraph.length)
   );
 
   const edgeHeight = 32;
@@ -133,6 +131,7 @@ const PathContainer: FC<PathContainerProps> = ({
                   edgeId: path.subgraph[1],
                   path,
                   pathKey,
+                  resultId: itemResultId,
                 });
               }
             }
@@ -196,7 +195,6 @@ const PathContainer: FC<PathContainerProps> = ({
                             pk={pk}
                             selected={selected}
                             selectedEdgeRef={selectedEdgeRef}
-                            selectedPaths={null}
                           />
                         );
                       })}
@@ -239,7 +237,6 @@ const PathContainer: FC<PathContainerProps> = ({
                     pathViewStyles={styles}
                     selected={selected}
                     selectedEdgeRef={selectedEdgeRef}
-                    selectedPaths={null}
                   />
                 )
               }
@@ -273,7 +270,6 @@ const PathContainer: FC<PathContainerProps> = ({
                   key={key}
                   handleEdgeClick={handleEdgeClick}
                   activeEntityFilters={activeEntityFilters}
-                  selectedPaths={selectedPaths}
                   pathFilterState={pathFilterState}
                   activeFilters={activeFilters}
                   pk={pk}

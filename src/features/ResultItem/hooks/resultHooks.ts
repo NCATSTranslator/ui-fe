@@ -1,5 +1,5 @@
 import { createContext, Dispatch, SetStateAction, useContext, useMemo } from "react";
-import { SupportPathDepthContext } from "@/features/ResultItem/components/PathView/PathView";
+import { SupportPathDepthContext, ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
 import { ExpandedPredicateContext } from "@/features/ResultItem/components/PathContainer/PathContainer";
 import { SupportPathKeyContext } from "@/features/ResultItem/components/SupportPathGroup/SupportPathGroup";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
@@ -26,6 +26,15 @@ export const useLastViewedPath = (): LastViewedPathIDContextType => {
  */
 export const useSupportPathDepth = (): number => {
   return useContext(SupportPathDepthContext);
+};
+
+/**
+ * Custom hook to get the id of the result that the current PathView belongs to.
+ * Falls back to undefined when rendered outside of a PathView.
+ * @returns {string | undefined} The result id, if available.
+ */
+export const useResultItemId = (): string | undefined => {
+  return useContext(ResultItemIdContext);
 };
 
 /**

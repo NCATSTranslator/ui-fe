@@ -18,7 +18,7 @@ import { Path, PathFilterState, ResultEdge } from '@/features/ResultList/types/r
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-import { useExpandedPredicate, useLastViewedPath, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
+import { useExpandedPredicate, useLastViewedPath, useResultItemId, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
 import { generatePredicateId, isAcceptedOntologyEdge } from '@/features/ResultItem/utils/utilities';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
@@ -48,7 +48,6 @@ interface PredicateProps {
   pk: string;
   selected?: boolean;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
-  selectedPaths: Set<Path> | null;
   showHiddenPaths: boolean;
   uid: string;
 }
@@ -74,7 +73,6 @@ const Predicate: FC<PredicateProps> = ({
   pk,
   selected = false,
   selectedEdgeRef,
-  selectedPaths,
   showHiddenPaths,
   uid }) => {
 
@@ -84,6 +82,7 @@ const Predicate: FC<PredicateProps> = ({
 
   const { expandedPredicateId, setExpandedPredicateId } = useExpandedPredicate();
   const { navigateToEvidenceView } = useResultListContext();
+  const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
   const supportPathKey = useSupportPathKey();
   const fullPathKey = supportPathKey ? `${supportPathKey}.${parentPathKey}` : parentPathKey;
@@ -144,6 +143,7 @@ const Predicate: FC<PredicateProps> = ({
         pathKey: targetFullPathKey,
         compressedEdgeSets: allSets,
         tab: options?.tab,
+        resultId: itemResultId,
       });
     }
   }
@@ -229,7 +229,6 @@ const Predicate: FC<PredicateProps> = ({
           pathFilterState={pathFilterState}
           pathViewStyles={pathViewStyles}
           handleEdgeClick={handleEdgeClick}
-          selectedPaths={selectedPaths}
           activeEntityFilters={activeEntityFilters}
           activeFilters={activeFilters}
           pk={pk}
