@@ -125,11 +125,23 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         </div>
       )}
       <Tabs
-        defaultActiveTab="Smart Query"
+        defaultActiveTab="Lookup"
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
         tabListWrapperClassName={styles.tabListWrapper}
       >
+        <Tab
+          heading="Lookup"
+          className={styles.lookupTab}
+        >
+          <QueryLookup
+            isResults={isResults}
+            selectedProject={selectedProject}
+            user={user}
+            shouldNavigate={shouldNavigate}
+            submissionCallback={onSubmitCallback}
+          />
+        </Tab>
         <Tab heading="Smart Query" className={styles.queryTab}>
           <Query
             isResults={isResults}
@@ -157,19 +169,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             />
           </Tab>
           : null}
-        <Tab
-          heading="Lookup"
-          headingOverride={<BetaTag heading="Lookup" tagClassName={projectPage ? styles.betaTag : ''} />}
-          className={styles.lookupTab}
-        >
-          <QueryLookup
-            isResults={isResults}
-            selectedProject={selectedProject}
-            user={user}
-            shouldNavigate={shouldNavigate}
-            submissionCallback={onSubmitCallback}
-          />
-        </Tab>
       </Tabs>
     </div>
   );

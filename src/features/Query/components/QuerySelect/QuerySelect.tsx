@@ -1,6 +1,7 @@
 import { FC, useState, useEffect, useRef, ReactNode, isValidElement, Children, MouseEvent } from "react";
 import AnimateHeight from "react-animate-height";
 import styles from './QuerySelect.module.scss';
+import DividerVert from '@/features/Core/components/DividerVert/DividerVert';
 
 interface QuerySelectProps {
   label?: string;
@@ -160,7 +161,7 @@ export const QuerySelect: FC<QuerySelectProps> = ({
           <div className={styles.iconContainer}>
             <span className={`${styles.icon} ${iconClass}`} onMouseDown={handleSelectClick}></span>
           </div>
-          <div className={styles.borderVert}></div>
+          <DividerVert />
           {
             noanimate &&
             <div
