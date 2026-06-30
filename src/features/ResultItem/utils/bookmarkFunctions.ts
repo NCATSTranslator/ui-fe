@@ -99,18 +99,18 @@ export const createBookmarkObject = (params: {
   const bookmarkResult: ResultBookmark = cloneDeep(result);
   const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
   
-  const bookmarkObject = getFormattedBookmarkObject(
-    "result",
-    bookmarkResult.drug_name,
-    "",
-    queryNodeID || "",
-    queryNodeLabel || "",
-    queryNodeDescription || "",
-    queryType,
-    result,
-    currentQueryID || "",
-    safeResultSet
-  );
+  const bookmarkObject = getFormattedBookmarkObject({
+    bookmarkType: "result",
+    bookmarkName: bookmarkResult.drug_name,
+    notes: "",
+    queryNodeID: queryNodeID || "",
+    queryNodeLabel: queryNodeLabel || "",
+    queryNodeDescription: queryNodeDescription || "",
+    typeObject: queryType,
+    saveItem: result,
+    pk: currentQueryID || "",
+    resultSet: safeResultSet
+  });
   
   bookmarkObject.user_id = user?.id || null;
   const currentDate = new Date().toDateString();

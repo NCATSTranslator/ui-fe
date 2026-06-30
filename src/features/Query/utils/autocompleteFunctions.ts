@@ -1,10 +1,19 @@
 import { Dispatch, SetStateAction } from 'react';
-import { AutocompleteItem, AutocompleteFunctions, Example } from '@/features/Query/types/querySubmission';
+import { AutocompleteItem, AutocompleteFunctions, Example, NormalizedNode } from '@/features/Query/types/querySubmission';
 
-interface Node {
-  curie: string;
-  synonyms: string[];
-}
+/**
+ * Returns a copy of the autocomplete item with the species match appended to its
+ * label for NCBIGene entries. Returns the item unchanged when not applicable.
+ * Never mutates the input item.
+ *
+ * @param {AutocompleteItem} item - The autocomplete item to label.
+ * @returns {AutocompleteItem} The labeled item (a new object when modified).
+ */
+export const withGeneMatchLabel = (item: AutocompleteItem): AutocompleteItem => {
+  if (item.id.includes("NCBIGene") && item.match && !item.label.includes(`(${item.match})`))
+    return { ...item, label: `${item.label} (${item.match})` };
+  return item;
+};
 
 // Function to get autocomplete terms based on user input
 export const getAutocompleteTerms = (
@@ -24,7 +33,7 @@ export const getAutocompleteTerms = (
 
     newFetchNodesFromInputText(inputText, limitTypes, limitPrefixes, excludePrefixes, endpoint)
       .then((response) => response.json())
-      .then((nodes: Node[]) => {
+      .then((nodes: NormalizedNode[]) => {
         let newNodes: { [key: string]: string[] } = {};
         for (const node of nodes) {
           newNodes[node.curie] = node.synonyms;

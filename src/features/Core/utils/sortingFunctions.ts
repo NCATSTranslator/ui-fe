@@ -18,16 +18,13 @@ const compareWithFallback = (
   const aText = aValue?.trim();
   const bText = bValue?.trim();
 
-  const aHas = !!aText;
-  const bHas = !!bText;
-
-  if (!aHas && !bHas) return 0;
-  if (!aHas) return 1;
-  if (!bHas) return -1;
+  if (!aText && !bText) return 0;
+  if (!aText) return 1;
+  if (!bText) return -1;
 
   return direction === 'asc'
-    ? aText!.localeCompare(bText!)
-    : bText!.localeCompare(aText!);
+    ? aText.localeCompare(bText)
+    : bText.localeCompare(aText);
 }
 
 export const sortNameLowHigh = (items: Result[] | PublicationObject[]) => {
@@ -235,35 +232,172 @@ export const pivotSort = <T>(arr: T[], pivot: number, compare: (a: T, b: T) => n
 }
 
 export const makePathRank = (resultSet: ResultSet, path: Path): PathRank => {
-  return _makePathRank(path, new Set<string>([getPathKey(path)]), 0);
+  return _makePathRank(resultSet, path, new Set<string>([getPathKey(path)]), 0);
+}
 
-  function _makePathRank(path: Path, visited: Set<string>, depth: number): PathRank {
-    const pathRank: PathRank = { rank: 0, path: path, support: [] };
-    if (depth > MAX_SUPPORT_DEPTH) return pathRank;
-    for (let i = 1; i < path.subgraph.length; i += 2) {
-      const edge = getEdgeById(resultSet, path.subgraph[i]);
-      if (!!edge && edge.inferred) {
-        for (const sp of edge.support) {
-          const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
-          if (!supportPath) continue;
-          const key = getPathKey(supportPath);
-          if (visited.has(key)) continue;
-          visited.add(key);
-          pathRank.support.push(_makePathRank(supportPath, visited, depth + 1));
-          visited.delete(key);
-        }
+function _collectSupportRanks(resultSet: ResultSet, edge: ResultEdge, visited: Set<string>, depth: number): PathRank[] {
+  const ranks: PathRank[] = [];
+  for (const sp of edge.support) {
+    const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
+    if (!supportPath) continue;
+    const key = getPathKey(supportPath);
+    if (visited.has(key)) continue;
+    visited.add(key);
+    ranks.push(_makePathRank(resultSet, supportPath, visited, depth + 1));
+    visited.delete(key);
+  }
+  return ranks;
+}
+
+function _makePathRank(resultSet: ResultSet, path: Path, visited: Set<string>, depth: number): PathRank {
+  const pathRank: PathRank = { rank: 0, path: path, support: [] };
+  if (depth > MAX_SUPPORT_DEPTH) return pathRank;
+  for (let i = 1; i < path.subgraph.length; i += 2) {
+    const edge = getEdgeById(resultSet, path.subgraph[i]);
+    if (edge && edge.inferred) {
+      pathRank.support.push(..._collectSupportRanks(resultSet, edge, visited, depth));
+    }
+  }
+  return pathRank;
+}
+
+interface PathRankingContext {
+  resultSet: ResultSet;
+  evidenceFilters: Filter[];
+  otherFilters: Filter[];
+  hasAraInclusion: boolean;
+  visited: Set<string>;
+}
+
+const INCLUDE_RANK_BASE = -1;
+const EXCLUDE_RANK_BASE = 1;
+
+function _applyPathExclusion(ctx: PathRankingContext, path: Path, pathRank: PathRank): boolean {
+  for (const ftr of ctx.otherFilters) {
+    if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+      if (getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA && ctx.hasAraInclusion) continue;
+      pathRank.rank = EXCLUDE_RANK_BASE * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
+      return true;
+    }
+  }
+  return false;
+}
+
+function _processInferredEdgeSupport(ctx: PathRankingContext, edge: ResultEdge, pathRank: PathRank, depth: number): number | null {
+  const supportRanks: number[] = [];
+  for (const [j, sp] of edge.support.entries()) {
+    const supportPath = (typeof sp === "string") ? getPathById(ctx.resultSet, sp) : sp;
+    const supportRank = pathRank.support[j];
+    if (!supportPath) {
+      console.warn(`_updatePathRanks: found undefined or null support path in edge: ${edge}`);
+      continue;
+    }
+    const key = getPathKey(supportPath);
+    if (ctx.visited.has(key)) continue;
+    ctx.visited.add(key);
+    _updatePathRanks(ctx, supportPath, supportRank, depth + 1);
+    ctx.visited.delete(key);
+    if (supportRank && supportRank.rank !== undefined && supportRank.rank !== null) {
+      supportRanks.push(supportRank.rank);
+    }
+  }
+  const nonExcludedRanks = supportRanks.filter(rank => rank <= 0);
+  if (nonExcludedRanks.length === 0) {
+    pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+    return null;
+  }
+  const totalSupportRank = nonExcludedRanks.reduce((acc, rank) => rank + acc, 0);
+  return INCLUDE_RANK_BASE * totalSupportRank * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+}
+
+function _collectEdgeRanks(ctx: PathRankingContext, path: Path, pathRank: PathRank, depth: number): number[] | null {
+  const edgeRanks: number[] = [];
+  for (let i = 1; i < path.subgraph.length; i += 2) {
+    const edge = getEdgeById(ctx.resultSet, path.subgraph[i]);
+    if (!edge) {
+      console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
+      continue;
+    }
+    if (edge.inferred) {
+      const rank = _processInferredEdgeSupport(ctx, edge, pathRank, depth);
+      if (rank === null) return null;
+      edgeRanks.push(rank);
+    } else {
+      edgeRanks.push(_calcEdgeRank(edge, ctx.evidenceFilters));
+    }
+  }
+  return edgeRanks;
+}
+
+function _evaluateEdgeRanks(edgeRanks: number[], evidenceFilters: Filter[], pathRank: PathRank): boolean {
+  let edgesUnmatched = true;
+  for (const rank of edgeRanks) {
+    if (rank > 0) {
+      pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+      return true;
+    }
+    edgesUnmatched = edgesUnmatched && rank === 0;
+    pathRank.rank += rank;
+  }
+  if (edgesUnmatched && evidenceFilters.some(ftr => !ftr.negated)) {
+    pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+    return true;
+  }
+  return false;
+}
+
+function _applyInclusionFiltering(ctx: PathRankingContext, path: Path, pathRank: PathRank): void {
+  let include = true;
+  let lastFamily = null;
+  for (const ftr of ctx.otherFilters) {
+    if (!ftr.negated && ftr.id) {
+      const currentFamily = getFilterFamily(ftr);
+      if (currentFamily !== lastFamily) {
+        include &&= (path.tags[ftr.id] !== undefined);
+        lastFamily = currentFamily;
+      } else {
+        include ||= (path.tags[ftr.id] !== undefined);
       }
     }
-    return pathRank;
+    if (include) {
+      pathRank.rank += INCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+    }
+  }
+  if (!include) {
+    pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+  }
+}
+
+function _calcEdgeRank(edge: ResultEdge, evidenceFilters: Filter[]): number {
+  let edgeRank = 0;
+  for (const ftr of evidenceFilters) {
+    if (ftr.id && edge.tags[ftr.id] !== undefined) {
+      if (!ftr.negated) return -1;
+      edgeRank = 1;
+    }
+  }
+  return edgeRank;
+}
+
+function _updatePathRanks(ctx: PathRankingContext, path: Path, pathRank: PathRank, depth: number): void {
+  if (depth > MAX_SUPPORT_DEPTH) return;
+
+  const isIndirectEdge = isPathIndirectEdge(ctx.resultSet, path);
+  if (!isIndirectEdge && _applyPathExclusion(ctx, path, pathRank)) return;
+
+  const edgeRanks = _collectEdgeRanks(ctx, path, pathRank, depth);
+  if (edgeRanks === null) return;
+  if (_evaluateEdgeRanks(edgeRanks, ctx.evidenceFilters, pathRank)) return;
+
+  if (!isIndirectEdge) {
+    _applyInclusionFiltering(ctx, path, pathRank);
   }
 }
 
 export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: PathRank, pathFilters: Filter[]) => {
   if (pathFilters.length === 0) return;
-  const includeRankBase = -1;
-  const excludeRankBase = 1;
-  const evidenceFilters = [];
-  const otherFilters = [];
+  const evidenceFilters: Filter[] = [];
+  const otherFilters: Filter[] = [];
 
   for (const ftr of pathFilters) {
     if (isEvidenceFilter(ftr)) {
@@ -272,116 +406,20 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
       otherFilters.push(ftr);
     }
   }
-  const hasAraInclusion = otherFilters.some(
-    (ftr) => !ftr.negated && getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
-  );
-  const visited = new Set<string>([getPathKey(path)]);
-  _updatePathRanks(resultSet, path, pathRank, evidenceFilters, otherFilters, visited, 0);
 
-  function _updatePathRanks(resultSet: ResultSet, path: Path, pathRank: PathRank,
-      evidenceFilters: Filter[], otherFilters: Filter[],
-      visited: Set<string>, depth: number) {
-    if (depth > MAX_SUPPORT_DEPTH) return;
-    // Apply exclusion first
-    const isIndirectEdge = isPathIndirectEdge(resultSet, path);
-    if (!isIndirectEdge) {
-      for (const ftr of otherFilters) {
-        if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-          if (getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA && hasAraInclusion) continue;
-          pathRank.rank = excludeRankBase * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
-          return;
-        }
-      }
-    }
-    // Next apply edge level and indirect edge filtering
-    const edgeRanks = [];
-    for (let i = 1; i < path.subgraph.length; i += 2) {
-      const edge = getEdgeById(resultSet, path.subgraph[i]);
-      if (!edge) {
-        console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
-        continue;
-      };
-      if (edge.inferred) {
-        const supportRanks = [];
-        for (const [j, sp] of edge.support.entries()) {
-          const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
-          const supportRank = pathRank.support[j];
-          if (!supportPath) {
-            console.warn(`_updatePathRanks: found undefined or null support path in edge: ${edge}`);
-            continue;
-          }
-          const key = getPathKey(supportPath);
-          if (visited.has(key)) continue;
-          visited.add(key);
-          _updatePathRanks(resultSet, supportPath, supportRank, evidenceFilters, otherFilters, visited, depth + 1);
-          visited.delete(key);
-          if (supportRank && supportRank.rank !== undefined && supportRank.rank !== null) {
-            supportRanks.push(supportRank.rank);
-          }
-        }
-        const nonExcludedRanks = supportRanks.filter(rank => rank <= 0)
-        if (nonExcludedRanks.length === 0) {
-          pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-          return;
-        } else {
-          const totalSupportRank = nonExcludedRanks.reduce((acc: number, rank: number): number => {
-            return rank + acc;
-          }, 0);
-          edgeRanks.push(includeRankBase * totalSupportRank * FILTERING_CONSTANTS.WEIGHT.LIGHT);
-        }
-      } else {
-        edgeRanks.push(_calcEdgeRank(edge, evidenceFilters));
-      }
-    }
-    // Determine if path should be filtered by edge ranks
-    let edgesUnmatched = true;
-    for (const rank of edgeRanks) {
-      if (rank > 0) {
-        pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-        return;
-      }
-      edgesUnmatched = edgesUnmatched && rank === 0;
-      pathRank.rank += rank;
-    }
-    if (edgesUnmatched && evidenceFilters.some(ftr => !ftr.negated)) {
-      pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-      return;
-    }
-    if (isIndirectEdge) return;
-    // Finally apply inclusion based on other filters
-    otherFilters.sort();
-    let include = true;
-    let lastFamily = null;
-    for (let ftr of otherFilters) {
-      if (!ftr.negated && ftr.id) { // Exclusion was handled above
-        let currentFamily = getFilterFamily(ftr);
-        if (currentFamily !== lastFamily) {
-          include &&= (path.tags[ftr.id] !== undefined);
-          lastFamily = currentFamily;
-        } else {
-          include ||= (path.tags[ftr.id] !== undefined);
-        }
-      }
-      if (include) {
-        pathRank.rank += includeRankBase * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-      }
-    }
-    if (!include) {
-      pathRank.rank = excludeRankBase * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-    }
-  }
+  otherFilters.sort();
 
-  // Only remove edges if there is a matching exclusion filter and no matching inclusion filters
-  function _calcEdgeRank(edge: ResultEdge, evidenceFilters: Filter[]): number {
-    let edgeRank = 0;
-    for (const ftr of evidenceFilters) {
-      if (ftr.id && edge.tags[ftr.id] !== undefined) {
-        if (!ftr.negated) return -1;
-        edgeRank = 1;
-      }
-    }
-    return edgeRank;
-  }
+  const ctx: PathRankingContext = {
+    resultSet,
+    evidenceFilters,
+    otherFilters,
+    hasAraInclusion: otherFilters.some(
+      (ftr) => !ftr.negated && getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
+    ),
+    visited: new Set<string>([getPathKey(path)]),
+  };
+
+  _updatePathRanks(ctx, path, pathRank, 0);
 }
 
 export const pathRankSort = (pathRanks: PathRank[]) => {

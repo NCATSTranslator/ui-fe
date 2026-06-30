@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Core/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
@@ -129,34 +129,55 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
   return filteredSaves;
 }
 
+interface FormattedBookmarkObjectParams {
+  bookmarkType?: string;
+  bookmarkName: string;
+  notes?: string;
+  queryNodeID: number | string | undefined;
+  queryNodeLabel?: string;
+  queryNodeDescription?: string;
+  typeObject: QueryType | null;
+  saveItem: ResultBookmark;
+  pk: string;
+  resultSet: ResultSet;
+}
+
 /**
  * Constructs a save object for bookmarking based on the provided parameters
- * 
- * @param {string} [bookmarkType="result"] - The type of the bookmark (e.g., "result").
- * @param {string} bookmarkName - The name of the bookmark.
- * @param {string} [notes=""] - Additional notes associated with the bookmark.
- * @param {number} queryNodeID - The ID of the query node related to the bookmark.
- * @param {string} [queryNodeLabel=""] - The label of the query node.
- * @param {string} [queryNodeDescription=""] - The description of the query node.
- * @param {Object} typeObject - The type object associated with the bookmark.
- * @param {Object} saveItem - The item to be saved.
- * @param {string} pk - The primary key associated with the save.
+ *
+ * @param {FormattedBookmarkObjectParams} params - The bookmark parameters.
+ * @param {string} [params.bookmarkType="result"] - The type of the bookmark (e.g., "result").
+ * @param {string} params.bookmarkName - The name of the bookmark.
+ * @param {string} [params.notes=""] - Additional notes associated with the bookmark.
+ * @param {number} params.queryNodeID - The ID of the query node related to the bookmark.
+ * @param {string} [params.queryNodeLabel=""] - The label of the query node.
+ * @param {string} [params.queryNodeDescription=""] - The description of the query node.
+ * @param {Object} params.typeObject - The type object associated with the bookmark.
+ * @param {Object} params.saveItem - The item to be saved.
+ * @param {string} params.pk - The primary key associated with the save.
  * @returns {Save} The formatted bookmark object.
  */
-export const getFormattedBookmarkObject = (
-    bookmarkType: string = "result",
-    bookmarkName: string,
-    notes: string = "",
-    queryNodeID: number | string | undefined,
-    queryNodeLabel: string = "",
-    queryNodeDescription: string = "",
-    typeObject: QueryType | null,
-    saveItem: ResultBookmark,
-    pk: string,
-    resultSet: ResultSet
-  ): Save => { 
+export const getFormattedBookmarkObject = ({
+    bookmarkType = "result",
+    bookmarkName,
+    notes = "",
+    queryNodeID,
+    queryNodeLabel = "",
+    queryNodeDescription = "",
+    typeObject,
+    saveItem,
+    pk,
+    resultSet
+  }: FormattedBookmarkObjectParams): Save => { 
 
-    let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk, resultSet);
+    let queryObject = getQueryObjectForSave({
+      nodeID: queryNodeID,
+      nodeLabel: queryNodeLabel,
+      nodeDescription: queryNodeDescription,
+      typeObject,
+      pk,
+      resultSet
+    });
     return { 
       save_type: "bookmark", 
       label: bookmarkName, 
@@ -175,24 +196,34 @@ export const getFormattedBookmarkObject = (
     }
 }
 
+interface QueryObjectForSaveParams {
+  nodeID?: number | string;
+  nodeLabel?: string;
+  nodeDescription?: string;
+  typeObject: QueryType | null;
+  pk: string;
+  resultSet: ResultSet;
+}
+
 /**
  * Constructs a query object for saving, encapsulating node and type details.
- * 
- * @param {number} [nodeID=0] - The ID of the node related to the save.
- * @param {string} [nodeLabel=""] - The label of the node.
- * @param {string} [nodeDescription=""] - The description of the node.
- * @param {Object} typeObject - The type object for the save.
- * @param {string} pk - The primary key for the save.
+ *
+ * @param {QueryObjectForSaveParams} params - The query object parameters.
+ * @param {number} [params.nodeID=0] - The ID of the node related to the save.
+ * @param {string} [params.nodeLabel=""] - The label of the node.
+ * @param {string} [params.nodeDescription=""] - The description of the node.
+ * @param {Object} params.typeObject - The type object for the save.
+ * @param {string} params.pk - The primary key for the save.
  * @returns {Object} The constructed query object.
  */
-export const getQueryObjectForSave = (
-    nodeID: number | string = 0, 
-    nodeLabel: string = "", 
-    nodeDescription: string = "", 
-    typeObject: QueryType | null, 
-    pk: string,
-    resultSet: ResultSet
-  ): QueryObject => {
+export const getQueryObjectForSave = ({
+    nodeID = 0,
+    nodeLabel = "",
+    nodeDescription = "",
+    typeObject,
+    pk,
+    resultSet
+  }: QueryObjectForSaveParams): QueryObject => {
     return {
       type: typeObject, 
       nodeId: nodeID,
@@ -707,22 +738,23 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
   return [ user, loading ];
 };
 
+/**
+ * Resolves the string ID for a path reference, which may be a raw ID string or a Path object.
+ *
+ * @param {string | Path} pathRef - The original path reference (ID string or Path object).
+ * @param {Path | null | undefined} resolvedPath - The resolved Path object.
+ * @returns {string} The path ID, or an empty string when unavailable.
+ */
+const resolvePathId = (pathRef: string | Path, resolvedPath: Path | null | undefined): string =>
+  (typeof pathRef === "string") ? pathRef : (resolvedPath?.id ?? "");
+
 const getAllPathsFromResult = (resultSet: ResultSet, result: Result) => {
   let paths: {[key: string]: Path} = {};
 
   for(const pathID of result.paths) {
-    let path;
-    let tempPathID = "";
-    if(typeof pathID === "string") {
-      path = getPathById(resultSet, pathID);
-      tempPathID = pathID;
-    } else {
-      path = pathID;
-      tempPathID = (!!path?.id) ? path.id : "";
-    } 
-
-    if(!!path) 
-      paths[tempPathID] = path;
+    const path = (typeof pathID === "string") ? getPathById(resultSet, pathID) : pathID;
+    if(!!path)
+      paths[resolvePathId(pathID, path)] = path;
   }
   return paths;
 }
@@ -739,23 +771,29 @@ const getAllNodesFromPath = (resultSet: ResultSet, path: Path, nodes: {[key: str
     
   }
 }
+const collectSupportPaths = (resultSet: ResultSet, edge: ResultEdge, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
+  if(!edge.support)
+    return;
+
+  for(const supPathID of edge.support) {
+    const supPath = (typeof supPathID === "string") ? getPathById(resultSet, supPathID) : supPathID;
+    if(!supPath)
+      continue;
+
+    paths[resolvePathId(supPathID, supPath)] = supPath;
+    getAllEdgesFromPath(resultSet, supPath, paths, edges, nodes);
+    getAllNodesFromPath(resultSet, supPath, nodes);
+  }
+}
+
 const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
   for (let i = 1; i < path.subgraph.length; i += 2) {
     const edge = getEdgeById(resultSet, path.subgraph[i]); 
-    if(!!edge)
-      edges[path.subgraph[i]] = edge;
+    if(!edge)
+      continue;
 
-    if(!!edge?.support) {
-      for(const supPathID of edge.support) {
-        const supPath = (typeof supPathID === "string") ? getPathById(resultSet, supPathID) : supPathID; 
-        if(!!supPath) {
-          const tempSupPathID = (typeof supPathID === "string") ? supPathID : (supPath.id) ? supPath.id : "";
-          paths[tempSupPathID] = supPath;
-          getAllEdgesFromPath(resultSet, supPath, paths, edges, nodes);
-          getAllNodesFromPath(resultSet, supPath, nodes);
-        }
-      }
-    }
+    edges[path.subgraph[i]] = edge;
+    collectSupportPaths(resultSet, edge, paths, edges, nodes);
   }
 }
 const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string]: Path}) => {

@@ -1,6 +1,12 @@
-import { internalServerErrorToast, notFoundErrorToast, unauthorizedErrorToast } from "@/features/Core/utils/toastMessages";
+import { forbiddenErrorToast, internalServerErrorToast, notFoundErrorToast, unauthorizedErrorToast } from "@/features/Core/utils/toastMessages";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { checkProperties } from "@/features/Core/types/checkers";
+
+const stripTrailingEquals = (str: string): string => {
+  let end = str.length;
+  while (end > 0 && str[end - 1] === '=') end--;
+  return str.slice(0, end);
+};
 
 const buildOptions = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: unknown) => {
   const headers = {
@@ -46,26 +52,19 @@ export type ErrorHandler = (error: Error) => void;
 
 export const defaultHttpErrorHandler: ErrorHandler = (error: Error): void => {
   console.error('HTTP Error:', error.message);
-  if (error.message.includes('401'))
+  if (error.message.includes('401')) {
     unauthorizedErrorToast();
-
-    // TODO: redirect to login page
-  if (error.message.includes('403'))
-    // forbiddenErrorToast();
-
-    // TODO: redirect to login page
-  if (error.message.includes('404'))
+  } else if (error.message.includes('403')) {
+    forbiddenErrorToast();
+  } else if (error.message.includes('404')) {
     notFoundErrorToast();
-
-  if (error.message.includes('500'))
+  } else if (error.message.includes('500')) {
     internalServerErrorToast();
-
-  throw error;
+  }
 };
 
 export const defaultFetchErrorHandler: ErrorHandler = (error: Error): void => {
   console.error('Fetch Error:', error.message);
-  throw error;
 };
 
 /**
@@ -84,6 +83,39 @@ export const isErrorObject = (obj: unknown, warn = false): obj is ErrorObject =>
   ], warn);
 };
 
+const parseResponseBody = async (response: Response): Promise<unknown> => {
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  }
+  const textResponse = await response.text();
+  if (textResponse === 'OK') {
+    return textResponse;
+  }
+  try {
+    return JSON.parse(textResponse);
+  } catch {
+    return textResponse;
+  }
+};
+
+const handleFetchError = (
+  error: unknown,
+  httpErrorHandler: ErrorHandler,
+  fetchErrorHandler: ErrorHandler
+): never => {
+  if (error instanceof Error) {
+    if (error.message.includes('HTTP Error')) {
+      httpErrorHandler(error);
+    } else {
+      fetchErrorHandler(error);
+    }
+  } else {
+    fetchErrorHandler(new Error('Unknown error occurred'));
+  }
+  throw error;
+};
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -95,7 +127,7 @@ export const fetchWithErrorHandling = async <T>(
 ): Promise<T> => {
   try {
     const response = await fetchMethod();
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       if (isErrorObject(errorData)) {
@@ -104,45 +136,16 @@ export const fetchWithErrorHandling = async <T>(
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
       }
     }
-    
-    // Handle responses that might be plain text "OK" instead of JSON
-    const contentType = response.headers.get('content-type');
-    let data: unknown;
-    
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      // For non-JSON responses, try to get text first
-      const textResponse = await response.text();
-      // If the response is "OK", return it as is, otherwise try to parse as JSON
-      if (textResponse === 'OK') {
-        data = textResponse;
-      } else {
-        try {
-          data = JSON.parse(textResponse);
-        } catch {
-          // If it's not valid JSON, return the text as is
-          data = textResponse;
-        }
-      }
-    }
-    
+
+    const data = await parseResponseBody(response);
+
     if (responseValidator && !responseValidator(data)) {
       throw new Error('Invalid response format');
     }
-    
+
     return data as T;
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes('HTTP Error')) {
-        httpErrorHandler(error);
-      } else {
-        fetchErrorHandler(error);
-      }
-    } else {
-      fetchErrorHandler(new Error('Unknown error occurred'));
-    }
-    throw error;
+    return handleFetchError(error, httpErrorHandler, fetchErrorHandler);
   }
 };
 
@@ -165,7 +168,7 @@ export const fetchWithErrorHandling = async <T>(
 export const decodeBase64Param = (segment: string): string => {
   const uriDecoded = decodeURIComponent(segment);
   const standardB64 = uriDecoded.replace(/-/g, '+').replace(/_/g, '/');
-  const strippedPadding = standardB64.replace(/=+$/, '');
+  const strippedPadding = stripTrailingEquals(standardB64);
   const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
   return window.atob(normalizedB64);
 }
@@ -232,10 +235,11 @@ export const getDecodedParams = (): string => {
 export const encodeParams = (params: string): string => {
   if(!params)
     return "";
-  return window.btoa(params)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return stripTrailingEquals(
+    window.btoa(params)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+  );
 }
 
 /**
@@ -251,15 +255,37 @@ export const encodeParams = (params: string): string => {
  * @returns {string} The share URL path — either `results?{params}` when
  *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
-export const getResultsShareURLPath = (label: string, nodeID: string, typeID: string | number, resultID: string, pk: string | number, shouldHash: boolean = false) => {
+/**
+ * Builds a results share URL path from a raw query string, optionally hashing
+ * the parameters and appending the query id.
+ *
+ * @param {string} rawParams - The unencoded query parameters (without the `q` param).
+ * @param {string} resultID - The result id. Pass `'0'` for list-only links.
+ * @param {string | number} pk - The id of the query.
+ * @param {boolean} shouldHash - Whether to hash the parameters.
+ * @returns {string} `results?{params}` when resultID is `'0'`, otherwise `results/{resultID}?{params}`.
+ */
+const buildResultsShareURLPath = (rawParams: string, resultID: string, pk: string | number, shouldHash: boolean): string => {
   const params = shouldHash
-    ? `${encodeParams(`l=${label}&i=${nodeID}&t=${typeID}`)}&q=${pk}`
-    : `l=${label}&i=${nodeID}&t=${typeID}&q=${pk}`;
+    ? `${encodeParams(rawParams)}&q=${pk}`
+    : `${rawParams}&q=${pk}`;
 
-  if (resultID === '0')
-    return `results?${params}`;
+  return resultID === '0'
+    ? `results?${params}`
+    : `results/${resultID}?${params}`;
+}
 
-  return `results/${resultID}?${params}`;
+interface ResultsShareURLParams {
+  label: string;
+  nodeID: string;
+  typeID: string | number;
+  resultID: string;
+  pk: string | number;
+  shouldHash?: boolean;
+}
+
+export const getResultsShareURLPath = ({ label, nodeID, typeID, resultID, pk, shouldHash = false }: ResultsShareURLParams) => {
+  return buildResultsShareURLPath(`l=${label}&i=${nodeID}&t=${typeID}`, resultID, pk, shouldHash);
 }
 
 /**
@@ -275,18 +301,26 @@ export const getResultsShareURLPath = (label: string, nodeID: string, typeID: st
  * @returns {string} The share URL path — either `results?{params}` when
  *   resultID is `'0'`, or `results/{resultID}?{params}` otherwise.
  */
-export const getPathfinderResultsShareURLPath = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, resultID: string, constraint: string | undefined, pk: string, shouldHash: boolean = false) => {
+interface PathfinderShareURLParams {
+  itemOne: AutocompleteItem;
+  itemTwo: AutocompleteItem;
+  resultID: string;
+  constraint: string | undefined;
+  pk: string;
+  shouldHash?: boolean;
+}
+
+export const getPathfinderResultsShareURLPath = ({ itemOne, itemTwo, resultID, constraint, pk, shouldHash = false }: PathfinderShareURLParams) => {
   const labelOne = (itemOne.label) ? itemOne.label : null;
   const labelTwo = (itemTwo.label) ? itemTwo.label : null;
   const idOne = (itemOne.id) ? itemOne.id : null;
   const idTwo = (itemTwo.id) ? itemTwo.id : null;
   const constraintVar = !!constraint ?  `&c=${constraint}`: '';
-  const params = shouldHash
-    ? `${encodeParams(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`)}&q=${pk}`
-    : `lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}&q=${pk}`;
+  return buildResultsShareURLPath(`lone=${labelOne}&ltwo=${labelTwo}&ione=${idOne}&itwo=${idTwo}&t=p${constraintVar}`, resultID, pk, shouldHash);
+}
 
-  if (resultID === '0')
-    return `results?${params}`;
-
-  return `results/${resultID}?${params}`;
+export const getLookupResultsShareURLPath = (item: AutocompleteItem, objectCategory: string, resultID: string, pk: string, shouldHash: boolean = false) => {
+  const label = item.label || '';
+  const id = item.id || '';
+  return buildResultsShareURLPath(`lone=${label}&ione=${id}&cat=${objectCategory}&t=l`, resultID, pk, shouldHash);
 }

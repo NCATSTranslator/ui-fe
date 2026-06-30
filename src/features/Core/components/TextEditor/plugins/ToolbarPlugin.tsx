@@ -13,7 +13,7 @@ import {
   $createParagraphNode,
   $getNodeByKey,
   LexicalEditor,
-  TextFormatType,
+  LexicalNode,
   ElementFormatType
 } from "lexical";
 import {
@@ -258,6 +258,53 @@ function BlockOptionsDropdownList({
   );
 }
 
+interface TextFormatState {
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  strikethrough: boolean;
+  code: boolean;
+}
+
+const INITIAL_TEXT_FORMAT: TextFormatState = {
+  bold: false,
+  italic: false,
+  underline: false,
+  strikethrough: false,
+  code: false,
+};
+
+function getBlockTypeInfo(
+  anchorNode: LexicalNode,
+  element: LexicalNode
+): { blockType: string; codeLanguage: string } {
+  if ($isListNode(element)) {
+    const parentList = $getNearestNodeOfType(anchorNode, ListNode);
+    const type = parentList ? parentList.getTag() : element.getTag();
+    return { blockType: type, codeLanguage: "" };
+  }
+  const blockType = $isHeadingNode(element) ? element.getTag() : element.getType();
+  const codeLanguage = $isCodeNode(element)
+    ? (element.getLanguage() || getDefaultCodeLanguage())
+    : "";
+  return { blockType, codeLanguage };
+}
+
+const TEXT_FORMAT_BUTTONS: { format: keyof TextFormatState; label: string }[] = [
+  { format: "bold", label: "Format Bold" },
+  { format: "italic", label: "Format Italics" },
+  { format: "underline", label: "Format Underline" },
+  { format: "strikethrough", label: "Format Strikethrough" },
+  { format: "code", label: "Insert Code" },
+];
+
+const ALIGNMENT_BUTTONS: { format: ElementFormatType; label: string; icon: string; spaced: boolean }[] = [
+  { format: "left", label: "Left Align", icon: "left-align", spaced: true },
+  { format: "center", label: "Center Align", icon: "center-align", spaced: true },
+  { format: "right", label: "Right Align", icon: "right-align", spaced: true },
+  { format: "justify", label: "Justify Align", icon: "justify-align", spaced: false },
+];
+
 export default function ToolbarPlugin(): ReactNode {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -267,11 +314,7 @@ export default function ToolbarPlugin(): ReactNode {
   const [selectedElementKey, setSelectedElementKey] = useState<string | null>(null);
   const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>("");
-  const [isBold, setIsBold] = useState<boolean>(false);
-  const [isItalic, setIsItalic] = useState<boolean>(false);
-  const [isUnderline, setIsUnderline] = useState<boolean>(false);
-  const [isStrikethrough, setIsStrikethrough] = useState<boolean>(false);
-  const [isCode, setIsCode] = useState<boolean>(false);
+  const [textFormat, setTextFormat] = useState<TextFormatState>(INITIAL_TEXT_FORMAT);
 
   const updateToolbar = useCallback((): void => {
     const selection = $getSelection();
@@ -285,27 +328,19 @@ export default function ToolbarPlugin(): ReactNode {
       const elementDOM = editor.getElementByKey(elementKey);
       if (elementDOM !== null) {
         setSelectedElementKey(elementKey);
-        if ($isListNode(element)) {
-          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
-          const type = parentList ? parentList.getTag() : element.getTag();
-          setBlockType(type);
-        } else {
-          const type = $isHeadingNode(element)
-            ? element.getTag()
-            : element.getType();
-          setBlockType(type);
-          if ($isCodeNode(element)) {
-            setCodeLanguage(element.getLanguage() || getDefaultCodeLanguage());
-          }
+        const blockInfo = getBlockTypeInfo(anchorNode, element);
+        setBlockType(blockInfo.blockType);
+        if (blockInfo.codeLanguage) {
+          setCodeLanguage(blockInfo.codeLanguage);
         }
       }
-      // Update text format
-      setIsBold(selection.hasFormat("bold"));
-      setIsItalic(selection.hasFormat("italic"));
-      setIsUnderline(selection.hasFormat("underline"));
-      setIsStrikethrough(selection.hasFormat("strikethrough"));
-      setIsCode(selection.hasFormat("code"));
-
+      setTextFormat({
+        bold: selection.hasFormat("bold"),
+        italic: selection.hasFormat("italic"),
+        underline: selection.hasFormat("underline"),
+        strikethrough: selection.hasFormat("strikethrough"),
+        code: selection.hasFormat("code"),
+      });
     }
   }, [editor]);
 
@@ -418,90 +453,27 @@ export default function ToolbarPlugin(): ReactNode {
         </>
       ) : (
         <>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold" as TextFormatType);
-            }}
-            className={"toolbar-item spaced " + (isBold ? "active" : "")}
-            aria-label="Format Bold"
-          >
-            <i className="format bold" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic" as TextFormatType);
-            }}
-            className={"toolbar-item spaced " + (isItalic ? "active" : "")}
-            aria-label="Format Italics"
-          >
-            <i className="format italic" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline" as TextFormatType);
-            }}
-            className={"toolbar-item spaced " + (isUnderline ? "active" : "")}
-            aria-label="Format Underline"
-          >
-            <i className="format underline" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough" as TextFormatType);
-            }}
-            className={
-              "toolbar-item spaced " + (isStrikethrough ? "active" : "")
-            }
-            aria-label="Format Strikethrough"
-          >
-            <i className="format strikethrough" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code" as TextFormatType);
-            }}
-            className={"toolbar-item spaced " + (isCode ? "active" : "")}
-            aria-label="Insert Code"
-          >
-            <i className="format code" />
-          </button>
+          {TEXT_FORMAT_BUTTONS.map(({ format, label }) => (
+            <button
+              key={format}
+              onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, format)}
+              className={"toolbar-item spaced " + (textFormat[format] ? "active" : "")}
+              aria-label={label}
+            >
+              <i className={`format ${format}`} />
+            </button>
+          ))}
           <Divider />
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left" as ElementFormatType);
-            }}
-            className="toolbar-item spaced"
-            aria-label="Left Align"
-          >
-            <i className="format left-align" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center" as ElementFormatType);
-            }}
-            className="toolbar-item spaced"
-            aria-label="Center Align"
-          >
-            <i className="format center-align" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right" as ElementFormatType);
-            }}
-            className="toolbar-item spaced"
-            aria-label="Right Align"
-          >
-            <i className="format right-align" />
-          </button>
-          <button
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify" as ElementFormatType);
-            }}
-            className="toolbar-item"
-            aria-label="Justify Align"
-          >
-            <i className="format justify-align" />
-          </button>{" "}
+          {ALIGNMENT_BUTTONS.map(({ format, label, icon, spaced }) => (
+            <button
+              key={format}
+              onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, format)}
+              className={"toolbar-item" + (spaced ? " spaced" : "")}
+              aria-label={label}
+            >
+              <i className={`format ${icon}`} />
+            </button>
+          ))}
         </>
       )}
     </div>

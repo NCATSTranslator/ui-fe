@@ -3,8 +3,6 @@ import PathView from '@/features/ResultItem/components/PathView/PathView';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 
-const EMPTY_PATH_SET = new Set<Path>();
-
 interface PathViewSectionProps {
   path: Path;
   compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false;
@@ -28,7 +26,6 @@ const PathViewSection: FC<PathViewSectionProps> = ({
     <div className={styles.pathViewContainer}>
       <PathView
         pathArray={[path]}
-        selectedPaths={EMPTY_PATH_SET}
         handleEdgeSpecificEvidence={handleEdgeClick}
         activeEntityFilters={[]}
         pathFilterState={{}}

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import styles from "./ShareModal.module.scss";
 import Modal from "@/features/Core/components/Modal/Modal";
 import Button from "@/features/Core/components/Button/Button";
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath, getDecodedParams } from "@/features/Core/utils/web";
+import { getPathfinderResultsShareURLPath, getResultsShareURLPath, getLookupResultsShareURLPath, getDecodedParams } from "@/features/Core/utils/web";
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
@@ -60,6 +60,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
   const queryTypeID = typeID || getDataFromQueryVar("t", decodedParams) || '';
   const queryResultID = shareResultID || routeResultId || '0';
   const isPathfinder = queryTypeID === 'p';
+  const isLookup = queryTypeID === 'l';
 
   const shareContext: ShareContext = useMemo(() => {
     if (edgeId) return 'evidence';
@@ -90,9 +91,18 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
         score: Infinity
       };
       const constraint = getDataFromQueryVar('c', decodedParams) || "";
-      path = getPathfinderResultsShareURLPath(itemOne, itemTwo, queryResultID, constraint, qid, shouldHash);
+      path = getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: queryResultID, constraint, pk: qid, shouldHash });
+    } else if (isLookup) {
+      const item: AutocompleteItem = {
+        id: getDataFromQueryVar('ione', decodedParams) || "",
+        label: getDataFromQueryVar('lone', decodedParams) || "",
+        isExact: false,
+        score: Infinity
+      };
+      const objectCategory = getDataFromQueryVar('cat', decodedParams) || "";
+      path = getLookupResultsShareURLPath(item, objectCategory, queryResultID, qid, shouldHash);
     } else {
-      path = getResultsShareURLPath(queryLabel, queryItemID, queryTypeID, queryResultID, qid, shouldHash);
+      path = getResultsShareURLPath({ label: queryLabel, nodeID: queryItemID, typeID: queryTypeID, resultID: queryResultID, pk: qid, shouldHash });
     }
 
     return encodeURI(`${window.location.origin}/${path}`);

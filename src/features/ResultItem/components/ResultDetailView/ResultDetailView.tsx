@@ -10,7 +10,6 @@ import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
-import { Path } from '@/features/ResultList/types/results';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import Tabs from '@/features/Core/components/Tabs/Tabs';
@@ -65,9 +64,7 @@ const ResultDetailView: FC = () => {
     visibleResultIds,
   } = useResultListContext();
 
-
   const [graphActive, setGraphActive] = useState(false);
-  const [selectedPaths] = useState<Set<Path> | null>(null);
 
   const user = useSelector(currentUser);
   const evidenceCounts = useMemo(
@@ -234,7 +231,6 @@ const ResultDetailView: FC = () => {
               pathArray={result.paths}
               pathFilterState={pathFilterState ?? {}}
               pk={pk ?? ''}
-              selectedPaths={selectedPaths}
               setShowHiddenPaths={setShowHiddenPaths}
               showHiddenPaths={showHiddenPaths}
             />

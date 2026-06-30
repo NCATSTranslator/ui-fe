@@ -13,7 +13,6 @@ import { isPublication } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
 import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
-import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 
 const QUERY_AMOUNT = 200;
 const PUBMED_API_URL = 'https://docmetadata.transltr.io/publications';
@@ -495,61 +494,6 @@ export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
     setPublications,
   };
 }; 
-
-interface UseEvidenceModalStateProps {
-  edge: ResultEdge | null;
-  pk: string;
-}
-
-/**
- * Custom hook to manage the evidence modal state including selected edge, edge label, and seen status.
- *
- * @param {UseEvidenceModalStateProps} props - Object containing edge and pk (primary key).
- * @returns {Object} Returns an object containing modal state and utility functions for managing edge selection and seen status.
- */
-export const useEvidenceModalState = ({ edge, pk }: UseEvidenceModalStateProps) => {
-  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(edge);
-  const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
-  const [isPathViewMinimized, setIsPathViewMinimized] = useState(false);
-
-  const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
-  
-  const isInferred = useMemo(() => selectedEdge?.inferred ?? false, [selectedEdge]);
-  const edgeSeen = useMemo(() => 
-    !!selectedEdge?.id && isEdgeSeen(selectedEdge.id), 
-    [selectedEdge?.id, isEdgeSeen]
-  );
-
-  /**
-   * Toggles the seen status of the currently selected edge.
-   *
-   * @returns {void} - This function does not return a value but updates the seen status directly.
-   */
-  const handleToggleSeen = useCallback(() => {
-    if (!selectedEdge?.id) {
-      console.warn("Edge seen status cannot be toggled, selectedEdge is null.");
-      return;
-    }
-    
-    if (edgeSeen) {
-      markEdgeUnseen(selectedEdge.id);
-    } else {
-      markEdgeSeen(selectedEdge.id);
-    }
-  }, [selectedEdge?.id, edgeSeen, markEdgeSeen, markEdgeUnseen]);
-
-  return {
-    selectedEdge,
-    edgeLabel,
-    isPathViewMinimized,
-    isInferred,
-    edgeSeen,
-    handleToggleSeen,
-    setSelectedEdge,
-    setEdgeLabel,
-    setIsPathViewMinimized,
-  };
-};
 
 interface UseEdgeInitializationProps {
   edgeId: string | undefined;

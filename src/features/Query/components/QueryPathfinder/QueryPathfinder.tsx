@@ -1,6 +1,4 @@
 import { useState, useCallback, useRef, FC, useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
@@ -14,11 +12,13 @@ import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Core/components/Select/Select';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
+import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint } from '@/features/Query/hooks/customQueryHooks';
+import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ProjectRaw } from '@/features/Projects/types/projects';
+import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
 import { User } from '@/features/UserAuth/types/user';
 import { getDecodedParams } from '@/features/Core/utils/web';
 
@@ -40,9 +40,8 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const autocompleteOneId = 'ac1';
   const autocompleteTwoId = 'ac2';
-  const config = useSelector(currentConfig);
   const disabled = user === null;
-  const nameResolverEndpoint = (config?.name_resolver.endpoint) ? `${config.name_resolver.endpoint}/lookup` : 'https://name-lookup.transltr.io/lookup';
+  const nameResolverEndpoint = useNameResolverEndpoint();
   const submitRef = useRef<HTMLButtonElement>(null);
   const autocompleteInputRefOne = useRef<HTMLInputElement>(null);
   const autocompleteInputRefTwo = useRef<HTMLInputElement>(null);
@@ -114,10 +113,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     }
   },[delayedQueryOne, delayedQueryTwo]);
 
-  const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
+  const updateQueryItem = (node: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
-    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match && !selectedNode.label.includes(`(${selectedNode.match})`))
-      selectedNode.label += ` (${selectedNode.match})`;
+    const selectedNode = withGeneMatchLabel(node);
 
     if(isFirstBar) {
       setInputOneText(selectedNode.label);
@@ -268,14 +266,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       noanimate
                       className={styles.middleTypeSelector}
                       >
-                      <option value="biolink:AnatomicalEntity">Anatomical Entity</option>
-                      <option value="biolink:BiologicalProcess">Biological Process</option>
-                      <option value="biolink:CellLine">Cell Line</option>
-                      <option value="biolink:ChemicalEntity">Chemical</option>
-                      <option value="biolink:Disease">Disease</option>
-                      <option value="biolink:Drug">Drug</option>
-                      <option value="biolink:Gene">Gene/Protein</option>
-                      <option value="biolink:PhenotypicFeature">Phenotype</option>
+                      {BIOLINK_CATEGORIES.map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                      ))}
                     </Select>
                   </>
                 : 

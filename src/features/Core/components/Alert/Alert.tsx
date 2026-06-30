@@ -7,6 +7,7 @@ import Cross from '@/assets/icons/status/Alerts/Cancelled.svg?react';
 import Close from '@/assets/icons/buttons/Close/Close.svg?react';
 import { Fade } from "react-awesome-reveal";
 import styles from './Alert.module.scss';
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 export type AlertType = 'success' | 'warning' | 'error' | 'info';
 export type VerticalPosition = 'top' | 'middle' | 'bottom';
@@ -60,10 +61,7 @@ const Alert: FC<AlertProps> = ({
     [isFading]
   );
 
-  const containerClass = useMemo(() => 
-    `${type} ${verticalPosition} ${horizontalPosition}`, 
-    [type, verticalPosition, horizontalPosition]
-  );
+  const containerClass = joinClasses(type, verticalPosition, horizontalPosition);
 
   const Icon = ALERT_ICONS[type];
 
@@ -115,7 +113,7 @@ const Alert: FC<AlertProps> = ({
     return null;
 
   return (
-    <div className={`${styles.alert} ${className || ''}`}>
+    <div className={joinClasses(styles.alert, className)}>
       {buttonText && (
         <Button 
           handleClick={handleActivate}

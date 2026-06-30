@@ -1,5 +1,4 @@
-import { isObject } from "@/features/Core/types/checkers";
-import { checkProperties } from "@/features/Core/types/checkers";
+import { isObject, nullable, checkProperties } from "@/features/Core/types/checkers";
 import { ProjectRaw, Project, UserQueryObject, ProjectUpdate } from "./projects.d";
 
 export const isProjectRaw = (obj: unknown, warn = false): obj is ProjectRaw => {
@@ -75,13 +74,15 @@ export const isUserQueryObject = (obj: unknown, warn = false): obj is UserQueryO
     if (warn) console.warn("[isUserQueryObject] expected object, got:", typeof obj, obj);
     return false;
   }
+  const sid = obj.sid;
   if (!checkProperties("isUserQueryObject", obj, [
-    ["sid", "sid" in obj, "present", obj.sid],
+    ["sid", typeof sid === 'number', "number", sid],
     ["status", "status" in obj, "present", obj.status],
     ["data", isObject(obj.data), "object", obj.data],
   ], warn)) return false;
 
   const data = obj.data as Record<string, unknown>;
+  const statistics = data.statistics;
   if (!checkProperties("isUserQueryObject.data", data, [
     ["aras", "aras" in data, "present", data.aras],
     ["bookmark_ids", "bookmark_ids" in data, "present", data.bookmark_ids],
@@ -89,13 +90,21 @@ export const isUserQueryObject = (obj: unknown, warn = false): obj is UserQueryO
     ["note_count", "note_count" in data, "present", data.note_count],
     ["qid", "qid" in data, "present", data.qid],
     ["query", isObject(data.query), "object", data.query],
+    ["statistics", isObject(statistics), "object", statistics],
     ["time_created", "time_created" in data, "present", data.time_created],
     ["time_updated", "time_updated" in data, "present", data.time_updated],
+    ["time_viewed", "time_viewed" in data, "present", data.time_viewed],
     ["title", "title" in data, "present", data.title],
   ], warn)) return false;
 
+  const stats = statistics as Record<string, unknown>;
+  if (!checkProperties("isUserQueryObject.data.statistics", stats, [
+    ["result_count", nullable(stats.result_count, (v) => typeof v === 'number'), "number or null", stats.result_count],
+    ["aux_graph_count", nullable(stats.aux_graph_count, (v) => typeof v === 'number'), "number or null", stats.aux_graph_count],
+  ], warn)) return false;
+
   const query = data.query as Record<string, unknown>;
-  const validTypes = ['drug', 'gene', 'chemical', 'pathfinder'];
+  const validTypes = ['drug', 'gene', 'chemical', 'pathfinder', 'lookup'];
   return checkProperties("isUserQueryObject.data.query", query, [
     ["type", typeof query.type === 'string' && validTypes.includes(query.type), `one of: ${validTypes.join(', ')}`, query.type],
   ], warn);

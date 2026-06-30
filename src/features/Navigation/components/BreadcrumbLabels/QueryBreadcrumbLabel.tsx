@@ -7,9 +7,15 @@ import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 const QueryBreadcrumbLabel: FC = () => {
   const decodedParams = useDecodedParams();
   const queryType = getDataFromQueryVar("t", decodedParams);
-  const nodeOneLabel = queryType === "p" ? getDataFromQueryVar("lone", decodedParams) : getDataFromQueryVar("l", decodedParams) || '';
+  const nodeOneLabel = (queryType === "p" || queryType === "l")
+    ? getDataFromQueryVar("lone", decodedParams)
+    : getDataFromQueryVar("l", decodedParams) || '';
   const nodeTwoLabel = queryType === "p" ? getDataFromQueryVar("ltwo", decodedParams) : '';
-  const constraint = queryType === "p" ? getDataFromQueryVar("c", decodedParams) : null;
+  const constraint = queryType === "p"
+    ? getDataFromQueryVar("c", decodedParams)
+    : queryType === "l"
+      ? getDataFromQueryVar("cat", decodedParams)
+      : null;
 
   const queryTitle = generateQueryTitle(queryType, nodeOneLabel || '', nodeTwoLabel || '', constraint);
 

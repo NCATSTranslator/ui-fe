@@ -25,6 +25,14 @@ interface PublicationsTableProps {
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>
 }
 
+// Maps a sortable column to its sort type when the column is already active vs. inactive.
+// Note the "date" column intentionally inverts (active => low-high) to match prior behavior.
+const SORT_TYPE_VARIANTS: Record<string, { active: string; inactive: string }> = {
+  title: { active: 'titleHighLow', inactive: 'titleLowHigh' },
+  date: { active: 'dateLowHigh', inactive: 'dateHighLow' },
+  journal: { active: 'journalHighLow', inactive: 'journalLowHigh' },
+};
+
 const PublicationsTable: FC<PublicationsTableProps> = ({ 
   isOpen,
   pk,
@@ -64,11 +72,10 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
   }, [selectedEdgeId, resetPage]);
 
   const handleSort = useCallback((sortKey: string) => {
-    const sortType = sortKey === 'title' 
-      ? (state.sortingState.title ? 'titleHighLow' : 'titleLowHigh')
-      : sortKey === 'date'
-      ? (state.sortingState.date ? 'dateLowHigh' : 'dateHighLow')
-      : (state.sortingState.journal ? 'journalHighLow' : 'journalLowHigh');
+    const variantKey = sortKey in SORT_TYPE_VARIANTS ? sortKey : 'journal';
+    const isActive = state.sortingState[variantKey as keyof EvidenceSortState];
+    const variant = SORT_TYPE_VARIANTS[variantKey];
+    const sortType = isActive ? variant.active : variant.inactive;
 
     const sortingStateSetter = (newState: EvidenceSortState | ((prev: EvidenceSortState) => EvidenceSortState)) => {
       if (typeof newState === 'function') {

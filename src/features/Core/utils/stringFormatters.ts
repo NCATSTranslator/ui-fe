@@ -1,6 +1,7 @@
 const isRomanNumeral = (word: string): boolean => {
-  const romanNumeralPattern = /^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$/i;
-  return romanNumeralPattern.test(word);
+  const upper = word.toUpperCase();
+  if (!/^[MDCLXVI]+$/.test(upper)) return false;
+  return /^M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$/.test(upper);
 };
 
 export const formatBiolinkEntity = (string: string): string => {

@@ -13,7 +13,7 @@ import { isResultNode, isResultEdge } from '@/features/ResultList/types/checkers
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
+import { useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
@@ -34,7 +34,6 @@ export interface PathObjectProps {
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
-  selectedPaths: Set<Path> | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
   showHiddenPaths?: boolean;
 }
@@ -54,11 +53,12 @@ const PathObject: FC<PathObjectProps> = ({
   pathViewStyles = null,
   pk,
   selected,
-  selectedPaths,
   selectedEdgeRef,
   showHiddenPaths = true}) => {
 
   const { resultId, resultsNavigate } = useResultListContext();
+  const itemResultId = useResultItemId();
+  const effectiveResultId = resultId ?? itemResultId;
   const resultSet = useSelector(getResultSetById(pk));
 
   // ID of the main element (in the case of a compressed edge)
@@ -90,14 +90,14 @@ const PathObject: FC<PathObjectProps> = ({
   );
 
   const handleNodeClick = useCallback((node: ResultNode) => {
-    if (resultId) {
-      resultsNavigate(`/results/${resultId}/node/${node.id}`);
+    if (effectiveResultId) {
+      resultsNavigate(`/results/${effectiveResultId}/node/${node.id}`);
     } else if(Array.isArray(node.provenance) && node.provenance[0].length > 0 && node.provenance[0].includes("http")) {
       window.open(node.provenance[0], '_blank');
     } else {
       console.warn('Could not navigate to node, resultId is not set and no provenance is available');
     }
-  }, [resultId, resultsNavigate]);
+  }, [effectiveResultId, resultsNavigate]);
 
   if (!pathObject) {
     console.warn(`Could not generate PathObject, pathObject is ${String(pathObject)}`);
@@ -163,7 +163,6 @@ const PathObject: FC<PathObjectProps> = ({
                   pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}
                   parentStyles={styles}
-                  selectedPaths={selectedPaths}
                   pk={pk}
                   showHiddenPaths={showHiddenPaths}
                   selectedEdgeRef={selectedEdgeRef}

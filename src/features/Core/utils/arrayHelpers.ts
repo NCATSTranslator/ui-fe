@@ -19,12 +19,6 @@ export const getLastItemInArray = <T,>(arr: T[]): T | undefined => {
   return arr.at(-1);
 };
 
-export const getRandomIntInclusive = (min: number, max: number) => {
-  const ceiledMin = Math.ceil(min);
-  const flooredMax = Math.floor(max);
-  return Math.floor(Math.random() * (flooredMax - ceiledMin + 1)) + ceiledMin;
-};
-
 export const mergeObjectArrays = <T extends { [key: string]: unknown },>(array1: T[], array2: T[], uniqueProp: keyof T): T[] => {
   const mergedMap = new Map<unknown, T>();
 

@@ -10,9 +10,9 @@ export type ResultContextObject = {
 }
 
 export const genTopNResultsContext = (resultSet: ResultSet, results: Result[], n: number) => {
-  n = Math.min(n, results.length);
+  const newN = Math.min(n, results.length);
   const resultContexts = [];
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < newN; i++) {
     resultContexts.push(genResultContext(resultSet, results[i]));
   }
   return resultContexts;

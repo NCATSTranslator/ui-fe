@@ -4,6 +4,7 @@ import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { generateEntityLink, getEntityLink } from '@/features/Core/utils/entityLinks';
+import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
 import { useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
 import { generateQueryTitleFromQueryObject } from '@/features/Projects/utils/queryTitleUtils';
@@ -15,7 +16,9 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
     queryNodeID,
     queryNodeLabel,
     queryNodeDescription,
+    isLookup,
     isPathfinder,
+    lookupCategory,
     pathfinderIdOne,
     pathfinderLabelOne,
     pathfinderIdTwo,
@@ -39,6 +42,13 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
       }
       return <>What paths begin with {linkOne} and end with {linkTwo}?</>;
     }
+    if (isLookup) {
+      const entityLink = queryNodeID && queryNodeLabel
+        ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel, false)
+        : null;
+      const catDisplay = getBiolinkCategoryDisplay(lookupCategory || '', true);
+      return <>What {catDisplay} are connected to {entityLink}?</>;
+    }
     const questionText = (queryType?.label || '')
       .replaceAll("a disease?", "")
       .replaceAll("a chemical?", "")
@@ -47,7 +57,7 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
       ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel, false)
       : null;
     return <>{questionText}{entityLink}?</>;
-  }, [isPathfinder, pathfinderIdOne, pathfinderLabelOne, pathfinderIdTwo, pathfinderLabelTwo, constraintText, queryType, queryNodeID, queryNodeLabel]);
+  }, [isPathfinder, isLookup, lookupCategory, pathfinderIdOne, pathfinderLabelOne, pathfinderIdTwo, pathfinderLabelTwo, constraintText, queryType, queryNodeID, queryNodeLabel]);
 
   return (
     <div className={styles.resultListSubheading}>

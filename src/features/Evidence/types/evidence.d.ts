@@ -1,9 +1,3 @@
-export type EvidenceContainer = {
-  distinctSources: any;
-  length?: number;
-  publications: any;
-  sources: any;
-}
 export type PublicationObject = {
   id?: string;
   infores?: string[];
@@ -39,12 +33,6 @@ export type EvidenceCountsContainer = {
   miscCount: number;
   publicationCount: number;
   sourceCount: number;
-}
-export type OldEvidence = {
-  distinctSources: any[];
-  length: number;
-  publications: {[key: string]: PublicationObject};
-  sources: any[];
 }
 
 export type Provenance = {

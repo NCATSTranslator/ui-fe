@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
+import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries, useNameResolverEndpoint } from "@/features/Query/hooks/customQueryHooks";
+import { withGeneMatchLabel } from "@/features/Query/utils/autocompleteFunctions";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import styles from './Query.module.scss';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
@@ -37,9 +38,7 @@ const Query: FC<QueryProps> = ({
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser) as User | null;
 
-  const nameResolverEndpoint = config?.name_resolver.endpoint
-    ? `${config.name_resolver.endpoint}/lookup`
-    : 'https://name-lookup.transltr.io/lookup';
+  const nameResolverEndpoint = useNameResolverEndpoint();
 
   const {
     queryItem,
@@ -99,11 +98,9 @@ const Query: FC<QueryProps> = ({
 
   const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
-    if (item.id.includes("NCBIGene") && item?.match) {
-      item.label += ` (${item.match})`;
-    }
-    setInputText(item.label);
-    setQueryItem((prev) => ({ type: prev.type, node: item }));
+    const labeledItem = withGeneMatchLabel(item);
+    setInputText(labeledItem.label);
+    setQueryItem((prev) => ({ type: prev.type, node: labeledItem }));
     setAutocompleteVisibility(false);
   }, [setInputText, setQueryItem, setAutocompleteVisibility]);
 
