@@ -45,7 +45,7 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
         <div className={styles.labelContainer}>
           {edgeLabel && <p className={styles.subtitle}> Path {pathKey} Evidence</p>}
           <span className={styles.sep}>·</span>
-          <p className={styles.toggleSeen} onClick={handleToggleSeen}>
+          <p className={styles.toggleSeen} onClick={handleToggleSeen} role="button" tabIndex={0}>
             Mark as {edgeSeen ? "Unseen" : "Seen"}
           </p>
         </div>
