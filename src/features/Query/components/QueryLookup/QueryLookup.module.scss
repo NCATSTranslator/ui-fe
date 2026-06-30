@@ -17,7 +17,7 @@
 }
 .form {
   display: grid;
-  grid-template-columns: 1fr 24px 268px 40px;
+  grid-template-columns: 1fr 9px 24px 268px 40px;
   gap: $xs;
   align-items: center;
   box-shadow: $dropShadow;
@@ -26,6 +26,9 @@
   background-color: $white;
   margin: 0 auto;
   position: relative;
+  .dividerVert {
+    justify-self: center;
+  }
   .categoryIcon {
     display: flex;
     align-items: center;

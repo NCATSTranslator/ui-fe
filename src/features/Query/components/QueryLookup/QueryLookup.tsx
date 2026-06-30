@@ -15,6 +15,7 @@ import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
 import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
+import DividerVert from '@/features/Core/components/DividerVert/DividerVert';
 
 type QueryLookupProps = {
   isResults?: boolean;
@@ -150,8 +151,8 @@ const QueryLookup: FC<QueryLookupProps> = ({
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRef}
-                showDisclaimer
               />
+              <DividerVert className={styles.dividerVert} />
               <span className={styles.categoryIcon}>{getNodeIcon(objectCategory)}</span>
               <Select
                 label=""
