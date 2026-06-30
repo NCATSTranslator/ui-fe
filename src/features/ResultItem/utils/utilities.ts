@@ -169,29 +169,19 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
   subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**
- * Compresses paths, marks highlighted selections, and sorts them.
- * Paths are sorted via sortArrayByIndirect (inferred status, length, highlighted, filter state).
+ * Compresses paths and sorts them.
+ * Paths are sorted via sortArrayByIndirect (inferred status, length, filter state).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @param {PathFilterState} pathFilterState - The current Path Filter State
- * @param {Set<Path> | null} selectedPaths - The currently selected paths
  * @returns {Path[]} - The array of properly formatted paths.
  */
-export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null) => {
+export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState) => {
   if(!paths || !resultSet)
     return [];
 
-  let newPaths = getCompressedPaths(resultSet, paths);
-
-  if(selectedPaths !== null && selectedPaths.size > 0) {
-    for(const selPath of selectedPaths) {
-      for(const path of newPaths) {
-        if(selPath?.id && path?.id && selPath.id === path.id)
-          path.highlighted = true;
-      }
-    }
-  }
+  const newPaths = getCompressedPaths(resultSet, paths);
 
   return sortArrayByIndirect(resultSet, newPaths, pathFilterState);
 }
@@ -200,8 +190,7 @@ export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (s
  * Sorts paths for top-level display. Priority order:
  * 1. Non-inferred before inferred
  * 2. Shorter subgraph (fewer hops) before longer
- * 3. Highlighted before non-highlighted
- * 4. Non-filtered before filtered
+ * 3. Non-filtered before filtered
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {Path[]} paths - An array of paths.
@@ -219,8 +208,6 @@ export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], 
       const lengthDiff = (a.subgraph?.length ?? 0) - (b.subgraph?.length ?? 0);
       if(lengthDiff !== 0)
         return lengthDiff;
-      if(a.highlighted !== b.highlighted)
-        return a.highlighted ? -1 : 1;
       if(pathFilterState) {
         const aFiltered = (a?.id && pathFilterState[a.id] === true) ? 1 : 0;
         const bFiltered = (b?.id && pathFilterState[b.id] === true) ? 1 : 0;
@@ -340,11 +327,6 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
           ].filter((id): id is string => id !== undefined)
         )
       );
-
-      // Merge highlighted
-      if (checkedPath.highlighted) {
-        existingPath.highlighted = true;
-      }
     } else {
       // Add the current path to the map
       groupedPaths.set(pathSequence, {

@@ -53,7 +53,6 @@ export interface Path {
   compressedIDs?: string[];
   // Compressed subgraph with edges as arrays
   compressedSubgraph?: (string | string[])[] | null;
-  highlighted?: boolean;
   id?: string;
   score?: number;
   // Original subgraph

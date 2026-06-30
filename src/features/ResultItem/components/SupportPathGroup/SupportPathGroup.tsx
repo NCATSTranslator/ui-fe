@@ -10,7 +10,7 @@ import { Path, PathFilterState } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { intToChar, intToNumeral } from '@/features/Core/utils/stringFormatters';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
-import { getPathsWithSelectionsSet, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
+import { getFormattedPaths, getFilteredPathCount, getIsPathFiltered, getPathIdSet } from '@/features/ResultItem/utils/utilities';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { useSupportPathDepth, useSupportPathKey } from '@/features/ResultItem/hooks/resultHooks';
@@ -30,7 +30,6 @@ interface SupportPathGroupProps {
   pathArray: (string | Path)[];
   pathViewStyles: {[key: string]: string;} | null;
   pk: string;
-  selectedPaths: Set<Path> | null;
   showHiddenPaths: boolean;
 }
 
@@ -45,20 +44,19 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
   pathArray,
   pathViewStyles,
   pk,
-  selectedPaths,
   showHiddenPaths }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ? getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const formattedPaths = useMemo(() => {
-    const newPaths = getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths);
+    const newPaths = getFormattedPaths(resultSet, paths, pathFilterState);
     if(activeEntityFilters.length > 0 && !!resultSet) {
       return sortSupportByEntityStrings(resultSet, newPaths, activeEntityFilters);
     // otherwise sort by shortest path length first
     } else {
       return sortSupportByLength(newPaths);
     }
-  }, [paths, selectedPaths, pathFilterState, resultSet, activeEntityFilters]);
+  }, [paths, pathFilterState, resultSet, activeEntityFilters]);
   const filteredPaths = useMemo(() => {
     return formattedPaths.filter((path) => {
       return showHiddenPaths ? true : !getIsPathFiltered(path, pathFilterState);
@@ -135,7 +133,6 @@ const SupportPathGroup: FC<SupportPathGroupProps> = ({
                     pathFilterState={pathFilterState}
                     path={supportPath}
                     handleEdgeClick={handleEdgeClick}
-                    selectedPaths={selectedPaths}
                     pathViewStyles={pathViewStyles}
                     activeEntityFilters={activeEntityFilters}
                     activeFilters={activeFilters}
