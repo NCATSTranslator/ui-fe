@@ -55,14 +55,14 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     handleItemsPerPageChange,
     resetPage,
   } = usePagination(publications, getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE));
-  usePubmedDataFetch(
+  usePubmedDataFetch({
     isOpen,
     publications,
     selectedEdgeId,
     prefs,
     setPublications,
-    updateState
-  );
+    updateState,
+  });
 
   // Reset to the first page whenever the selected edge changes (skip initial mount).
   const didMountRef = useRef(false);
