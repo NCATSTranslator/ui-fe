@@ -1,7 +1,6 @@
 import { getPathCount, isPathIndirectEdge, getStringNameFromPath, getDefaultEdge } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
 import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
-import { isPublicationObjectArray } from '@/features/Evidence/types/checkers';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
@@ -27,16 +26,20 @@ const compareWithFallback = (
     : bText.localeCompare(aText);
 }
 
-export const sortNameLowHigh = (items: Result[] | PublicationObject[]) => {
-  return isPublicationObjectArray(items)
-    ? items.sort((a, b) => compareWithFallback(a.title, b.title, 'asc'))
-    : items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'asc'));
+export const sortNameLowHigh = (items: Result[]) => {
+  return items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'asc'));
 };
 
-export const sortNameHighLow = (items: Result[] | PublicationObject[]) => {
-  return isPublicationObjectArray(items)
-    ? items.sort((a, b) => compareWithFallback(a.title, b.title, 'desc'))
-    : items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'desc'));
+export const sortNameHighLow = (items: Result[]) => {
+  return items.sort((a, b) => compareWithFallback(a.drug_name, b.drug_name, 'desc'));
+};
+
+export const sortTitleLowHigh = (items: PublicationObject[]) => {
+  return items.sort((a, b) => compareWithFallback(a.title, b.title, 'asc'));
+};
+
+export const sortTitleHighLow = (items: PublicationObject[]) => {
+  return items.sort((a, b) => compareWithFallback(a.title, b.title, 'desc'));
 };
 
 export const sortJournalLowHigh = (items: PublicationObject[]) => {
