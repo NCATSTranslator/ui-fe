@@ -1,0 +1,334 @@
+@use "@/assets/styles" as *;
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $m;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+}
+
+// List views (query results list, paths list)
+.listView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $xs $s;
+  border-bottom: 1px solid $midGray;
+}
+
+.listCount {
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $darkGray;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: $xxxs;
+  padding: $xs $s;
+  border: none;
+  border-bottom: 1px solid $midGray;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+  width: 100%;
+
+  &:hover {
+    background: $hoverGray;
+  }
+}
+
+.listItemMain {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+}
+
+.listItemName {
+  font-size: $bodyTwoSize;
+  font-weight: 600;
+  color: $black;
+}
+
+.listItemType {
+  font-size: $captionSize;
+  color: $darkGray;
+  background: $lightGray;
+  padding: 1px $xxs;
+  border-radius: $defaultBorderRadius;
+}
+
+.listItemMeta {
+  display: flex;
+  gap: $xs;
+  font-size: $captionSize;
+  color: $darkGray;
+}
+
+.pathPreview {
+  font-size: $captionSize;
+  color: $midDarkGray;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Detail views (result, node, evidence, path)
+.detailView {
+  display: flex;
+  flex-direction: column;
+  padding: $s;
+  gap: $s;
+}
+
+.detailHeader {
+  display: flex;
+  flex-direction: column;
+  gap: $xxs;
+}
+
+.detailNameRow {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+  flex-wrap: wrap;
+}
+
+.detailName {
+  font-size: $subOneSize;
+  font-weight: 700;
+  color: $black;
+}
+
+.detailSub {
+  font-size: $bodyTwoSize;
+  color: $darkGray;
+}
+
+.detailDescription {
+  font-size: $bodyTwoSize;
+  color: $darkGray;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.typeChip {
+  font-size: $captionSize;
+  color: $purpleOne;
+  background: $lightPurpleOne;
+  padding: 1px $xs;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.onCanvasBadge {
+  font-size: $captionSize;
+  color: $green;
+  font-weight: 600;
+}
+
+.statsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $xs;
+}
+
+.stat {
+  font-size: $captionSize;
+  color: $darkGray;
+  background: $lightGray;
+  padding: $xxxs $xs;
+  border-radius: $defaultBorderRadius;
+}
+
+.addToGraphButton {
+  align-self: flex-start;
+  padding: $xxs $s;
+  font-size: $bodyTwoSize;
+  font-weight: 600;
+  color: $white;
+  background: $purpleTwo;
+  border: none;
+  border-radius: $defaultBorderRadius;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $purpleOne;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+}
+
+.sectionTitle {
+  font-size: $captionSize;
+  font-weight: 700;
+  color: $darkGray;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.detailList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $xxs;
+}
+
+.detailListItem {
+  font-size: $captionSize;
+  color: $darkGray;
+  background: $lightGray;
+  padding: $xxxs $xs;
+  border-radius: $defaultBorderRadius;
+}
+
+.fieldRow {
+  display: flex;
+  gap: $xs;
+  font-size: $bodyTwoSize;
+  align-items: baseline;
+}
+
+.fieldLabel {
+  font-weight: 600;
+  color: $darkGray;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+// Evidence view edge label
+.edgeLabel {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+  flex-wrap: wrap;
+}
+
+.edgeNodeName {
+  font-size: $bodyTwoSize;
+  font-weight: 600;
+  color: $black;
+}
+
+.edgePredicate {
+  font-size: $captionSize;
+  color: $purpleTwo;
+  font-style: italic;
+}
+
+// Evidence source items
+.sourceItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $xxs $xs;
+  background: $lightGray;
+  border-radius: $defaultBorderRadius;
+}
+
+.sourceName {
+  font-size: $bodyTwoSize;
+  color: $black;
+}
+
+.sourceLevel {
+  font-size: $captionSize;
+  color: $darkGray;
+}
+
+// Path chain visualization
+.pathChain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pathChainItem {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
+
+.pathNode {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: $xxs $xs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  cursor: pointer;
+  transition: $defaultAnim;
+  width: 100%;
+
+  &:hover {
+    background: $hoverGray;
+    border-color: $purpleTwo;
+  }
+}
+
+.pathNodeName {
+  font-size: $bodyTwoSize;
+  font-weight: 600;
+  color: $black;
+}
+
+.pathNodeType {
+  font-size: $captionSize;
+  color: $darkGray;
+}
+
+.pathEdge {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: $xxxs $s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    .pathEdgeLabel {
+      text-decoration: underline;
+    }
+  }
+}
+
+.pathEdgeLabel {
+  font-size: $captionSize;
+  color: $purpleTwo;
+  font-style: italic;
+}
+
+.pathEdgeInferred {
+  font-size: $captionSize;
+  color: $midDarkGray;
+}
+
+.pathArrow {
+  color: $midDarkGray;
+  font-size: $captionSize;
+  margin-left: auto;
+}

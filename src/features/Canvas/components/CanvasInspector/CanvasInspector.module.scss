@@ -1,0 +1,140 @@
+@use "@/assets/styles" as *;
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  min-width: 360px;
+  border-left: 1px solid $midGray;
+  background: $white;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $xs;
+  padding: $xs $s;
+  min-height: 36px;
+  border-bottom: 1px solid $midGray;
+  background: $lightGray;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  min-width: 0;
+  flex: 1;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: $defaultBorderRadius;
+  background: transparent;
+  color: $darkGray;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $grayHover;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.breadcrumbSeparator {
+  color: $midDarkGray;
+  font-size: $captionSize;
+  margin: 0 $xxs;
+}
+
+.breadcrumbLink {
+  font-size: $captionSize;
+  color: $purpleTwo;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.breadcrumbCurrent {
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $black;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: $defaultBorderRadius;
+  background: transparent;
+  color: $darkGray;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $grayHover;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+}
