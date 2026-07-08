@@ -88,25 +88,7 @@ export const queryTypes: QueryType[] = [
     pathString: 'activity may be decreased by',
     searchTypeString: 'chemical',
     iconString: 'genedown'
-  },
-  // lookup query type
-  {
-    id: 5,
-    label: 'What direct connections exist between the search term and a chosen type?',
-    placeholder: 'Enter a Search Term',
-    targetType: '',
-    direction: null,
-    filterType: '',
-    limitPrefixes: [],
-    functions: {
-      filter: defaultQueryFilterFactory(''),
-      annotate: queryTypeAnnotator,
-      format: combinedQueryFormatter,
-    },
-    pathString: '',
-    searchTypeString: '',
-    iconString: ''
-  },
+  }
 ]
 
 export const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
