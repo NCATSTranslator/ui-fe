@@ -1,0 +1,14 @@
+@use "@/assets/styles" as *;
+
+.canvasGraph {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.graphArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
