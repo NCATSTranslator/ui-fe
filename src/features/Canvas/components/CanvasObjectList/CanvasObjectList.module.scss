@@ -1,0 +1,404 @@
+@use "@/assets/styles" as *;
+
+.objectList {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  min-width: 260px;
+  border-left: 1px solid $midGray;
+  background: $white;
+  overflow: hidden;
+}
+
+.collapsed {
+  display: flex;
+  flex-direction: column;
+  width: 36px;
+  min-width: 36px;
+  border-left: 1px solid $midGray;
+  background: $lightGray;
+}
+
+.collapseToggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $xs;
+  padding: $xs $xxs;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $grayHover;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+    color: $darkGray;
+    transform: rotate(180deg);
+  }
+}
+
+.collapseLabel {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $darkGray;
+  white-space: nowrap;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: 1px solid $midGray;
+  background: $lightGray;
+}
+
+.collapseButton {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: $xs $xs $xs $xs;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex: 1;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $grayHover;
+  }
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    color: $darkGray;
+  }
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.headerTitle {
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $black;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid $midGray;
+}
+
+.tab {
+  flex: 1;
+  padding: $xxs $xs;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $darkGray;
+  cursor: pointer;
+  transition: $defaultAnim;
+  white-space: nowrap;
+
+  &:hover {
+    color: $black;
+    background: $hoverGray;
+  }
+
+  &.activeTab {
+    color: $purpleTwo;
+    border-bottom-color: $purpleTwo;
+  }
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: $xxs;
+  padding: $xs;
+  border-bottom: 1px solid $midGray;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  padding: $xxxs $xxs;
+  background: $white;
+  transition: $defaultAnim;
+
+  &:focus-within {
+    border-color: $purpleTwo;
+  }
+}
+
+.searchIcon {
+  width: 14px;
+  height: 14px;
+  color: $midDarkGray;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: $captionSize;
+  color: $black;
+  width: 100%;
+  background: transparent;
+
+  &::placeholder {
+    color: $placeholderGray;
+  }
+}
+
+.sortWrapper {
+  position: relative;
+}
+
+.sortButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: $xxxs $xxs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  font-size: $captionSize;
+  color: $darkGray;
+  cursor: pointer;
+  transition: $defaultAnim;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    border-color: $midDarkGray;
+  }
+}
+
+.sortDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+  margin-top: $xxxs;
+}
+
+.sortOption {
+  padding: $xxs $xs;
+  border: none;
+  background: transparent;
+  font-size: $captionSize;
+  color: $black;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+
+  &.activeSortOption {
+    color: $purpleTwo;
+    font-weight: 600;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $xs;
+  padding: $m $s;
+  text-align: center;
+
+  p {
+    font-size: $captionSize;
+    color: $darkGray;
+    margin: 0;
+  }
+}
+
+.emptyAction {
+  padding: $xxs $s;
+  font-size: $captionSize;
+  font-weight: 600;
+  color: $purpleTwo;
+  background: transparent;
+  border: 1px solid $purpleTwo;
+  border-radius: $defaultBorderRadius;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+}
+
+.nodeList {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nodeItem {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $midGray;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: $hoverGray;
+
+    .nodeMenuButton {
+      opacity: 1;
+    }
+  }
+}
+
+.nodeItemContent {
+  display: flex;
+  flex-direction: column;
+  gap: $xxxs;
+  flex: 1;
+  padding: $xxs $xs;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.nodeName {
+  font-size: $bodyTwoSize;
+  font-weight: 600;
+  color: $black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nodeMeta {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  flex-wrap: wrap;
+}
+
+.typeChip {
+  font-size: 10px;
+  color: $purpleOne;
+  background: $lightPurpleOne;
+  padding: 0 $xxs;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.edgeCount {
+  font-size: 10px;
+  color: $midDarkGray;
+}
+
+.nodeMenuWrapper {
+  position: relative;
+  flex-shrink: 0;
+  padding-right: $xxs;
+}
+
+.nodeMenuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: $defaultBorderRadius;
+  background: transparent;
+  color: $darkGray;
+  cursor: pointer;
+  opacity: 0;
+  transition: $defaultAnim;
+
+  &:hover,
+  &.active {
+    background: $grayHover;
+    opacity: 1;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.nodeMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadow;
+}
+
+.nodeMenuItem {
+  padding: $xxs $xs;
+  border: none;
+  background: transparent;
+  font-size: $captionSize;
+  color: $black;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+}
+
+.annotationItem {
+  padding: $xxs $xs;
+  border-bottom: 1px solid $midGray;
+}
+
+.annotationText {
+  font-size: $bodyTwoSize;
+  color: $black;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
