@@ -92,3 +92,14 @@ export const bookmarkErrorToast = () => {
 export const queryStatusResultsCompleteToast = () => {
   return toast(AppToast, { data: { topText: 'Results Complete' } });
 };
+
+// Canvas
+export const canvasEntityAddedToast = (entityName: string, canvasTitle: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: `Added to ${canvasTitle}` } });
+};
+export const canvasEntitiesAddedToast = (count: number, canvasTitle: string) => {
+  return toast(AppToast, { data: { topText: `${count} entities added`, bottomText: `Added to ${canvasTitle}` } });
+};
+export const canvasEntityAlreadyAddedToast = (entityName: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: 'Already on this canvas' } });
+};
