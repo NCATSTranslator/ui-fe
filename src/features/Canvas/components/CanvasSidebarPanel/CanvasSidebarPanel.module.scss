@@ -1,0 +1,82 @@
+@use "@/assets/styles" as *;
+
+.canvasesPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+  padding-bottom: $s;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  margin-bottom: $s;
+}
+
+.searchInput {
+  margin: 0;
+}
+
+.sortToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  color: $darkGray;
+  cursor: pointer;
+  transition: $defaultAnim;
+  background-color: transparent;
+  svg {
+    width: 18px;
+    height: 18px;
+    transform: rotate(90deg);
+    path {
+      fill: $purpleOne;
+    }
+  }
+
+  &:hover {
+    border-color: $midDarkGray;
+    color: $black;
+  }
+}
+
+.createButton {
+  svg path {
+    stroke: $white;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $xs;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.empty {
+  padding: $s $xs;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+  text-align: center;
+}
+
+.activeCanvas {
+  background-color: $lightPurpleTwo;
+}
+
+.count {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+}
