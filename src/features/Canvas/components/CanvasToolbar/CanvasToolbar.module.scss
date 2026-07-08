@@ -1,0 +1,247 @@
+@use "@/assets/styles" as *;
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 $s;
+  border-bottom: 1px solid $midGray;
+  background: $white;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.title {
+  font-size: $subTwoSize;
+  font-weight: 600;
+  color: $black;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+.titleInput {
+  font-size: $subTwoSize;
+  font-weight: 600;
+  color: $black;
+  border: 1px solid $purpleTwo;
+  border-radius: $defaultBorderRadius;
+  padding: 2px $xxs;
+  outline: none;
+  width: 200px;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+}
+
+.zoomGroup {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
+
+.zoomLevel {
+  font-size: $captionSize;
+  color: $darkGray;
+  min-width: 36px;
+  text-align: center;
+  user-select: none;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: $midGray;
+}
+
+.layoutGroup {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
+
+.layoutButton {
+  font-size: $captionSize;
+  padding: 4px $xs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  color: $black;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+
+  &.active {
+    background: $purpleTwo;
+    border-color: $purpleTwo;
+    color: $white;
+  }
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
+
+.toolButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: $defaultBorderRadius;
+  background: transparent;
+  color: $darkGray;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover:not(:disabled) {
+    background: $grayHover;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  &.active {
+    background: $grayHover;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.addMenuWrapper {
+  position: relative;
+  margin-left: $xs;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: 4px $xs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  color: $black;
+  font-size: $captionSize;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+
+  &.active {
+    background: $hoverGray;
+    border-color: $purpleTwo;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.addMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 140px;
+  padding: $xxs 0;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: 0 2px 8px $dropShadowColor;
+  z-index: 10;
+}
+
+.addMenuItem {
+  display: block;
+  width: 100%;
+  padding: $xxs $s;
+  border: none;
+  background: transparent;
+  color: $black;
+  font-size: $captionSize;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+}
+
+.processingIndicator {
+  font-size: $captionSize;
+  color: $purpleTwo;
+  font-style: italic;
+  margin-left: $xs;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.overflowWrapper {
+  position: relative;
+}
+
+.overflowMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  padding: $xxs 0;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: 0 2px 8px $dropShadowColor;
+  z-index: 10;
+}
+
+.overflowItem {
+  display: block;
+  width: 100%;
+  padding: $xxs $s;
+  border: none;
+  background: transparent;
+  color: $black;
+  font-size: $captionSize;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover:not(:disabled) {
+    background: $hoverGray;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
