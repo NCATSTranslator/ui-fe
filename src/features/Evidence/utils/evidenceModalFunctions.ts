@@ -1,6 +1,6 @@
 // Focus: Evidence modal-specific functionality and UI state management
 import { Dispatch, SetStateAction } from 'react';
-import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
+import { sortTitleHighLow, sortTitleLowHigh, sortJournalHighLow, sortJournalLowHigh,
   sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Core/utils/sortingFunctions';
 import cloneDeep from 'lodash/cloneDeep';
 import { EvidenceSortState, PublicationObject, SortingState, SortPreference } from '@/features/Evidence/types/evidence';
@@ -28,13 +28,13 @@ export const handleEvidenceSort = (
   let newSortingState: EvidenceSortState = { title: null, journal: null, date: null };
   switch (sortName) {
     case 'titleLowHigh':
-      sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence) as PublicationObject[];
+      sortedPubmedEvidence = sortTitleLowHigh(sortedPubmedEvidence);
       newSortingState.title = true;
       newSortingState.journal = null;
       newSortingState.date = null;
       break;
     case 'titleHighLow':
-      sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence) as PublicationObject[];
+      sortedPubmedEvidence = sortTitleHighLow(sortedPubmedEvidence);
       newSortingState.title = false;
       newSortingState.journal = null;
       newSortingState.date = null;
@@ -103,8 +103,8 @@ export const getSortingFunction = (sortPreference: SortPreference) => {
     dateLowHigh: sortDateYearLowHigh,
     journalHighLow: sortJournalHighLow,
     journalLowHigh: sortJournalLowHigh,
-    titleHighLow: sortNameHighLow,
-    titleLowHigh: sortNameLowHigh,
+    titleHighLow: sortTitleHighLow,
+    titleLowHigh: sortTitleLowHigh,
   };
   return sortFunctions[sortPreference];
 };

@@ -9,103 +9,104 @@ import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 import { getCompressedEdge } from "@/features/Core/utils/resultHelpers";
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 
+interface EvidenceAccumulator {
+  pubs: Set<string>;
+  cts: Set<string>;
+  sources: Set<string>;
+  misc: Set<string>;
+  visitedPathIds: Set<string>;
+}
+
+const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
+  for (const key in edge.publications) {
+    const pubArray = edge.publications[key];
+    if (!Array.isArray(pubArray)) continue;
+    for (const pubData of pubArray) {
+      const pub = getPubById(resultSet, pubData.id);
+      if (!pub) continue;
+      if (isPublication(pub, false))
+        acc.pubs.add(pub.url);
+      else
+        acc.misc.add(pub.url);
+    }
+  }
+};
+
+const addEdgeTrials = (edge: ResultEdge, acc: EvidenceAccumulator) => {
+  if (Array.isArray(edge.trials)) {
+    for (const trialId of edge.trials) {
+      acc.cts.add(trialId);
+    }
+  }
+};
+
+const addEdgeSources = (edge: ResultEdge, acc: EvidenceAccumulator) => {
+  if (edge.provenance && !edge.inferred) {
+    for (const source of edge.provenance) {
+      acc.sources.add(source.infores);
+    }
+  }
+};
+
+const collectSupportPathEvidence = (resultSet: ResultSet, supportPath: Path, pathId: string, acc: EvidenceAccumulator) => {
+  if (pathId && acc.visitedPathIds.has(pathId)) return;
+  if (pathId) acc.visitedPathIds.add(pathId);
+  try {
+    for (let j = 1; j < supportPath.subgraph.length; j += 2) {
+      collectEvidenceFromEdge(resultSet, supportPath.subgraph[j], true, acc);
+    }
+  } finally {
+    if (pathId) acc.visitedPathIds.delete(pathId);
+  }
+};
+
+const collectSupportEvidence = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
+  if (!edge.inferred || !edge.support) return;
+  for (const sp of edge.support) {
+    const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
+    if (!supportPath) continue;
+    const pathId = supportPath.id ?? (typeof sp === "string" ? sp : "");
+    collectSupportPathEvidence(resultSet, supportPath, pathId, acc);
+  }
+};
+
+const collectEvidenceFromEdge = (
+  resultSet: ResultSet,
+  edge: ResultEdge | string,
+  includeSupport: boolean,
+  acc: EvidenceAccumulator
+) => {
+  const resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
+  if (!resultEdge) return;
+
+  addEdgePublications(resultSet, resultEdge, acc);
+  addEdgeTrials(resultEdge, acc);
+  addEdgeSources(resultEdge, acc);
+
+  if (includeSupport) {
+    collectSupportEvidence(resultSet, resultEdge, acc);
+  }
+};
+
 /**
  * Generates evidence ids for a provided edge, optionally including support edges
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
  * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
  * @param {boolean} includeSupport - Whether to include evidence from support edges (default: false).
- * @param {Set<string>} allPubs - Optional Set to add publication URLs to (if not provided, creates new Set).
- * @param {Set<string>} allCTs - Optional Set to add clinical trial IDs to (if not provided, creates new Set).
- * @param {Set<string>} allSources - Optional Set to add source names to (if not provided, creates new Set).
- * @param {Set<string>} allMisc - Optional Set to add miscellaneous URLs to (if not provided, creates new Set).
- * @param {Set<string>} visitedPathIds - Optional Set of path IDs currently being processed (used to prevent cycles in nested support).
  * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
  */
 export const getEvidenceFromEdge = (
-  resultSet: ResultSet, 
+  resultSet: ResultSet,
   edge: ResultEdge | string,
-  includeSupport: boolean = false,
-  allPubs?: Set<string>,
-  allCTs?: Set<string>,
-  allSources?: Set<string>,
-  allMisc?: Set<string>,
-  visitedPathIds: Set<string> = new Set()
+  includeSupport: boolean = false
 ) => {
-  // Initialize Sets if not provided
-  const pubs = allPubs || new Set<string>();
-  const cts = allCTs || new Set<string>();
-  const sources = allSources || new Set<string>();
-  const misc = allMisc || new Set<string>();
-
-  // Helper function to process a single edge
-  const processEdge = (edgeToProcess: ResultEdge) => {
-    // Process publications
-    for(const key in edgeToProcess.publications) {
-      const pubArray = edgeToProcess.publications[key];
-      if (!Array.isArray(pubArray)) continue;
-      for(const pubData of pubArray) {
-        const pub = getPubById(resultSet, pubData.id);
-        if(!pub) 
-          continue;
-        const url = pub.url;
-        if(isPublication(pub, false)) 
-          pubs.add(url);
-        else 
-          misc.add(url);
-      }
-    }
-
-    // Process clinical trials (use of trial IDs for correct deduplication across edges)
-    if (Array.isArray(edgeToProcess.trials)) {
-      for (const trialId of edgeToProcess.trials) {
-        cts.add(trialId);
-      }
-    }
-
-    // Process sources
-    // don't process sources for inferred edges, only for direct edges
-    if(edgeToProcess.provenance && !edgeToProcess.inferred) {
-      for(const source of edgeToProcess.provenance) {
-        sources.add(source.infores);
-      }
-    }
+  const acc: EvidenceAccumulator = {
+    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(), visitedPathIds: new Set(),
   };
-
-  // Get the edge object
-  let resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
-  
-  if(!!resultEdge) {
-    // Process the main edge
-    processEdge(resultEdge);
-    
-    // Process support edges if requested (recursively so nested support paths e.g. 2.a.i are counted)
-    if(includeSupport && resultEdge.inferred && resultEdge.support) {
-      for(const sp of resultEdge.support) {
-        const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
-        if(!supportPath) 
-          continue;
-        const pathId = supportPath.id ?? (typeof sp === "string" ? sp : "");
-        if(pathId && visitedPathIds.has(pathId))
-          continue; // avoid cycles
-        if(pathId) visitedPathIds.add(pathId);
-        try {
-          for(let j = 1; j < supportPath.subgraph.length; j += 2) {
-            getEvidenceFromEdge(resultSet, supportPath.subgraph[j], true, pubs, cts, sources, misc, visitedPathIds);
-          }
-        } finally {
-          if(pathId) visitedPathIds.delete(pathId);
-        }
-      }
-    }
-  }
-
-  return {
-    pubs,
-    cts,
-    sources,
-    misc
-  };
+  collectEvidenceFromEdge(resultSet, edge, includeSupport, acc);
+  const { pubs, cts, sources, misc } = acc;
+  return { pubs, cts, sources, misc };
 };
 
 /**
