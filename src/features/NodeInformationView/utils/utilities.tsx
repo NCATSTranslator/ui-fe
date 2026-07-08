@@ -35,5 +35,5 @@ export const renderValue = (value: unknown): ReactNode => {
  */
 export const getNodeBiolinkLink = (node: ResultNode): string => {
   const nodeType = node.types[0].replace('biolink:', '');
-  return `https://https://biolink.github.io/biolink-model/${nodeType}`;
+  return `https://biolink.github.io/biolink-model/${nodeType}`;
 };
