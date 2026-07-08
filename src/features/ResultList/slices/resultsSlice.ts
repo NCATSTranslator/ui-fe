@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
 import { PublicationObject, Provenance, SourceObject, TrialObject } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
@@ -136,5 +136,11 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
   }
   return state.resultSets[id];
 }
+
+export const selectResultSets = (state: { resultSets: ResultState }) => state.resultSets;
+export const selectResultSetKeys = createSelector(
+  selectResultSets,
+  (resultSets) => Object.keys(resultSets),
+);
 
 export default resultSetsSlice.reducer;
