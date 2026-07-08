@@ -45,6 +45,7 @@ const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/Explorin
 const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify').then(m => ({ default: m.ReviewIdentify })));
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
+const Canvases = lazy(() => import('@/pageRoutes/Canvases/Canvases'));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
@@ -240,6 +241,10 @@ const routes = [
   {
     path: "query-history",
     element: <Page title="Query History"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
+  },
+  {
+    path: "canvases",
+    element: <Page title="Canvases"><Suspense fallback={<LoadingWrapper />}><Canvases /></Suspense></Page>
   },
   {
     path: "new-query",

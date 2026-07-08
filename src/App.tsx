@@ -22,6 +22,8 @@ import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
+import CanvasPane from '@/features/Canvas/components/CanvasPane/CanvasPane';
+import CanvasHeaderButton from '@/features/Canvas/components/CanvasHeaderButton/CanvasHeaderButton';
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -82,7 +84,9 @@ const App = ({children}: {children?: ReactNode}) => {
               <div className="layout">
                 <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
                 <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
-                  <Header />
+                  <Header>
+                    <CanvasHeaderButton />
+                  </Header>
                   {children}
                   {
                     isSmallScreen && <SmallScreenOverlay /> 
@@ -114,6 +118,7 @@ const App = ({children}: {children?: ReactNode}) => {
                 document.body,
               )}
             </DndContext>
+            <CanvasPane />
           </div>
         </ProjectModalsProvider>
       </QueryClientProvider>
