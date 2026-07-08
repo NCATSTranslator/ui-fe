@@ -71,7 +71,7 @@ export const findStringMatch = (
         item.names.length > 0 &&
         item.names[0].toLowerCase().includes(normalizedTerm)) ||
       (getNodeDescription(item)?.toLowerCase().includes(normalizedTerm) ?? false) ||
-      item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
+      item.curies && item.curies.length > 0 && item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
   }
 
   function _checkPathForMatch(
