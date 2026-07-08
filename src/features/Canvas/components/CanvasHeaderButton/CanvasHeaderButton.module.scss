@@ -1,0 +1,33 @@
+@use "@/assets/styles" as *;
+
+.canvasButton {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: $xxs $xs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  color: $black;
+  font-size: $captionSize;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $defaultAnim;
+  white-space: nowrap;
+
+  &:hover {
+    background: $hoverGray;
+    border-color: $midDarkGray;
+  }
+
+  &.active {
+    background: $hoverGray;
+    border-color: $purpleTwo;
+    color: $purpleTwo;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
