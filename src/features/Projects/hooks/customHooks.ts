@@ -326,14 +326,14 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
 
 /**
  * Hook to get a query link with hashed parameters when configured.
- * @param {UserQueryObject} query - The query to get the link for
+ * @param {UserQueryObject} userQuery - The query to get the link for
  * @returns {string} The full URL for the query
  */
-export const useQueryLink = (query: UserQueryObject) => {
+export const useQueryLink = (userQuery: UserQueryObject) => {
   const config = useSelector(currentConfig);
   return useMemo(
-    () => getQueryLink(query, config?.include_hashed_parameters),
-    [query, config?.include_hashed_parameters],
+    () => getQueryLink(userQuery, config?.include_hashed_parameters),
+    [userQuery, config?.include_hashed_parameters],
   );
 };
 

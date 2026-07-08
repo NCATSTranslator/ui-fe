@@ -10,7 +10,7 @@ import { getNodeIcon } from "@/features/Core/utils/entityLinks";
 import { useDecodedParams } from "@/features/Core/hooks/useDecodedParams";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import Tab from "@/features/Core/components/Tabs/Tab";
-import { formatLabel, renderValue } from "@/features/NodeInformationView/utils/utilities";
+import { formatLabel, getNodeBiolinkLink, renderValue } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeViewSkeleton/NodeViewSkeleton";
 import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
@@ -40,6 +40,7 @@ const NodeInformationView: FC = () => {
   const node = nodeId ? resultSet?.data?.nodes?.[nodeId] ?? null : null;
   const nodeType = useMemo(() => node?.types[0] ?? null, [node?.types]);
   const nodeName = useMemo(() => getFormattedNodeName(node?.names[0] ?? undefined, nodeType ?? null), [node?.names, nodeType]);
+  const nodeBiolinkLink = node ? getNodeBiolinkLink(node) : "https://biolink.github.io/biolink-model/";
   
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
 
@@ -125,7 +126,7 @@ const NodeInformationView: FC = () => {
                   <div className={styles.section}>
                     <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
                     <p className={styles.description}>{nodeTypeDefinition}</p>
-                    <a href="https://biolink.github.io/biolink-model/" target="_blank" rel="noreferrer">Learn More About the Biolink Model</a>
+                    <a href={nodeBiolinkLink} target="_blank" rel="noreferrer">Learn More About the Biolink Model</a>
                   </div>
                 }
                 {
