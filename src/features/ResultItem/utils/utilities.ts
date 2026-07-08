@@ -502,7 +502,9 @@ export const getNodeDescription = (node: ResultNode) => {
     if(annotation.descriptions && annotation.descriptions.length > 0)
       return annotation.descriptions[0];
   }
-  return node.descriptions[0] || null;
+  if(node.descriptions && node.descriptions.length > 0)
+    return node.descriptions[0];
+  return null;
 }
 
 /**
