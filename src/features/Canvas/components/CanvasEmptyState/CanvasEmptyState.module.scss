@@ -1,0 +1,10 @@
+@use "@/assets/styles" as *;
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+}
