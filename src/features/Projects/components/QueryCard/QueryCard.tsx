@@ -1,10 +1,9 @@
 import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
-import { getQueryLink } from "@/features/Projects/utils/utilities";
 import DataCard from "@/features/Projects/components/DataCard/DataCard";
 import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
-import { useGetQueryCardTitle, useUserProjects } from "@/features/Projects/hooks/customHooks";
+import { useGetQueryCardTitle, useQueryLink, useUserProjects } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
@@ -41,7 +40,7 @@ const QueryCard: FC<QueryCardProps> = ({
     return activePanelId !== 'projects' && (query.data.deleted || !currentPage.includes('projects'));
   }, [query.data.deleted, currentPage, activePanelId]);
 
-  const queryURL = getQueryLink(query);
+  const queryURL = useQueryLink(query);
   const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
   const queryLastSeenTime = getTimeRelativeDate(new Date(query.data.time_updated));
   
