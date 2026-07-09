@@ -701,6 +701,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
           cached_queries: [],
           gaID: '',
           include_hashed_parameters: false,
+          include_lookup: false,
           include_pathfinder: false,
           include_projects: false,
           include_query_status_polling: false,
