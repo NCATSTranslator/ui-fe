@@ -69,6 +69,8 @@
     color: $darkGray;
     font-weight: 800;
     margin-bottom: $xxs;
+    display: flex;
+    gap: $xxxs;
   }
   .prefValueButton {
     width: 100%;
@@ -105,4 +107,9 @@
       }
     }
   }
+}
+
+.confidenceTooltipIcon {
+  height: 19px;
+  width: 19px;
 }

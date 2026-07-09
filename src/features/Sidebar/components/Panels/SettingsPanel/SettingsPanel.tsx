@@ -18,6 +18,7 @@ import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
+import ConfidenceTooltip from './ConfidenceTooltip';
 
 const SettingsPanel = () => {
   const location = useLocation();
@@ -60,9 +61,9 @@ const SettingsPanel = () => {
   
   const resultPrefs = useMemo(()=> {
     return {
-      result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
       results_per_page: userPrefs.results_per_page ?? defaultPrefs.results_per_page,
       path_show_count: userPrefs.path_show_count ?? defaultPrefs.path_show_count,
+      result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
     };
   }, [userPrefs]);
 
@@ -172,7 +173,7 @@ const SettingsPanel = () => {
                   {
                     prefsToDisplay && Object.entries(prefsToDisplay).filter(([, pref]) => !!pref).map(([key, pref]) => (
                       <div className={styles.activePref} key={key}>
-                        <h6 className={styles.prefLabel}>{pref.name}</h6>
+                        <h6 className={styles.prefLabel}>{pref.name} {key === "result_sort" && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} />}</h6>
                         <Button 
                           className={styles.prefValueButton}
                           variant="secondary"
