@@ -3,10 +3,9 @@ import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
-import { getQueryLink } from "@/features/Projects/utils/utilities";
+import { useGetQueryCardTitle, useQueryLink } from "@/features/Projects/hooks/customHooks";
 import SidebarCard from "@/features/Sidebar/components/SidebarCard/SidebarCard";
 import styles from "@/features/Sidebar/components/SidebarCard/SidebarCard.module.scss";
-import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
@@ -42,7 +41,7 @@ const SidebarQueryCard: FC<SidebarQueryCardProps> = ({
     return query.data.deleted || !currentPage.includes('projects');
   }, [query.data.deleted, currentPage]);
 
-  const queryURL = getQueryLink(query);
+  const queryURL = useQueryLink(query);
   const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
   
   const leftIcon = <StatusIndicator status={query.status} />;

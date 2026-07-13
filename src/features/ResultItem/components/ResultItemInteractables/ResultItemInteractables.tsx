@@ -48,14 +48,14 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
       className={`${styles.interactables} ${!!isEven && styles.even}`}
       onOutsideClick={handleOutsideClick}>
       {
-        !!belowBreakpoint &&
+        (!!belowBreakpoint && !isPathfinder) &&
         <button className={`${styles.icon}`} onClick={(e)=>{e.stopPropagation(); setIsOpen(prev=>!prev)}}>
           <MenuIcon/>
         </button>
       }
       <div className={`${styles.interactablesContainer} ${!!belowBreakpoint && styles.belowBreakpoint} ${!!isOpen && styles.isOpen}`}>
         {
-          !!hasUser && !isPathfinder
+          (!!hasUser && !isPathfinder)
             ? <>
                 <button 
                   className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}

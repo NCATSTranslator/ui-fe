@@ -4,7 +4,7 @@ import { copyQuery, createProject, deleteProjects, deleteQueries, getUserProject
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { fetchNodeNameFromCurie, getQueryLink } from '@/features/Projects/utils/utilities';
 import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitleFromQueryObject,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
@@ -322,6 +322,19 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
     data: queries.data || {},
     isLoading: queries.isLoading,
   };
+};
+
+/**
+ * Hook to get a query link with hashed parameters when configured.
+ * @param {UserQueryObject} userQuery - The query to get the link for
+ * @returns {string} The full URL for the query
+ */
+export const useQueryLink = (userQuery: UserQueryObject) => {
+  const config = useSelector(currentConfig);
+  return useMemo(
+    () => getQueryLink(userQuery, config?.include_hashed_parameters),
+    [userQuery, config?.include_hashed_parameters],
+  );
 };
 
 /**

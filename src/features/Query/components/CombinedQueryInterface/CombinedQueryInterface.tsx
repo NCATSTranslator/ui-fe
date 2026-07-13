@@ -54,6 +54,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     clearSelectedProject
   } = useSidebar();
   const isPathfinderEnabled = config?.include_pathfinder;
+  const isLookupEnabled = config?.include_lookup;
   const showAddToProject = !!user && config?.include_projects;
 
   const handleAddToProject = () => {
@@ -125,23 +126,26 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         </div>
       )}
       <Tabs
-        defaultActiveTab="Lookup"
+        defaultActiveTab={isLookupEnabled ? "Lookup" : "Smart Query"}
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
         tabListWrapperClassName={styles.tabListWrapper}
       >
-        <Tab
-          heading="Lookup"
-          className={styles.lookupTab}
-        >
-          <QueryLookup
-            isResults={isResults}
-            selectedProject={selectedProject}
-            user={user}
-            shouldNavigate={shouldNavigate}
-            submissionCallback={onSubmitCallback}
-          />
-        </Tab>
+        { isLookupEnabled ?
+          <Tab
+            heading="Lookup"
+            className={styles.lookupTab}
+          >
+            <QueryLookup
+              isResults={isResults}
+              selectedProject={selectedProject}
+              user={user}
+              shouldNavigate={shouldNavigate}
+              submissionCallback={onSubmitCallback}
+            />
+          </Tab>
+          : null
+        }
         <Tab heading="Smart Query" className={styles.queryTab}>
           <Query
             isResults={isResults}
@@ -154,8 +158,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             submissionCallback={onSubmitCallback}
           />
         </Tab>
-        { isPathfinderEnabled
-        ? 
+        { isPathfinderEnabled ? 
           <Tab
             heading="Pathfinder Query"
             headingOverride={<BetaTag heading="Pathfinder Query" tagClassName={projectPage ? styles.betaTag : ''} />}
@@ -168,7 +171,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               submissionCallback={onSubmitCallback}
             />
           </Tab>
-          : null}
+          : null
+        }
       </Tabs>
     </div>
   );

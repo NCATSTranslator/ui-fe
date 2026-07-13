@@ -14,13 +14,15 @@ export const SortingAndFiltering = () => {
         <path d="M8 11L12 7M12 7L16 11M12 7V17" stroke="#606368" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
         </svg>
         Sorting</h2>
-      <p>You can sort results by clicking the column headers in the table. The currently available sorting options include:</p>
+      <p>The default ordering of results is by <Link to="/frequently-asked-questions#confidence">Confidence</Link> (high to low). You can change the sort order of results by clicking on the column headers in the table:</p>
       <ul>
         <li>Name</li>
         <li>Evidence</li>
         <li>Paths</li>
-        <li><Link to="/frequently-asked-questions#scores">Score</Link></li>
       </ul>
+
+      <p>You can change the default ordering of results in your <a href="#" onClick={(e) => { e.preventDefault(); togglePanel('settings'); }}>account settings</a> under "Preferences".</p>
+
       {/* eslint-disable-next-line no-restricted-syntax */}
       <h2 className="h6" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <svg width="28" height="28" viewBox="-3 -3 28 28" fill="#606368" xmlns="http://www.w3.org/2000/svg">

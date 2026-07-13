@@ -67,6 +67,7 @@ const DataCard: FC<DataCardProps> = ({
   const queryTypeLabel = useMemo(() => {
     if(queryType === 'drug' || queryType === 'gene' || queryType === 'chemical') return 'Smart Query';
     if(queryType === 'pathfinder') return 'Pathfinder Query';
+    if(queryType === 'lookup') return 'Lookup Query';
     return 'Unknown Query Type';
   }, [queryType]);
 

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-
+import { ResultNode } from "@/features/ResultList/types/results";
 
 export const formatLabel = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
@@ -26,4 +26,14 @@ export const renderValue = (value: unknown): ReactNode => {
     if (entries.every(e => typeof e === "string")) return (entries as string[]).join(", ");
   }
   return null;
+};
+
+/**
+ * Get the Biolink Model link for a node
+ * @param node - The node to get the link for
+ * @returns The Biolink Model link for the node
+ */
+export const getNodeBiolinkLink = (node: ResultNode): string => {
+  const nodeType = node.types[0].replace('biolink:', '');
+  return `https://biolink.github.io/biolink-model/${nodeType}`;
 };

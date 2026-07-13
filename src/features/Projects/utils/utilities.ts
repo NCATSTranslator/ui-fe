@@ -1,4 +1,4 @@
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Core/utils/web";
+import { getLookupResultsShareURLPath, getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Core/utils/web";
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
@@ -99,45 +99,77 @@ export const fetchNodeNameFromCurie = async (curie: string, signal?: AbortSignal
 }
 
 /**
+ * Build an AutocompleteItem from a node id and optional label.
+ */
+const toAutocompleteItem = (id: string, label?: string | null): AutocompleteItem => ({
+  id,
+  label: label || id,
+  isExact: false,
+  score: 0,
+});
+
+/**
+ * Get the share URL path for a query using the appropriate builder for its type.
+ * @param {UserQueryObject} query - The query to get the path for
+ * @param {string} resultID - The result ID (pass '0' for list-only links)
+ * @param {boolean} shouldHash - Whether to hash the URL parameters
+ * @returns {string | null} The share URL path, or null if required data is missing
+ */
+export const getQueryShareURLPath = (
+  query: UserQueryObject,
+  resultID = '0',
+  shouldHash = false,
+): string | null => {
+  const { qid, query: queryData } = query.data;
+
+  if (queryData.type === 'pathfinder' && queryData.subject && queryData.object) {
+    if (!queryData.subject.id || !queryData.object.id) return null;
+    return getPathfinderResultsShareURLPath({
+      itemOne: toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+      itemTwo: toAutocompleteItem(queryData.object.id, queryData.node_two_label),
+      resultID,
+      constraint: queryData.constraint || undefined,
+      pk: qid,
+      shouldHash,
+    });
+  }
+
+  if (queryData.type === 'lookup' && queryData.subject) {
+    if (!queryData.subject.id) return null;
+    return getLookupResultsShareURLPath(
+      toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+      queryData.object?.category || '',
+      resultID,
+      qid,
+      shouldHash,
+    );
+  }
+
+  const curie = queryData.curie || '';
+  return getResultsShareURLPath({
+    label: queryData.node_one_label || curie,
+    nodeID: curie,
+    typeID: getTypeIDFromType(queryData.type, queryData.direction || null),
+    resultID,
+    pk: qid,
+    shouldHash,
+  });
+};
+
+/**
  * Get the link for a query
  * @param {UserQueryObject} query - The query to get the link for
+ * @param {boolean} shouldHash - Whether to hash the URL parameters
  * @returns {string} The link for the query
  */
-export const getQueryLink = (query: UserQueryObject) => {
-  const qid = query.data.qid;
-
-  if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
-    if(!query.data.query.subject.id || !query.data.query.object.id) {
-      unableToReachLinkToast();
-      return "";
-    }
-    const subjectId = query.data.query.subject.id || '';
-    const objectId = query.data.query.object.id || '';
-    const itemOne: AutocompleteItem = {
-      id: subjectId,
-      label: query.data.query.node_one_label || subjectId,
-      isExact: false,
-      score: 0
-    }
-    const itemTwo: AutocompleteItem = {
-      id: objectId,
-      label: query.data.query.node_two_label || objectId,
-      isExact: false,
-      score: 0
-    }
-    const constraint = query.data.query.constraint || undefined;
-    const path = getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: "0", constraint, pk: qid });
-    return encodeURI(`${window.location.origin}/${path}`);
-  } else {
-    const curie = query.data.query.curie || '';
-    const label = query.data.query.node_one_label || curie|| '';
-    const type = query.data.query.type;
-    const direction = query.data.query.direction || null;
-    const typeID = getTypeIDFromType(type, direction);
-    const path = getResultsShareURLPath({ label, nodeID: curie, typeID, resultID: "0", pk: qid });
-    return encodeURI(`${window.location.origin}/${path}`);
+export const getQueryLink = (query: UserQueryObject, shouldHash = false) => {
+  const path = getQueryShareURLPath(query, '0', shouldHash);
+  if (!path) {
+    unableToReachLinkToast();
+    return '';
   }
-}
+  return encodeURI(`${window.location.origin}/${path}`);
+};
 
 /**
  * Get the percentage of the query status based on the number of ARAs returned and the total number of ARAs

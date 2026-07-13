@@ -41,20 +41,12 @@ export const FrequentlyAskedQuestions = () => {
         with little known about them or dietary supplements.
       </p>
 
-      <span className="hash-anchor" id="scores"></span>
+      <span className="hash-anchor" id="confidence"></span>
 
-      <h2 className="h6">How are result scores calculated?</h2>
-      <p>
-        Result scores range from 0.00 - 5.00 and reflect a combined assessment of{" "}
-        <strong>confidence, clinical evidence, and novelty</strong>; higher scores indicate stronger overall
-        support. Scores help you quickly identify <strong>high-confidence results</strong> that are most
-        likely to be meaningful.
-      </p>
-      <p>
-        Scores are unavailable when results are still{" "}
-        <Link to="/loading-and-syncing#loading">loading</Link>. Once the results are fully loaded, you can{" "}
-        <Link to="/loading-and-syncing#syncing">sync</Link> them to view scores.
-      </p>
+      <h2 className="h6">How do you decide what results to list first?</h2>
+      <p>The default ordering of results is by Confidence (high to low). Confidence is a reflection of the level of support that Translator has for each result.</p>
+      <p><strong>Lower Confidence doesn't mean a result is wrong</strong>, but it does warrant closer scrutiny of the relationship evidence before drawing conclusions.</p>
+      <p>You can change the default ordering of results in your <a href="#" onClick={(e) => { e.preventDefault(); togglePanel('settings'); }}>account settings</a> under "Preferences."</p>
 
       <h2 className="h6">Can I export results?</h2>
       <p>
