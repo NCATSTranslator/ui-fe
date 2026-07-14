@@ -96,7 +96,7 @@ export const isPathEvidenceTag = (tagID: string): boolean => {
 }
 
 export const getValidFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
+  return ['cc', 'di', 'pc', 'pred', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
@@ -104,7 +104,7 @@ export const getResultFamilies = (): FilterFamily[] => {
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pt', 'ev', 'ara'];
+  return ['pc', 'pred', 'pt', 'ev', 'ara'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
@@ -172,6 +172,7 @@ export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   switch(typeof filter === 'string' ? filter as FilterFamily : getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
+    case "pred": return "Relationship";
     case "di":   return "Clinical Trial Indications";
     case "ara":  return "Reasoning Agent";
     case "role": return "Chemical Classification";

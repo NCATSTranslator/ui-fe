@@ -356,7 +356,8 @@ function _applyInclusionFiltering(ctx: PathRankingContext, path: Path, pathRank:
     if (!ftr.negated && ftr.id) {
       const currentFamily = getFilterFamily(ftr);
       if (currentFamily !== lastFamily) {
-        include &&= (path.tags[ftr.id] !== undefined);
+        if (!include) break;
+        include = (path.tags[ftr.id] !== undefined);
         lastFamily = currentFamily;
       } else {
         include ||= (path.tags[ftr.id] !== undefined);
