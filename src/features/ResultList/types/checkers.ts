@@ -150,7 +150,7 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       ["descriptions", tc.nullable(obj.descriptions, tc.isStringArray), "string[] | null", obj.descriptions],
       ["name", tc.nullable(obj.name, tc.isString), "string | null", obj.name],
       ["species", tc.nullable(obj.species, isSpecies), "Species | null", obj.species],
-      ["tdl", _isTdlArray(obj.tdl), "Tdl | null", obj.tdl],
+      ["tdl", tc.nullable(obj.tdl, _isTdlArray), "Tdl | null", obj.tdl],
     ], warn);
   }
 }
