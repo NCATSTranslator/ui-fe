@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { ProjectRaw, UserQueryObject } from '@/features/Projects/types/projects';
 
-type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'canvases' | 'filters' | 'queryStatus'
-  | 'settings' | 'feedback' | 'help' | 'download';
+type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'canvases' | 'filters' | 'canvasFilters'
+  | 'queryStatus' | 'settings' | 'feedback' | 'help' | 'download';
 
 export type SidebarContextValue = {
   collapsed: boolean;

@@ -103,3 +103,12 @@ export const canvasEntitiesAddedToast = (count: number, canvasTitle: string) => 
 export const canvasEntityAlreadyAddedToast = (entityName: string) => {
   return toast(AppToast, { data: { topText: entityName, bottomText: 'Already on this canvas' } });
 };
+export const canvasEntityRemovedToast = (entityName: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: 'Removed from canvas' } });
+};
+export const canvasSaveErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas save failed', bottomText: 'Your changes may not be saved' } });
+};
+export const canvasDeleteErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas delete failed', bottomText: 'The canvas may not have been removed' } });
+};

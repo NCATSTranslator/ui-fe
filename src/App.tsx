@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, lazy, Suspense } from 'react';
 import './App.scss';
 import { useGoogleAnalytics } from '@/features/Core/hooks/useGoogleAnalytics';
 import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
@@ -22,8 +22,11 @@ import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
-import CanvasPane from '@/features/Canvas/components/CanvasPane/CanvasPane';
 import CanvasHeaderButton from '@/features/Canvas/components/CanvasHeaderButton/CanvasHeaderButton';
+import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+
+// Lazy so translator-graph-view stays out of the entry chunk.
+const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -78,6 +81,7 @@ const App = ({children}: {children?: ReactNode}) => {
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
+          <CanvasContextMenuProvider>
           <div className={joinClasses('app', pathnameClass, additionalClasses)}>
             <AppToastContainer />
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -118,8 +122,11 @@ const App = ({children}: {children?: ReactNode}) => {
                 document.body,
               )}
             </DndContext>
-            <CanvasPane />
+            <Suspense fallback={null}>
+              <CanvasPane />
+            </Suspense>
           </div>
+        </CanvasContextMenuProvider>
         </ProjectModalsProvider>
       </QueryClientProvider>
     </SidebarProvider>
