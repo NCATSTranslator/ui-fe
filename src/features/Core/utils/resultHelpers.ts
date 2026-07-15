@@ -26,6 +26,8 @@ const EMPTY_EDGE: ResultEdge = {
   description: "",
   provenance: [],
   publications: {},
+  signature: "",
+  source_time: "",
   subject: "",
   support: [],
   trials: [],

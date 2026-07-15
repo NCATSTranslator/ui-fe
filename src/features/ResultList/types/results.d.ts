@@ -93,6 +93,8 @@ export interface ResultEdge {
   description?: string | null;
   provenance: EdgeProvenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
+  signature: string;
+  source_time: string;
   // nodeID
   subject: string;
   // array of path ids or Path objects
@@ -152,6 +154,8 @@ export type ResultNode = {
   other_names: {[key: string]: string[]};
   // link to relevant info about node
   provenance: string[];
+  signature: string;
+  source_time: string;
   synonyms: string[];
   tags: Tags;
   // array of biolink types

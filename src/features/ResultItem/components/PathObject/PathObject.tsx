@@ -18,6 +18,7 @@ import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -60,6 +61,7 @@ const PathObject: FC<PathObjectProps> = ({
   const itemResultId = useResultItemId();
   const effectiveResultId = resultId ?? itemResultId;
   const resultSet = useSelector(getResultSetById(pk));
+  const { openMenu } = useCanvasContextMenu();
 
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id;
@@ -119,6 +121,7 @@ const PathObject: FC<PathObjectProps> = ({
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
+              onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu('node', pathObject.id, pk, { x: e.clientX, y: e.clientY }); }}
               {...hoverHandlers}
               >
               <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>

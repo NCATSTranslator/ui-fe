@@ -23,6 +23,7 @@ import { generatePredicateId, isAcceptedOntologyEdge } from '@/features/ResultIt
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
+import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -77,6 +78,7 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
+  const { openMenu } = useCanvasContextMenu();
   const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
@@ -156,6 +158,7 @@ const Predicate: FC<PredicateProps> = ({
         data-edge-ids={edgeIds.toString()}
         data-aras={edge.aras.toString()}
         onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, fullPathKey)}
+        onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu('edge', edgeIds[0], pk, { x: e.clientX, y: e.clientY }); }}
         ref={selected ? selectedEdgeRef : null}
         {...hoverHandlers}
         >
