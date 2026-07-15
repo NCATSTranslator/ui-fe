@@ -82,6 +82,9 @@
       font-weight: 400;
       padding: 0;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
     }
     svg {
       path {
@@ -99,6 +102,9 @@
       font-weight: 400;
       padding: 0;
       font-size: $bodyTwoSize;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
     }
     &.active {
       background-color: $lightPurpleTwo;
@@ -107,9 +113,19 @@
       }
     }
   }
+  svg.confidenceTooltipIcon {
+    height: 18px;
+    width: 18px;
+    path {
+      fill: $black;
+      stroke: transparent;
+    }
+  }
 }
-
-.confidenceTooltipIcon {
-  height: 19px;
-  width: 19px;
+span.confidenceTooltipLink {
+  color: $white;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: $xs;
+  display: block;
 }
