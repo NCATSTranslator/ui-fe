@@ -20,6 +20,9 @@ import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelC
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 import ConfidenceTooltip from './ConfidenceTooltip';
 
+const isConfidenceSort = (value: string | number): boolean =>
+  value === 'scoreHighLow' || value === 'scoreLowHigh';
+
 const SettingsPanel = () => {
   const location = useLocation();
   const [user, loading] = useUser();
@@ -173,14 +176,18 @@ const SettingsPanel = () => {
                   {
                     prefsToDisplay && Object.entries(prefsToDisplay).filter(([, pref]) => !!pref).map(([key, pref]) => (
                       <div className={styles.activePref} key={key}>
-                        <h6 className={styles.prefLabel}>{pref.name} {key === "result_sort" && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} />}</h6>
+                        <h6 className={styles.prefLabel}>{pref.name}</h6>
                         <Button 
                           className={styles.prefValueButton}
                           variant="secondary"
                           iconRight={<ChevRight />}
                           handleClick={() => handleSetActivePrefObject(key as PrefKey, userPrefs)}
+                          dataTooltipId={isConfidenceSort(pref.pref_value) ? `confidence-explanation-tooltip-${pref.pref_value}` : undefined}
                         >
                           {getPrettyPrefValue(pref.pref_value)}
+                          {
+                            isConfidenceSort(pref.pref_value) && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} linkClassName={styles.confidenceTooltipLink} dataTooltipId={`confidence-explanation-tooltip-${pref.pref_value}`} />
+                          }
                         </Button>
                       </div>
                     ))
@@ -194,15 +201,19 @@ const SettingsPanel = () => {
                 handleBack={() => setActivePrefObject(null)}
                 backButtonLabel={activePrefObject.prefObject.name}
               >
-                <div className={styles.activePrefContent}>
+                <div>
                   {activePrefObject.prefObject.possible_values.map((value) => (
                     <Button
                       key={value}
                       className={`${styles.prefValueSelectorButton} ${(userPrefs[activePrefObject.prefKey] ?? defaultPrefs[activePrefObject.prefKey])?.pref_value === value ? styles.active : ''}`}
                       variant="secondary"
                       handleClick={() => handlePrefValueClick(activePrefObject.prefKey, value)}
+                      dataTooltipId={isConfidenceSort(value) ? `confidence-explanation-tooltip-${value}` : undefined}
                       >
                       {getPrettyPrefValue(value)}
+                      {
+                        isConfidenceSort(value) && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} linkClassName={styles.confidenceTooltipLink} dataTooltipId={`confidence-explanation-tooltip-${value}`} />
+                      }
                     </Button>
                   ))}
                 </div>
