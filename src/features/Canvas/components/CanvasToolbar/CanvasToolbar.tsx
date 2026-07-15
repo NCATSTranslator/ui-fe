@@ -3,6 +3,7 @@ import styles from './CanvasToolbar.module.scss';
 import { LayoutType } from 'translator-graph-view';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
+import type { SaveStatus } from '@/features/Canvas/types/canvas';
 import UndoIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import RedoIcon from '@/assets/icons/directional/Undo & Redo/Redo.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
@@ -58,6 +59,7 @@ interface CanvasToolbarProps {
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   isProcessing?: boolean;
+  saveStatus?: SaveStatus;
 }
 
 const CanvasToolbar: FC<CanvasToolbarProps> = ({
@@ -75,6 +77,7 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   onAddObject,
   onAddAnnotation,
   isProcessing,
+  saveStatus,
 }) => {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
@@ -151,6 +154,17 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
           )}
         </OutsideClickHandler>
         {isProcessing && <span className={styles.processingIndicator}>Processing...</span>}
+        {saveStatus && saveStatus !== 'unsaved' && !isProcessing && (
+          <span className={joinClasses(
+            styles.saveIndicator,
+            saveStatus === 'saving' && styles.saving,
+            saveStatus === 'error' && styles.saveError,
+          )}>
+            {saveStatus === 'saving' && 'Saving...'}
+            {saveStatus === 'saved' && 'Saved'}
+            {saveStatus === 'error' && 'Save failed'}
+          </span>
+        )}
       </div>
       <div className={styles.center}>
         <div className={styles.zoomGroup}>

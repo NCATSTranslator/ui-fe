@@ -66,6 +66,9 @@ const NodeItem: FC<NodeItemProps> = ({ node, canvas, nodeMenuId, onNodeClick, on
           </button>
           {isMenuOpen && (
             <div className={styles.nodeMenu}>
+              <button className={styles.nodeMenuItem} onClick={() => onMenuAction('newQuery', node)}>
+                New Query
+              </button>
               <button className={styles.nodeMenuItem} onClick={() => onMenuAction('information', node)}>
                 Information
               </button>
@@ -103,20 +106,57 @@ const AnnotationsTab: FC<{ annotations: Canvas['annotations']; onAddAnnotation?:
   </>
 );
 
+const renderObjectsEmptyState = (
+  allNodes: CanvasNode[],
+  sortedNodes: CanvasNode[],
+  searchTerm: string,
+  onAddObject?: () => void,
+) => {
+  if (allNodes.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <p>No objects on this canvas yet.</p>
+        {onAddObject && (
+          <button className={styles.emptyAction} onClick={onAddObject}>
+            Add Object
+          </button>
+        )}
+      </div>
+    );
+  }
+  if (sortedNodes.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <p>No matching objects.</p>
+        {onAddObject && (
+          <button className={styles.emptyAction} onClick={onAddObject}>
+            Add &ldquo;{searchTerm}&rdquo;
+          </button>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 interface CanvasObjectListProps {
   canvas: Canvas;
+  visibleNodes?: Record<string, CanvasNode>;
   inspector: CanvasInspectorState;
   onHoverNode: (nodeId: string | null) => void;
   onSelectNode: (nodeId: string) => void;
+  onNewQuery?: (node: CanvasNode) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
 }
 
 const CanvasObjectList: FC<CanvasObjectListProps> = ({
   canvas,
+  visibleNodes,
   inspector,
   onHoverNode,
   onSelectNode,
+  onNewQuery,
   onAddObject,
   onAddAnnotation,
 }) => {
@@ -128,7 +168,10 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   const [nodeMenuId, setNodeMenuId] = useState<string | null>(null);
   const nodeMenuRef = useRef<string | null>(null);
 
-  const allNodes = useMemo(() => Object.values(canvas.nodes), [canvas.nodes]);
+  const allNodes = useMemo(
+    () => Object.values(visibleNodes ?? canvas.nodes),
+    [visibleNodes, canvas.nodes]
+  );
   const annotationCount = canvas.annotations.length;
 
   const filteredNodes = useMemo(
@@ -155,6 +198,9 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   const handleNodeMenuAction = useCallback((action: string, node: CanvasNode) => {
     setNodeMenuId(null);
     switch (action) {
+      case 'newQuery':
+        onNewQuery?.(node);
+        break;
       case 'information':
         inspector.openView('node', node.names[0] || node.id, node.id, { nodeId: node.id });
         break;
@@ -163,7 +209,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
         onHoverNode(node.id);
         break;
     }
-  }, [inspector, onSelectNode, onHoverNode]);
+  }, [inspector, onSelectNode, onHoverNode, onNewQuery]);
 
   const handleCloseMenu = useCallback(() => setNodeMenuId(null), []);
 
@@ -183,34 +229,6 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
       </div>
     );
   }
-
-  const renderObjectsEmptyState = () => {
-    if (allNodes.length === 0) {
-      return (
-        <div className={styles.emptyState}>
-          <p>No objects on this canvas yet.</p>
-          {onAddObject && (
-            <button className={styles.emptyAction} onClick={onAddObject}>
-              Add Object
-            </button>
-          )}
-        </div>
-      );
-    }
-    if (sortedNodes.length === 0) {
-      return (
-        <div className={styles.emptyState}>
-          <p>No matching objects.</p>
-          {onAddObject && (
-            <button className={styles.emptyAction} onClick={onAddObject}>
-              Add &ldquo;{searchTerm}&rdquo;
-            </button>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className={styles.objectList}>
@@ -279,7 +297,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
             </OutsideClickHandler>
           </div>
 
-          {renderObjectsEmptyState() || (
+          {renderObjectsEmptyState(allNodes, sortedNodes, searchTerm, onAddObject) || (
             <div className={styles.nodeList}>
               {sortedNodes.map(node => (
                 <NodeItem

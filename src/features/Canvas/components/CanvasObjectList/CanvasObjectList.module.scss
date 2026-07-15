@@ -1,4 +1,4 @@
-@use "@/assets/styles" as *;
+@use "@/assets/styles/variables" as *;
 
 .objectList {
   display: flex;
@@ -399,6 +399,7 @@
   color: $black;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

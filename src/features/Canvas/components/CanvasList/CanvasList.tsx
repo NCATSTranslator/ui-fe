@@ -15,9 +15,10 @@ import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import SidebarCard from '@/features/Sidebar/components/SidebarCard/SidebarCard';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
+import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { getCanvasNodeCount } from '@/features/Canvas/utils/canvasFunctions';
 
-const EmptyCanvasList = ({ searchTerm, onCreateCanvas }: { searchTerm: string; onCreateCanvas: () => void }) => {
+const EmptyCanvasList = ({ searchTerm, createCanvas }: { searchTerm: string; createCanvas: () => void }) => {
   if (searchTerm) {
     return (
       <EmptyArea>
@@ -28,7 +29,7 @@ const EmptyCanvasList = ({ searchTerm, onCreateCanvas }: { searchTerm: string; o
   return (
     <EmptyArea heading="No Canvases">
       <p>
-        <Button handleClick={onCreateCanvas} title="Create New Canvas" variant="textOnly" inline>Create a canvas</Button> to start building knowledge graphs from your query results.
+        <Button handleClick={createCanvas} title="Create New Canvas" variant="textOnly" inline>Create a canvas</Button> to start building knowledge graphs from your query results.
       </p>
     </EmptyArea>
   );
@@ -47,12 +48,12 @@ const CanvasList = () => {
     renamingId,
     renameInputRef,
     setRenameValue,
-    handleCreateCanvas,
     handleSelectCanvas,
     handleStartRename,
     handleSubmitRename,
     handleDeleteCanvas,
   } = useCanvasList();
+  const { createCanvas } = useCreateCanvas();
 
   useEffect(() => {
     if (activePanelId === 'canvases') closePanel();
@@ -79,7 +80,7 @@ const CanvasList = () => {
           <div className={styles.canvasList}>
             <Button
               iconLeft={<Plus />}
-              handleClick={handleCreateCanvas}
+              handleClick={createCanvas}
               title="Create New Canvas"
               className={styles.createButton}
               variant="textOnly"
@@ -91,7 +92,7 @@ const CanvasList = () => {
             </div>
             <div className={styles.cards}>
               {sortedFilteredCanvases.length === 0 ? (
-                <EmptyCanvasList searchTerm={searchTerm} onCreateCanvas={handleCreateCanvas} />
+                <EmptyCanvasList searchTerm={searchTerm} createCanvas={createCanvas} />
               ) : (
                 sortedFilteredCanvases.map(canvas => {
                   const nodeCount = getCanvasNodeCount(canvas);
@@ -111,12 +112,12 @@ const CanvasList = () => {
                       key={canvas.id}
                       className={isActive ? styles.activeCanvas : ''}
                       leftIcon={<WorkspaceIcon />}
-                      title={canvas.title}
+                      title={canvas.label}
                       searchTerm={searchTerm}
                       onClick={() => handleSelectCanvas(canvas)}
                       bottomLeft={
                         <span className={styles.meta}>
-                          {nodeCount} {nodeCount === 1 ? 'object' : 'objects'} · {canvas.annotations.length} {canvas.annotations.length === 1 ? 'note' : 'notes'}
+                          {nodeCount} {nodeCount === 1 ? 'object' : 'objects'}
                         </span>
                       }
                       bottomRight={<span className={styles.meta}>{updatedTime}</span>}

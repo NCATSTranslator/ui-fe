@@ -1,4 +1,4 @@
-@use "@/assets/styles" as *;
+@use "@/assets/styles/variables" as *;
 
 .canvasButton {
   display: flex;
@@ -24,6 +24,16 @@
     background: $hoverGray;
     border-color: $purpleTwo;
     color: $purpleTwo;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background: $white;
+      border-color: $midGray;
+    }
   }
 
   svg {

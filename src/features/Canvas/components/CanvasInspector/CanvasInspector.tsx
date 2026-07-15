@@ -8,6 +8,7 @@ import type {
   InspectorEvidenceData,
   InspectorNodeData,
 } from '@/features/Canvas/types/canvas';
+import type { CanvasInspectorFiltersState } from '@/features/Canvas/hooks/useCanvasInspectorFilters';
 import InspectorQueryView from './views/InspectorQueryView';
 import InspectorResultView from './views/InspectorResultView';
 import InspectorPathView from './views/InspectorPathView';
@@ -42,9 +43,10 @@ const buildNodeAddHandler = (
 interface CanvasInspectorProps {
   inspector: CanvasInspectorState;
   addToGraphHandlers?: InspectorAddToGraphHandlers;
+  inspectorFilters?: CanvasInspectorFiltersState;
 }
 
-const CanvasInspector: FC<CanvasInspectorProps> = ({ inspector, addToGraphHandlers }) => {
+const CanvasInspector: FC<CanvasInspectorProps> = ({ inspector, addToGraphHandlers, inspectorFilters }) => {
   const { stack, currentView, goBack, popTo, reset } = inspector;
 
   if (!currentView) return null;
@@ -68,6 +70,7 @@ const CanvasInspector: FC<CanvasInspectorProps> = ({ inspector, addToGraphHandle
           <InspectorResultView
             data={rData}
             inspector={inspector}
+            inspectorFilters={inspectorFilters}
             onAddToGraph={buildAddHandler(h, x => x.onAddResult(rData.queryPk, rData.resultId))}
           />
         );

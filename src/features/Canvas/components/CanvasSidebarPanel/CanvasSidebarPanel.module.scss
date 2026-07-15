@@ -1,4 +1,4 @@
-@use "@/assets/styles" as *;
+@use "@/assets/styles/variables" as *;
 
 .canvasesPanel {
   display: flex;
@@ -69,6 +69,10 @@
   color: $darkGray;
   font-size: $bodyTwoSize;
   text-align: center;
+}
+
+.link {
+  color: $purpleOne;
 }
 
 .activeCanvas {

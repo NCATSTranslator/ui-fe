@@ -1,4 +1,4 @@
-@use "@/assets/styles" as *;
+@use "@/assets/styles/variables" as *;
 
 .toolbar {
   display: flex;
@@ -200,6 +200,21 @@
   font-style: italic;
   margin-left: $xs;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.saveIndicator {
+  font-size: $captionSize;
+  color: $darkGray;
+  margin-left: $xs;
+
+  &.saving {
+    font-style: italic;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  &.saveError {
+    color: $red;
+  }
 }
 
 @keyframes pulse {

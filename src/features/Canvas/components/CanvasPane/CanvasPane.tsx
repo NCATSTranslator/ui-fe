@@ -1,10 +1,15 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './CanvasPane.module.scss';
 import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import useCanvas from '@/features/Canvas/hooks/useCanvas';
+import useCanvasPersistence from '@/features/Canvas/hooks/useCanvasPersistence';
 import useCanvasInspector from '@/features/Canvas/hooks/useCanvasInspector';
 import useCanvasInspectorHandlers from '@/features/Canvas/hooks/useCanvasInspectorHandlers';
-import { useSelector } from 'react-redux';
+import useCanvasFilters from '@/features/Canvas/hooks/useCanvasFilters';
+import useCanvasHoverState from '@/features/Canvas/hooks/useCanvasHoverState';
+import useCanvasHoverActions from '@/features/Canvas/hooks/useCanvasHoverActions';
+import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import ChevUp from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
@@ -12,55 +17,65 @@ import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasInspector from '@/features/Canvas/components/CanvasInspector/CanvasInspector';
-import CanvasTestPanel from './CanvasTestPanel';
+import CanvasNodeHoverMenu from '@/features/Canvas/components/CanvasNodeHoverMenu/CanvasNodeHoverMenu';
 import WarningModal from '@/features/Core/components/WarningModal/WarningModal';
-import { selectResultSetKeys } from '@/features/ResultList/slices/resultsSlice';
-import { resolveQueryPkFromSources } from '@/features/Canvas/utils/canvasFunctions';
+import { formatBiolinkEntity } from '@/features/Core/utils/stringFormatters';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import type { GraphNodeType, GraphEdgeType } from 'translator-graph-view';
 
-const CanvasPane: FC = () => {
-  const { paneOpen, activeCanvas, togglePane, closePane } = useCanvasPane();
-  const canvasActions = useCanvas();
-  const { rename, undo, redo, canUndo, canRedo, mergeEntities, addNode, addEdge, removeNode, isProcessing } = canvasActions;
-  const inspector = useCanvasInspector();
-  const { addToGraphHandlers, warningModalOpen, handleConfirmLargeAdd, cancelWarning, closeWarning, skipWarningKey } = useCanvasInspectorHandlers(canvasActions);
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
-  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
-  const resultSetKeys = useSelector(selectResultSetKeys);
+type User = ReturnType<typeof useUser>[0];
 
-  const resolveQueryPk = useCallback((sourceIds: string[]): string | undefined => {
-    if (!activeCanvas) return undefined;
-    return resolveQueryPkFromSources(activeCanvas, sourceIds);
-  }, [activeCanvas]);
+const useCloseCanvasOnLogout = (user: User, paneOpen: boolean, closePane: () => void) => {
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    if (prevUserRef.current && !user && paneOpen) {
+      closePane();
+    }
+    prevUserRef.current = user;
+  }, [user, paneOpen, closePane]);
+};
+
+const CanvasPane: FC = () => {
+  const navigate = useNavigate();
+  const [user] = useUser();
+  const { paneOpen, activeCanvas, togglePane, closePane } = useCanvasPane();
+  const { saveStatus, saveMerge, saveTrashElements, saveRename } = useCanvasPersistence();
+  const { rename, undo, redo, canUndo, canRedo, removeNode, isProcessing, ...canvasResultActions } = useCanvas({ saveMerge, saveTrashElements, saveRename });
+  const inspector = useCanvasInspector();
+  const { addToGraphHandlers, warningModalOpen, handleConfirmLargeAdd, cancelWarning, closeWarning, skipWarningKey } = useCanvasInspectorHandlers(canvasResultActions);
+  const { visibleNodes, visibleEdges, inspectorFilters } = useCanvasFilters(activeCanvas);
+  const {
+    hoveredNodeId, setHoveredNodeId, nodeHover, edgeHover, clearHover,
+    handleNodeHover, handleEdgeHover, handleMenuMouseEnter, handleMenuMouseLeave,
+  } = useCanvasHoverState();
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const { handleHoverRemove, handleHoverNewQuery, handleHoverInformation } = useCanvasHoverActions({ activeCanvas, clearHover, removeNode, inspector, navigate, setSelectedNodeIds });
+  useCloseCanvasOnLogout(user, paneOpen, closePane);
 
   const handleNodeClick = useCallback((node: GraphNodeType) => {
     const canvasNode = activeCanvas?.nodes[node.id];
     setSelectedNodeIds([node.id]);
     inspector.openView('node', canvasNode?.names[0] || node.id, node.id, {
       nodeId: node.id,
-      queryPk: canvasNode ? resolveQueryPk(canvasNode.sources) : undefined,
+      queryPk: activeCanvas?.queryRef ?? undefined,
     });
-  }, [activeCanvas, inspector, resolveQueryPk]);
+  }, [activeCanvas, inspector]);
 
-  const handleObjectListSelectNode = useCallback((nodeId: string) => {
+  const handleEdgeClick = useCallback((edge: GraphEdgeType) => {
+    inspector.openView('evidence', edge.predicate || edge.id, edge.id, {
+      queryPk: activeCanvas?.queryRef ?? '',
+      edgeId: edge.id,
+    });
+  }, [activeCanvas, inspector]);
+
+  const handleSelectNode = useCallback((nodeId: string) => {
     setSelectedNodeIds([nodeId]);
   }, []);
 
-  const handleEdgeClick = useCallback((edge: GraphEdgeType) => {
-    const canvasEdge = activeCanvas?.edges[edge.id];
-    inspector.openView('evidence', edge.predicate || edge.id, edge.id, {
-      queryPk: (canvasEdge ? resolveQueryPk(canvasEdge.sources) : undefined) ?? '',
-      edgeId: edge.id,
-    });
-  }, [activeCanvas, inspector, resolveQueryPk]);
-
-  const handleAddObject = useCallback(() => {
-    // TODO: Phase 5 follow-up — open object search interface in inspector
-  }, []);
-
-  const handleAddAnnotation = useCallback(() => {
-    // TODO: Phase 5 follow-up — open annotation input in inspector
-  }, []);
+  const handleObjectListNewQuery = useCallback((node: { id: string; names: string[] }) => {
+    const term = node.names[0] || node.id;
+    navigate(term ? `/new-query?prefill=${encodeURIComponent(term)}` : '/new-query');
+  }, [navigate]);
 
   if (!activeCanvas) return null;
 
@@ -74,7 +89,7 @@ const CanvasPane: FC = () => {
           aria-label={paneOpen ? 'Collapse canvas' : 'Expand canvas'}
           aria-expanded={paneOpen}
         >
-          <span className={styles.canvasTitle}>{activeCanvas.title}</span>
+          <span className={styles.canvasTitle}>{activeCanvas.label}</span>
         </button>
         <div className={styles.titleRight}>
           <button
@@ -97,6 +112,8 @@ const CanvasPane: FC = () => {
         <div className={styles.contentArea}>
           <CanvasGraph
             canvas={activeCanvas}
+            visibleNodes={visibleNodes}
+            visibleEdges={visibleEdges}
             onRename={rename}
             onUndo={undo}
             onRedo={redo}
@@ -104,32 +121,46 @@ const CanvasPane: FC = () => {
             canRedo={canRedo}
             onNodeClick={handleNodeClick}
             onEdgeClick={handleEdgeClick}
-            onAddObject={handleAddObject}
-            onAddAnnotation={handleAddAnnotation}
+            onNodeHover={handleNodeHover}
+            onEdgeHover={handleEdgeHover}
             isProcessing={isProcessing}
+            saveStatus={saveStatus}
             hoveredNodeId={hoveredNodeId}
             selectedIds={selectedNodeIds}
-          />
+          >
+            {nodeHover && (
+              <CanvasNodeHoverMenu
+                nodeId={nodeHover.nodeId}
+                geometry={nodeHover.geometry}
+                onRemove={handleHoverRemove}
+                onNewQuery={handleHoverNewQuery}
+                onInformation={handleHoverInformation}
+                onMouseEnter={handleMenuMouseEnter}
+                onMouseLeave={handleMenuMouseLeave}
+              />
+            )}
+            <Tooltip
+              id="canvas-edge-tooltip"
+              isOpen={!!edgeHover}
+              position={edgeHover?.geometry.anchor}
+              place="top"
+              delayShow={250}
+              delayHide={100}
+            >
+              {edgeHover && activeCanvas.edges[edgeHover.edgeId] && (
+                <span>{formatBiolinkEntity(activeCanvas.edges[edgeHover.edgeId].predicate)}</span>
+              )}
+            </Tooltip>
+          </CanvasGraph>
           <CanvasObjectList
             canvas={activeCanvas}
+            visibleNodes={visibleNodes}
             inspector={inspector}
             onHoverNode={setHoveredNodeId}
-            onSelectNode={handleObjectListSelectNode}
-            onAddObject={handleAddObject}
-            onAddAnnotation={handleAddAnnotation}
+            onSelectNode={handleSelectNode}
+            onNewQuery={handleObjectListNewQuery}
           />
-          <CanvasInspector inspector={inspector} addToGraphHandlers={addToGraphHandlers} />
-          <CanvasTestPanel
-            canvas={activeCanvas}
-            inspector={inspector}
-            mergeEntities={mergeEntities}
-            addNode={addNode}
-            addEdge={addEdge}
-            removeNode={removeNode}
-            undo={undo}
-            canUndo={canUndo}
-            resultSetKeys={resultSetKeys}
-          />
+          <CanvasInspector inspector={inspector} addToGraphHandlers={addToGraphHandlers} inspectorFilters={inspectorFilters} />
         </div>
       )}
       <WarningModal

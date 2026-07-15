@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import styles from './CanvasSidebarPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
@@ -11,9 +12,13 @@ import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
+import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
+import { useUser, getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 import { getCanvasNodeCount, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 
 const CanvasSidebarPanel: FC = () => {
+  const [user] = useUser();
+  const location = useLocation();
   const [sortMode, setSortMode] = useState<CanvasSortMode>('date');
   const {
     sortedFilteredCanvases,
@@ -23,16 +28,28 @@ const CanvasSidebarPanel: FC = () => {
     renamingId,
     renameInputRef,
     setRenameValue,
-    handleCreateCanvas,
     handleSelectCanvas,
     handleStartRename,
     handleSubmitRename,
     handleDeleteCanvas,
-  } = useCanvasList(sortMode);
+  } = useCanvasList({ sortMode });
+  const { createCanvas } = useCreateCanvas();
 
   const toggleSort = () => {
     setSortMode(prev => prev === 'date' ? 'name' : 'date');
   };
+
+  if (!user) {
+    return (
+      <div className={styles.canvasesPanel}>
+        <div className={styles.empty}>
+          <p>
+            <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your canvases.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.canvasesPanel}>
@@ -56,7 +73,7 @@ const CanvasSidebarPanel: FC = () => {
         </div>
         <Button 
           iconLeft={<AddIcon />}
-          handleClick={handleCreateCanvas}
+          handleClick={createCanvas}
           title="Create New Canvas"
           className={styles.createButton}
         >
@@ -83,11 +100,6 @@ const CanvasSidebarPanel: FC = () => {
                 {nodeCount} {nodeCount === 1 ? 'Object' : 'Objects'}
               </span>
             );
-            const bottomRight = (
-              <span className={styles.count}>
-                {canvas.annotations.length} {canvas.annotations.length === 1 ? 'Annotation' : 'Annotations'}
-              </span>
-            );
             const options = (
               <>
                 <Button handleClick={() => handleStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
@@ -100,11 +112,10 @@ const CanvasSidebarPanel: FC = () => {
                 key={canvas.id}
                 className={isActive ? styles.activeCanvas : ''}
                 leftIcon={<WorkspaceIcon />}
-                title={canvas.title}
+                title={canvas.label}
                 searchTerm={searchTerm}
                 onClick={() => handleSelectCanvas(canvas)}
                 bottomLeft={bottomLeft}
-                bottomRight={bottomRight}
                 options={options}
                 isRenaming={isRenaming}
                 onTitleChange={setRenameValue}

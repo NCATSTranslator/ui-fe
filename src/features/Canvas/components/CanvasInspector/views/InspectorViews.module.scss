@@ -1,4 +1,4 @@
-@use "@/assets/styles" as *;
+@use "@/assets/styles/variables" as *;
 
 .empty {
   display: flex;
@@ -331,4 +331,25 @@
   color: $midDarkGray;
   font-size: $captionSize;
   margin-left: auto;
+}
+
+.toggleExcludedButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $xs $s;
+  border: 1px dashed $midGray;
+  border-radius: $defaultBorderRadius;
+  background: transparent;
+  color: $darkGray;
+  font-size: $captionSize;
+  font-weight: 600;
+  cursor: pointer;
+  margin: $xxs 0;
+  transition: $defaultAnim;
+
+  &:hover {
+    border-color: $purpleTwo;
+    color: $purpleTwo;
+  }
 }
