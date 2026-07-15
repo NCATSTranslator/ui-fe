@@ -14,45 +14,45 @@ const useCanvasHistory = (activeCanvas: Canvas | null) => {
 
   const pushUndo = useCallback(() => {
     if (!activeCanvas) return;
-    const id = activeCanvas.id;
+    const key = String(activeCanvas.id);
     const snapshot = structuredClone(activeCanvas);
-    const stack = undoStacksRef.current[id] ?? [];
-    undoStacksRef.current[id] = [...stack.slice(-(MAX_UNDO_DEPTH - 1)), snapshot];
-    if (redoStacksRef.current[id]?.length) {
-      redoStacksRef.current[id] = [];
+    const stack = undoStacksRef.current[key] ?? [];
+    undoStacksRef.current[key] = [...stack.slice(-(MAX_UNDO_DEPTH - 1)), snapshot];
+    if (redoStacksRef.current[key]?.length) {
+      redoStacksRef.current[key] = [];
     }
   }, [activeCanvas]);
 
   const undo = useCallback(() => {
     if (!activeCanvas) return;
-    const id = activeCanvas.id;
-    const stack = undoStacksRef.current[id];
+    const key = String(activeCanvas.id);
+    const stack = undoStacksRef.current[key];
     if (!stack || stack.length === 0) return;
     const snapshot = stack[stack.length - 1];
     const current = structuredClone(activeCanvas);
-    undoStacksRef.current[id] = stack.slice(0, -1);
-    const redoStack = redoStacksRef.current[id] ?? [];
-    redoStacksRef.current[id] = [...redoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
+    undoStacksRef.current[key] = stack.slice(0, -1);
+    const redoStack = redoStacksRef.current[key] ?? [];
+    redoStacksRef.current[key] = [...redoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
     dispatch(replaceCanvas(snapshot));
     forceUpdate(r => r + 1);
   }, [activeCanvas, dispatch]);
 
   const redo = useCallback(() => {
     if (!activeCanvas) return;
-    const id = activeCanvas.id;
-    const stack = redoStacksRef.current[id];
+    const key = String(activeCanvas.id);
+    const stack = redoStacksRef.current[key];
     if (!stack || stack.length === 0) return;
     const snapshot = stack[stack.length - 1];
     const current = structuredClone(activeCanvas);
-    redoStacksRef.current[id] = stack.slice(0, -1);
-    const undoStack = undoStacksRef.current[id] ?? [];
-    undoStacksRef.current[id] = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
+    redoStacksRef.current[key] = stack.slice(0, -1);
+    const undoStack = undoStacksRef.current[key] ?? [];
+    undoStacksRef.current[key] = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
     dispatch(replaceCanvas(snapshot));
     forceUpdate(r => r + 1);
   }, [activeCanvas, dispatch]);
 
-  const canUndo = !!activeCanvas && (undoStacksRef.current[activeCanvas.id]?.length ?? 0) > 0;
-  const canRedo = !!activeCanvas && (redoStacksRef.current[activeCanvas.id]?.length ?? 0) > 0;
+  const canUndo = !!activeCanvas && (undoStacksRef.current[String(activeCanvas.id)]?.length ?? 0) > 0;
+  const canRedo = !!activeCanvas && (redoStacksRef.current[String(activeCanvas.id)]?.length ?? 0) > 0;
 
   return { pushUndo, undo, redo, canUndo, canRedo };
 };

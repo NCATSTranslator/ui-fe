@@ -7,11 +7,11 @@ import type { ResultSet, Result, Path } from '@/features/ResultList/types/result
 const SKIP_LARGE_WARNING_KEY = 'canvas-skip-large-add-warning';
 
 interface CanvasResultActions {
-  addResult: (resultSet: ResultSet, result: Result, sourceId: string) => void;
-  addPath: (resultSet: ResultSet, path: Path, sourceId: string) => void;
-  addQueryResults: (resultSet: ResultSet, sourceId: string) => void;
-  addSingleNode: (resultSet: ResultSet, nodeId: string, sourceId: string) => void;
-  addEdgeFromEvidence: (resultSet: ResultSet, edgeId: string, sourceId: string) => void;
+  addResult: (resultSet: ResultSet, result: Result) => void;
+  addPath: (resultSet: ResultSet, path: Path) => void;
+  addQueryResults: (resultSet: ResultSet) => void;
+  addSingleNode: (resultSet: ResultSet, nodeId: string) => void;
+  addEdgeFromEvidence: (resultSet: ResultSet, edgeId: string) => void;
   resultCountExceedsThreshold: (resultSet: ResultSet) => boolean;
 }
 
@@ -27,7 +27,7 @@ const useCanvasInspectorHandlers = (actions: CanvasResultActions) => {
     if (!rs) return;
     const result = getResultById(rs, resultId);
     if (!result) return;
-    addResult(rs, result, queryPk);
+    addResult(rs, result);
   }, [resultSets, addResult]);
 
   const handleAddPath = useCallback((queryPk: string, pathId: string) => {
@@ -35,7 +35,7 @@ const useCanvasInspectorHandlers = (actions: CanvasResultActions) => {
     if (!rs) return;
     const path = getPathById(rs, pathId);
     if (!path) return;
-    addPath(rs, path, queryPk);
+    addPath(rs, path);
   }, [resultSets, addPath]);
 
   const handleAddQueryResults = useCallback((queryPk: string) => {
@@ -47,27 +47,27 @@ const useCanvasInspectorHandlers = (actions: CanvasResultActions) => {
       setWarningModalOpen(true);
       return;
     }
-    addQueryResults(rs, queryPk);
+    addQueryResults(rs);
   }, [resultSets, addQueryResults, resultCountExceedsThreshold]);
 
   const handleConfirmLargeAdd = useCallback(() => {
     const queryPk = pendingAddAllRef.current;
     if (!queryPk) return;
     const rs = resultSets[queryPk];
-    if (rs) addQueryResults(rs, queryPk);
+    if (rs) addQueryResults(rs);
     pendingAddAllRef.current = null;
   }, [resultSets, addQueryResults]);
 
   const handleAddNode = useCallback((queryPk: string, nodeId: string) => {
     const rs = resultSets[queryPk];
     if (!rs) return;
-    addSingleNode(rs, nodeId, queryPk);
+    addSingleNode(rs, nodeId);
   }, [resultSets, addSingleNode]);
 
   const handleAddEdge = useCallback((queryPk: string, edgeId: string) => {
     const rs = resultSets[queryPk];
     if (!rs) return;
-    addEdgeFromEvidence(rs, edgeId, queryPk);
+    addEdgeFromEvidence(rs, edgeId);
   }, [resultSets, addEdgeFromEvidence]);
 
   const addToGraphHandlers: InspectorAddToGraphHandlers = useMemo(() => ({
