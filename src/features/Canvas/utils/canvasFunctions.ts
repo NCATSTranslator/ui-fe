@@ -1,4 +1,4 @@
-import type { Canvas, CanvasNode, CanvasSource } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import type { ResultSet } from '@/features/ResultList/types/results.d';
 
 export type CanvasSortMode = 'date' | 'name';
@@ -41,31 +41,23 @@ export const filterCanvasNodes = (nodes: CanvasNode[], search: string): CanvasNo
   );
 };
 
-export const makeQuerySource = (sourceId: string): CanvasSource => ({
-  id: sourceId,
-  type: 'query',
-  label: `Query ${sourceId.slice(0, 8)}`,
-  queryPk: sourceId,
-});
-
 export const mergeCanvasNode = (existing: CanvasNode, incoming: CanvasNode): CanvasNode => ({
   ...existing,
   names: Array.from(new Set([...existing.names, ...incoming.names])),
   types: Array.from(new Set([...existing.types, ...incoming.types])),
   curies: Array.from(new Set([...existing.curies, ...incoming.curies])),
-  sources: Array.from(new Set([...existing.sources, ...incoming.sources])),
 });
 
 export const filterCanvasesBySearch = (canvases: Canvas[], searchTerm: string): Canvas[] => {
   if (!searchTerm) return canvases;
   const lower = searchTerm.toLowerCase();
-  return canvases.filter(c => c.title.toLowerCase().includes(lower));
+  return canvases.filter(c => c.label.toLowerCase().includes(lower));
 };
 
 export const sortCanvases = (canvases: Canvas[], mode: CanvasSortMode = 'date'): Canvas[] =>
   [...canvases].sort((a, b) =>
     mode === 'name'
-      ? a.title.localeCompare(b.title)
+      ? a.label.localeCompare(b.label)
       : new Date(b.timeUpdated).getTime() - new Date(a.timeUpdated).getTime()
   );
 
@@ -73,6 +65,3 @@ const LARGE_RESULT_THRESHOLD = 50;
 
 export const resultCountExceedsThreshold = (resultSet: ResultSet): boolean =>
   resultSet.data.results.length > LARGE_RESULT_THRESHOLD;
-
-export const resolveQueryPkFromSources = (canvas: Canvas, sourceIds: string[]): string | undefined =>
-  canvas.sources.find(s => s.type === 'query' && s.queryPk && sourceIds.includes(s.id))?.queryPk;

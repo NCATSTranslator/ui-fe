@@ -1,13 +1,19 @@
 import type { GraphData, GraphNodeType, GraphEdgeType } from 'translator-graph-view';
-import type { Canvas, CanvasNode, CanvasEdge, CanvasSource } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
 import type { ResultSet, Result, Path, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
 import { getNodeById, getEdgeById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
-export const canvasToGraphData = (canvas: Canvas): GraphData => {
+export const canvasToGraphData = (canvas: Canvas): GraphData =>
+  filteredCanvasToGraphData(canvas.nodes, canvas.edges);
+
+export const filteredCanvasToGraphData = (
+  visibleNodes: Record<string, CanvasNode>,
+  visibleEdges: Record<string, CanvasEdge>,
+): GraphData => {
   const nodes: Record<string, GraphNodeType> = {};
-  for (const [id, node] of Object.entries(canvas.nodes)) {
+  for (const [id, node] of Object.entries(visibleNodes)) {
     nodes[id] = {
       id: node.id,
       names: node.names,
@@ -17,13 +23,12 @@ export const canvasToGraphData = (canvas: Canvas): GraphData => {
   }
 
   const edges: Record<string, GraphEdgeType> = {};
-  for (const [id, edge] of Object.entries(canvas.edges)) {
+  for (const [id, edge] of Object.entries(visibleEdges)) {
     edges[id] = {
       id: edge.id,
       subject: edge.subject,
       object: edge.object,
       predicate: edge.predicate,
-      inferred: edge.inferred,
     };
   }
 
@@ -34,13 +39,9 @@ export const mergeEntityIntoCanvas = (
   canvas: Canvas,
   nodes: CanvasNode[],
   edges: CanvasEdge[],
-  source: CanvasSource,
 ): Canvas => {
   const mergedNodes = { ...canvas.nodes };
   const mergedEdges = { ...canvas.edges };
-  const mergedSources = canvas.sources.some(s => s.id === source.id)
-    ? canvas.sources
-    : [...canvas.sources, source];
 
   for (const node of nodes) {
     const existing = mergedNodes[node.id];
@@ -48,11 +49,7 @@ export const mergeEntityIntoCanvas = (
   }
 
   for (const edge of edges) {
-    const existing = mergedEdges[edge.id];
-    if (existing) {
-      const mergedSourceIds = Array.from(new Set([...existing.sources, ...edge.sources]));
-      mergedEdges[edge.id] = { ...existing, sources: mergedSourceIds };
-    } else {
+    if (!mergedEdges[edge.id]) {
       mergedEdges[edge.id] = edge;
     }
   }
@@ -61,26 +58,34 @@ export const mergeEntityIntoCanvas = (
     ...canvas,
     nodes: mergedNodes,
     edges: mergedEdges,
-    sources: mergedSources,
     timeUpdated: new Date().toISOString(),
   };
 };
 
-const resultNodeToCanvasNode = (node: ResultNode, sourceId: string): CanvasNode => ({
+const resultNodeToCanvasNode = (node: ResultNode): CanvasNode => ({
   id: node.id,
+  dataId: 0,
+  ref: node.id,
   names: [...node.names],
   types: [...node.types],
   curies: [...node.curies],
-  sources: [sourceId],
+  x: 0,
+  y: 0,
+  hidden: false,
+  tags: {},
 });
 
-const resultEdgeToCanvasEdge = (edge: ResultEdge, sourceId: string): CanvasEdge => ({
+const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
   id: edge.id,
+  dataId: 0,
+  ref: edge.id,
   subject: edge.subject,
   object: edge.object,
+  subjectDataId: 0,
+  objectDataId: 0,
   predicate: edge.predicate,
-  inferred: edge.inferred || undefined,
-  sources: [sourceId],
+  hidden: false,
+  tags: {},
 });
 
 const collectUnique = <T extends { id: string }>(
@@ -99,7 +104,6 @@ const collectUnique = <T extends { id: string }>(
 export const extractNodesAndEdgesFromPath = (
   resultSet: ResultSet,
   path: Path,
-  sourceId: string,
 ): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
   const nodes: CanvasNode[] = [];
   const edges: CanvasEdge[] = [];
@@ -108,10 +112,10 @@ export const extractNodesAndEdgesFromPath = (
     const id = path.subgraph[i] as string;
     if (i % 2 === 0) {
       const node = getNodeById(resultSet, id);
-      if (node) nodes.push(resultNodeToCanvasNode(node, sourceId));
+      if (node) nodes.push(resultNodeToCanvasNode(node));
     } else {
       const edge = getEdgeById(resultSet, id);
-      if (edge) edges.push(resultEdgeToCanvasEdge(edge, sourceId));
+      if (edge) edges.push(resultEdgeToCanvasEdge(edge));
     }
   }
 
@@ -121,7 +125,6 @@ export const extractNodesAndEdgesFromPath = (
 export const extractNodesAndEdgesFromResult = (
   resultSet: ResultSet,
   result: Result,
-  sourceId: string,
 ): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
   const allNodes: CanvasNode[] = [];
   const allEdges: CanvasEdge[] = [];
@@ -129,14 +132,14 @@ export const extractNodesAndEdgesFromResult = (
   const seenEdges = new Set<string>();
 
   const subjectNode = getNodeById(resultSet, result.subject);
-  if (subjectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(subjectNode, sourceId)]);
+  if (subjectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(subjectNode)]);
   const objectNode = getNodeById(resultSet, result.object);
-  if (objectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(objectNode, sourceId)]);
+  if (objectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(objectNode)]);
 
   if (isStringArray(result.paths)) {
     const paths = getPathsByIds(resultSet, result.paths as string[]);
     for (const path of paths) {
-      const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, path, sourceId);
+      const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, path);
       collectUnique(allNodes, seenNodes, nodes);
       collectUnique(allEdges, seenEdges, edges);
     }
@@ -147,7 +150,6 @@ export const extractNodesAndEdgesFromResult = (
 
 export const extractNodesAndEdgesFromAllResults = (
   resultSet: ResultSet,
-  sourceId: string,
 ): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
   const allNodes: CanvasNode[] = [];
   const allEdges: CanvasEdge[] = [];
@@ -155,7 +157,7 @@ export const extractNodesAndEdgesFromAllResults = (
   const seenEdges = new Set<string>();
 
   for (const result of resultSet.data.results) {
-    const { nodes, edges } = extractNodesAndEdgesFromResult(resultSet, result, sourceId);
+    const { nodes, edges } = extractNodesAndEdgesFromResult(resultSet, result);
     collectUnique(allNodes, seenNodes, nodes);
     collectUnique(allEdges, seenEdges, edges);
   }
@@ -166,9 +168,8 @@ export const extractNodesAndEdgesFromAllResults = (
 export const extractNodeFromResultSet = (
   resultSet: ResultSet,
   nodeId: string,
-  sourceId: string,
 ): CanvasNode | null => {
   const node = getNodeById(resultSet, nodeId);
   if (!node) return null;
-  return resultNodeToCanvasNode(node, sourceId);
+  return resultNodeToCanvasNode(node);
 };
