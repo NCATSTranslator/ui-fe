@@ -4,7 +4,8 @@ import { ResultEdge, ResultNode, Path, Tags, Annotation, ChemicalAnnotation,
   DiseaseAnnotation, GeneAnnotation, EdgeMetadata } from "./results";
 
 export const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
-export const isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
+const _isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
+const _isTdlArray = tc.makeIsHomogeneousArray(_isTdl);
 
 
 /**
@@ -149,7 +150,7 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       ["descriptions", tc.nullable(obj.descriptions, tc.isStringArray), "string[] | null", obj.descriptions],
       ["name", tc.nullable(obj.name, tc.isString), "string | null", obj.name],
       ["species", tc.nullable(obj.species, isSpecies), "Species | null", obj.species],
-      ["tdl", tc.nullable(obj.tdl, isTdl), "Tdl | null", obj.tdl],
+      ["tdl", tc.nullable(obj.tdl, _isTdlArray), "Tdl | null", obj.tdl],
     ], warn);
   }
 }
