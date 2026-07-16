@@ -1,4 +1,4 @@
-import { createContext, FC, Fragment, useId, useRef, useState } from 'react';
+import { createContext, FC, Fragment, useCallback, useId, useRef, useState, MouseEvent } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
@@ -17,6 +17,7 @@ import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resu
 import { useSelector } from 'react-redux';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 
 export const ExpandedPredicateContext = createContext<{
   expandedPredicateId: string | null;
@@ -61,9 +62,17 @@ const PathContainer: FC<PathContainerProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
+  const { openMenu } = useCanvasContextMenu();
   const itemResultId = useResultItemId();
   const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
   const initialExpandedPredicateIdSet = useRef(false);
+
+  const handlePathContextMenu = useCallback((e: MouseEvent) => {
+    if (!path.id) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openMenu('path', path.id, pk, { x: e.clientX, y: e.clientY }, path);
+  }, [path, pk, openMenu]);
 
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
   const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
@@ -136,6 +145,7 @@ const PathContainer: FC<PathContainerProps> = ({
               }
             }
           }}
+          onContextMenu={path.id ? handlePathContextMenu : undefined}
           className={styles.pathEvidenceButton}
           data-tooltip-id={tooltipID}
         >

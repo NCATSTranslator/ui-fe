@@ -2,31 +2,56 @@ import { FC, createContext, useContext, useState, useCallback, useEffect, useRef
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
-import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
+import { selectActiveCanvas, addCanvas, replaceCanvas, getNextCanvasLabel, selectCanvases } from '@/features/Canvas/slices/canvasSlice';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { resultDataToGraphSubmission } from '@/features/Canvas/utils/canvasMappers';
-import { extractNodeFromResultSet } from '@/features/Canvas/utils/canvasGraphFunctions';
+import { resultDataToGraphSubmission, backendGraphToInternal } from '@/features/Canvas/utils/canvasMappers';
+import { extractNodeFromResultSet, extractNodesAndEdgesFromPath } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { mergeCanvasGraph, createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
-import { canvasEntityAddedToast, canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
-import { addCanvas } from '@/features/Canvas/slices/canvasSlice';
-import { getNextCanvasLabel, selectCanvases } from '@/features/Canvas/slices/canvasSlice';
+import { canvasEntityAddedToast, canvasEntitiesAddedToast, canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
+import type { Path, ResultSet } from '@/features/ResultList/types/results';
 import styles from './CanvasContextMenu.module.scss';
 
 type MenuTarget = {
-  type: 'node' | 'edge';
+  type: 'node' | 'edge' | 'path';
   id: string;
   pk: string;
   position: { x: number; y: number };
+  path?: Path;
 };
 
 type CanvasContextMenuContextValue = {
-  openMenu: (type: 'node' | 'edge', id: string, pk: string, position: { x: number; y: number }) => void;
+  openMenu: (type: 'node' | 'edge' | 'path', id: string, pk: string, position: { x: number; y: number }, path?: Path) => void;
 };
 
 const CanvasContextMenuContext = createContext<CanvasContextMenuContextValue | null>(null);
+
+const resolveTarget = (
+  resultSet: ResultSet,
+  target: MenuTarget,
+): { nodeIds: string[]; edgeIds: string[]; entityName: string } | null => {
+  if (target.type === 'path') {
+    if (!target.path) return null;
+    const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, target.path);
+    if (nodes.length === 0) return null;
+    return { nodeIds: nodes.map(n => n.id), edgeIds: edges.map(e => e.id), entityName: target.id };
+  }
+  if (target.type === 'node') {
+    const node = extractNodeFromResultSet(resultSet, target.id);
+    if (!node) return null;
+    return { nodeIds: [target.id], edgeIds: [], entityName: node.names[0] || target.id };
+  }
+  const edge = resultSet.data.edges[target.id];
+  if (!edge) return null;
+  return { nodeIds: [edge.subject, edge.object], edgeIds: [target.id], entityName: edge.predicate };
+};
+
+const getButtonLabel = (type: MenuTarget['type'], hasCanvas: boolean): string => {
+  if (type === 'path') return hasCanvas ? 'Add path to graph' : 'New canvas + add path to graph';
+  return hasCanvas ? `Add ${type} to canvas` : `New canvas + add ${type}`;
+};
 
 export const useCanvasContextMenu = (): CanvasContextMenuContextValue => {
   const ctx = useContext(CanvasContextMenuContext);
@@ -93,36 +118,34 @@ const ContextMenuPopup: FC<{
 
   const handleAdd = useCallback(async () => {
     if (!resultSet) return;
+    const resolved = resolveTarget(resultSet, target);
+    if (!resolved) return;
     const canvas = await ensureCanvas();
     if (!canvas) return;
 
-    let nodeIds: string[] = [];
-    let edgeIds: string[] = [];
-    let entityName = target.id;
-
-    if (target.type === 'node') {
-      const node = extractNodeFromResultSet(resultSet, target.id);
-      if (!node) return;
-      nodeIds = [target.id];
-      entityName = node.names[0] || target.id;
-    } else {
-      const edge = resultSet.data.edges[target.id];
-      if (!edge) return;
-      nodeIds = [edge.subject, edge.object];
-      edgeIds = [target.id];
-      entityName = edge.predicate;
-    }
-
+    const { nodeIds, edgeIds, entityName } = resolved;
     const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds);
     try {
-      await mergeCanvasGraph(canvas.id, submission);
+      const graph = await mergeCanvasGraph(canvas.id, submission);
+      const { nodes, edges } = backendGraphToInternal(graph);
+      dispatch(replaceCanvas({
+        ...canvas,
+        nodes,
+        edges,
+        tags: graph.tags ?? canvas.tags,
+        timeUpdated: new Date().toISOString(),
+      }));
       queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
-      canvasEntityAddedToast(entityName, canvas.label);
+      if (target.type === 'path') {
+        canvasEntitiesAddedToast(nodeIds.length, canvas.label);
+      } else {
+        canvasEntityAddedToast(entityName, canvas.label);
+      }
     } catch {
       canvasSaveErrorToast();
     }
     onClose();
-  }, [resultSet, ensureCanvas, target, queryClient, onClose]);
+  }, [resultSet, ensureCanvas, target, dispatch, queryClient, onClose]);
 
   const hasCanvas = !!activeCanvas;
 
@@ -134,7 +157,7 @@ const ContextMenuPopup: FC<{
       style={{ left: `${target.position.x}px`, top: `${target.position.y}px` }}
     >
       <button type="button" onClick={handleAdd}>
-        {hasCanvas ? `Add ${target.type} to canvas` : `New canvas + add ${target.type}`}
+        {getButtonLabel(target.type, hasCanvas)}
       </button>
     </div>,
     document.body,
@@ -144,8 +167,8 @@ const ContextMenuPopup: FC<{
 export const CanvasContextMenuProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [target, setTarget] = useState<MenuTarget | null>(null);
 
-  const openMenu = useCallback((type: 'node' | 'edge', id: string, pk: string, position: { x: number; y: number }) => {
-    setTarget({ type, id, pk, position });
+  const openMenu = useCallback((type: 'node' | 'edge' | 'path', id: string, pk: string, position: { x: number; y: number }, path?: Path) => {
+    setTarget({ type, id, pk, position, path });
   }, []);
 
   const closeMenu = useCallback(() => setTarget(null), []);
