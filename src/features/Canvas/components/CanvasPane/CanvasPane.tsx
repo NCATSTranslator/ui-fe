@@ -11,9 +11,6 @@ import useCanvasHoverState from '@/features/Canvas/hooks/useCanvasHoverState';
 import useCanvasHoverActions from '@/features/Canvas/hooks/useCanvasHoverActions';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
-import ChevUp from '@/assets/icons/directional/Chevron/Chevron Up.svg?react';
-import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
-import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasInspector from '@/features/Canvas/components/CanvasInspector/CanvasInspector';
@@ -22,6 +19,7 @@ import WarningModal from '@/features/Core/components/WarningModal/WarningModal';
 import { formatBiolinkEntity } from '@/features/Core/utils/stringFormatters';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import type { GraphNodeType, GraphEdgeType } from 'translator-graph-view';
+import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 
 type User = ReturnType<typeof useUser>[0];
 
@@ -38,7 +36,7 @@ const useCloseCanvasOnLogout = (user: User, paneOpen: boolean, closePane: () => 
 const CanvasPane: FC = () => {
   const navigate = useNavigate();
   const [user] = useUser();
-  const { paneOpen, activeCanvas, togglePane, closePane } = useCanvasPane();
+  const { paneOpen, paneMaximized, activeCanvas, togglePane, closePane } = useCanvasPane();
   const { saveStatus, saveMerge, saveTrashElements, saveRename } = useCanvasPersistence();
   const { rename, undo, redo, canUndo, canRedo, removeNode, isProcessing, ...canvasResultActions } = useCanvas({ saveMerge, saveTrashElements, saveRename });
   const inspector = useCanvasInspector();
@@ -48,6 +46,7 @@ const CanvasPane: FC = () => {
     hoveredNodeId, setHoveredNodeId, nodeHover, edgeHover, clearHover,
     handleNodeHover, handleEdgeHover, handleMenuMouseEnter, handleMenuMouseLeave,
   } = useCanvasHoverState();
+  const { createCanvas } = useCreateCanvas();
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const { handleHoverRemove, handleHoverNewQuery, handleHoverInformation } = useCanvasHoverActions({ activeCanvas, clearHover, removeNode, inspector, navigate, setSelectedNodeIds });
   useCloseCanvasOnLogout(user, paneOpen, closePane);
@@ -77,36 +76,41 @@ const CanvasPane: FC = () => {
     navigate(term ? `/new-query?prefill=${encodeURIComponent(term)}` : '/new-query');
   }, [navigate]);
 
-  if (!activeCanvas) return null;
+  const paneClass = joinClasses(
+    styles.canvasPane,
+    !paneOpen && styles.collapsed,
+    paneOpen && !paneMaximized && styles.expanded,
+    paneOpen && paneMaximized && styles.maximized,
+  );
 
+  if (!activeCanvas) return (
+    <div className={paneClass}>
+      <div className={styles.collapsedTitle}>
+        <button
+          type="button"
+          className={styles.titleLeft}
+          onClick={createCanvas}
+          aria-label="Create new canvas"
+        >
+          <span className={styles.canvasTitle}>Create New Canvas</span>
+        </button>
+
+      </div>
+    </div>
+  );
+  
   return (
-    <div className={joinClasses(styles.canvasPane, paneOpen ? styles.expanded : styles.collapsed)}>
-      <div className={styles.titleBar}>
+    <div className={paneClass}>
+      <div className={styles.collapsedTitle}>
         <button
           type="button"
           className={styles.titleLeft}
           onClick={togglePane}
-          aria-label={paneOpen ? 'Collapse canvas' : 'Expand canvas'}
+          aria-label="Expand canvas"
           aria-expanded={paneOpen}
         >
           <span className={styles.canvasTitle}>{activeCanvas.label}</span>
         </button>
-        <div className={styles.titleRight}>
-          <button
-            className={styles.iconButton}
-            onClick={togglePane}
-            aria-label={paneOpen ? 'Collapse canvas' : 'Expand canvas'}
-          >
-            {paneOpen ? <ChevDown /> : <ChevUp />}
-          </button>
-          <button
-            className={styles.iconButton}
-            onClick={closePane}
-            aria-label="Close canvas"
-          >
-            <CloseIcon />
-          </button>
-        </div>
       </div>
       {paneOpen && (
         <div className={styles.contentArea}>
