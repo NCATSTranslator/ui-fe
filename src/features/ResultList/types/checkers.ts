@@ -1,6 +1,6 @@
 import * as tc from "@/features/Core/types/checkers";
 import { isEdgeProvenance } from "@/features/Evidence/types/checkers";
-import { ResultEdge, ResultNode, Path, Tags, Annotation, ChemicalAnnotation, 
+import { ResultEdge, ResultNode, Path, EntityTags, Annotation, ChemicalAnnotation,
   DiseaseAnnotation, GeneAnnotation, EdgeMetadata } from "./results";
 
 export const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
@@ -185,15 +185,16 @@ export const isPath = (obj: unknown, warn = false): obj is Path => {
  * @param {boolean} warn - Whether to warn if the object is not a Tags.
  * @returns {boolean} - True if the object is a Tags, otherwise false.
  */
-export const isTags = (obj: unknown, warn = false): obj is Tags => {
+export const isTags = (obj: unknown, warn = false): obj is EntityTags => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isTags] expected object, got:", typeof obj, obj);
     return false;
   }
   for (const key in obj) {
     const tag = (obj as Record<string, unknown>)[key];
-    if (!tc.nullable(tag, (t) => tc.isObject(t) && tc.isString(t.name) && tc.isString(t.value))) {
-      if (warn) console.warn(`[isTags] invalid tag at key "${key}": expected {name, value} | null, got:`, tag);
+    if (!tc.isObject(tag) || !tc.isString(tag.id) || !tc.isObject(tag.description)
+      || !tc.isString(tag.description.name) || !tc.isString(tag.description.description)) {
+      if (warn) console.warn(`[isTags] invalid tag at key "${key}": expected TagObject, got:`, tag);
       return false;
     }
   }

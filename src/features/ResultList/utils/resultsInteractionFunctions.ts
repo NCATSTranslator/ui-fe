@@ -430,9 +430,9 @@ export const injectDynamicFilters = (
   for (const tagEntry of tagsAdded) {
     const tag = tagEntry.tag;
     const ridx = tagEntry.index;
-    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
-    modifiedFormattedResults[ridx].tags[tag.id] = null;
-    modifiedOriginalResults[ridx].tags[tag.id] = null;
+    modifiedSummary.data.tags[tag.id] = tag.description;
+    modifiedFormattedResults[ridx].tags[tag.id] = tag;
+    modifiedOriginalResults[ridx].tags[tag.id] = tag;
   }
   return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }
@@ -469,7 +469,9 @@ export const calculateFacetCounts = (
   negatedFacets: Filter[]
 ): Filters => {
   // Create a list of tags from the master tag list provided by the backend
-  const countedTags = cloneDeep(summary.data.tags) as Filters;
+  const countedTags: Filters = Object.fromEntries(
+    Object.entries(summary.data.tags).map(([key, tag]) => [key, { name: tag.name }])
+  );
   const activeFamilies = new Set(activeFacets.map(facet => filtering.getFilterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection

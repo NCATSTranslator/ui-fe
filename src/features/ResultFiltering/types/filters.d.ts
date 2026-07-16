@@ -18,7 +18,9 @@ export type GroupedFilters = {
 }
 export type DynamicTag = {
   id: string;
-  name: string;
-  value: string;
+  description: {
+    name: string;
+    description: string;
+  };
 }
 

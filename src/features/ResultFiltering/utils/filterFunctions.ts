@@ -12,13 +12,17 @@ export const FILTERING_CONSTANTS = {
   DYNAMIC_TAG: {
     BOOKMARK: {
       id: 'r/sv/bookmark',
-      name: 'Has Bookmark',
-      value: '',
+      description: {
+        name: 'Has Bookmark',
+        description: '',
+      },
     },
     NOTE: {
       id: 'r/sv/note',
-      name: 'Has Note',
-      value: '',
+      description: {
+        name: 'Has Note',
+        description: '',
+      },
     },
   },
   WEIGHT: {

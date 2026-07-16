@@ -1,5 +1,5 @@
 import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, Tags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
+import { Path, ResultSet, PathFilterState, EntityTags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
 import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
@@ -11,10 +11,10 @@ import { Preferences } from "@/features/UserAuth/types/user";
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
  *
- * @param {Tags} tags - The tags object from a ResultItem.
+ * @param {EntityTags} tags - The tags object from a ResultItem.
  * @returns {string[]} - An array of ARA names (the portion after "infores:").
  */
-export const getARATagsFromResultTags = (tags: Tags): string[] => {
+export const getARATagsFromResultTags = (tags: EntityTags): string[] => {
   const araTags: string[] = [];
 
   if (!tags) return araTags;
@@ -249,8 +249,8 @@ export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) 
  * @returns {Path[]} - The array of compressed paths.
  */
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
-  const mergeTags = (tags1: Tags, tags2: Tags): Tags => {
-    const mergedTags: Tags = { ...tags1 };
+  const mergeTags = (tags1: EntityTags, tags2: EntityTags): EntityTags => {
+    const mergedTags: EntityTags = { ...tags1 };
 
     for (const key in tags2) {
       const tag1 = tags1[key];
@@ -258,12 +258,9 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 
       // If the tag exists in both tags1 and tags2, ensure no duplicates
       if (tag1 && tag2) {
-        // Check if the tag is the same by comparing name and value
-        if (tag1.name === tag2.name && tag1.value === tag2.value) {
-          // Use the existing tag
+        if (tag1.id === tag2.id) {
           mergedTags[key] = tag1;
         } else {
-          // If different, prioritize tag2 or handle conflicts as needed
           mergedTags[key] = tag2;
         }
       } else {
@@ -527,11 +524,11 @@ export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
 /**
  * Gets a string of role tags from a ResultItem's tags object.
  *
- * @param {Tags} tags - The tags object from a ResultItem.
+ * @param {EntityTags} tags - The tags object from a ResultItem.
  * @param {Filter[]} availableFilters - The available filters.
  * @returns {string} - A string of role tags, comma separated.
  */
-export const getResultRoleTagsString = (tags: Tags, availableFilters: { [key: string]: Filter }) => {
+export const getResultRoleTagsString = (tags: EntityTags, availableFilters: { [key: string]: Filter }) => {
   return Object.keys(tags).filter((fid) => availableFilters[fid] && getTagFamily(fid) === FILTERING_CONSTANTS.FAMILIES.ROLE).map((fid) => availableFilters[fid].name).join(', ');
 }
 
