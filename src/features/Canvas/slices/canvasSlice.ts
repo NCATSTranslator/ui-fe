@@ -6,12 +6,19 @@ export interface CanvasState {
   canvases: Canvas[];
   activeCanvasId: number | null;
   paneOpen: boolean;
+  paneMaximized: boolean;
 }
 
 const initialState: CanvasState = {
   canvases: [],
   activeCanvasId: null,
   paneOpen: false,
+  paneMaximized: false,
+};
+
+const resetPaneState = (state: CanvasState) => {
+  state.paneOpen = false;
+  state.paneMaximized = false;
 };
 
 const getNextCanvasLabel = (canvases: Canvas[]) => {
@@ -36,7 +43,7 @@ export const canvasSlice = createSlice({
       state.canvases = state.canvases.filter(c => c.id !== action.payload);
       if (state.activeCanvasId === action.payload) {
         state.activeCanvasId = state.canvases.length > 0 ? state.canvases[0].id : null;
-        if (!state.activeCanvasId) state.paneOpen = false;
+        if (!state.activeCanvasId) resetPaneState(state);
       }
     },
     renameCanvas: (state, action: PayloadAction<{ id: number; label: string }>) => {
@@ -54,12 +61,18 @@ export const canvasSlice = createSlice({
     },
     togglePane: (state) => {
       state.paneOpen = !state.paneOpen;
+      if (!state.paneOpen) state.paneMaximized = false;
     },
     openPane: (state) => {
       state.paneOpen = true;
     },
     closePane: (state) => {
-      state.paneOpen = false;
+      resetPaneState(state);
+      state.activeCanvasId = null;
+    },
+    toggleMaximizePane: (state) => {
+      state.paneOpen = true;
+      state.paneMaximized = !state.paneMaximized;
     },
     addCanvasNode: (state, action: PayloadAction<{ canvasId: number; node: CanvasNode }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
@@ -124,7 +137,7 @@ export const canvasSlice = createSlice({
       });
       if (state.activeCanvasId && !action.payload.some(c => c.id === state.activeCanvasId)) {
         state.activeCanvasId = action.payload.length > 0 ? action.payload[0].id : null;
-        if (!state.activeCanvasId) state.paneOpen = false;
+        if (!state.activeCanvasId) resetPaneState(state);
       }
     },
   },
@@ -138,6 +151,7 @@ export const {
   togglePane,
   openPane,
   closePane,
+  toggleMaximizePane,
   addCanvasNode,
   addCanvasEdge,
   removeCanvasNode,
@@ -153,6 +167,7 @@ export { getNextCanvasLabel };
 export const selectCanvases = (state: RootState) => state.canvas.canvases;
 export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCanvasId;
 export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
+export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
 export const selectActiveCanvas = (state: RootState) =>
   state.canvas.canvases.find(c => c.id === state.canvas.activeCanvasId) ?? null;
 
