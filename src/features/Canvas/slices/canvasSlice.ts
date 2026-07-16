@@ -110,7 +110,18 @@ export const canvasSlice = createSlice({
       }
     },
     setCanvases: (state, action: PayloadAction<Canvas[]>) => {
-      state.canvases = action.payload;
+      const existingById = new Map(state.canvases.map(c => [c.id, c]));
+      state.canvases = action.payload.map(canvas => {
+        const existing = existingById.get(canvas.id);
+        if (
+          existing &&
+          Object.keys(existing.nodes).length > 0 &&
+          Object.keys(canvas.nodes).length === 0
+        ) {
+          return { ...canvas, nodes: existing.nodes, edges: existing.edges, tags: existing.tags };
+        }
+        return canvas;
+      });
       if (state.activeCanvasId && !action.payload.some(c => c.id === state.activeCanvasId)) {
         state.activeCanvasId = action.payload.length > 0 ? action.payload[0].id : null;
         if (!state.activeCanvasId) state.paneOpen = false;
