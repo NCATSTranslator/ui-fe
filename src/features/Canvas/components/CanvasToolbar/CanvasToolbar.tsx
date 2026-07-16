@@ -2,41 +2,18 @@ import { FC, useState, useRef, useEffect, useCallback, KeyboardEvent } from 'rea
 import styles from './CanvasToolbar.module.scss';
 import { LayoutType } from 'translator-graph-view';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
-import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
+import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import type { SaveStatus } from '@/features/Canvas/types/canvas';
 import UndoIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import RedoIcon from '@/assets/icons/directional/Undo & Redo/Redo.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
-import CircleAddIcon from '@/assets/icons/buttons/Add/Circle Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
+import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SettingsIcon from '@/assets/icons/navigation/Settings.svg?react';
-import OverflowIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
-
-const OverflowMenu: FC = () => {
-  const [open, setOpen] = useState(false);
-  return (
-    <OutsideClickHandler className={styles.overflowWrapper} onOutsideClick={() => setOpen(false)}>
-      <button
-        className={joinClasses(styles.toolButton, open && styles.active)}
-        onClick={() => setOpen(prev => !prev)}
-        aria-label="More options"
-        title="More options"
-      >
-        <OverflowIcon />
-      </button>
-      {open && (
-        <div className={styles.overflowMenu}>
-          <button className={styles.overflowItem} onClick={() => setOpen(false)} disabled>
-            Export Canvas
-          </button>
-          <button className={styles.overflowItem} onClick={() => setOpen(false)} disabled>
-            Duplicate Canvas
-          </button>
-        </div>
-      )}
-    </OutsideClickHandler>
-  );
-};
+import ExpandIcon from '@/assets/icons/buttons/Expand.svg?react';
+import OverflowMenu from './OverflowMenu';
+import AddMenu from './AddMenu';
+import StatusIndicator from './StatusIndicator';
 
 const layouts: { key: LayoutType; label: string }[] = [
   { key: 'hierarchicalLR', label: 'Horizontal' },
@@ -79,9 +56,9 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   isProcessing,
   saveStatus,
 }) => {
+  const { closePane, togglePane, toggleMaximizePane, paneMaximized } = useCanvasPane();
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
-  const [addMenuOpen, setAddMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -104,10 +81,40 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   }, [commitRename, title]);
 
   const displayZoom = (zoomLevel !== null && zoomLevel !== undefined) ? `${Math.round(zoomLevel * 100)}%` : '100%';
+  const maximizeLabel = paneMaximized ? 'Restore canvas' : 'Maximize canvas';
 
   return (
     <div className={styles.toolbar}>
       <div className={styles.left}>
+        <div className={styles.interactions}>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={closePane}
+            aria-label="Close canvas"
+            title="Close canvas"
+          >
+            <CloseIcon />
+          </button>
+          <button
+            type="button"
+            className={styles.collapseButton}
+            onClick={togglePane}
+            aria-label="Collapse canvas"
+            title="Collapse canvas"
+          >
+            <SubtractIcon />
+          </button>
+          <button
+            type="button"
+            className={styles.expandButton}
+            onClick={toggleMaximizePane}
+            aria-label={maximizeLabel}
+            title={maximizeLabel}
+          >
+            <ExpandIcon />
+          </button>
+        </div>
         {editing ? (
           <input
             ref={inputRef}
@@ -126,45 +133,8 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
             {title}
           </span>
         )}
-        <OutsideClickHandler className={styles.addMenuWrapper} onOutsideClick={() => setAddMenuOpen(false)}>
-          <button
-            className={joinClasses(styles.addButton, addMenuOpen && styles.active)}
-            onClick={() => setAddMenuOpen(prev => !prev)}
-            aria-label="Add to canvas"
-            title="Add to canvas"
-          >
-            <CircleAddIcon />
-            <span>Add</span>
-          </button>
-          {addMenuOpen && (
-            <div className={styles.addMenu}>
-              <button
-                className={styles.addMenuItem}
-                onClick={() => { setAddMenuOpen(false); onAddObject?.(); }}
-              >
-                Object
-              </button>
-              <button
-                className={styles.addMenuItem}
-                onClick={() => { setAddMenuOpen(false); onAddAnnotation?.(); }}
-              >
-                Annotation
-              </button>
-            </div>
-          )}
-        </OutsideClickHandler>
-        {isProcessing && <span className={styles.processingIndicator}>Processing...</span>}
-        {saveStatus && saveStatus !== 'unsaved' && !isProcessing && (
-          <span className={joinClasses(
-            styles.saveIndicator,
-            saveStatus === 'saving' && styles.saving,
-            saveStatus === 'error' && styles.saveError,
-          )}>
-            {saveStatus === 'saving' && 'Saving...'}
-            {saveStatus === 'saved' && 'Saved'}
-            {saveStatus === 'error' && 'Save failed'}
-          </span>
-        )}
+        <AddMenu onAddObject={onAddObject} onAddAnnotation={onAddAnnotation} />
+        <StatusIndicator isProcessing={isProcessing} saveStatus={saveStatus} />
       </div>
       <div className={styles.center}>
         <div className={styles.zoomGroup}>

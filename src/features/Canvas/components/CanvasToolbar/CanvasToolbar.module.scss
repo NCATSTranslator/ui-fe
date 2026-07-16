@@ -8,13 +8,38 @@
   min-height: 40px;
   padding: 0 $s;
   border-bottom: 1px solid $midGray;
-  background: $white;
 }
 
 .left {
   display: flex;
   align-items: center;
   min-width: 0;
+}
+
+.interactions {
+  display: flex;
+  gap: $xxs;
+  svg {
+    width: $s;
+    height: $s;
+  }
+  button {
+    margin: 0;
+    border-radius: 20px;
+    border: none;
+    padding: 0;
+    display: flex;
+    cursor: pointer;
+  }
+  .closeButton {
+    background: $red;
+  }
+  .collapseButton {
+    background: $yellow;
+  }
+  .expandButton {
+    background: $green;
+  }
 }
 
 .title {
