@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import styles from './CanvasSidebarPanel.module.scss';
+import styles from './CanvasPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
@@ -16,7 +16,7 @@ import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { useUser, getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 import { getCanvasNodeCount, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 
-const CanvasSidebarPanel: FC = () => {
+const CanvasPanel: FC = () => {
   const [user] = useUser();
   const location = useLocation();
   const [sortMode, setSortMode] = useState<CanvasSortMode>('date');
@@ -26,6 +26,7 @@ const CanvasSidebarPanel: FC = () => {
     searchTerm,
     handleSearch,
     renamingId,
+    renameValue,
     renameInputRef,
     setRenameValue,
     handleSelectCanvas,
@@ -112,7 +113,7 @@ const CanvasSidebarPanel: FC = () => {
                 key={canvas.id}
                 className={isActive ? styles.activeCanvas : ''}
                 leftIcon={<WorkspaceIcon />}
-                title={canvas.label}
+                title={isRenaming ? renameValue : canvas.label}
                 searchTerm={searchTerm}
                 onClick={() => handleSelectCanvas(canvas)}
                 bottomLeft={bottomLeft}
@@ -130,4 +131,4 @@ const CanvasSidebarPanel: FC = () => {
   );
 };
 
-export default CanvasSidebarPanel;
+export default CanvasPanel;
