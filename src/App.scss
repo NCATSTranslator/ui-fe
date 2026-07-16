@@ -3,6 +3,6 @@
 .app {
   .layout { display: flex; height: 100vh; justify-content: stretch; }
   .smallScreen { width: 0; }
-  .content { flex: 1; display: flex; flex-direction: column; }
+  .content { flex: 1; display: flex; flex-direction: column; position: relative; }
   .content > footer { margin-top: auto; }
 }
