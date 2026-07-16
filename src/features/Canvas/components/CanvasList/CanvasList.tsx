@@ -46,6 +46,7 @@ const CanvasList = () => {
     searchTerm,
     handleSearch,
     renamingId,
+    renameValue,
     renameInputRef,
     setRenameValue,
     handleSelectCanvas,
@@ -112,7 +113,7 @@ const CanvasList = () => {
                       key={canvas.id}
                       className={isActive ? styles.activeCanvas : ''}
                       leftIcon={<WorkspaceIcon />}
-                      title={canvas.label}
+                      title={isRenaming ? renameValue : canvas.label}
                       searchTerm={searchTerm}
                       onClick={() => handleSelectCanvas(canvas)}
                       bottomLeft={
