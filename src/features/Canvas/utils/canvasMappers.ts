@@ -9,9 +9,8 @@ import type {
   GraphSubmission,
   GraphSubmissionNode,
   GraphSubmissionEdge,
-  TagObject,
 } from '@/features/Canvas/types/canvas';
-import type { ResultSet, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
+import type { ResultSet, ResultNode, ResultEdge, ResultSetTags } from '@/features/ResultList/types/results.d';
 import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 
 // ---------------------------------------------------------------------------
@@ -45,6 +44,8 @@ const backendEdgeToCanvasEdge = (
   predicate: edge.label,
   hidden: edge.hidden,
   tags: edge.tags,
+  signature: edge.ref,
+  source_time: edge.time_created,
 });
 
 export const backendGraphToInternal = (
@@ -115,7 +116,7 @@ export const backendCanvasListToCanvasList = (
 export const buildGraphSubmission = (
   signedNodes: Record<string, GraphSubmissionNode>,
   signedEdges: Record<string, GraphSubmissionEdge>,
-  tagDescriptions?: Record<string, TagObject>,
+  tagDescriptions?: ResultSetTags,
   source?: { query_ref: string; result_ref: string },
 ): GraphSubmission => ({
   nodes: signedNodes,
@@ -137,7 +138,7 @@ const canvasNodeToSubmissionNode = (node: CanvasNode): GraphSubmissionNode => ({
   synonyms: [],
   curies: [...node.curies],
   provenance: [],
-  tags: {},
+  tags: node.tags,
   source_time: new Date().toISOString(),
   x: node.x,
   y: node.y,
@@ -150,21 +151,22 @@ const canvasEdgeToSubmissionEdge = (edge: CanvasEdge): GraphSubmissionEdge => ({
   subject: edge.subject,
   object: edge.object,
   predicate: edge.predicate,
-  aras: [],
-  support: [],
-  is_root: false,
-  knowledge_level: '',
-  description: null,
-  type: '',
-  predicate_url: null,
-  provenance: [],
-  publications: {},
-  metadata: null,
-  trials: [],
-  tags: {},
-  source_time: new Date().toISOString(),
+  aras: [...(edge.aras ?? [])],
+  support: Array.isArray(edge.support) ? [...edge.support] : [],
+  is_root: edge.is_root ?? false,
+  inferred: edge.inferred ?? false,
+  knowledge_level: edge.knowledge_level ?? '',
+  description: edge.description ?? null,
+  type: edge.type ?? '',
+  predicate_url: edge.predicate_url ?? '',
+  provenance: [...(edge.provenance ?? [])],
+  publications: { ...(edge.publications ?? {}) },
+  metadata: edge.metadata ?? null,
+  trials: [...(edge.trials ?? [])],
+  tags: edge.tags,
+  source_time: edge.source_time ?? new Date().toISOString(),
   hidden: edge.hidden,
-  signature: edge.id,
+  signature: edge.signature ?? edge.id,
 });
 
 export const canvasNodesToGraphSubmission = (
@@ -195,7 +197,7 @@ const resultNodeToSubmissionNode = (node: ResultNode): GraphSubmissionNode => ({
   synonyms: [...node.synonyms],
   curies: [...node.curies],
   provenance: [...node.provenance],
-  tags: {},
+  tags: node.tags,
   source_time: node.source_time,
   annotations: node.annotations,
   x: 0,
@@ -211,6 +213,7 @@ const resultEdgeToSubmissionEdge = (edge: ResultEdge): GraphSubmissionEdge => ({
   aras: [...edge.aras],
   support: Array.isArray(edge.support) ? [...edge.support] : [],
   is_root: edge.is_root,
+  inferred: edge.inferred,
   knowledge_level: edge.knowledge_level,
   description: edge.description ?? null,
   type: edge.type,
@@ -219,7 +222,7 @@ const resultEdgeToSubmissionEdge = (edge: ResultEdge): GraphSubmissionEdge => ({
   publications: { ...edge.publications },
   metadata: edge.metadata,
   trials: [...edge.trials],
-  tags: {},
+  tags: edge.tags,
   source_time: edge.source_time,
   signature: edge.signature,
 });

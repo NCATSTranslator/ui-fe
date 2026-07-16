@@ -1,17 +1,8 @@
+import { ResultSetTags, EntityTags, ResultEdge } from '@/features/ResultList/types/results';
 
 // ---------------------------------------------------------------------------
 // Backend response types (match API contract exactly)
 // ---------------------------------------------------------------------------
-
-export type TagDescription = {
-  name: string;
-  description: string;
-};
-
-export type TagObject = {
-  id: string;
-  description: TagDescription;
-};
 
 export type BackendUserCanvas = {
   user_id: string;
@@ -19,7 +10,7 @@ export type BackendUserCanvas = {
   label: string;
   layout: CanvasLayout;
   data: {
-    tags: Record<string, TagObject> | null;
+    tags: ResultSetTags | null;
     query_ref: string | null;
     result_ref: string | null;
   };
@@ -37,7 +28,7 @@ export type BackendCanvasNode = {
   x: number;
   y: number;
   hidden: boolean;
-  tags: Record<string, null>;
+  tags: EntityTags;
   time_created: string;
   time_updated: string;
   time_deleted: string | null;
@@ -51,7 +42,7 @@ export type BackendCanvasEdge = {
   ref: string;
   label: string;
   hidden: boolean;
-  tags: Record<string, null>;
+  tags: EntityTags;
   time_created: string;
   time_updated: string;
   time_deleted: string | null;
@@ -60,7 +51,7 @@ export type BackendCanvasEdge = {
 export type BackendCanvasGraph = {
   nodes: BackendCanvasNode[];
   edges: BackendCanvasEdge[];
-  tags: Record<string, TagObject> | null;
+  tags: ResultSetTags | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -76,7 +67,7 @@ export type GraphSubmissionNode = {
   synonyms: string[];
   curies: string[];
   provenance: unknown[];
-  tags: Record<string, TagObject>;
+  tags: EntityTags;
   source_time: string;
   annotations?: unknown;
   x: number;
@@ -94,6 +85,7 @@ export type GraphSubmissionEdge = {
   aras: string[];
   support: unknown[];
   is_root: boolean;
+  inferred: boolean;
   knowledge_level: string;
   description: string | null;
   type: string;
@@ -102,7 +94,7 @@ export type GraphSubmissionEdge = {
   publications: Record<string, unknown>;
   metadata: unknown;
   trials: unknown[];
-  tags: Record<string, TagObject>;
+  tags: EntityTags;
   source_time: string;
   hidden?: boolean;
   label?: string;
@@ -112,7 +104,7 @@ export type GraphSubmissionEdge = {
 export type GraphSubmission = {
   nodes: Record<string, GraphSubmissionNode>;
   edges: Record<string, GraphSubmissionEdge>;
-  tag_descriptions?: Record<string, TagObject>;
+  tag_descriptions?: ResultSetTags;
   source?: {
     query_ref: string;
     result_ref: string;
@@ -149,7 +141,7 @@ export type Canvas = {
   layout: CanvasLayout;
   nodes: Record<string, CanvasNode>;
   edges: Record<string, CanvasEdge>;
-  tags: Record<string, TagObject> | null;
+  tags: ResultSetTags | null;
   queryRef: string | null;
   resultRef: string | null;
   annotations: CanvasAnnotation[];
@@ -167,20 +159,16 @@ export type CanvasNode = {
   x: number;
   y: number;
   hidden: boolean;
-  tags: Record<string, null>;
+  tags: EntityTags;
 };
 
-export type CanvasEdge = {
-  id: string;
+export type CanvasEdge = Partial<ResultEdge> &
+  Pick<ResultEdge, 'id' | 'subject' | 'object' | 'predicate' | 'tags'> & {
   dataId: number;
   ref: string;
-  subject: string;
-  object: string;
   subjectDataId: number;
   objectDataId: number;
-  predicate: string;
   hidden: boolean;
-  tags: Record<string, null>;
 };
 
 export type CanvasAnnotation = {

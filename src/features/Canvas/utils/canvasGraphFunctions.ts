@@ -62,6 +62,7 @@ export const mergeEntityIntoCanvas = (
   };
 };
 
+
 const resultNodeToCanvasNode = (node: ResultNode): CanvasNode => ({
   id: node.id,
   dataId: 0,
@@ -72,20 +73,16 @@ const resultNodeToCanvasNode = (node: ResultNode): CanvasNode => ({
   x: 0,
   y: 0,
   hidden: false,
-  tags: {},
+  tags: node.tags,
 });
 
-const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
-  id: edge.id,
+export const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
+  ...edge,
   dataId: 0,
   ref: edge.id,
-  subject: edge.subject,
-  object: edge.object,
   subjectDataId: 0,
   objectDataId: 0,
-  predicate: edge.predicate,
   hidden: false,
-  tags: {},
 });
 
 const collectUnique = <T extends { id: string }>(

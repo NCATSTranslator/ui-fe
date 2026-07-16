@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
+import type { ResultSetTags } from '@/features/ResultList/types/results';
 
 export interface CanvasTagFiltersState {
-  tags: Record<string, { name: string; description: string }>;
+  tags: ResultSetTags;
   hiddenTagIds: Set<string>;
   toggleTag: (tagId: string) => void;
   showAll: () => void;
@@ -16,11 +17,7 @@ const useCanvasSourceFilters = (canvas: Canvas | null): CanvasTagFiltersState =>
 
   const tags = useMemo(() => {
     if (!canvas?.tags) return {};
-    const result: Record<string, { name: string; description: string }> = {};
-    for (const [id, tag] of Object.entries(canvas.tags)) {
-      result[id] = { name: tag.description.name, description: tag.description.description };
-    }
-    return result;
+    return canvas.tags;
   }, [canvas?.tags]);
 
   const toggleTag = useCallback((tagId: string) => {
