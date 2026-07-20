@@ -262,7 +262,8 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
 /**
  * Custom hook that manages autocomplete functionality including debounced API calls,
  * loading states, and autocomplete item management. Provides a 750ms debounced
- * query function to reduce API calls during user typing.
+ * query function to reduce API calls during user typing. Autocomplete fetch only
+ * runs when the input is at least 2 characters; shorter input clears suggestions.
  *
  * @param {AutocompleteConfig} config - Configuration object containing functions, types, and prefixes
  * @param {string} nameResolverEndpoint - API endpoint URL for name resolution
@@ -290,6 +291,11 @@ export const useAutocomplete = (
   const delayedQuery = useMemo(
     () => debounce(
       (inputText: string) => {
+        if (inputText.length < 2) {
+          setAutoCompleteItems(null);
+          setLoadingAutocomplete(false);
+          return;
+        }
         const { functions, limitTypes, limitPrefixes, excludePrefixes } = configRef.current;
         if (functions) {
           getAutocompleteTerms(
