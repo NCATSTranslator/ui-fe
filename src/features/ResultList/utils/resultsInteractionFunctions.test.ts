@@ -93,7 +93,7 @@ const buildPathRanks = (rs: ResultSet, result: Result): Map<string, PathRank> =>
   const ranks = new Map<string, PathRank>();
   for (const p of result.paths) {
     const path = typeof p === 'string' ? getPathById(rs, p) : (p as Path);
-    if (path?.id) ranks.set(path.id, makePathRank(rs, path));
+    if (path?.id) ranks.set(path.id, makePathRank(path));
   }
   return ranks;
 };
@@ -260,13 +260,11 @@ describe('findStringMatch — exclude', () => {
 });
 
 // ---------------------------------------------------------------------------
-// findStringMatch — support-path recursion
+// findStringMatch — paths are ranked independently
 // ---------------------------------------------------------------------------
 
-describe('findStringMatch — support paths', () => {
-  it('matches content found inside a support path of an inferred edge', () => {
-    // Top path P1: [n0, e0(inferred -> P2), n1]
-    // Support P2: [n2(name match), e1, n3]
+describe('findStringMatch — path independence', () => {
+  it('ranks only the path that matches, leaving sibling paths unranked', () => {
     const rs = makeResultSet({
       nodes: {
         'subject-node': makeNode('subject-node'),
@@ -275,19 +273,19 @@ describe('findStringMatch — support paths', () => {
         n3: makeNode('n3'),
       },
       edges: {
-        e0: makeEdge('e0', { inferred: true, support: ['P2'], predicate: 'biolink:related_to' }),
+        e0: makeEdge('e0', { predicate: 'biolink:related_to' }),
         e1: makeEdge('e1'),
       },
       paths: {
         P1: makePath('P1', ['subject-node', 'e0', 'n1']),
-        P2: makePath('P2', ['n2', 'e1', 'n3']),
+        P2: makePath('P2', ['subject-node', 'e1', 'n2']),
       },
     });
-    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1'] });
+    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1', 'P2'] });
     const ranks = buildPathRanks(rs, result);
 
     expect(findStringMatch(rs, result, makeEntityFilter('prostaglandin'), ranks)).toBe(true);
-    // the top path's rank should reflect the matching support path
-    expect(ranks.get('P1')!.rank).toBeLessThan(0);
+    expect(ranks.get('P2')!.rank).toBeLessThan(0);
+    expect(ranks.get('P1')!.rank).toBe(0);
   });
 });

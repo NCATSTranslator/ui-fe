@@ -4,7 +4,6 @@ import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
 import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Core/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
-import { MAX_SUPPORT_DEPTH, getPathKey } from "@/features/ResultList/utils/pathUtils";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/utilities";
@@ -50,10 +49,7 @@ export const findStringMatch = (
     if (!!path && typeof path !== 'string') {
       const pathRank = (path.id) ? pathRanks.get(path.id) : null;
       if (!!pathRank) {
-        // Fresh visited set per top-level path; seed with this path's key so
-        // cyclic support references back to it are pruned.
-        const visited = new Set<string>([getPathKey(path)]);
-        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0, visited);
+        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion);
         matched ||= subMatch;
       }
     }
@@ -78,14 +74,9 @@ export const findStringMatch = (
       resultSet: ResultSet,
       path: Path,
       pathRank: PathRank,
-      isExclusion: boolean,
-      depth: number,
-      visited: Set<string>): boolean {
-    if (depth > MAX_SUPPORT_DEPTH) return false;
-
-    // Look for direct matches on any node/edge of this path, accumulating rank
+      isExclusion: boolean): boolean {
+    // Look for matches on any node/edge of this path, accumulating rank
     // for every matching element (not just the first).
-    let hasDirectMatch = false;
     for (let i = 0; i < path.subgraph.length; i++) {
       const item = isNodeIndex(i)
         ? getNodeById(resultSet, path.subgraph[i])
@@ -98,69 +89,10 @@ export const findStringMatch = (
         pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
         return false;
       }
-      // This path is relevant, so mark it and propagate relevance to its
-      // support paths so they are not filtered out from under it.
       pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-      hasDirectMatch = true;
-    }
-    if (hasDirectMatch) {
-      _cascadePathRank(resultSet, path, pathRank, new Set(visited), 0);
-      return true;
     }
 
-    // No direct match on this path: recurse into the support paths of any
-    // inferred edges to look for a deeper match.
-    for (let i = 1; i < path.subgraph.length; i += 2) {
-      const item = getEdgeById(resultSet, path.subgraph[i]);
-      if (!isResultEdge(item) || !item.inferred) continue;
-      for (let j = 0; j < item.support.length; j++) {
-        const support = item.support[j];
-        const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
-        const supportRank = pathRank.support?.[j];
-        if (supportPath && typeof supportPath !== "string" && supportRank) {
-          // Skip support paths already on the current traversal stack to
-          // avoid infinite recursion when the support graph has cycles.
-          const key = getPathKey(supportPath);
-          if (visited.has(key)) continue;
-          visited.add(key);
-          const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth + 1, visited);
-          visited.delete(key);
-          if (subMatch && supportRank.rank < 0) {
-            pathRank.rank += supportRank.rank;
-          }
-        }
-      }
-    }
     return (!isExclusion && pathRank.rank < 0);
-  }
-
-  function _cascadePathRank(
-      resultSet: ResultSet,
-      path: Path,
-      pathRank: PathRank,
-      visited: Set<string>,
-      depth: number) {
-    if (depth > MAX_SUPPORT_DEPTH) return;
-    for (let i = 0; i < path.subgraph.length; i++) {
-      const elementID = path.subgraph[i];
-      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
-      // Recursive support path checking
-      if (isResultEdge(item) && item.inferred) {
-        for (let j = 0; j < item.support.length; j++) {
-          const support = item.support[j];
-          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
-          const supportRank = pathRank.support?.[j];
-          if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const key = getPathKey(supportPath);
-            if (visited.has(key)) continue;
-            visited.add(key);
-            supportRank.rank = pathRank.rank;
-            _cascadePathRank(resultSet, supportPath, supportRank, visited, depth + 1);
-            visited.delete(key);
-          }
-        }
-      }
-    }
   }
 }
 
@@ -284,7 +216,7 @@ export const applyFilters = (
       for (const p of result.paths) {
         const path: Path | null = typeof p === "string" ? getPathById(resultSet, p) : p as Path;
         if (path?.id) {
-          pathRanks.set(path.id, makePathRank(resultSet, path));
+          pathRanks.set(path.id, makePathRank(path));
         }
       }
 
@@ -544,30 +476,10 @@ export const calculateFacetCounts = (
 function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                                 pathRanks: PathRank[],
                                 unrankedIsFiltered: boolean) {
-  __updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
-
-  function __updateState(pathFilterState: {[key: string]: boolean},
-                        pathRanks: PathRank[],
-                        unrankedIsFiltered: boolean,
-                        depth: number) {
-    for (let pathRank of pathRanks) {
-      const pid = pathRank.path.id;
-      if (!pid) continue;
-      pathFilterState[pid] = false;
-      __updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
-      if (pathRank.support.length !== 0) {
-        let filterIndirect = true;
-        for (let supportRank of pathRank.support) {
-          const supportPid = supportRank.path.id;
-          if (!!supportPid) {
-            filterIndirect = filterIndirect && pathFilterState[supportPid];
-          }
-        }
-        pathFilterState[pid] = filterIndirect;
-      } else {
-        pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
-      }
-    }
+  for (let pathRank of pathRanks) {
+    const pid = pathRank.path.id;
+    if (!pid) continue;
+    pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
   }
 }
 

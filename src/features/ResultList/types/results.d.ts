@@ -68,7 +68,6 @@ export interface RankedPath extends Path {
 export type PathRank = {
   path: Path;
   rank: number;
-  support: PathRank[];
 }
 
 export type EdgeMetadata = {
