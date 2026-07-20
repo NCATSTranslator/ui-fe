@@ -21,7 +21,7 @@ const NavConfirmationPromptModal: FC<NavConfirmationPromptModalProps> = ({
   blocker,
   title = "Are you sure you want to leave this page?",
   message = "If you leave this page, you may lose your results and have to run this query again.",
-  subtitle = "Note: You can revisit this query later by visiting the Search History page.",
+  subtitle = "Note: You can revisit this query later by visiting the Query History page.",
   proceedButtonText = "Navigate away from the results page",
   stayButtonText = "Stay on the results page",
   className,

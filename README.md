@@ -77,10 +77,6 @@ Evidence views with tabbed tables for publications, clinical trials, and knowled
 
 Detail view for individual nodes within a result, including clinical trial annotations.
 
-#### **History** — Query History
-
-QueryHistoryList for browsing past queries.
-
 #### **Projects** — Project Management
 
 Create and manage projects, organize queries with drag-and-drop, edit query metadata, and handle project-level modals and error states.
@@ -107,7 +103,7 @@ Login warnings, user session state (Redux slice), and user preference API utilit
 
 ### Supporting Directories
 
-- **`src/pageRoutes/`**: Page-level components organized by route (Home, Results, Projects, History, New Query, help articles, and others)
+- **`src/pageRoutes/`**: Page-level components organized by route (Home, Results, Projects, Query History, New Query, help articles, and others)
 - **`src/redux/`**: Redux store configuration, listener middleware, and selectors
 - **`src/assets/`**: Static assets including icons, images, and global styles
 - **`src/test/`**: Vitest setup and shared test utilities
