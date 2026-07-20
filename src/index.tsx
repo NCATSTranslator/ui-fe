@@ -30,7 +30,6 @@ import { SubmittingQueries } from '@/pageRoutes/Articles/SubmittingQueries';
 import { HowToUseTranslator } from '@/pageRoutes/Articles/HowToUseTranslator';
 const Home = lazy(() => import('@/pageRoutes/Home/Home'));
 const ResultsLayout = lazy(() => import('@/pageRoutes/ResultsLayout/ResultsLayout'));
-const History = lazy(() => import('@/pageRoutes/History/History'));
 const Terms = lazy(() => import('@/pageRoutes/Terms/Terms'));
 const Projects = lazy(() => import('@/pageRoutes/Projects/Projects'));
 const ProjectDetail = lazy(() => import('@/pageRoutes/ProjectDetail/ProjectDetail'));
@@ -38,7 +37,6 @@ const Queries = lazy(() => import('@/pageRoutes/Queries/Queries'));
 const LoggingIn = lazy(() => import('@/pageRoutes/Articles/LoggingIn').then(m => ({ default: m.LoggingIn })));
 const WhatIs = lazy(() => import('@/pageRoutes/Articles/WhatIs').then(m => ({ default: m.WhatIs })));
 const Affiliates = lazy(() => import('@/pageRoutes/Articles/Affiliates').then(m => ({ default: m.Affiliates })));
-const SearchHistoryArticle = lazy(() => import('@/pageRoutes/Articles/SearchHistoryArticle').then(m => ({ default: m.SearchHistoryArticle })));
 const SendFeedbackArticle = lazy(() => import('@/pageRoutes/Articles/SendFeedbackArticle').then(m => ({ default: m.SendFeedbackArticle })));
 const Overview = lazy(() => import('@/pageRoutes/Articles/Overview').then(m => ({ default: m.Overview })));
 const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/ExploringRelationships').then(m => ({ default: m.ExploringRelationships })));
@@ -140,8 +138,9 @@ const routes = [
     element: <HelpPage title="Funding Information"><Suspense fallback={<LoadingWrapper />}><Affiliates /></Suspense></HelpPage>
   },
   {
+    // old search history help article, redirect to query history article
     path: "search-history",
-    element: <HelpPage title="Search History"><Suspense fallback={<LoadingWrapper />}><SearchHistoryArticle /></Suspense></HelpPage>
+    element: <Navigate to="/query-history-article" replace />
   },
   {
     path: "send-feedback-help",
@@ -222,8 +221,9 @@ const routes = [
     handle: { breadcrumb: 'Canvas Evidence' },
   },
   {
+    // old search history page, redirect to query history
     path: "history",
-    element: <Page title="History"><Suspense fallback={<LoadingWrapper />}><History /></Suspense></Page>
+    element: <Navigate to="/query-history" replace />
   },
   {
     path: "projects",

@@ -1,9 +1,8 @@
 import { useMemo, useState, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
-import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath, getLookupResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
@@ -77,7 +76,6 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
  */
 export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const config = useSelector(currentConfig);
 
@@ -88,7 +86,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
     }
 
     setIsLoading(true);
-    const timestamp = new Date();
 
     try {
       const queryJson = JSON.stringify({
@@ -108,19 +105,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       const data = await response.json();
 
       if (data.data && data.status === 'complete') {
-        dispatch(
-          incrementHistory({
-            item,
-            date: timestamp.toDateString(),
-            time: timestamp.toLocaleTimeString([], {
-              hour12: true,
-              hour: 'numeric',
-              minute: '2-digit'
-            }),
-            id: data.data,
-          })
-        );
-
         const nodeLabel = item.node?.label || "";
         const nodeID = item.node?.id || "";
         const newQueryPath = getResultsShareURLPath({
@@ -151,7 +135,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       setIsLoading(false);
       console.error(error);
     }
-  }, [dispatch, navigate]);
+  }, [navigate, config, shouldNavigate, submissionCallback]);
 
   const submitPathfinderQuery = useCallback(async (
     itemOne: AutocompleteItem,
