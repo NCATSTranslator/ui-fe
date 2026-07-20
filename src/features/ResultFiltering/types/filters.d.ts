@@ -1,4 +1,4 @@
-export type FilterType = 'p' | 'r' | 'g';
+export type FilterType = 'p' | 'r' | 'g' | 'e';
 export type FilterFamily = 'cc' | 'di' | 'pc' | 'pred' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev';
 
 export type Filter = {

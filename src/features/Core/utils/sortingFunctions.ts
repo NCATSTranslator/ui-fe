@@ -1,7 +1,7 @@
 import { getPathCount, getStringNameFromPath, getDefaultEdge } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
-import { Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
-import { Filter } from '@/features/ResultFiltering/types/filters';
+import { EdgeRank, Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
+import { Filter, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
 import { getFilterFamily, getTagFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
@@ -360,6 +360,46 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
 
 export const pathRankSort = (pathRanks: PathRank[]) => {
   pathRanks.sort(pathRankCompare);
+}
+
+export const makeEdgeRank = (edgeID: string): EdgeRank => {
+  return { rank: 0, edgeID: edgeID };
+}
+
+/**
+ * Ranks a single edge against the active edge filters.
+ *
+ * @param {ResultEdge} edge - The edge to rank.
+ * @param {Filter[]} edgeFilters - The active edge filters.
+ * @param {EdgeRank} edgeRank - Mutable rank record for this edge.
+ */
+export const updateEdgeRank = (edge: ResultEdge, edgeFilters: Filter[], edgeRank: EdgeRank) => {
+  if (edgeFilters.length === 0) return;
+
+  for (const ftr of edgeFilters) {
+    if (ftr.negated && ftr.id && edge.tags[ftr.id] !== undefined) {
+      edgeRank.rank = EXCLUDE_RANK_BASE * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
+      return;
+    }
+  }
+
+  const inclusionsByFamily = new Map<FilterFamily, Filter[]>();
+  for (const ftr of edgeFilters) {
+    if (ftr.negated || !ftr.id) continue;
+    const family = getFilterFamily(ftr);
+    const group = inclusionsByFamily.get(family);
+    if (group) group.push(ftr);
+    else inclusionsByFamily.set(family, [ftr]);
+  }
+
+  for (const group of inclusionsByFamily.values()) {
+    const matchCount = group.filter((ftr) => edge.tags[ftr.id as string] !== undefined).length;
+    if (matchCount === 0) {
+      edgeRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+      return;
+    }
+    edgeRank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+  }
 }
 
 const pathRankCompare = (a: PathRank, b: PathRank) => {

@@ -4,6 +4,7 @@ import { Filter, FilterFamily, FilterType, GroupedFilters } from '@/features/Res
 export const FILTERING_CONSTANTS = {
   RESULT: 'r' as const,
   PATH: 'p' as const,
+  EDGE: 'e' as const,
   GLOBAL: 'g' as const,
   FAMILIES: {
     ROLE: 'role' as const,
@@ -75,6 +76,7 @@ export const getFamiliesByType = (type: FilterType): FilterFamily[] => {
   switch(type) {
     case FILTERING_CONSTANTS.RESULT: return getResultFamilies();
     case FILTERING_CONSTANTS.PATH: return getPathFamilies();
+    case FILTERING_CONSTANTS.EDGE: return getEdgeFamilies();
     default: throw new RangeError(`Invalid filter type: ${type}`);
   }
 }
@@ -85,6 +87,10 @@ export const isResultTag = (tagID: string): boolean => {
 
 export const isPathTag = (tagID: string): boolean => {
   return getTagType(tagID) === FILTERING_CONSTANTS.PATH;
+}
+
+export const isEdgeTag = (tagID: string): boolean => {
+  return getTagType(tagID) === FILTERING_CONSTANTS.EDGE;
 }
 
 export const isGlobalTag = (tagID: string): boolean => {
@@ -107,26 +113,33 @@ export const getPathFamilies = (): FilterFamily[] => {
   return ['pc', 'pred', 'pt', 'ev', 'ara'];
 }
 
+export const getEdgeFamilies = (): FilterFamily[] => {
+  return ['pred', 'ev'];
+}
+
 export const isTagFilter = (filter: Filter): boolean => {
   const family = getFilterFamily(filter);
   return getValidFamilies().includes(family);
 }
 
-export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[]] => {
+export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[], Filter[]] => {
   const resultFilters: Filter[] = [];
   const pathFilters: Filter[] = [];
+  const edgeFilters: Filter[] = [];
   const globalFilters: Filter[] = [];
   for (let filter of filters) {
     if (isResultFilter(filter)) {
       resultFilters.push(filter);
     } else if (isPathFilter(filter)) {
       pathFilters.push(filter);
+    } else if (isEdgeFilter(filter)) {
+      edgeFilters.push(filter);
     } else {
       globalFilters.push(filter);
     }
   }
 
-  return [resultFilters, pathFilters, globalFilters];
+  return [resultFilters, pathFilters, edgeFilters, globalFilters];
 }
 
 export const isResultFilter = (filter: Filter): boolean => {
@@ -135,6 +148,10 @@ export const isResultFilter = (filter: Filter): boolean => {
 
 export const isPathFilter = (filter: Filter): boolean => {
   return isPathTag(filter.id || '');
+}
+
+export const isEdgeFilter = (filter: Filter): boolean => {
+  return isEdgeTag(filter.id || '');
 }
 
 export const isGlobalFilter = (filter: Filter): boolean => {

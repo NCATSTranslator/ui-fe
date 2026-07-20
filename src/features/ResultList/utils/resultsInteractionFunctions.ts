@@ -1,8 +1,8 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
+import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState, EdgeFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Core/utils/sortingFunctions";
+import { makePathRank, updatePathRanks, pathRankSort, makeEdgeRank, updateEdgeRank } from "@/features/Core/utils/sortingFunctions";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
@@ -124,6 +124,7 @@ export const applyFilters = (
   results: Result[];
   updatedEntityFilters: string[];
   updatedPathFilterState: PathFilterState;
+  updatedEdgeFilterState: EdgeFilterState;
   facetCounts: {
     resultFacets: Filter[];
     negatedResultFacets: Filter[];
@@ -133,7 +134,7 @@ export const applyFilters = (
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
 } => {
-  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+  let [resultFilters, pathFilters, edgeFilters, globalFilters] = filtering.groupFilterByType(filters);
   const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
   const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
   resultFilters = negatedResultFacets.concat(globalFilters);
@@ -143,6 +144,7 @@ export const applyFilters = (
       results: filteredResults,
       updatedEntityFilters: [],
       updatedPathFilterState: genPathFilterState(summary),
+      updatedEdgeFilterState: {},
       facetCounts: {
         resultFacets: resultFacets,
         negatedResultFacets: negatedResultFacets,
@@ -172,10 +174,12 @@ export const applyFilters = (
   }
 
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
+  const updatedEdgeFilterState = _genEdgeFilterState(summary, finalResults, edgeFilters);
 
   return {
     results: finalResults,
     updatedEntityFilters,
+    updatedEdgeFilterState,
     updatedPathFilterState: pathFilterState,
     facetCounts: {
       resultFacets,
@@ -328,6 +332,38 @@ export const applyFilters = (
 }
 
 /**
+ * Ranks every edge reachable from the given results against the active edge
+ * filters and returns a map of edge ID to filtered state.
+ *
+ * @param {ResultSet} resultSet - The full dataset used for path and edge lookup.
+ * @param {Result[]} results - The results whose edges should be ranked.
+ * @param {Filter[]} edgeFilters - The active edge ('e/...') filters.
+ * @returns {EdgeFilterState} A map of edge IDs to whether that edge is filtered out.
+ */
+function _genEdgeFilterState(resultSet: ResultSet, results: Result[], edgeFilters: Filter[]): EdgeFilterState {
+  const edgeFilterState: EdgeFilterState = {};
+  if (edgeFilters.length === 0) return edgeFilterState;
+
+  for (const result of results) {
+    for (const p of result.paths) {
+      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+      if (!path) continue;
+      for (const [i, elementID] of path.subgraph.entries()) {
+        // An edge shared across paths only needs ranking once.
+        if (isNodeIndex(i) || elementID in edgeFilterState) continue;
+        const edge = getEdgeById(resultSet, elementID);
+        if (!edge) continue;
+        const edgeRank = makeEdgeRank(elementID);
+        updateEdgeRank(edge, edgeFilters, edgeRank);
+        edgeFilterState[elementID] = edgeRank.rank > 0;
+      }
+    }
+  }
+
+  return edgeFilterState;
+}
+
+/**
  * Injects dynamic filters into the result set based on the bookmark set.
  * This is used to display the bookmark and note tags on the result item.
  * @param {ResultSet} summary - The result set containing the full tag list.
@@ -466,9 +502,9 @@ export const calculateFacetCounts = (
 }
 
 /**
- * Updates the path filter state based on the rank and support relationships of each path.
- * Recursively traverses supported paths and marks a path as filtered if all of its supports are filtered.
- * A path is included if it is ranked positively or meets the fallback condition for unranked paths.
+ * Updates the path filter state based on the rank of each path.
+ * A path is filtered out if it ranked positively, or if it went unranked (rank 0)
+ * while some other path in the set did match.
  * @param {{[key: string]: boolean}} pathFilterState - The current map of path IDs to their filtered state.
  * @param {PathRank[]} pathRanks - The ranked paths to evaluate and update in the state.
  * @param {boolean} unrankedIsFiltered - Whether paths with rank 0 should be considered filtered.

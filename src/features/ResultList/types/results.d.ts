@@ -70,6 +70,11 @@ export type PathRank = {
   rank: number;
 }
 
+export type EdgeRank = {
+  edgeID: string;
+  rank: number;
+}
+
 export type EdgeMetadata = {
   edge_bindings: string[],
   inverted_id: string | null,
@@ -189,6 +194,10 @@ export type Tags = {
 
 export type PathFilterState = {
   [pid: string]: boolean;
+}
+
+export type EdgeFilterState = {
+  [eid: string]: boolean;
 }
 
 export type Score = {
