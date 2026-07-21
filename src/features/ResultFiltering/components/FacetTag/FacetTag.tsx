@@ -7,7 +7,7 @@ import { joinClasses } from "@/features/Core/utils/classHelpers";
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { getTagType, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getTagType, FILTERING_CONSTANTS, formatPredicateFilterName } from '@/features/ResultFiltering/utils/filterFunctions';
 import AcceptedOntologyTooltip from '@/features/ResultFiltering/components/AcceptedOntologyTooltip/AcceptedOntologyTooltip';
 
 interface FacetTagProps {
@@ -36,8 +36,12 @@ const generateTagName = (isEntitySearch: boolean, filter: Filter, family: string
   let tagName = "";
   if(isEntitySearch)
     tagName = (!!filter?.value) ? `"${filter.value}"` : filter.name;
+  else if (family === 'pc')
+    tagName = formatBiolinkEntity(filter.name);
+  else if (family === 'pred')
+    tagName = formatPredicateFilterName(filter.name);
   else
-    tagName = (family === 'pc') ? formatBiolinkEntity(filter.name) : filter.name;
+    tagName = filter.name;
 
   return tagName;
 }
