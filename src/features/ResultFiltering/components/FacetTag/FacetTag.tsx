@@ -79,6 +79,13 @@ const FacetTag: FC<FacetTagProps> = ({
     negativeChecked ? styles.containerNegativeChecked : "",
   );
 
+  const tagNameClass = joinClasses(
+    styles.tagName,
+    (tagKey.includes('r/role') || tagKey.includes('r/ara')) && styles.roleTagName,
+    (tagKey.includes('p/pred') && styles.predicateTagName),
+  );
+
+console.log(tagKey, tagKey.includes('p/pred'));
   return (
     <div className={classNames} key={tagKey} data-facet-name={tagName}>
       <FacetCheckbox
@@ -95,7 +102,7 @@ const FacetTag: FC<FacetTagProps> = ({
         title="Include"
         >
         <span
-          className={`${styles.tagName} ${(tagKey.includes('r/role') || tagKey.includes('r/ara') ) ? styles.roleTagName: ''}`}
+          className={tagNameClass}
           title={tagName}
         >
           {tagName}
