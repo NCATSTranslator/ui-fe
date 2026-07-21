@@ -247,13 +247,32 @@ interface PathRankingContext {
 const INCLUDE_RANK_BASE = -1;
 const EXCLUDE_RANK_BASE = 1;
 
-function _applyPathExclusion(ctx: PathRankingContext, path: Path, pathRank: PathRank): boolean {
-  for (const ftr of ctx.otherFilters) {
+/**
+ * Returns the first negated filter that excludes this path, or null.
+ * Preserves the ARA exemption: negated ARA filters are ignored when an ARA inclusion is active.
+ */
+export const getExcludingFilter = (
+  path: Path,
+  negatedFilters: Filter[],
+  hasAraInclusion: boolean
+): Filter | null => {
+  for (const ftr of negatedFilters) {
     if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
-      if (getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA && ctx.hasAraInclusion) continue;
-      pathRank.rank = EXCLUDE_RANK_BASE * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
-      return true;
+      if (getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA && hasAraInclusion) continue;
+      return ftr;
     }
+  }
+  return null;
+};
+
+function _applyPathExclusion(ctx: PathRankingContext, path: Path, pathRank: PathRank): boolean {
+  const negatedFilters = ctx.otherFilters.filter((ftr) => ftr.negated);
+  const excludingFilter = getExcludingFilter(path, negatedFilters, ctx.hasAraInclusion);
+  if (excludingFilter) {
+    pathRank.rank = EXCLUDE_RANK_BASE * (
+      excludingFilter.excludeWeight ? excludingFilter.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY
+    );
+    return true;
   }
   return false;
 }
@@ -344,7 +363,7 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     }
   }
 
-  otherFilters.sort();
+  otherFilters.sort(filterCompare);
 
   const ctx: PathRankingContext = {
     resultSet,
