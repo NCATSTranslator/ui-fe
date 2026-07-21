@@ -85,7 +85,6 @@ const FacetTag: FC<FacetTagProps> = ({
     (tagKey.includes('p/pred') && styles.predicateTagName),
   );
 
-console.log(tagKey, tagKey.includes('p/pred'));
   return (
     <div className={classNames} key={tagKey} data-facet-name={tagName}>
       <FacetCheckbox
