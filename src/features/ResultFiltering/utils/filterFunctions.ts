@@ -1,5 +1,5 @@
 import { Filter, FilterFamily, FilterType, GroupedFilters } from '@/features/ResultFiltering/types/filters';
-
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 
 export const FILTERING_CONSTANTS = {
   RESULT: 'r' as const,
@@ -50,6 +50,23 @@ export const normalizeSearchTermForMatch = (value: string): string => {
  */
 export const isSameFilterValue = (a?: string, b?: string): boolean =>
   normalizeSearchTermForMatch(a || '') === normalizeSearchTermForMatch(b || '');
+
+/**
+ * Applies the same treat→impact display substitution used for edge predicates.
+ */
+export const formatPredicateFilterName = (name: string): string => {
+  if (!name.includes('treat')) return name;
+  return replaceTreatWithImpact(name);
+};
+
+/** Rewrites pred-family filter names for UI display. Mutates the filters object in place. */
+export const applyPredicateFilterDisplayNames = (filters: { [key: string]: Filter }): void => {
+  for (const [tagId, filter] of Object.entries(filters)) {
+    if (getTagFamily(tagId) === 'pred' && filter.name?.includes('treat')) {
+      filters[tagId] = { ...filter, name: formatPredicateFilterName(filter.name) };
+    }
+  }
+};
 
 export const makeEntitySearch = (): Filter => {
   return {
