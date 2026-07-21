@@ -2,12 +2,13 @@ import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/sli
 import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState, EdgeFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { makePathRank, updatePathRanks, pathRankSort, makeEdgeRank, updateEdgeRank } from "@/features/Core/utils/sortingFunctions";
+import { makePathRank, updatePathRanks, pathRankSort, makeEdgeRank, updateEdgeRank, getExcludingFilter } from "@/features/Core/utils/sortingFunctions";
+import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/utilities";
-import { FILTERING_CONSTANTS, makeFilter } from "@/features/ResultFiltering/utils/filterFunctions";
+import { FILTERING_CONSTANTS, makeFilter, applyPredicateFilterDisplayNames } from "@/features/ResultFiltering/utils/filterFunctions";
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -172,6 +173,8 @@ export const applyFilters = (
   for (const pathRanks of resultPathRanks.values()) {
     _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
   }
+
+  _propagateExclusionAcrossCompressionGroups(summary, resultsAfterFacets, pathFilters, pathFilterState);
 
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
   const updatedEdgeFilterState = _genEdgeFilterState(summary, finalResults, edgeFilters);
@@ -438,6 +441,7 @@ export const calculateFacetCounts = (
 ): Filters => {
   // Create a list of tags from the master tag list provided by the backend
   const countedTags = cloneDeep(summary.data.tags) as Filters;
+  applyPredicateFilterDisplayNames(countedTags);
   const activeFamilies = new Set(activeFacets.map(facet => filtering.getFilterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection
@@ -516,6 +520,53 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
     const pid = pathRank.path.id;
     if (!pid) continue;
     pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
+  }
+}
+
+/**
+ * When paths are compressed for display (same node sequence, different predicates),
+ * exclusion on one member must hide the entire compressed path. Propagates filtered
+ * state to all members of a compression group when any member matches a negated path filter.
+ */
+function _propagateExclusionAcrossCompressionGroups(
+  resultSet: ResultSet,
+  results: Result[],
+  pathFilters: Filter[],
+  pathFilterState: PathFilterState
+): void {
+  const negatedPathFilters = pathFilters.filter(
+    (ftr) => filtering.isExclusion(ftr) && !filtering.isEvidenceFilter(ftr)
+  );
+  if (negatedPathFilters.length === 0) return;
+
+  const otherPathFilters = pathFilters.filter((ftr) => !filtering.isEvidenceFilter(ftr));
+  const hasAraInclusion = otherPathFilters.some(
+    (ftr) => !ftr.negated && filtering.getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
+  );
+
+  for (const result of results) {
+    const groups = new Map<string, Path[]>();
+    for (const p of result.paths) {
+      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+      if (!path?.id) continue;
+      const key = getPathSequenceKey(resultSet, path);
+      if (!key) continue;
+      const group = groups.get(key);
+      if (group) group.push(path);
+      else groups.set(key, [path]);
+    }
+
+    for (const members of groups.values()) {
+      if (members.length <= 1) continue;
+      const anyExcluded = members.some((path) =>
+        getExcludingFilter(path, negatedPathFilters, hasAraInclusion) !== null
+      );
+      if (anyExcluded) {
+        for (const path of members) {
+          if (path.id) pathFilterState[path.id] = true;
+        }
+      }
+    }
   }
 }
 
