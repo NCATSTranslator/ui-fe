@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
 
 export const useSimpleSearch = () => {
@@ -8,6 +8,10 @@ export const useSimpleSearch = () => {
     () => debounce((term: string) => { setSearchTerm(term); }, 500),
     []
   );
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
 
   const handleSearch = useCallback((value: string) => {
     if (value.length === 0) {
