@@ -7,13 +7,14 @@ import NotesIcon from "@/assets/icons/buttons/Notes/Notes.svg?react";
 import styles from '@/features/ResultFiltering/components/FacetGroup/FacetGroup.module.scss';
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 import { useLocation } from "react-router-dom";
+import { isSearchableFacetFamily } from "@/features/ResultFiltering/utils/facetGroupUtils";
 
 type NoFacetsMarkupProps = {
-  chemicalCategorySearchTerm: string;
+  facetSearchTerm: string;
   filterFamily: FilterFamily;
 }
 
-const NoFacetsMarkup: FC<NoFacetsMarkupProps> = ({ chemicalCategorySearchTerm, filterFamily }) => {
+const NoFacetsMarkup: FC<NoFacetsMarkupProps> = ({ facetSearchTerm, filterFamily }) => {
   const user = useSelector(currentUser);
   const location = useLocation();
   const isLoggedIn = user !== null;
@@ -41,7 +42,11 @@ const NoFacetsMarkup: FC<NoFacetsMarkupProps> = ({ chemicalCategorySearchTerm, f
     )
   }
 
-  return <p className={styles.noResults}>No {filterFamily} matches found for <span className={styles.searchTerm}>"{chemicalCategorySearchTerm}"</span></p>
+  if (isSearchableFacetFamily(filterFamily) && facetSearchTerm) {
+    return <p className={styles.noResults}>No matches found for <span className={styles.searchTerm}>"{facetSearchTerm}"</span></p>
+  }
+
+  return <p className={styles.noResults}>No facets available</p>
 }
 
 export default NoFacetsMarkup;

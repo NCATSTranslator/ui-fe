@@ -4,6 +4,11 @@ import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import styles from '@/features/ResultFiltering/components/FacetGroup/FacetGroup.module.scss';
 import { Filter, FilterFamily, GroupedFilters } from '@/features/ResultFiltering/types/filters';
 
+export const SEARCHABLE_FACET_FAMILIES: FilterFamily[] = ['role', 'pred'];
+
+export const isSearchableFacetFamily = (family: FilterFamily): boolean =>
+  SEARCHABLE_FACET_FAMILIES.includes(family);
+
 // Tag captions for each facet group
 const tagCaptions: Record<string, string> = {
   cc: "Filter on different categories of chemicals.",

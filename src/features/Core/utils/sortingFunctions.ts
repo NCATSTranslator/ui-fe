@@ -277,33 +277,30 @@ function _applyPathExclusion(ctx: PathRankingContext, path: Path, pathRank: Path
   return false;
 }
 
-function _collectEdgeRanks(ctx: PathRankingContext, path: Path): number[] {
-  const edgeRanks: number[] = [];
-  for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edge = getEdgeById(ctx.resultSet, path.subgraph[i]);
-    if (!edge) {
-      console.warn(`_updatePathRanks: found undefined or null edge in path: ${path}`);
-      continue;
-    }
-    edgeRanks.push(_calcEdgeRank(edge, ctx.evidenceFilters));
-  }
-  return edgeRanks;
-}
+function _applyEvidenceFiltering(path: Path, evidenceFilters: Filter[], pathRank: PathRank): boolean {
+  if (evidenceFilters.length === 0) return false;
 
-function _evaluateEdgeRanks(edgeRanks: number[], evidenceFilters: Filter[], pathRank: PathRank): boolean {
-  let edgesUnmatched = true;
-  for (const rank of edgeRanks) {
-    if (rank > 0) {
+  for (const ftr of evidenceFilters) {
+    if (ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) {
+      pathRank.rank = EXCLUDE_RANK_BASE * (
+        ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY
+      );
+      return true;
+    }
+  }
+
+  const inclusionFilters = evidenceFilters.filter((ftr) => !ftr.negated);
+  if (inclusionFilters.length > 0) {
+    const hasMatch = inclusionFilters.some(
+      (ftr) => ftr.id && path.tags[ftr.id] !== undefined
+    );
+    if (!hasMatch) {
       pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
       return true;
     }
-    edgesUnmatched = edgesUnmatched && rank === 0;
-    pathRank.rank += rank;
+    pathRank.rank += INCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.LIGHT;
   }
-  if (edgesUnmatched && evidenceFilters.some(ftr => !ftr.negated)) {
-    pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-    return true;
-  }
+
   return false;
 }
 
@@ -330,22 +327,10 @@ function _applyInclusionFiltering(ctx: PathRankingContext, path: Path, pathRank:
   }
 }
 
-function _calcEdgeRank(edge: ResultEdge, evidenceFilters: Filter[]): number {
-  let edgeRank = 0;
-  for (const ftr of evidenceFilters) {
-    if (ftr.id && edge.tags[ftr.id] !== undefined) {
-      if (!ftr.negated) return -1;
-      edgeRank = 1;
-    }
-  }
-  return edgeRank;
-}
-
 function _updatePathRanks(ctx: PathRankingContext, path: Path, pathRank: PathRank): void {
   if (_applyPathExclusion(ctx, path, pathRank)) return;
 
-  const edgeRanks = _collectEdgeRanks(ctx, path);
-  if (_evaluateEdgeRanks(edgeRanks, ctx.evidenceFilters, pathRank)) return;
+  if (_applyEvidenceFiltering(path, ctx.evidenceFilters, pathRank)) return;
 
   _applyInclusionFiltering(ctx, path, pathRank);
 }
