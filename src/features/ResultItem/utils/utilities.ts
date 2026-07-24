@@ -513,9 +513,7 @@ export const getNodeDescription = (node: ResultNode) => {
 export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
   if(
     edge.predicate === "subclass of" ||
-    edge.predicate === "superclass of" ||
-    edge.predicate === "phenotype of" ||
-    edge.predicate === "has phenotype"
+    edge.predicate === "superclass of"
   )
     return true;
   return false;

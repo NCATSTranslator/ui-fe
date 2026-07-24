@@ -1,5 +1,4 @@
 import { AnyAction, configureStore, ThunkDispatch } from '@reduxjs/toolkit';
-import historyReducer from '@/features/History/slices/historySlice';
 import resultsReducer from '@/features/ResultList/slices/resultsSlice';
 import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
 import queryStatusReducer from '@/features/ResultList/slices/queryStatusSlice';
@@ -8,7 +7,6 @@ import canvasReducer from '@/features/Canvas/slices/canvasSlice';
 import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
 export type RootState = {
-  history: ReturnType<typeof historyReducer>;
   resultSets: ReturnType<typeof resultsReducer>;
   seenStatus: ReturnType<typeof seenStatusReducer>;
   queryStatus: ReturnType<typeof queryStatusReducer>;
@@ -20,7 +18,6 @@ export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
 const listenerMiddleware = createAppListenerMiddleware();
 export const store = configureStore({
   reducer: {
-    history: historyReducer,
     resultSets: resultsReducer,
     seenStatus: seenStatusReducer,
     queryStatus: queryStatusReducer,

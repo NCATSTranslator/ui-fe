@@ -1,9 +1,10 @@
 import { Filter, FilterFamily, FilterType, GroupedFilters } from '@/features/ResultFiltering/types/filters';
-
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 
 export const FILTERING_CONSTANTS = {
   RESULT: 'r' as const,
   PATH: 'p' as const,
+  EDGE: 'e' as const,
   GLOBAL: 'g' as const,
   FAMILIES: {
     ROLE: 'role' as const,
@@ -54,6 +55,23 @@ export const normalizeSearchTermForMatch = (value: string): string => {
 export const isSameFilterValue = (a?: string, b?: string): boolean =>
   normalizeSearchTermForMatch(a || '') === normalizeSearchTermForMatch(b || '');
 
+/**
+ * Applies the same treat→impact display substitution used for edge predicates.
+ */
+export const formatPredicateFilterName = (name: string): string => {
+  if (!name.includes('treat')) return name;
+  return replaceTreatWithImpact(name);
+};
+
+/** Rewrites pred-family filter names for UI display. Mutates the filters object in place. */
+export const applyPredicateFilterDisplayNames = (filters: { [key: string]: Filter }): void => {
+  for (const [tagId, filter] of Object.entries(filters)) {
+    if (getTagFamily(tagId) === 'pred' && filter.name?.includes('treat')) {
+      filters[tagId] = { ...filter, name: formatPredicateFilterName(filter.name) };
+    }
+  }
+};
+
 export const makeEntitySearch = (): Filter => {
   return {
     id: 'g/str',
@@ -79,6 +97,7 @@ export const getFamiliesByType = (type: FilterType): FilterFamily[] => {
   switch(type) {
     case FILTERING_CONSTANTS.RESULT: return getResultFamilies();
     case FILTERING_CONSTANTS.PATH: return getPathFamilies();
+    case FILTERING_CONSTANTS.EDGE: return getEdgeFamilies();
     default: throw new RangeError(`Invalid filter type: ${type}`);
   }
 }
@@ -91,6 +110,10 @@ export const isPathTag = (tagID: string): boolean => {
   return getTagType(tagID) === FILTERING_CONSTANTS.PATH;
 }
 
+export const isEdgeTag = (tagID: string): boolean => {
+  return getTagType(tagID) === FILTERING_CONSTANTS.EDGE;
+}
+
 export const isGlobalTag = (tagID: string): boolean => {
   return getTagType(tagID) === FILTERING_CONSTANTS.GLOBAL;
 }
@@ -100,7 +123,7 @@ export const isPathEvidenceTag = (tagID: string): boolean => {
 }
 
 export const getValidFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'pc', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
+  return ['cc', 'di', 'pc', 'pred', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
@@ -108,7 +131,11 @@ export const getResultFamilies = (): FilterFamily[] => {
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pt', 'ev', 'ara'];
+  return ['pc', 'pred', 'pt', 'ev', 'ara'];
+}
+
+export const getEdgeFamilies = (): FilterFamily[] => {
+  return ['pred', 'ev'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
@@ -116,21 +143,24 @@ export const isTagFilter = (filter: Filter): boolean => {
   return getValidFamilies().includes(family);
 }
 
-export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[]] => {
+export const groupFilterByType = (filters: Filter[]): [Filter[], Filter[], Filter[], Filter[]] => {
   const resultFilters: Filter[] = [];
   const pathFilters: Filter[] = [];
+  const edgeFilters: Filter[] = [];
   const globalFilters: Filter[] = [];
   for (let filter of filters) {
     if (isResultFilter(filter)) {
       resultFilters.push(filter);
     } else if (isPathFilter(filter)) {
       pathFilters.push(filter);
+    } else if (isEdgeFilter(filter)) {
+      edgeFilters.push(filter);
     } else {
       globalFilters.push(filter);
     }
   }
 
-  return [resultFilters, pathFilters, globalFilters];
+  return [resultFilters, pathFilters, edgeFilters, globalFilters];
 }
 
 export const isResultFilter = (filter: Filter): boolean => {
@@ -139,6 +169,10 @@ export const isResultFilter = (filter: Filter): boolean => {
 
 export const isPathFilter = (filter: Filter): boolean => {
   return isPathTag(filter.id || '');
+}
+
+export const isEdgeFilter = (filter: Filter): boolean => {
+  return isEdgeTag(filter.id || '');
 }
 
 export const isGlobalFilter = (filter: Filter): boolean => {
@@ -176,6 +210,7 @@ export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   switch(typeof filter === 'string' ? filter as FilterFamily : getFilterFamily(filter)) {
     case "cc":   return "Development Stage";
     case "pc":   return "Objects within Paths";
+    case "pred": return "Relationships";
     case "di":   return "Clinical Trial Indications";
     case "ara":  return "Reasoning Agent";
     case "role": return "Chemical Classification";

@@ -4,10 +4,16 @@ import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import styles from '@/features/ResultFiltering/components/FacetGroup/FacetGroup.module.scss';
 import { Filter, FilterFamily, GroupedFilters } from '@/features/ResultFiltering/types/filters';
 
+export const SEARCHABLE_FACET_FAMILIES: FilterFamily[] = ['role', 'pred'];
+
+export const isSearchableFacetFamily = (family: FilterFamily): boolean =>
+  SEARCHABLE_FACET_FAMILIES.includes(family);
+
 // Tag captions for each facet group
 const tagCaptions: Record<string, string> = {
   cc: "Filter on different categories of chemicals.",
   pc: "Include or exclude paths from results that contain a particular type of object",
+  pred: "Include or exclude paths from results based on the types of relationships within them",
   role: "Include or exclude results according to their biological or chemical role or application",
   ara: "Include or exclude paths from results based on which reasoning agents provided them",
   di: "Include or exclude results based on whether they have been tested in clinical trials for treatment of the indicated disease",

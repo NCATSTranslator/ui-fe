@@ -68,7 +68,11 @@ export interface RankedPath extends Path {
 export type PathRank = {
   path: Path;
   rank: number;
-  support: PathRank[];
+}
+
+export type EdgeRank = {
+  edgeID: string;
+  rank: number;
 }
 
 export type EdgeMetadata = {
@@ -208,6 +212,10 @@ export type EntityTags = {
 
 export type PathFilterState = {
   [pid: string]: boolean;
+}
+
+export type EdgeFilterState = {
+  [eid: string]: boolean;
 }
 
 export type Score = {
