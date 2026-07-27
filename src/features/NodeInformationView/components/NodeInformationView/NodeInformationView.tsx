@@ -48,8 +48,9 @@ const NodeInformationView: FC = () => {
     if(!node || !node.annotations) return [];
     const fields: {label: string; content: ReactNode}[] = [];
     for(const category of Object.values(node.annotations)) {
-      for(const [key, value] of Object.entries(category)) {
-        if(key === "descriptions" || value === null || value === undefined) continue;
+      for(const [key, section] of Object.entries(category)) {
+        if(key === "descriptions" || section === null || section === undefined) continue;
+        const value = section.value;
         const Override = ANNOTATION_OVERRIDES[key];
         if(Override) {
           fields.push({ label: formatLabel(key), content: <Override value={value} nodeName={nodeName ?? ""} nodeType={nodeType ?? ""} /> });
@@ -66,8 +67,9 @@ const NodeInformationView: FC = () => {
     if(!node || !node.annotations) return null;
     for(const key in node.annotations) {
       const annotation = node.annotations[key as keyof typeof node.annotations];
-      if(annotation.descriptions !== null && annotation.descriptions.length > 0)
-        return annotation.descriptions[0];
+      const descriptions = annotation.descriptions?.value;
+      if(descriptions && descriptions.length > 0)
+        return descriptions[0];
     }
     if(node.descriptions.length > 0)
       return node.descriptions[0];

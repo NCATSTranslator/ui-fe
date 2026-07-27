@@ -499,8 +499,9 @@ export const handleTagClick = (filterID: string, filter: Filter, handleFilter: (
 export const getNodeDescription = (node: ResultNode) => {
   for(const key in node.annotations) {
     const annotation = node.annotations[key as keyof typeof node.annotations];
-    if(annotation.descriptions && annotation.descriptions.length > 0)
-      return annotation.descriptions[0];
+    const descriptions = annotation.descriptions?.value;
+    if(descriptions && descriptions.length > 0)
+      return descriptions[0];
   }
   if(node.descriptions && node.descriptions.length > 0)
     return node.descriptions[0];

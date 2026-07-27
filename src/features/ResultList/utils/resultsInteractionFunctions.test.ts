@@ -161,7 +161,7 @@ describe('findStringMatch — shallow matches', () => {
         'subject-node': makeNode('subject-node', {
           descriptions: [],
           annotations: {
-            chemical: { descriptions: ['Inhibits prostaglandin synthesis'] },
+            chemical: { descriptions: { value: ['Inhibits prostaglandin synthesis'], metadata: { sources: [] } } },
             disease: {},
             gene: {},
           },
