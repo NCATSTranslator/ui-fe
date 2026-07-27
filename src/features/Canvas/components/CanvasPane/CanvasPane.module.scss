@@ -3,7 +3,6 @@
 .canvasPane {
   position: absolute;
   bottom: 12px;
-  left: 12px;
   right: 12px;
   z-index: 100;
   display: flex;
@@ -13,7 +12,6 @@
   transition: height 0.3s ease, width 0.3s ease;
   border: 1px solid $midGray;
   border-radius: $s;
-  margin-left: auto;
   overflow: hidden;
 
   &.collapsed {
@@ -30,7 +28,7 @@
   }
 
   &.maximized {
-    height: calc(100% - 88px);
+    height: calc(100% - 24px);
     width: calc(100% - 24px);
   }
 }
