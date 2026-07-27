@@ -21,7 +21,7 @@ import OptionsPane from '@/features/Sidebar/components/OptionsPane/OptionsPane';
 import Button from '@/features/Core/components/Button/Button';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
 import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
-import CardList from '@/features/Projects/components/CardList/CardList';
+import CardList from '@/features/Core/components/CardList/CardList';
 import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';

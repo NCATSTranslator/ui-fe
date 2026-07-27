@@ -12,7 +12,7 @@ import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebar
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import Tab from "@/features/Core/components/Tabs/Tab";
-import CardList from "@/features/Projects/components/CardList/CardList";
+import CardList from "@/features/Core/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';

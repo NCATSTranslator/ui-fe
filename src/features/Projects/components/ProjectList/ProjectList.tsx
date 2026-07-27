@@ -14,7 +14,7 @@ import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tab from "@/features/Core/components/Tabs/Tab";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import ProjectsTableHeader from "../TableHeader/ProjectsTableHeader/ProjectsTableHeader";
-import CardList from "@/features/Projects/components/CardList/CardList";
+import CardList from "@/features/Core/components/CardList/CardList";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
