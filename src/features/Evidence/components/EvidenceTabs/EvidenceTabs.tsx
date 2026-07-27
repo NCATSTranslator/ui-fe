@@ -132,7 +132,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
 
       {miscEvidence.length > 0 ? (
         <Tab heading="Miscellaneous" className={styles.tab}>
-          <MiscEvidenceTable miscEvidence={miscEvidence} />
+          <MiscEvidenceTable miscEvidence={miscEvidence} prefs={prefs} />
         </Tab>
       ) : null}
 
