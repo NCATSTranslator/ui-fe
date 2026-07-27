@@ -85,9 +85,10 @@ export const backendCanvasToCanvas = (
     tags: graph.tags ?? meta.data.tags,
     queryRef: meta.data.query_ref,
     resultRef: meta.data.result_ref,
-    annotations: [],
-    timeCreated: meta.time_created,
-    timeUpdated: meta.time_updated,
+  annotations: [],
+  timeCreated: meta.time_created,
+  timeUpdated: meta.time_updated,
+  graphLoaded: true,
   };
 };
 
@@ -103,6 +104,7 @@ export const backendMetaToCanvas = (meta: BackendUserCanvas): Canvas => ({
   annotations: [],
   timeCreated: meta.time_created,
   timeUpdated: meta.time_updated,
+  graphLoaded: false,
 });
 
 export const backendCanvasListToCanvasList = (

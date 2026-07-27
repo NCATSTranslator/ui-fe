@@ -15,12 +15,14 @@ import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 import { filterCanvasesBySearch, sortCanvases, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 import { canvasDeleteErrorToast } from '@/features/Core/utils/toastMessages';
 import { trashCanvases, updateCanvasMetadata } from '@/features/Canvas/utils/canvasApi';
+import { useCanvasSync } from '@/features/Canvas/hooks/useCanvasPersistence';
 
 interface UseCanvasListOptions {
   sortMode?: CanvasSortMode;
 }
 
 const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
+  useCanvasSync();
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const canvases = useSelector(selectCanvases);

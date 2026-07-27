@@ -147,6 +147,7 @@ export type Canvas = {
   annotations: CanvasAnnotation[];
   timeCreated: string;
   timeUpdated: string;
+  graphLoaded?: boolean;
 };
 
 export type CanvasNode = {

@@ -6,6 +6,16 @@ export type ObjectSortMode = 'relationships' | 'alphabetical' | 'type';
 
 export const getCanvasNodeCount = (canvas: Canvas): number => Object.keys(canvas.nodes).length;
 
+export const getCanvasObjectCountDisplay = (
+  canvas: Canvas,
+  labels?: { singular: string; plural: string },
+): string => {
+  if (!canvas.graphLoaded) return '-';
+  const count = getCanvasNodeCount(canvas);
+  if (!labels) return String(count);
+  return `${count} ${count === 1 ? labels.singular : labels.plural}`;
+};
+
 export const getNodeEdgeCount = (canvas: Canvas, nodeId: string): number => {
   let count = 0;
   for (const edge of Object.values(canvas.edges)) {

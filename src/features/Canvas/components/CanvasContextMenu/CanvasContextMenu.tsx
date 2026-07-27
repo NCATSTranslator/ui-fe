@@ -106,6 +106,7 @@ const ContextMenuPopup: FC<{
         annotations: [],
         timeCreated: meta.time_created,
         timeUpdated: meta.time_updated,
+        graphLoaded: true,
       };
       dispatch(addCanvas(canvas));
       queryClient.invalidateQueries({ queryKey: ['userCanvases'] });

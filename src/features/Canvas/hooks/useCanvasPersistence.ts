@@ -3,12 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AppDispatch } from '@/redux/store';
 import {
-  selectActiveCanvasId,
   selectCanvases,
   setCanvases,
   replaceCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
-import type { SaveStatus, CanvasLayout, GraphSubmission } from '@/features/Canvas/types/canvas';
+import type { BackendUserCanvas, SaveStatus, CanvasLayout, GraphSubmission } from '@/features/Canvas/types/canvas';
 import {
   listCanvases,
   updateCanvasMetadata,
@@ -51,9 +50,35 @@ const applyGraphChange = async (
   }
 };
 
-const useCanvasSync = () => {
+const pendingGraphLoads = new Set<number>();
+
+const canvasNeedsGraph = (canvasId: number, canvases: ReturnType<typeof selectCanvases>) => {
+  const existing = canvases.find(c => c.id === canvasId);
+  return !existing || !existing.graphLoaded;
+};
+
+const loadCanvasGraphIntoStore = async (
+  meta: BackendUserCanvas,
+  dispatch: AppDispatch,
+  canvases: ReturnType<typeof selectCanvases>,
+  isCancelled: () => boolean,
+) => {
+  if (!canvasNeedsGraph(meta.id, canvases) || pendingGraphLoads.has(meta.id)) return;
+
+  pendingGraphLoads.add(meta.id);
+  try {
+    const graph = await getCanvasGraph(meta.id);
+    if (isCancelled()) return;
+    dispatch(replaceCanvas(backendCanvasToCanvas(meta, graph)));
+  } catch {
+    // graph load failed — keep metadata-only canvas
+  } finally {
+    pendingGraphLoads.delete(meta.id);
+  }
+};
+
+export const useCanvasSync = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const activeCanvasId = useSelector(selectActiveCanvasId);
   const canvases = useSelector(selectCanvases);
   const canvasesRef = useRef(canvases);
   canvasesRef.current = canvases;
@@ -66,25 +91,22 @@ const useCanvasSync = () => {
   }, [canvasMetas, dispatch]);
 
   useEffect(() => {
-    if (!listLoaded || !activeCanvasId) return;
+    if (!listLoaded || !canvasMetas?.length) return;
     let cancelled = false;
-    const loadGraph = async () => {
-      try {
-        if (!canvasesRef.current.find(c => c.id === activeCanvasId)) return;
-        const graph = await getCanvasGraph(activeCanvasId);
-        if (cancelled) return;
-        const metas = await listCanvases();
-        if (cancelled) return;
-        const meta = metas.find(m => m.id === activeCanvasId);
-        if (!meta) return;
-        dispatch(replaceCanvas(backendCanvasToCanvas(meta, graph)));
-      } catch {
-        // graph load failed — keep metadata-only canvas
-      }
+    const isCancelled = () => cancelled;
+
+    const loadGraphs = async () => {
+      const metasToLoad = canvasMetas.filter(
+        meta => !meta.time_deleted && canvasNeedsGraph(meta.id, canvasesRef.current),
+      );
+      await Promise.all(
+        metasToLoad.map(meta => loadCanvasGraphIntoStore(meta, dispatch, canvasesRef.current, isCancelled)),
+      );
     };
-    loadGraph();
+
+    loadGraphs();
     return () => { cancelled = true; };
-  }, [activeCanvasId, listLoaded, dispatch]);
+  }, [listLoaded, canvasMetas, dispatch]);
 
   return { listLoaded, canvases };
 };

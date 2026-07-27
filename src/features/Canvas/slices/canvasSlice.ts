@@ -128,10 +128,15 @@ export const canvasSlice = createSlice({
         const existing = existingById.get(canvas.id);
         if (
           existing &&
-          Object.keys(existing.nodes).length > 0 &&
-          Object.keys(canvas.nodes).length === 0
+          (existing.graphLoaded || Object.keys(existing.nodes).length > 0)
         ) {
-          return { ...canvas, nodes: existing.nodes, edges: existing.edges, tags: existing.tags };
+          return {
+            ...canvas,
+            nodes: existing.nodes,
+            edges: existing.edges,
+            tags: existing.tags,
+            graphLoaded: true,
+          };
         }
         return canvas;
       });
