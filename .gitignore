@@ -22,6 +22,8 @@
 **/*.swo
 *.cpuprofile
 lint-warnings.txt
+.claude/
+.cursor/
 
 npm-debug.log*
 yarn-debug.log*

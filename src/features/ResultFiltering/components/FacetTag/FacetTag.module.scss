@@ -74,7 +74,7 @@
   input + span {
     position: relative;
     width: 100%;
-    padding: 12px 30px 12px 12px;
+    padding: 12px 0 12px 12px;
     margin-right: 6px;
   }
   label.checkbox {
@@ -130,6 +130,9 @@
     display: block;
     &.roleTagName {
       max-width: 115px;
+    }
+    &.predicateTagName {
+      max-width: 154px;
     }
   }
   .checkbox {
