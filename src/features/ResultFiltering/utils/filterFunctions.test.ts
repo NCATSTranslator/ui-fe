@@ -1,6 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { applyPredicateFilterDisplayNames, formatPredicateFilterName } from '@/features/ResultFiltering/utils/filterFunctions';
+import { applyPredicateFilterDisplayNames, formatPredicateFilterName, propagatesExclusionAcrossCompressionGroups } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
+
+// Permissive default: no families propagate. See commented strict-mode logic in
+// propagatesExclusionAcrossCompressionGroups to re-enable group-wide propagation.
+describe('propagatesExclusionAcrossCompressionGroups', () => {
+  it('returns false for all path families in permissive mode', () => {
+    expect(propagatesExclusionAcrossCompressionGroups({ id: 'p/ara/agent-a', name: 'Agent A' })).toBe(false);
+    expect(propagatesExclusionAcrossCompressionGroups({ id: 'p/pred/treats', name: 'treats' })).toBe(false);
+    expect(propagatesExclusionAcrossCompressionGroups({ id: 'p/ev/publication', name: 'Publication' })).toBe(false);
+    expect(propagatesExclusionAcrossCompressionGroups({ id: 'p/pc/gene', name: 'Gene' })).toBe(false);
+    expect(propagatesExclusionAcrossCompressionGroups({ id: 'p/pt/2', name: '2' })).toBe(false);
+  });
+});
 
 describe('formatPredicateFilterName', () => {
   it('replaces treat terminology with impact terminology', () => {

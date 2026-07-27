@@ -524,9 +524,16 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
 }
 
 /**
- * When paths are compressed for display (same node sequence, different predicates),
- * exclusion on one member must hide the entire compressed path. Propagates filtered
- * state to all members of a compression group when any member matches a negated path filter.
+ * Scaffolding for strict-mode compression-group exclusion propagation.
+ *
+ * Currently a no-op: propagatesExclusionAcrossCompressionGroups returns false for
+ * all path filters, so negatedPathFilters is always empty. Per-member exclusion
+ * is handled solely by updatePathRanks.
+ *
+ * When strict mode is re-enabled in propagatesExclusionAcrossCompressionGroups,
+ * matching negated filters will spread filtered state to every member of a
+ * compression group (same node sequence). ARA inclusion exemption is preserved
+ * via getExcludingFilter.
  */
 function _propagateExclusionAcrossCompressionGroups(
   resultSet: ResultSet,
@@ -535,13 +542,16 @@ function _propagateExclusionAcrossCompressionGroups(
   pathFilterState: PathFilterState
 ): void {
   const negatedPathFilters = pathFilters.filter(
-    (ftr) => filtering.isExclusion(ftr) && !filtering.isEvidenceFilter(ftr)
+    (ftr) =>
+      filtering.isExclusion(ftr) &&
+      filtering.propagatesExclusionAcrossCompressionGroups(ftr)
   );
   if (negatedPathFilters.length === 0) return;
 
-  const otherPathFilters = pathFilters.filter((ftr) => !filtering.isEvidenceFilter(ftr));
-  const hasAraInclusion = otherPathFilters.some(
-    (ftr) => !ftr.negated && filtering.getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
+  const hasAraInclusion = pathFilters.some(
+    (ftr) =>
+      !ftr.negated &&
+      filtering.getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
   );
 
   for (const result of results) {

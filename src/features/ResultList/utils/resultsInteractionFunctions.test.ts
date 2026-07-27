@@ -459,15 +459,15 @@ describe('applyFilters — compressed path predicate filtering', () => {
     return { rs, result };
   };
 
-  it('propagates predicate exclusion across compressed path members', () => {
+  it('excludes only the matching member on predicate exclusion', () => {
     const { rs, result } = buildTwoMemberFixture();
     const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
 
     expect(updatedPathFilterState.P1).toBe(true);
-    expect(updatedPathFilterState.P2).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
 
     const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
-    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(true);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
   });
 
   it('keeps compressed path visible when excluding a predicate not present on any member', () => {
@@ -526,28 +526,28 @@ describe('applyFilters — compressed path predicate filtering', () => {
     expect(results).toHaveLength(0);
   });
 
-  it('propagates exclusion across a three-member compression group', () => {
+  it('excludes only the matching member in a three-member compression group', () => {
     const { rs, result } = buildCompressedFixture();
     const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3'] });
     const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
       makePathFilter(PRED_CAUSES, true),
     ]);
 
-    expect(updatedPathFilterState.P1).toBe(true);
-    expect(updatedPathFilterState.P2).toBe(true);
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
     expect(updatedPathFilterState.P3).toBe(true);
 
     const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2', 'P3']);
     expect(compressedPath.compressedIDs?.length).toBeGreaterThan(1);
-    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(true);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
   });
 
-  it('does not propagate exclusion to paths with a different node sequence', () => {
+  it('does not filter paths with a different node sequence', () => {
     const { rs, result } = buildCompressedFixture();
     const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
 
     expect(updatedPathFilterState.P1).toBe(true);
-    expect(updatedPathFilterState.P2).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
     expect(updatedPathFilterState.P4).toBe(false);
 
     expect(getIsPathFiltered(getPathById(rs, 'P4')!, updatedPathFilterState)).toBe(false);
@@ -560,11 +560,76 @@ describe('applyFilters — compressed path predicate filtering', () => {
     expect(results).toHaveLength(1);
   });
 
-  it('removes the result when every path is filtered out', () => {
+  it('keeps the result when a compressed sibling remains unfiltered', () => {
     const { rs, result } = buildTwoMemberFixture();
     const { results } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
 
-    expect(results).toHaveLength(0);
+    expect(results).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — compressed path ARA exclusion (per-member)
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
+  const buildAraCompressionFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null } }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [PRED_AFFECTS]: null } }),
+      },
+      tags: {
+        [ARA_EXCLUDE]: { name: 'Agent A', value: '' },
+        [ARA_INCLUDE]: { name: 'Agent B', value: '' },
+        [PRED_AFFECTS]: { name: 'affects', value: '' },
+      },
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    return { rs, result };
+  };
+
+  it('excludes only the matching member on ARA exclusion', () => {
+    const { rs, result } = buildAraCompressionFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(ARA_EXCLUDE, true)]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('does not propagate ARA exclusion when an ARA inclusion is active', () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null, [ARA_INCLUDE]: null } }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [ARA_INCLUDE]: null } }),
+      },
+      tags: {
+        [ARA_EXCLUDE]: { name: 'Agent A', value: '' },
+        [ARA_INCLUDE]: { name: 'Agent B', value: '' },
+      },
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(ARA_INCLUDE, false),
+      makePathFilter(ARA_EXCLUDE, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(results).toHaveLength(1);
   });
 });
 
@@ -573,7 +638,7 @@ describe('applyFilters — compressed path predicate filtering', () => {
 // ---------------------------------------------------------------------------
 
 describe('applyFilters — filtered path count consistency', () => {
-  it('counts all compressed member IDs as filtered after exclusion propagation', () => {
+  it('counts only matching members as filtered for per-member exclusions', () => {
     const { rs, result } = buildCompressedFixture();
     const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
@@ -583,7 +648,7 @@ describe('applyFilters — filtered path count consistency', () => {
     const compressedPaths = getCompressedPaths(rs, ['P1', 'P2']);
     const filteredCount = getFilteredPathCount(compressedPaths, updatedPathFilterState);
 
-    expect(filteredCount).toBe(2);
+    expect(filteredCount).toBe(1);
   });
 
   it('counts zero filtered paths when exclusion does not match any member', () => {
