@@ -6,6 +6,7 @@ import { intToChar, intToNumeral } from '@/features/Core/utils/stringFormatters'
 import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 
 export const MAIN_CONTENT_ELEMENT_ID = 'main';
+export const MAIN_SCROLL_ELEMENT_ID = 'main-scroll';
 
 /**
  * Derives the display key for a path (e.g. "2", "1.a", "1.a.i") by searching

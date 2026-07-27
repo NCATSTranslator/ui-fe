@@ -5,7 +5,7 @@ import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
 import { useWindowSize } from '@/features/Core/hooks/useWindowSize';
 import { useScrollToHash } from '@/features/Core/hooks/useScrollToHash';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
+import { MAIN_CONTENT_ELEMENT_ID, MAIN_SCROLL_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
 import { commonQueryClientOptions } from '@/features/Core/utils/queryClientConfig';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
@@ -86,30 +86,32 @@ const App = ({children}: {children?: ReactNode}) => {
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               <div className="layout">
                 <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
-                <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
-                  <Header />
-                  {children}
-                  {
-                    isSmallScreen && <SmallScreenOverlay /> 
-                  }
-                  <Outlet />
-                  <Footer>
-                    <nav>
-                      <a
-                        href="https://ncats.nih.gov/translator/about"
-                        rel="noreferrer"
-                        target="_blank"
-                      >About Translator</a>
-                      <NavLink to={`/terms-of-use`}
-                        className={({isActive}) => joinClasses(isActive && 'active')}
-                      >Terms of Use</NavLink>
-                      <a
-                        href="https://ncats.nih.gov/privacy"
-                        rel="noreferrer"
-                        target="_blank"
-                      >Privacy Policy</a>
-                    </nav>
-                  </Footer>
+                <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>
+                  <div id={MAIN_SCROLL_ELEMENT_ID} className='contentScroll scrollable'>
+                    <Header />
+                    {children}
+                    {
+                      isSmallScreen && <SmallScreenOverlay /> 
+                    }
+                    <Outlet />
+                    <Footer>
+                      <nav>
+                        <a
+                          href="https://ncats.nih.gov/translator/about"
+                          rel="noreferrer"
+                          target="_blank"
+                        >About Translator</a>
+                        <NavLink to={`/terms-of-use`}
+                          className={({isActive}) => joinClasses(isActive && 'active')}
+                        >Terms of Use</NavLink>
+                        <a
+                          href="https://ncats.nih.gov/privacy"
+                          rel="noreferrer"
+                          target="_blank"
+                        >Privacy Policy</a>
+                      </nav>
+                    </Footer>
+                  </div>
                   <Suspense fallback={null}>
                     <CanvasPane />
                   </Suspense>
