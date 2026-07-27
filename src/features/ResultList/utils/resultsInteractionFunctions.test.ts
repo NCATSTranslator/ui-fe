@@ -4,7 +4,7 @@ import { getExcludingFilter, makePathRank } from '@/features/Core/utils/sortingF
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
+import { EntityTags, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, ResultSetTags, TagDescription, TagObject } from '@/features/ResultList/types/results.d';
 import { getCompressedPaths, getFilteredPathCount, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 
 // ---------------------------------------------------------------------------
@@ -106,6 +106,19 @@ const PRED_UNRELATED = 'p/pred/unrelated';
 const ARA_EXCLUDE = 'p/ara/agent-a';
 const ARA_INCLUDE = 'p/ara/agent-b';
 
+const makeTagDescription = (name: string): TagDescription => ({ name, description: '' });
+
+const makePathTag = (id: string, name: string): TagObject => ({
+  id,
+  description: makeTagDescription(name),
+});
+
+const pathTags = (tags: Record<string, string>): EntityTags =>
+  Object.fromEntries(Object.entries(tags).map(([id, name]) => [id, makePathTag(id, name)]));
+
+const resultSetTags = (tags: Record<string, string>): ResultSetTags =>
+  Object.fromEntries(Object.entries(tags).map(([id, name]) => [id, makeTagDescription(name)]));
+
 /** Runs applyFilters for a single result and returns the full response. */
 const runApplyFilters = (rs: ResultSet, result: Result, filters: Filter[]) => {
   const pathFilterState = genPathFilterState(rs);
@@ -127,20 +140,20 @@ const buildCompressedFixture = (extraPaths: Record<string, Path> = {}) => {
       e4: makeEdge('e4', { predicate: 'biolink:related_to', inferred: false }),
     },
     paths: {
-      P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
-      P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [PRED_AFFECTS]: null } }),
-      P3: makePath('P3', ['n1', 'e3', 'n2'], { tags: { [PRED_CAUSES]: null } }),
+      P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+      P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
+      P3: makePath('P3', ['n1', 'e3', 'n2'], { tags: pathTags({ [PRED_CAUSES]: 'causes' }) }),
       P4: makePath('P4', ['n1', 'e4', 'n3']),
       ...extraPaths,
     },
-    tags: {
-      [PRED_TREATS]: { name: 'treats', value: '' },
-      [PRED_AFFECTS]: { name: 'affects', value: '' },
-      [PRED_CAUSES]: { name: 'causes', value: '' },
-      [PRED_UNRELATED]: { name: 'unrelated', value: '' },
-      [ARA_EXCLUDE]: { name: 'Agent A', value: '' },
-      [ARA_INCLUDE]: { name: 'Agent B', value: '' },
-    },
+    tags: resultSetTags({
+      [PRED_TREATS]: 'treats',
+      [PRED_AFFECTS]: 'affects',
+      [PRED_CAUSES]: 'causes',
+      [PRED_UNRELATED]: 'unrelated',
+      [ARA_EXCLUDE]: 'Agent A',
+      [ARA_INCLUDE]: 'Agent B',
+    }),
   });
   const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3', 'P4'] });
   return { rs, result };
@@ -354,28 +367,28 @@ describe('findStringMatch — path independence', () => {
 
 describe('getExcludingFilter', () => {
   it('returns the matching negated filter when the path carries that tag', () => {
-    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } });
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) });
     const filter = makePathFilter(PRED_TREATS, true);
 
     expect(getExcludingFilter(path, [filter], false)).toBe(filter);
   });
 
   it('returns null when the path does not carry the excluded tag', () => {
-    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } });
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) });
     const filter = makePathFilter(PRED_AFFECTS, true);
 
     expect(getExcludingFilter(path, [filter], false)).toBeNull();
   });
 
   it('ignores negated ARA filters when an ARA inclusion is active', () => {
-    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null } });
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) });
     const araExclude = makePathFilter(ARA_EXCLUDE, true);
 
     expect(getExcludingFilter(path, [araExclude], true)).toBeNull();
   });
 
   it('applies negated ARA filters when no ARA inclusion is active', () => {
-    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null } });
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) });
     const araExclude = makePathFilter(ARA_EXCLUDE, true);
 
     expect(getExcludingFilter(path, [araExclude], false)).toBe(araExclude);
@@ -392,9 +405,9 @@ describe('applyFilters — uncompressed path predicate filtering', () => {
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
       edges: { e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }) },
       paths: {
-        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
       },
-      tags: { [PRED_TREATS]: { name: 'treats', value: '' } },
+      tags: resultSetTags({ [PRED_TREATS]: 'treats' }),
     });
     const result = makeResult({ drug_name: 'Drug', paths: ['P1'] });
     return { rs, result };
@@ -446,14 +459,14 @@ describe('applyFilters — compressed path predicate filtering', () => {
         e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
       },
       paths: {
-        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
-        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [PRED_AFFECTS]: null } }),
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
       },
-      tags: {
-        [PRED_TREATS]: { name: 'treats', value: '' },
-        [PRED_AFFECTS]: { name: 'affects', value: '' },
-        [PRED_UNRELATED]: { name: 'unrelated', value: '' },
-      },
+      tags: resultSetTags({
+        [PRED_TREATS]: 'treats',
+        [PRED_AFFECTS]: 'affects',
+        [PRED_UNRELATED]: 'unrelated',
+      }),
     });
     const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     return { rs, result };
@@ -581,14 +594,14 @@ describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
         e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
       },
       paths: {
-        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null } }),
-        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [PRED_AFFECTS]: null } }),
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
       },
-      tags: {
-        [ARA_EXCLUDE]: { name: 'Agent A', value: '' },
-        [ARA_INCLUDE]: { name: 'Agent B', value: '' },
-        [PRED_AFFECTS]: { name: 'affects', value: '' },
-      },
+      tags: resultSetTags({
+        [ARA_EXCLUDE]: 'Agent A',
+        [ARA_INCLUDE]: 'Agent B',
+        [PRED_AFFECTS]: 'affects',
+      }),
     });
     const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     return { rs, result };
@@ -613,13 +626,15 @@ describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
         e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
       },
       paths: {
-        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null, [ARA_INCLUDE]: null } }),
-        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: { [ARA_INCLUDE]: null } }),
+        P1: makePath('P1', ['n1', 'e1', 'n2'], {
+          tags: pathTags({ [ARA_EXCLUDE]: 'Agent A', [ARA_INCLUDE]: 'Agent B' }),
+        }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [ARA_INCLUDE]: 'Agent B' }) }),
       },
-      tags: {
-        [ARA_EXCLUDE]: { name: 'Agent A', value: '' },
-        [ARA_INCLUDE]: { name: 'Agent B', value: '' },
-      },
+      tags: resultSetTags({
+        [ARA_EXCLUDE]: 'Agent A',
+        [ARA_INCLUDE]: 'Agent B',
+      }),
     });
     const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
