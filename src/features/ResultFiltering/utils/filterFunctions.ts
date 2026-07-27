@@ -179,6 +179,30 @@ export const isEvidenceFilter = (filter: Filter): boolean => {
   return getFilterFamily(filter) === 'ev';
 }
 
+/**
+ * Returns true when a negated path filter should propagate exclusion to every
+ * member of a compressed path group.
+ *
+ * Permissive default (current): returns false for all families — exclusions apply
+ * per member only via updatePathRanks.
+ *
+ * Strict mode: uncomment a return in the function body (and remove `return false`)
+ * to re-enable group-wide propagation for selected families.
+ */
+export const propagatesExclusionAcrossCompressionGroups = (filter: Filter): boolean => {
+  // Permissive default: all path exclusions apply per compressed-path member.
+  return false;
+
+  // Strict mode exampels: propagate exclusion to every member of a compression group
+  // for matching families. Uncomment the return below (and remove `return false`).
+  //
+  // Reasoning Agent (ara) only:
+  // return getFilterFamily(filter) === FILTERING_CONSTANTS.FAMILIES.ARA;
+  //
+  // Previously also considered for pred (Relationships):
+  // return getFilterFamily(filter) !== 'ev';
+};
+
 export const isExclusion = (filter: Filter): boolean => {
   return filter.negated || false;
 }
