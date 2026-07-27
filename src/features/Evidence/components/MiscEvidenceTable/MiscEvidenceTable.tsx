@@ -1,10 +1,17 @@
 import { FC, useMemo } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { PublicationObject } from '@/features/Evidence/types/evidence.d';
+import { Preferences } from '@/features/UserAuth/types/user';
+import { usePagination } from '@/features/Core/hooks/usePagination';
+import { getInitItemsPerPage } from '@/features/Evidence/utils/evidenceModalFunctions';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/features/Evidence/hooks/evidenceHooks';
+import TablePaginationControls from '@/features/Evidence/components/TablePaginationControls/TablePaginationControls';
+import PaginationSummary from '@/features/Evidence/components/PaginationSummary/PaginationSummary';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 
 interface MiscEvidenceTableProps {
   miscEvidence: PublicationObject[];
+  prefs: Preferences;
 }
 
 interface FormattedMiscEvidence {
@@ -37,30 +44,56 @@ const formatMiscEvidence = (miscEvidence: PublicationObject[]): FormattedMiscEvi
   return formattedMiscEvidence;
 }
 
-const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence }) => {
+const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence, prefs }) => {
   const formattedMiscEvidence = useMemo(() => formatMiscEvidence(miscEvidence), [miscEvidence]);
+  const {
+    itemsPerPage,
+    currentPage,
+    itemOffset,
+    endOffset,
+    displayedItems,
+    pageCount,
+    handlePageClick,
+    handleItemsPerPageChange,
+  } = usePagination(formattedMiscEvidence, getInitItemsPerPage(prefs, DEFAULT_ITEMS_PER_PAGE));
 
   return (
-    <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
-      <div className={`table-head ${styles.tableHead}`}>
-        <div className={`head ${styles.head} ${styles.link}`}>Link</div>
-      </div>
-      <div className={`table-items ${styles.tableItems} scrollable`}>
-        {formattedMiscEvidence.map((item) => {
-          return (
-            <div className={`table-item ${styles.tableItem}`} key={item.id}>
-              <div className={`table-cell ${styles.cell} ${styles.link} link`}>
-                {item.url && (
-                  <a href={item.url} rel="noreferrer" target="_blank">
-                    {item.url} <ExternalLink />
-                  </a>
-                )}
+    <>
+      <PaginationSummary
+        itemOffset={itemOffset}
+        endOffset={endOffset}
+        totalCount={formattedMiscEvidence.length}
+        label="Miscellaneous Evidence"
+      />
+      <div className={`table-body ${styles.tableBody} ${styles.misc}`}>
+        <div className={`table-head ${styles.tableHead}`}>
+          <div className={`head ${styles.head} ${styles.link}`}>Link</div>
+        </div>
+        <div className={`table-items ${styles.tableItems} scrollable`}>
+          {displayedItems.map((item) => {
+            return (
+              <div className={`table-item ${styles.tableItem}`} key={item.id}>
+                <div className={`table-cell ${styles.cell} ${styles.link} link`}>
+                  {item.url && (
+                    <a href={item.url} rel="noreferrer" target="_blank">
+                      {item.url} <ExternalLink />
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
-    </div>
+      <TablePaginationControls
+        label="Links per Page"
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        pageCount={pageCount}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        onPageChange={handlePageClick}
+      />
+    </>
   );
 };
 
