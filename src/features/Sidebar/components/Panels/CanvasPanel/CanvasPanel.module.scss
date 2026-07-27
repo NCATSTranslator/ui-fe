@@ -3,7 +3,6 @@
 .canvasesPanel {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .top {
@@ -60,7 +59,7 @@
   display: flex;
   flex-direction: column;
   gap: $xs;
-  overflow-y: auto;
+  overflow: hidden;
   flex: 1;
 }
 
@@ -73,14 +72,4 @@
 
 .link {
   color: $purpleOne;
-}
-
-.activeCanvas {
-  background-color: $lightPurpleTwo;
-}
-
-.count {
-  font-size: $captionSize;
-  font-weight: 400;
-  color: $darkGray;
 }

@@ -4,17 +4,14 @@ import styles from './CanvasPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import SidebarCard from '@/features/Sidebar/components/SidebarCard/SidebarCard';
 import Button from '@/features/Core/components/Button/Button';
-import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
-import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
+import CanvasSidebarCard from '@/features/Canvas/components/CanvasSidebarCard/CanvasSidebarCard';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { useUser, getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
-import { getCanvasNodeCount, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
+import { CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 
 const CanvasPanel: FC = () => {
   const [user] = useUser();
@@ -91,40 +88,22 @@ const CanvasPanel: FC = () => {
             )}
           </div>
         ) : (
-          sortedFilteredCanvases.map(canvas => {
-            const nodeCount = getCanvasNodeCount(canvas);
-            const isActive = canvas.id === activeCanvasId;
-            const isRenaming = canvas.id === renamingId;
-
-            const bottomLeft = (
-              <span className={styles.count}>
-                {nodeCount} {nodeCount === 1 ? 'Object' : 'Objects'}
-              </span>
-            );
-            const options = (
-              <>
-                <Button handleClick={() => handleStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
-                <Button handleClick={() => handleDeleteCanvas(canvas.id)} iconLeft={<TrashIcon />}>Delete</Button>
-              </>
-            );
-
-            return (
-              <SidebarCard
-                key={canvas.id}
-                className={isActive ? styles.activeCanvas : ''}
-                leftIcon={<WorkspaceIcon />}
-                title={isRenaming ? renameValue : canvas.label}
-                searchTerm={searchTerm}
-                onClick={() => handleSelectCanvas(canvas)}
-                bottomLeft={bottomLeft}
-                options={options}
-                isRenaming={isRenaming}
-                onTitleChange={setRenameValue}
-                onFormSubmit={handleSubmitRename}
-                textInputRef={renameInputRef}
-              />
-            );
-          })
+          sortedFilteredCanvases.map(canvas => (
+            <CanvasSidebarCard
+              key={canvas.id}
+              canvas={canvas}
+              isActive={canvas.id === activeCanvasId}
+              isRenaming={canvas.id === renamingId}
+              renameValue={renameValue}
+              searchTerm={searchTerm}
+              renameInputRef={renameInputRef}
+              onSelect={handleSelectCanvas}
+              onStartRename={handleStartRename}
+              onDelete={handleDeleteCanvas}
+              onRenameValueChange={setRenameValue}
+              onSubmitRename={handleSubmitRename}
+            />
+          ))
         )}
       </div>
     </div>

@@ -1,22 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import styles from './CanvasList.module.scss';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
+import Tab from '@/features/Core/components/Tabs/Tab';
+import Tabs from '@/features/Core/components/Tabs/Tabs';
 import Button from '@/features/Core/components/Button/Button';
 import Plus from '@/assets/icons/buttons/Add/Add.svg?react';
-import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
-import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
 import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
+import CardList from '@/features/Core/components/CardList/CardList';
 import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
-import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
-import SidebarCard from '@/features/Sidebar/components/SidebarCard/SidebarCard';
+import CanvasSidebarCard from '@/features/Canvas/components/CanvasSidebarCard/CanvasSidebarCard';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
-import { getCanvasNodeCount } from '@/features/Canvas/utils/canvasFunctions';
 
 const EmptyCanvasList = ({ searchTerm, createCanvas }: { searchTerm: string; createCanvas: () => void }) => {
   if (searchTerm) {
@@ -56,86 +54,80 @@ const CanvasList = () => {
   } = useCanvasList();
   const { createCanvas } = useCreateCanvas();
 
+  const canvasTabHeading = useMemo(() => {
+    const canvasCount = sortedFilteredCanvases.length;
+    return `${canvasCount} Canvas${canvasCount === 1 ? '' : 'es'}`;
+  }, [sortedFilteredCanvases.length]);
+
+  // on component mount, if the canvases panel is open, close it
   useEffect(() => {
     if (activePanelId === 'canvases') closePanel();
-  }, [activePanelId, closePanel]);
+  }, []);
 
   const shouldShowErrorState = !user?.id && canvases.length === 0;
 
   return (
-    <div className={styles.canvasesPage}>
+    <>
       <ListHeader
         heading="Canvases"
         searchPlaceholder="Search Canvases"
         searchTerm={searchTerm}
         handleSearch={handleSearch}
       />
-      <div className={styles.list}>
-        {shouldShowErrorState ? (
-          <EmptyArea>
-            <p>
-              <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your canvases.
-            </p>
-          </EmptyArea>
-        ) : (
-          <div className={styles.canvasList}>
-            <Button
-              iconLeft={<Plus />}
-              handleClick={createCanvas}
-              title="Create New Canvas"
-              className={styles.createButton}
-              variant="textOnly"
-            >
-              Create New Canvas
-            </Button>
-            <div className={styles.canvasCount}>
-              {sortedFilteredCanvases.length} {sortedFilteredCanvases.length === 1 ? 'Canvas' : 'Canvases'}
-            </div>
-            <div className={styles.cards}>
-              {sortedFilteredCanvases.length === 0 ? (
-                <EmptyCanvasList searchTerm={searchTerm} createCanvas={createCanvas} />
-              ) : (
-                sortedFilteredCanvases.map(canvas => {
-                  const nodeCount = getCanvasNodeCount(canvas);
-                  const isActive = canvas.id === activeCanvasId;
-                  const isRenaming = canvas.id === renamingId;
-                  const updatedTime = getTimeRelativeDate(new Date(canvas.timeUpdated));
-
-                  const options = (
-                    <>
-                      <Button handleClick={() => handleStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
-                      <Button handleClick={() => handleDeleteCanvas(canvas.id)} iconLeft={<TrashIcon />}>Delete</Button>
-                    </>
-                  );
-
-                  return (
-                    <SidebarCard
-                      key={canvas.id}
-                      className={isActive ? styles.activeCanvas : ''}
-                      leftIcon={<WorkspaceIcon />}
-                      title={isRenaming ? renameValue : canvas.label}
-                      searchTerm={searchTerm}
-                      onClick={() => handleSelectCanvas(canvas)}
-                      bottomLeft={
-                        <span className={styles.meta}>
-                          {nodeCount} {nodeCount === 1 ? 'object' : 'objects'}
-                        </span>
-                      }
-                      bottomRight={<span className={styles.meta}>{updatedTime}</span>}
-                      options={options}
-                      isRenaming={isRenaming}
-                      onTitleChange={setRenameValue}
-                      onFormSubmit={handleSubmitRename}
-                      textInputRef={renameInputRef}
-                    />
-                  );
-                })
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      {shouldShowErrorState ? (
+        <EmptyArea>
+          <p>
+            <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your canvases.
+          </p>
+        </EmptyArea>
+      ) : (
+        <div className={styles.canvasList}>
+          <Button
+            iconLeft={<Plus />}
+            handleClick={createCanvas}
+            title="Create New Canvas"
+            className={styles.createButton}
+            variant="textOnly"
+          >
+            Create New Canvas
+          </Button>
+          <Tabs
+            handleTabSelection={() => {}}
+            defaultActiveTab={canvasTabHeading}
+            activeTab={canvasTabHeading}
+            controlled
+          >
+            {[
+              <Tab key="canvases" heading={canvasTabHeading}>
+                <CardList>
+                  {sortedFilteredCanvases.length === 0 ? (
+                    <EmptyCanvasList searchTerm={searchTerm} createCanvas={createCanvas} />
+                  ) : (
+                    sortedFilteredCanvases.map(canvas => (
+                      <CanvasSidebarCard
+                        key={canvas.id}
+                        canvas={canvas}
+                        isActive={canvas.id === activeCanvasId}
+                        isRenaming={canvas.id === renamingId}
+                        renameValue={renameValue}
+                        searchTerm={searchTerm}
+                        renameInputRef={renameInputRef}
+                        onSelect={handleSelectCanvas}
+                        onStartRename={handleStartRename}
+                        onDelete={handleDeleteCanvas}
+                        onRenameValueChange={setRenameValue}
+                        onSubmitRename={handleSubmitRename}
+                        showUpdatedTime
+                      />
+                    ))
+                  )}
+                </CardList>
+              </Tab>,
+            ]}
+          </Tabs>
+        </div>
+      )}
+    </>
   );
 };
 

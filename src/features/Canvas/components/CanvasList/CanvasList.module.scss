@@ -20,27 +20,6 @@
   }
 }
 
-.canvasCount {
-  font-size: $bodyTwoSize;
-  font-weight: 600;
-  color: $black;
-  padding: $s $xl;
-  border-bottom: 1px solid $midGray;
-}
-
-.cards {
-  display: flex;
-  flex-direction: column;
-  gap: $xs;
-  padding: $s $xl;
-}
-
-.activeCanvas {
-  background-color: $lightPurpleTwo;
-}
-
-.meta {
-  font-size: $captionSize;
-  font-weight: 400;
-  color: $darkGray;
+.link {
+  color: $purpleOne;
 }
