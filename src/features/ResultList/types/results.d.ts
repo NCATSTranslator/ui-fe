@@ -136,11 +136,16 @@ export type ChebiRole = {
   name: string;
 }
 
+export type Indication = {
+  name: string;
+  ids: string[];
+}
+
 export type ChemicalAnnotation = {
   approval: AnnotationSection<number> | null;
   clinical_trials: AnnotationSection<string[]> | null;
   descriptions: AnnotationSection<string[]> | null;
-  indications: AnnotationSection<string[]> | null;
+  indications: AnnotationSection<Indication[]> | null;
   otc_status: AnnotationSection<{code: number, label: string}> | null;
   other_names: AnnotationSection<{commercial: string[], generic: string[]}> | null;
   roles: AnnotationSection<ChebiRole[]> | null;
