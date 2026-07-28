@@ -141,6 +141,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const activeFiltersRef = useRef<Filter[]>([]);
   const resultIdParamRef = useRef<string | null>(null);
   const itemsPerPageRef = useRef<number>(0);
+  const visibleResultIdsRef = useRef<Set<string>>(new Set());
 
   // Data lifecycle hook — state, refs, fetching, and data processing
   const {
@@ -160,6 +161,11 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     dispatch, scoreWeights, activeFiltersRef, activeEntityFiltersRef,
     currentSortString, userSavesRef, handleUpdateResultsRef,
   });
+
+  const visibleResultIds = useMemo(
+    () => new Set(formattedResults.map(r => r.id)),
+    [formattedResults]
+  );
 
   // Pagination state management via hook
   const initialItemsPerPage = ((!!prefs.results_per_page.pref_value) ? (typeof prefs.results_per_page.pref_value === "string") ? parseInt(prefs.results_per_page.pref_value) : prefs.results_per_page.pref_value : 10) as number;
@@ -244,6 +250,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   activeFiltersRef.current = activeFilters;
   resultIdParamRef.current = resultIdParam;
   itemsPerPageRef.current = itemsPerPage;
+  visibleResultIdsRef.current = visibleResultIds;
 
   // Reset state when the query ID changes (e.g., navigating to a different query)
   useQueryChangeReset({
@@ -293,7 +300,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isPathfinder: boolean = false,
     userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
-    fr: Result[] = [],
   ): Result[] => {
     if (!summary) return [];
 
@@ -307,7 +313,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       newOriginalResults = cloneDeep(newFormattedResults);
       newPathFilterState = genPathFilterState(summary);
     } else {
-      newFormattedResults = justSort ? fr : or;
+      newFormattedResults = or;
       newOriginalResults = or;
     }
 
@@ -353,10 +359,12 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
         handlePageReset(false, newFormattedResults.length);
 
       originalResults.current = newOriginalResults;
+      newFormattedResults = getSortedResults(summary, newFormattedResults, sortType, isPathfinder);
+    } else {
+      // Sort canonical full list, then intersect with currently visible IDs (avoids re-running applyFilters)
+      const sortedOriginal = getSortedResults(summary, newOriginalResults, sortType, isPathfinder);
+      newFormattedResults = sortedOriginal.filter(r => visibleResultIdsRef.current.has(r.id));
     }
-
-    // Sorting
-    newFormattedResults = getSortedResults(summary, newFormattedResults, sortType, isPathfinder);
 
     // State assignment
     setFormattedResults(newFormattedResults);
@@ -407,9 +415,9 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handleUpdateResults(
       activeFilters, activeEntityFilters, rawResults.current as ResultSet,
       originalResults.current, true, currentSortString.current,
-      isPathfinder, userSaves, pathFilterState, formattedResults
+      isPathfinder, userSaves, pathFilterState
     );
-  }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState, formattedResults]);
+  }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState]);
   useLayoutEffect(() => { handleSortUpdateRef.current = handleSortUpdate; }); // see handleUpdateResultsRef comment
 
   // Memoized data prop for ResultListHeader
@@ -427,11 +435,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     noveltyBoost,
     onToggleNoveltyBoost: handleToggleNoveltyBoost,
   }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
-
-  const visibleResultIds = useMemo(
-    () => new Set(formattedResults.map(r => r.id)),
-    [formattedResults]
-  );
 
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
     userSaves,
