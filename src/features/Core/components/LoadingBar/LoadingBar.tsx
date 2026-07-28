@@ -2,6 +2,7 @@ import { FC, ReactNode } from 'react';
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 import TextCrossfade from '@/features/Core/components/TextCrossfade/TextCrossfade';
 import styles from './LoadingBar.module.scss';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface LoadingBarProps {
   useIcon: boolean;
@@ -14,7 +15,7 @@ interface LoadingBarProps {
 const LoadingBar: FC<LoadingBarProps> = ({useIcon, disclaimerText, className, reducedPadding = false, loadingText}) => {
 
   return (
-    <div className={`${styles.loadingBar} ${className} ${(reducedPadding) ? styles.reducedPadding : ''}`}> 
+    <div className={joinClasses(styles.loadingBar, className, reducedPadding && styles.reducedPadding)}> 
       <div className={styles.top}>
         { useIcon &&
           <LoadingIcon size="medium" className={styles.loadingIcon} />
