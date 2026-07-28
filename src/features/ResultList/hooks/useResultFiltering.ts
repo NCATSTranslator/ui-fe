@@ -15,7 +15,6 @@ export type HandleUpdateResultsFn = (
   isPathfinder?: boolean,
   userSavesGroup?: SaveGroup | null,
   pfState?: PathFilterState | null,
-  fr?: Result[],
 ) => Result[];
 
 export interface UseResultFilteringReturn {
