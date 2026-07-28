@@ -29,6 +29,9 @@ const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
   clinical_trials: ({ value, nodeName, nodeType }) => (
     <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
   ),
+  name: ({ value }) => (
+    <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
+  ),
   indications: ({ value }) => (
     <>
       {(value as Indication[])
