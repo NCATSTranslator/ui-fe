@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
 import { getDataFromQueryVar } from "@/features/Core/utils/urlHelpers";
-import { getFormattedNodeName, formatBiolinkEntity } from "@/features/Core/utils/stringFormatters";
+import { getFormattedNodeName, formatBiolinkEntity, capitalizeAllWords } from "@/features/Core/utils/stringFormatters";
 import { getNodeIcon } from "@/features/Core/utils/entityLinks";
 import { useDecodedParams } from "@/features/Core/hooks/useDecodedParams";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
@@ -17,6 +17,7 @@ import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotF
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import ResultListTopBar from "@/features/ResultList/components/ResultListTopBar/ResultListTopBar";
+import { Indication } from "@/features/ResultList/types/results";
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -27,6 +28,19 @@ interface AnnotationOverrideProps {
 const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
   clinical_trials: ({ value, nodeName, nodeType }) => (
     <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
+  ),
+  indications: ({ value }) => (
+    <>
+      {(value as Indication[])
+        .map((indication, i) => {
+          const url = indication.urls[0];
+          const name = capitalizeAllWords(indication.name);
+          return url
+            ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
+            : <span key={i}>{name}</span>;
+        })
+        .flatMap((el, i) => (i === 0 ? [el] : [", ", el]))}
+    </>
   ),
 };
 

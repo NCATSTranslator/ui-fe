@@ -139,6 +139,7 @@ export type ChebiRole = {
 export type Indication = {
   name: string;
   ids: string[];
+  urls: string[];
 }
 
 export type ChemicalAnnotation = {
