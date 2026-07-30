@@ -32,6 +32,9 @@ const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
   name: ({ value }) => (
     <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
   ),
+  synonyms: ({ value }) => (
+    <>{(value as string[]).map(synonym => capitalizeAllWords(synonym)).join(", ")}</>
+  ),
   indications: ({ value }) => (
     <>
       {(value as Indication[])
