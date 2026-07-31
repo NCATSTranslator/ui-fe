@@ -1,21 +1,21 @@
 @use "@/assets/styles/variables" as *;
 
-.hoverMenu {
+.contextMenu {
   position: fixed;
-  z-index: 100;
-  display: flex;
-  gap: 4px;
+  z-index: 1000;
+  min-width: 160px;
   padding: 4px;
   background: $white;
   border: 1px solid $midGray;
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translate(-50%, -100%);
-  margin-top: -8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   button {
-    padding: 4px 8px;
-    font-size: 12px;
+    display: block;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 13px;
+    text-align: left;
     border: none;
     border-radius: 4px;
     background: transparent;
