@@ -47,8 +47,11 @@ export interface ResultListContextValue {
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
 
+export const useOptionalResultListContext = (): ResultListContextValue | null =>
+  useContext(ResultListContext);
+
 export const useResultListContext = (): ResultListContextValue => {
-  const ctx = useContext(ResultListContext);
+  const ctx = useOptionalResultListContext();
   if (!ctx) throw new Error('useResultListContext must be used within a ResultListProvider');
   return ctx;
 };
