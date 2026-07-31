@@ -1,15 +1,20 @@
-import { FC, useState, useMemo, useCallback, useRef, MouseEvent } from 'react';
+import { FC, useState, useMemo, useCallback, MouseEvent } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
-import type { CanvasInspectorState } from '@/features/Canvas/hooks/useCanvasInspector';
 import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 import { ObjectSortMode, sortCanvasNodes, filterCanvasNodes, getNodeEdgeCount } from '@/features/Canvas/utils/canvasFunctions';
 import { formatBiolinkEntity } from '@/features/Core/utils/stringFormatters';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
-import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
+import CanvasNodeActionMenu from '@/features/Canvas/components/CanvasNodeActionMenu/CanvasNodeActionMenu';
+import {
+  OBJECT_LIST_NODE_ACTIONS,
+  type CanvasNodeAction,
+} from '@/features/Canvas/constants/canvasNodeActions';
+import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
-import CircleAddIcon from '@/assets/icons/buttons/Add/Circle Add.svg?react';
+import Button from '@/features/Core/components/Button/Button';
+import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 
 type Tab = 'objects' | 'annotations';
 
@@ -26,11 +31,10 @@ interface NodeItemProps {
   onNodeClick: (node: CanvasNode) => void;
   onHoverNode: (nodeId: string | null) => void;
   onMenuToggle: (nodeId: string, e: MouseEvent) => void;
-  onMenuAction: (action: string, node: CanvasNode) => void;
-  onCloseMenu: () => void;
+  onMenuAction: (action: CanvasNodeAction, node: CanvasNode) => void;
 }
 
-const NodeItem: FC<NodeItemProps> = ({ node, canvas, nodeMenuId, onNodeClick, onHoverNode, onMenuToggle, onMenuAction, onCloseMenu }) => {
+const NodeItem: FC<NodeItemProps> = ({ node, canvas, nodeMenuId, onNodeClick, onHoverNode, onMenuToggle, onMenuAction }) => {
   const edgeCount = getNodeEdgeCount(canvas, node.id);
   const typeLabel = node.types[0] ? formatBiolinkEntity(node.types[0]) : '';
   const isMenuOpen = nodeMenuId === node.id;
@@ -42,6 +46,7 @@ const NodeItem: FC<NodeItemProps> = ({ node, canvas, nodeMenuId, onNodeClick, on
       onMouseLeave={() => onHoverNode(null)}
     >
       <button
+        type="button"
         className={styles.nodeItemContent}
         onClick={() => onNodeClick(node)}
       >
@@ -55,56 +60,51 @@ const NodeItem: FC<NodeItemProps> = ({ node, canvas, nodeMenuId, onNodeClick, on
           )}
         </span>
       </button>
-      <OutsideClickHandler onOutsideClick={() => { if (isMenuOpen) onCloseMenu(); }}>
-        <div className={styles.nodeMenuWrapper}>
-          <button
-            className={joinClasses(styles.nodeMenuButton, isMenuOpen && styles.active)}
-            onClick={e => onMenuToggle(node.id, e)}
-            aria-label={`Actions for ${node.names[0] || node.id}`}
-          >
-            <CircleAddIcon />
-          </button>
-          {isMenuOpen && (
-            <div className={styles.nodeMenu}>
-              <button className={styles.nodeMenuItem} onClick={() => onMenuAction('newQuery', node)}>
-                New Query
-              </button>
-              <button className={styles.nodeMenuItem} onClick={() => onMenuAction('information', node)}>
-                Information
-              </button>
-              <button className={styles.nodeMenuItem} onClick={() => onMenuAction('find', node)}>
-                Find on Canvas
-              </button>
-            </div>
-          )}
-        </div>
-      </OutsideClickHandler>
+      <div className={styles.nodeMenuWrapper}>
+        <button
+          type="button"
+          className={joinClasses(styles.nodeMenuButton, isMenuOpen && styles.active)}
+          onClick={e => onMenuToggle(node.id, e)}
+          aria-label={`Actions for ${node.names[0] || node.id}`}
+        >
+          <AddIcon />
+        </button>
+        {isMenuOpen && (
+          <CanvasNodeActionMenu
+            actions={OBJECT_LIST_NODE_ACTIONS}
+            onAction={action => onMenuAction(action, node)}
+            className={styles.nodeMenu}
+            itemClassName={styles.nodeMenuItem}
+          />
+        )}
+      </div>
     </div>
   );
 };
 
-const AnnotationsTab: FC<{ annotations: Canvas['annotations']; onAddAnnotation?: () => void }> = ({ annotations, onAddAnnotation }) => (
-  <>
-    {annotations.length === 0 ? (
+const AnnotationsTab: FC<{ annotations: Canvas['annotations']; onAddAnnotation?: () => void }> = ({ annotations, onAddAnnotation }) => {
+  if (annotations.length === 0) {
+    return (
       <div className={styles.emptyState}>
-        <p>No annotations on this canvas yet.</p>
         {onAddAnnotation && (
-          <button className={styles.emptyAction} onClick={onAddAnnotation}>
+          <Button handleClick={onAddAnnotation} smallFont iconLeft={<AddIcon />}>
             Add Annotation
-          </button>
+          </Button>
         )}
       </div>
-    ) : (
-      <div className={styles.nodeList}>
-        {annotations.map(annotation => (
-          <div key={annotation.id} className={styles.annotationItem}>
-            <span className={styles.annotationText}>{annotation.text}</span>
-          </div>
-        ))}
-      </div>
-    )}
-  </>
-);
+    );
+  }
+
+  return (
+    <div className={styles.nodeList}>
+      {annotations.map(annotation => (
+        <div key={annotation.id} className={styles.annotationItem}>
+          <span className={styles.annotationText}>{annotation.text}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const renderObjectsEmptyState = (
   allNodes: CanvasNode[],
@@ -117,7 +117,7 @@ const renderObjectsEmptyState = (
       <div className={styles.emptyState}>
         <p>No objects on this canvas yet.</p>
         {onAddObject && (
-          <button className={styles.emptyAction} onClick={onAddObject}>
+          <button type="button" className={styles.emptyAction} onClick={onAddObject}>
             Add Object
           </button>
         )}
@@ -129,7 +129,7 @@ const renderObjectsEmptyState = (
       <div className={styles.emptyState}>
         <p>No matching objects.</p>
         {onAddObject && (
-          <button className={styles.emptyAction} onClick={onAddObject}>
+          <button type="button" className={styles.emptyAction} onClick={onAddObject}>
             Add &ldquo;{searchTerm}&rdquo;
           </button>
         )}
@@ -142,31 +142,31 @@ const renderObjectsEmptyState = (
 interface CanvasObjectListProps {
   canvas: Canvas;
   visibleNodes?: Record<string, CanvasNode>;
-  inspector: CanvasInspectorState;
   onHoverNode: (nodeId: string | null) => void;
-  onSelectNode: (nodeId: string) => void;
-  onNewQuery?: (node: CanvasNode) => void;
+  onFindNode: (nodeId: string) => void;
+  onAction?: (action: CanvasNodeAction, node: CanvasNode) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
+  nodeMenuId: string | null;
+  onNodeMenuIdChange: (nodeId: string | null) => void;
 }
 
 const CanvasObjectList: FC<CanvasObjectListProps> = ({
   canvas,
   visibleNodes,
-  inspector,
   onHoverNode,
-  onSelectNode,
-  onNewQuery,
+  onFindNode,
+  onAction,
   onAddObject,
   onAddAnnotation,
+  nodeMenuId,
+  onNodeMenuIdChange,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('objects');
   const { searchTerm, handleSearch } = useSimpleSearch();
   const [sortMode, setSortMode] = useState<ObjectSortMode>('relationships');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const [nodeMenuId, setNodeMenuId] = useState<string | null>(null);
-  const nodeMenuRef = useRef<string | null>(null);
 
   const allNodes = useMemo(
     () => Object.values(visibleNodes ?? canvas.nodes),
@@ -185,141 +185,127 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   );
 
   const handleNodeClick = useCallback((node: CanvasNode) => {
-    onSelectNode(node.id);
-    inspector.openView('node', node.names[0] || node.id, node.id, { nodeId: node.id });
-  }, [onSelectNode, inspector]);
+    onFindNode(node.id);
+  }, [onFindNode]);
 
   const handleNodeMenuToggle = useCallback((nodeId: string, e: MouseEvent) => {
     e.stopPropagation();
-    setNodeMenuId(prev => prev === nodeId ? null : nodeId);
-    nodeMenuRef.current = nodeId;
-  }, []);
+    onNodeMenuIdChange(nodeMenuId === nodeId ? null : nodeId);
+  }, [nodeMenuId, onNodeMenuIdChange]);
 
-  const handleNodeMenuAction = useCallback((action: string, node: CanvasNode) => {
-    setNodeMenuId(null);
-    switch (action) {
-      case 'newQuery':
-        onNewQuery?.(node);
-        break;
-      case 'information':
-        inspector.openView('node', node.names[0] || node.id, node.id, { nodeId: node.id });
-        break;
-      case 'find':
-        onSelectNode(node.id);
-        onHoverNode(node.id);
-        break;
-    }
-  }, [inspector, onSelectNode, onHoverNode, onNewQuery]);
+  const handleNodeMenuAction = useCallback((action: CanvasNodeAction, node: CanvasNode) => {
+    onNodeMenuIdChange(null);
+    onAction?.(action, node);
+  }, [onAction, onNodeMenuIdChange]);
 
-  const handleCloseMenu = useCallback(() => setNodeMenuId(null), []);
+  const handleCloseNodeMenu = useCallback(() => onNodeMenuIdChange(null), [onNodeMenuIdChange]);
+
+  const toggleCollapse = useCallback(() => setCollapsed(prev => !prev), []);
 
   const currentSortLabel = SORT_OPTIONS.find(o => o.key === sortMode)?.label ?? '';
 
-  if (collapsed) {
-    return (
-      <div className={styles.collapsed}>
-        <button
-          className={styles.collapseToggle}
-          onClick={() => setCollapsed(false)}
-          aria-label="Expand object list"
-        >
-          <span className={styles.collapseLabel}>On this Canvas</span>
-          <ChevRight />
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className={styles.objectList}>
-      <div className={styles.header}>
-        <button
-          className={styles.collapseButton}
-          onClick={() => setCollapsed(true)}
-          aria-label="Collapse object list"
-        >
-          <span className={joinClasses(styles.chevron, styles.expanded)}>
-            <ChevRight />
-          </span>
-          <span className={styles.headerTitle}>On this Canvas</span>
-        </button>
-      </div>
-
-      <div className={styles.tabs}>
-        <button
-          className={joinClasses(styles.tab, activeTab === 'objects' && styles.activeTab)}
-          onClick={() => setActiveTab('objects')}
-        >
-          Objects ({allNodes.length})
-        </button>
-        <button
-          className={joinClasses(styles.tab, activeTab === 'annotations' && styles.activeTab)}
-          onClick={() => setActiveTab('annotations')}
-        >
-          Annotations ({annotationCount})
-        </button>
-      </div>
-
-      {activeTab === 'objects' && (
-        <>
-          <div className={styles.controls}>
-            <div className={styles.searchWrapper}>
-              <SearchIcon className={styles.searchIcon} />
-              <input
-                className={styles.searchInput}
-                type="text"
-                placeholder="Search objects..."
-                onChange={e => handleSearch(e.target.value)}
-              />
-            </div>
-            <OutsideClickHandler onOutsideClick={() => setSortDropdownOpen(false)}>
-              <div className={styles.sortWrapper}>
-                <button
-                  className={styles.sortButton}
-                  onClick={() => setSortDropdownOpen(prev => !prev)}
-                >
-                  Sort: {currentSortLabel}
-                </button>
-                {sortDropdownOpen && (
-                  <div className={styles.sortDropdown}>
-                    {SORT_OPTIONS.map(({ key, label }) => (
-                      <button
-                        key={key}
-                        className={joinClasses(styles.sortOption, sortMode === key && styles.activeSortOption)}
-                        onClick={() => { setSortMode(key); setSortDropdownOpen(false); }}
-                      >
-                        {label}
-                      </button>
-                    ))}
+    <div className={joinClasses(styles.objectList, collapsed && styles.collapsed)}>
+      <button
+        type="button"
+        className={styles.collapseToggle}
+        onClick={toggleCollapse}
+        aria-label={collapsed ? 'Expand object list' : 'Collapse object list'}
+      >
+        <span className={styles.collapseLabel}>On this Canvas</span>
+        <ChevDown />
+      </button>
+      {
+        !collapsed && (
+          <div className={styles.contentWrapper}>
+            {activeTab === 'objects' && (
+              <div className={styles.controls}>
+                <div className={styles.searchWrapper}>
+                  <SearchIcon className={styles.searchIcon} />
+                  <input
+                    className={styles.searchInput}
+                    type="text"
+                    placeholder="Search objects..."
+                    onChange={e => handleSearch(e.target.value)}
+                  />
+                </div>
+                <OutsideClickHandler onOutsideClick={() => setSortDropdownOpen(false)}>
+                  <div className={styles.sortWrapper}>
+                    <button
+                      type="button"
+                      className={styles.sortButton}
+                      onClick={() => setSortDropdownOpen(prev => !prev)}
+                    >
+                      Sort: {currentSortLabel}
+                    </button>
+                    {sortDropdownOpen && (
+                      <div className={styles.sortDropdown}>
+                        {SORT_OPTIONS.map(({ key, label }) => (
+                          <button
+                            key={key}
+                            type="button"
+                            className={joinClasses(styles.sortOption, sortMode === key && styles.activeSortOption)}
+                            onClick={() => { setSortMode(key); setSortDropdownOpen(false); }}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                </OutsideClickHandler>
               </div>
-            </OutsideClickHandler>
-          </div>
+            )}
 
-          {renderObjectsEmptyState(allNodes, sortedNodes, searchTerm, onAddObject) || (
-            <div className={styles.nodeList}>
-              {sortedNodes.map(node => (
-                <NodeItem
-                  key={node.id}
-                  node={node}
-                  canvas={canvas}
-                  nodeMenuId={nodeMenuId}
-                  onNodeClick={handleNodeClick}
-                  onHoverNode={onHoverNode}
-                  onMenuToggle={handleNodeMenuToggle}
-                  onMenuAction={handleNodeMenuAction}
-                  onCloseMenu={handleCloseMenu}
-                />
-              ))}
+            <div className={styles.listBody}>
+              {activeTab === 'objects' && (
+                renderObjectsEmptyState(allNodes, sortedNodes, searchTerm, onAddObject) || (
+                  <OutsideClickHandler
+                    className={styles.listBodyClickTarget}
+                    onOutsideClick={() => { if (nodeMenuId) handleCloseNodeMenu(); }}
+                  >
+                    <div className={styles.nodeList}>
+                      {sortedNodes.map(node => (
+                        <NodeItem
+                          key={node.id}
+                          node={node}
+                          canvas={canvas}
+                          nodeMenuId={nodeMenuId}
+                          onNodeClick={handleNodeClick}
+                          onHoverNode={onHoverNode}
+                          onMenuToggle={handleNodeMenuToggle}
+                          onMenuAction={handleNodeMenuAction}
+                        />
+                      ))}
+                    </div>
+                  </OutsideClickHandler>
+                )
+              )}
+
+              {activeTab === 'annotations' && (
+                <AnnotationsTab annotations={canvas.annotations} onAddAnnotation={onAddAnnotation} />
+              )}
             </div>
-          )}
-        </>
-      )}
 
-      {activeTab === 'annotations' && (
-        <AnnotationsTab annotations={canvas.annotations} onAddAnnotation={onAddAnnotation} />
-      )}
+            <div className={styles.tabs}>
+              <button
+                type="button"
+                className={joinClasses(styles.tab, activeTab === 'objects' && styles.activeTab)}
+                onClick={() => setActiveTab('objects')}
+              >
+                Objects ({allNodes.length})
+              </button>
+              <button
+                type="button"
+                className={joinClasses(styles.tab, activeTab === 'annotations' && styles.activeTab)}
+                onClick={() => setActiveTab('annotations')}
+              >
+                Annotations ({annotationCount})
+              </button>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };

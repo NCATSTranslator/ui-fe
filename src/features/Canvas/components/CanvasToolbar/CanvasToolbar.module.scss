@@ -7,13 +7,18 @@
   height: 40px;
   min-height: 40px;
   padding: 0 $s;
-  border-bottom: 1px solid $midGray;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: var(--canvas-object-list-width, #{$panelWidth});
+  z-index: 10;
 }
 
 .left {
   display: flex;
   align-items: center;
   min-width: 0;
+  gap: $s;
 }
 
 .interactions {
@@ -157,7 +162,6 @@
 
 .addMenuWrapper {
   position: relative;
-  margin-left: $xs;
 }
 
 .addButton {
@@ -230,7 +234,6 @@
 .saveIndicator {
   font-size: $captionSize;
   color: $darkGray;
-  margin-left: $xs;
 
   &.saving {
     font-style: italic;

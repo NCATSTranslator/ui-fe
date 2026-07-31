@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import styles from './CanvasList.module.scss';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -59,10 +59,13 @@ const CanvasList = () => {
     return `${canvasCount} Canvas${canvasCount === 1 ? '' : 'es'}`;
   }, [sortedFilteredCanvases.length]);
 
-  // on component mount, if the canvases panel is open, close it
+  // Close the canvases sidebar panel once when this list mounts.
+  const didClosePanelRef = useRef(false);
   useEffect(() => {
+    if (didClosePanelRef.current) return;
+    didClosePanelRef.current = true;
     if (activePanelId === 'canvases') closePanel();
-  }, []);
+  }, [activePanelId, closePanel]);
 
   const shouldShowErrorState = !user?.id && canvases.length === 0;
 

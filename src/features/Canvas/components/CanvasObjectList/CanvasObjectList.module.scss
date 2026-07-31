@@ -3,61 +3,67 @@
 .objectList {
   display: flex;
   flex-direction: column;
-  width: 260px;
-  min-width: 260px;
-  border-left: 1px solid $midGray;
+  width: var(--canvas-object-list-width, #{$panelWidth});
+  min-width: var(--canvas-object-list-width, #{$panelWidth});
   overflow: hidden;
+  position: absolute;
+  top: $s;
+  right: $s;
+  bottom: $s;
+  z-index: 20;
+  gap: 2px;
+  transition: $defaultAnim;
+  background: $lightGray;
 }
 
 .collapsed {
   display: flex;
   flex-direction: column;
-  width: 36px;
-  min-width: 36px;
-  border-left: 1px solid $midGray;
-  background: $lightGray;
+  bottom: calc(100% - 50px);
+  .collapseToggle {
+    svg {
+      width: 18px;
+      height: 18px;
+      transform: rotate(180deg);
+      path {
+        stroke: $black;
+      }
+    }
+  }
 }
 
 .collapseToggle {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-between;
   gap: $xs;
-  padding: $xs $xxs;
+  padding: $xs;
   border: none;
   background: transparent;
   cursor: pointer;
   width: 100%;
-  height: 100%;
   transition: $defaultAnim;
+  border-radius: $defaultBorderRadius;
+  background: $lightGray;
 
   &:hover {
     background: $grayHover;
   }
 
   svg {
-    width: 12px;
-    height: 12px;
-    color: $darkGray;
-    transform: rotate(180deg);
+    width: 18px;
+    height: 18px;
+    path {
+      stroke: $black;
+    }
   }
 }
 
 .collapseLabel {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
   font-size: $captionSize;
-  font-weight: 600;
-  color: $darkGray;
+  font-weight: 800;
+  color: $black;
   white-space: nowrap;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  min-height: 36px;
-  border-bottom: 1px solid $midGray;
-  background: $lightGray;
+  padding-left: $xxs;
 }
 
 .collapseButton {
@@ -100,14 +106,42 @@
   white-space: nowrap;
 }
 
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background-color: $white;
+  border-radius: $defaultBorderRadius;
+  border: 1px solid $palePurple;
+  overflow: hidden;
+}
+
+.listBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.listBodyClickTarget {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .tabs {
   display: flex;
-  border-bottom: 1px solid $midGray;
+  flex-shrink: 0;
+  border-top: 1px solid $midGray;
+  background-color: $white;
 }
 
 .tab {
-  flex: 1;
-  padding: $xxs $xs;
+  padding: 12px $xs;
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -132,6 +166,7 @@
 .controls {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: $xxs;
   padding: $xs;
   border-bottom: 1px solid $midGray;
@@ -236,9 +271,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
   gap: $xs;
   padding: $m $s;
   text-align: center;
+  overflow-y: auto;
 
   p {
     font-size: $captionSize;
@@ -247,24 +286,9 @@
   }
 }
 
-.emptyAction {
-  padding: $xxs $s;
-  font-size: $captionSize;
-  font-weight: 600;
-  color: $purpleTwo;
-  background: transparent;
-  border: 1px solid $purpleTwo;
-  border-radius: $defaultBorderRadius;
-  cursor: pointer;
-  transition: $defaultAnim;
-
-  &:hover {
-    background: $hoverGray;
-  }
-}
-
 .nodeList {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
 }
