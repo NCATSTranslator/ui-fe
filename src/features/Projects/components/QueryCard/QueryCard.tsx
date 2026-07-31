@@ -15,6 +15,7 @@ import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
+import useAddToProject from "@/features/Projects/hooks/useAddToProject";
 import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
 import { projectUpdatedToast } from "@/features/Core/utils/toastMessages";
 
@@ -31,9 +32,10 @@ const QueryCard: FC<QueryCardProps> = ({
 }) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
-  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
+  const { addToProject } = useAddToProject();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { data: projects = [] } = useUserProjects();
+  const { activePanelId } = useSidebar();
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
@@ -42,16 +44,11 @@ const QueryCard: FC<QueryCardProps> = ({
 
   const queryURL = useQueryLink(query);
   const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
-  const queryLastSeenTime = getTimeRelativeDate(new Date(query.data.time_updated));
+  const queryLastSeenTime = query.data.time_viewed ? getTimeRelativeDate(new Date(query.data.time_viewed)) : "--";
   
   const icon = <StatusIndicator status={query.status} />;
 
-  const handleAddToProject = () => {
-    setAddToProjectMode(query);
-    if (activePanelId !== 'projects') {
-      togglePanel('projects');
-    }
-  };
+  const handleAddToProject = () => addToProject(query);
   const handleShareQuery = () => {
     openShareQueryModal(query);
   };
