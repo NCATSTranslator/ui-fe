@@ -1,16 +1,16 @@
-import { FC } from 'react';
+import { FC, KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { EvidenceViewContentProps } from '@/features/Evidence/hooks/useEvidenceView';
 import styles from './EvidenceView.module.scss';
 
 const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   edgeLabel,
-  pathKey,
+  evidenceSubtitle,
   edgeSeen,
   handleToggleSeen,
   path,
@@ -29,9 +29,18 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   sources,
   prefs,
   initialTab,
-}) => (
+  isCanvasOnlyMode,
+}) => {
+  const handleToggleSeenKeyDown = (event: KeyboardEvent<HTMLParagraphElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleToggleSeen();
+    }
+  };
+
+  return (
   <div className={styles.evidenceViewWrapper}>
-    <ResultListTopBar />
+    <ViewTopBar />
     <FilteredOutWrapper
       isFilteredOut={isFilteredOut}
       message="This path has been filtered out."
@@ -43,11 +52,23 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
           {edgeLabel}
         </h5>
         <div className={styles.labelContainer}>
-          {edgeLabel && <p className={styles.subtitle}> Path {pathKey} Evidence</p>}
-          <span className={styles.sep}>·</span>
-          <p className={styles.toggleSeen} onClick={handleToggleSeen} role="button" tabIndex={0}>
-            Mark as {edgeSeen ? "Unseen" : "Seen"}
-          </p>
+          {evidenceSubtitle && (
+            <>
+              <p className={styles.subtitle}>{evidenceSubtitle}</p>
+              {!isCanvasOnlyMode && <span className={styles.sep}>·</span>}
+            </>
+          )}
+          {!isCanvasOnlyMode && (
+            <p
+              className={styles.toggleSeen}
+              onClick={handleToggleSeen}
+              onKeyDown={handleToggleSeenKeyDown}
+              role="button"
+              tabIndex={0}
+            >
+              Mark as {edgeSeen ? "Unseen" : "Seen"}
+            </p>
+          )}
         </div>
         <Tooltip id="knowledge-sources-tooltip">
           <span>The resources that provided the information supporting the selected relationship.</span>
@@ -86,6 +107,7 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
       </div>
     </FilteredOutWrapper>
   </div>
-);
+  );
+};
 
 export default EvidenceViewContent;
