@@ -2,10 +2,13 @@
 
 .breadcrumbs {
   padding: $l 0;
-  font-size: $bodyTwoSize;
   display: flex;
   align-items: center;
   gap: $m;
+  span {
+    font-size: $captionSize;
+    color: $darkGray;
+  }
 }
 
 .arrowLeftIcon {

@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 import ResultBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/ResultBreadcrumbLabel';
 import NodeBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/NodeBreadcrumbLabel';
+import CanvasEvidenceBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/CanvasEvidenceBreadcrumbLabel';
 import PathBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/PathBreadcrumbLabel';
 import PathRedirect from '@/features/Navigation/components/PathRedirect/PathRedirect';
 import { resultsLoader } from '@/features/Navigation/utils/navigationUtils';
@@ -219,7 +220,7 @@ const routes = [
   {
     path: "evidence/:edgeId",
     element: <Suspense fallback={<LoadingWrapper />}><EvidenceView /></Suspense>,
-    handle: { breadcrumb: 'Canvas Evidence' },
+    handle: { breadcrumb: CanvasEvidenceBreadcrumbLabel },
   },
   {
     // old search history page, redirect to query history
@@ -249,6 +250,11 @@ const routes = [
   {
     path: "new-query",
     element: <Page title="New Query"><Suspense fallback={<LoadingWrapper />}><NewQuery /></Suspense></Page>
+  },
+  {
+    path: "node/:nodeId",
+    element: <Suspense fallback={<LoadingWrapper />}><NodeInformationView /></Suspense>,
+    handle: { breadcrumb: NodeBreadcrumbLabel },
   },
   {
     path: "*",

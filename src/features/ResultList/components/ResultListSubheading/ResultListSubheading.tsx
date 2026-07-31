@@ -8,7 +8,7 @@ import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategor
 import { useUserQueries } from '@/features/Projects/hooks/customHooks';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
 import { generateQueryTitleFromQueryObject } from '@/features/Projects/utils/queryTitleUtils';
-import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
 const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
   const {
@@ -61,7 +61,7 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
 
   return (
     <div className={styles.resultListSubheading}>
-      <ResultListTopBar/>
+      <ViewTopBar/>
       {
         !isLoading &&
         <>
