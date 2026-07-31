@@ -114,7 +114,18 @@ export const canvasSlice = createSlice({
     replaceCanvas: (state, action: PayloadAction<Canvas>) => {
       const index = state.canvases.findIndex(c => c.id === action.payload.id);
       if (index !== -1) {
-        state.canvases[index] = action.payload;
+        const existing = state.canvases[index];
+        state.canvases[index] = {
+          ...action.payload,
+          annotations: existing.annotations,
+        };
+      }
+    },
+    setCanvasAnnotations: (state, action: PayloadAction<{ canvasId: number; annotations: Canvas['annotations'] }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        canvas.annotations = action.payload.annotations;
+        canvas.timeUpdated = new Date().toISOString();
       }
     },
     restoreCanvas: (state, action: PayloadAction<Canvas>) => {
@@ -135,6 +146,7 @@ export const canvasSlice = createSlice({
             nodes: existing.nodes,
             edges: existing.edges,
             tags: existing.tags,
+            annotations: existing.annotations,
             graphLoaded: true,
           };
         }
@@ -164,6 +176,7 @@ export const {
   replaceCanvas,
   restoreCanvas,
   setCanvases,
+  setCanvasAnnotations,
 } = canvasSlice.actions;
 
 export { getNextCanvasLabel };
