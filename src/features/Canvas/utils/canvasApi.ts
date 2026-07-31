@@ -8,12 +8,16 @@ import type {
   GraphMove,
   UpdateCanvasElementRequest,
   CanvasLayout,
+  CanvasNodeDetail,
+  CanvasEdgeDetail,
 } from '@/features/Canvas/types/canvas';
 import {
   isBackendUserCanvas,
   isBackendUserCanvasArray,
   isBackendCanvasGraph,
   isBackendCanvasNodeArray,
+  isCanvasNodeDetail,
+  isCanvasEdgeDetail,
 } from '@/features/Canvas/types/checkers';
 
 const BASE = '/api/v1/users/me/canvas';
@@ -161,11 +165,12 @@ export const getNodeDetail = async (
   dataId: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
-): Promise<unknown> =>
-  fetchWithErrorHandling<unknown>(
+): Promise<CanvasNodeDetail> =>
+  fetchWithErrorHandling<CanvasNodeDetail>(
     () => get(`${BASE}/${saveId}/node/${dataId}`),
     httpErrorHandler,
     fetchErrorHandler,
+    isCanvasNodeDetail,
   );
 
 export const updateNodeDisplay = async (
@@ -186,11 +191,12 @@ export const getEdgeDetail = async (
   dataId: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
-): Promise<unknown> =>
-  fetchWithErrorHandling<unknown>(
+): Promise<CanvasEdgeDetail> =>
+  fetchWithErrorHandling<CanvasEdgeDetail>(
     () => get(`${BASE}/${saveId}/edge/${dataId}`),
     httpErrorHandler,
     fetchErrorHandler,
+    isCanvasEdgeDetail,
   );
 
 export const updateEdgeDisplay = async (

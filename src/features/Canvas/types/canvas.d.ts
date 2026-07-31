@@ -1,4 +1,11 @@
-import { ResultSetTags, EntityTags, ResultEdge } from '@/features/ResultList/types/results';
+import {
+  ResultSetTags,
+  EntityTags,
+  ResultEdge,
+  Annotation,
+  EdgeMetadata,
+} from '@/features/ResultList/types/results';
+import { EdgeProvenance, PublicationSupport } from '@/features/Evidence/types/evidence';
 
 // ---------------------------------------------------------------------------
 // Backend response types (match API contract exactly)
@@ -85,7 +92,6 @@ export type GraphSubmissionEdge = {
   aras: string[];
   support: unknown[];
   is_root: boolean;
-  inferred: boolean;
   knowledge_level: string;
   description: string | null;
   type: string;
@@ -182,48 +188,39 @@ export type CanvasAnnotation = {
 export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error';
 
 // ---------------------------------------------------------------------------
-// Inspector types (unchanged)
+// Canvas detail API response types (SummaryNode/SummaryEdge.to_raw_obj())
 // ---------------------------------------------------------------------------
 
-export type InspectorLevel = 'query' | 'result' | 'path' | 'evidence' | 'node';
-
-export type InspectorBreadcrumb = {
-  label: string;
-  level: InspectorLevel;
+export type CanvasNodeDetail = {
   id: string;
-  data: InspectorViewData;
+  aras: string[];
+  descriptions: string[];
+  names: string[];
+  types: string[];
+  synonyms: string[];
+  curies: string[];
+  provenance: string[];
+  annotations?: Annotation;
+  source_time: string | null;
+  tags: EntityTags;
 };
 
-export type InspectorQueryData = {
-  queryPk: string;
+export type CanvasEdgeDetail = {
+  id: string;
+  aras: string[];
+  support: string[] | import('@/features/ResultList/types/results').Path[];
+  is_root: boolean;
+  knowledge_level: string;
+  description: string | null;
+  type: string;
+  subject: string;
+  object: string;
+  predicate: string;
+  predicate_url: string | null;
+  provenance: EdgeProvenance[];
+  publications: Record<string, { id: string; support: PublicationSupport; infores: string }[]>;
+  metadata: EdgeMetadata | null;
+  trials: string[];
+  source_time: string | null;
+  tags: EntityTags;
 };
-
-export type InspectorResultData = {
-  queryPk: string;
-  resultId: string;
-};
-
-export type InspectorPathData = {
-  queryPk: string;
-  resultId: string;
-  pathId: string;
-};
-
-export type InspectorEvidenceData = {
-  queryPk: string;
-  edgeId: string;
-  pathId?: string;
-  resultId?: string;
-};
-
-export type InspectorNodeData = {
-  nodeId: string;
-  queryPk?: string;
-};
-
-export type InspectorViewData =
-  | InspectorQueryData
-  | InspectorResultData
-  | InspectorPathData
-  | InspectorEvidenceData
-  | InspectorNodeData;

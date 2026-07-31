@@ -1,4 +1,12 @@
-import type { BackendUserCanvas, BackendCanvasNode, BackendCanvasGraph } from '@/features/Canvas/types/canvas';
+import * as tc from '@/features/Core/types/checkers';
+import { isEdgeProvenance } from '@/features/Evidence/types/checkers';
+import type {
+  BackendUserCanvas,
+  BackendCanvasNode,
+  BackendCanvasGraph,
+  CanvasNodeDetail,
+  CanvasEdgeDetail,
+} from '@/features/Canvas/types/canvas';
 
 export const isBackendUserCanvas = (obj: unknown): obj is BackendUserCanvas => {
   if (!obj || typeof obj !== 'object') return false;
@@ -22,4 +30,43 @@ export const isBackendCanvasGraph = (obj: unknown): obj is BackendCanvasGraph =>
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
   return Array.isArray(o.nodes) && Array.isArray(o.edges);
+};
+
+export const isCanvasNodeDetail = (obj: unknown): obj is CanvasNodeDetail => {
+  if (!tc.isObject(obj)) return false;
+  return tc.checkProperties('isCanvasNodeDetail', obj, [
+    ['id', tc.isString(obj.id), 'string', obj.id],
+    ['aras', tc.isStringArray(obj.aras), 'string[]', obj.aras],
+    ['descriptions', tc.isStringArray(obj.descriptions), 'string[]', obj.descriptions],
+    ['names', tc.isStringArray(obj.names), 'string[]', obj.names],
+    ['types', tc.isStringArray(obj.types), 'string[]', obj.types],
+    ['synonyms', tc.isStringArray(obj.synonyms), 'string[]', obj.synonyms],
+    ['curies', tc.isStringArray(obj.curies), 'string[]', obj.curies],
+    ['provenance', tc.isStringArray(obj.provenance), 'string[]', obj.provenance],
+    ['source_time', tc.nullable(obj.source_time, tc.isString), 'string | null', obj.source_time],
+    ['tags', tc.isObject(obj.tags), 'EntityTags', obj.tags],
+  ], false);
+};
+
+export const isCanvasEdgeDetail = (obj: unknown): obj is CanvasEdgeDetail => {
+  if (!tc.isObject(obj)) return false;
+  return tc.checkProperties('isCanvasEdgeDetail', obj, [
+    ['id', tc.isString(obj.id), 'string', obj.id],
+    ['aras', tc.isStringArray(obj.aras), 'string[]', obj.aras],
+    ['support', Array.isArray(obj.support), 'array', obj.support],
+    ['is_root', tc.isBoolean(obj.is_root), 'boolean', obj.is_root],
+    ['knowledge_level', tc.isString(obj.knowledge_level), 'string', obj.knowledge_level],
+    ['description', tc.nullable(obj.description, tc.isString), 'string | null', obj.description],
+    ['type', tc.isString(obj.type), 'string', obj.type],
+    ['subject', tc.isString(obj.subject), 'string', obj.subject],
+    ['object', tc.isString(obj.object), 'string', obj.object],
+    ['predicate', tc.isString(obj.predicate), 'string', obj.predicate],
+    ['predicate_url', tc.nullable(obj.predicate_url, tc.isString), 'string | null', obj.predicate_url],
+    ['provenance', tc.makeIsHomogeneousArray((p: unknown) => isEdgeProvenance(p))(obj.provenance), 'EdgeProvenance[]', obj.provenance],
+    ['publications', tc.isObject(obj.publications), 'object', obj.publications],
+    ['metadata', tc.nullable(obj.metadata, tc.isObject), 'EdgeMetadata | null', obj.metadata],
+    ['trials', tc.isStringArray(obj.trials), 'string[]', obj.trials],
+    ['source_time', tc.nullable(obj.source_time, tc.isString), 'string | null', obj.source_time],
+    ['tags', tc.isObject(obj.tags), 'EntityTags', obj.tags],
+  ], false);
 };
