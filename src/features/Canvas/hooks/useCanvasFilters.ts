@@ -1,14 +1,11 @@
 import { useMemo } from 'react';
 import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
 import useCanvasSourceFilters from '@/features/Canvas/hooks/useCanvasSourceFilters';
-import useCanvasInspectorFilters from '@/features/Canvas/hooks/useCanvasInspectorFilters';
 import type { CanvasTagFiltersState } from '@/features/Canvas/hooks/useCanvasSourceFilters';
-import type { CanvasInspectorFiltersState } from '@/features/Canvas/hooks/useCanvasInspectorFilters';
 
 interface CanvasFiltersResult {
   visibleNodes: Record<string, CanvasNode> | undefined;
   visibleEdges: Record<string, CanvasEdge> | undefined;
-  inspectorFilters: CanvasInspectorFiltersState;
   tagFilters: CanvasTagFiltersState;
 }
 
@@ -31,19 +28,12 @@ const useCanvasFilters = (
     return new Set<string>();
   }, [visibleNodes, canvas]);
 
-  const allNodeIds = useMemo(
-    () => new Set(canvas ? Object.keys(canvas.nodes) : []),
-    [canvas],
-  );
-
   const visibleEdges = useMemo(() => {
     if (!canvas || !visibleNodes) return undefined;
     return tagFilters.getVisibleEdges(visibleNodeIds);
   }, [canvas, visibleNodes, tagFilters, visibleNodeIds]);
 
-  const inspectorFilters = useCanvasInspectorFilters(visibleNodeIds, allNodeIds, tagFilters.showAll);
-
-  return { visibleNodes, visibleEdges, inspectorFilters, tagFilters };
+  return { visibleNodes, visibleEdges, tagFilters };
 };
 
 export default useCanvasFilters;

@@ -11,7 +11,7 @@ import type {
   GraphSubmissionEdge,
 } from '@/features/Canvas/types/canvas';
 import type { ResultSet, ResultNode, ResultEdge, ResultSetTags } from '@/features/ResultList/types/results.d';
-import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
+import { getNodeById, getRawEdgeById } from '@/features/ResultList/slices/resultsSlice';
 
 // ---------------------------------------------------------------------------
 // Backend → Internal
@@ -156,7 +156,6 @@ const canvasEdgeToSubmissionEdge = (edge: CanvasEdge): GraphSubmissionEdge => ({
   aras: [...(edge.aras ?? [])],
   support: Array.isArray(edge.support) ? [...edge.support] : [],
   is_root: edge.is_root ?? false,
-  inferred: edge.inferred ?? false,
   knowledge_level: edge.knowledge_level ?? '',
   description: edge.description ?? null,
   type: edge.type ?? '',
@@ -215,7 +214,6 @@ const resultEdgeToSubmissionEdge = (edge: ResultEdge): GraphSubmissionEdge => ({
   aras: [...edge.aras],
   support: Array.isArray(edge.support) ? [...edge.support] : [],
   is_root: edge.is_root,
-  inferred: edge.inferred,
   knowledge_level: edge.knowledge_level,
   description: edge.description ?? null,
   type: edge.type,
@@ -242,7 +240,7 @@ export const resultDataToGraphSubmission = (
   }
   const subEdges: Record<string, GraphSubmissionEdge> = {};
   for (const id of edgeIds) {
-    const edge = getEdgeById(resultSet, id);
+    const edge = getRawEdgeById(resultSet, id);
     if (edge) subEdges[id] = resultEdgeToSubmissionEdge(edge);
   }
   return buildGraphSubmission(subNodes, subEdges, undefined, source);

@@ -14,7 +14,6 @@ import type { CanvasNode, CanvasEdge, GraphSubmission } from '@/features/Canvas/
 import { mergeEntityIntoCanvas } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { canvasNodesToGraphSubmission } from '@/features/Canvas/utils/canvasMappers';
 import useCanvasHistory from './useCanvasHistory';
-import useCanvasResultActions from './useCanvasResultActions';
 import { canvasEntityAddedToast, canvasEntityAlreadyAddedToast } from '@/features/Core/utils/toastMessages';
 
 type UseCanvasOptions = {
@@ -96,8 +95,6 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
     canvasEntityAddedToast(name, activeCanvas.label);
   }, [activeCanvas, mergeEntities]);
 
-  const resultActions = useCanvasResultActions(activeCanvas, mergeEntities);
-
   return {
     activeCanvas,
     addNode,
@@ -111,7 +108,7 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
     canUndo,
     canRedo,
     addObject,
-    ...resultActions,
+    pushUndo,
   };
 };
 

@@ -102,8 +102,8 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
   };
 
   const renderEdgeSlot = (slot: Slot, id: string) => {
-    const entries = slot.target?.kind === 'edge' && resultSet
-      ? [edgeToTooltipEntry(resultSet, slot.target.edge)]
+    const entries = slot.target?.kind === 'edge'
+      ? [edgeToTooltipEntry(resultSet ?? null, slot.target.edge)]
       : [];
     const position = slot.target?.anchor ?? cursor ?? undefined;
     return (

@@ -1,11 +1,13 @@
-import { FC, ReactNode, useMemo, useState } from 'react';
+import { FC, ReactNode, useMemo, useState, MouseEvent, useCallback } from 'react';
 import styles from './CanvasGraph.module.scss';
-import { GraphView as TranslatorGraphView, LayoutType, GraphNodeType, GraphEdgeType, HoverGeometry } from 'translator-graph-view';
+import { GraphView as TranslatorGraphView, LayoutType, GraphNodeType, GraphEdgeType, HoverGeometry, type GraphFocusRequest, type GraphAnnotation } from 'translator-graph-view';
 import 'translator-graph-view/styles.css';
 import type { Canvas, CanvasNode, CanvasEdge, SaveStatus } from '@/features/Canvas/types/canvas';
-import { canvasToGraphData, filteredCanvasToGraphData } from '@/features/Canvas/utils/canvasGraphFunctions';
+import { filteredCanvasToGraphData } from '@/features/Canvas/utils/canvasGraphFunctions';
 import CanvasToolbar from '@/features/Canvas/components/CanvasToolbar/CanvasToolbar';
 import CanvasEmptyState from '@/features/Canvas/components/CanvasEmptyState/CanvasEmptyState';
+
+const REACT_FLOW_NODE_SELECTOR = '.react-flow__node';
 
 interface CanvasGraphProps {
   canvas: Canvas;
@@ -20,12 +22,16 @@ interface CanvasGraphProps {
   onEdgeClick?: (edge: GraphEdgeType) => void;
   onNodeHover?: (node: GraphNodeType | null, geometry: HoverGeometry | null) => void;
   onEdgeHover?: (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => void;
+  onNodeContextMenu?: (nodeId: string, position: { x: number; y: number }) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
+  annotations?: GraphAnnotation[];
+  onAnnotationsChange?: (annotations: GraphAnnotation[]) => void;
   isProcessing?: boolean;
   saveStatus?: SaveStatus;
   hoveredNodeId?: string | null;
   selectedIds?: string[];
+  focusRequest?: GraphFocusRequest | null;
   children?: ReactNode;
 }
 
@@ -42,12 +48,16 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onEdgeClick,
   onNodeHover,
   onEdgeHover,
+  onNodeContextMenu,
   onAddObject,
   onAddAnnotation,
+  annotations = [],
+  onAnnotationsChange,
   isProcessing,
   saveStatus,
   hoveredNodeId,
   selectedIds,
+  focusRequest,
   children,
 }) => {
   const [layout, setLayout] = useState<LayoutType>('hierarchicalLR');
@@ -55,10 +65,21 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   const graphData = useMemo(
     () => visibleNodes && visibleEdges
       ? filteredCanvasToGraphData(visibleNodes, visibleEdges)
-      : canvasToGraphData(canvas),
-    [canvas, visibleNodes, visibleEdges]
+      : filteredCanvasToGraphData(canvas.nodes, canvas.edges),
+    [canvas.nodes, canvas.edges, visibleNodes, visibleEdges],
   );
   const hasNodes = Object.keys(canvas.nodes).length > 0;
+  const hasGraphContent = hasNodes || annotations.length > 0;
+
+  const handleGraphContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
+    if (!onNodeContextMenu) return;
+    const nodeElement = (event.target as HTMLElement).closest(REACT_FLOW_NODE_SELECTOR);
+    if (!nodeElement) return;
+    event.preventDefault();
+    const nodeId = nodeElement.getAttribute('data-id');
+    if (!nodeId) return;
+    onNodeContextMenu(nodeId, { x: event.clientX, y: event.clientY });
+  }, [onNodeContextMenu]);
 
   return (
     <div className={styles.canvasGraph}>
@@ -76,14 +97,15 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
         isProcessing={isProcessing}
         saveStatus={saveStatus}
       />
-      <div className={styles.graphArea}>
-        {hasNodes ? (
+      <div className={styles.graphArea} onContextMenu={handleGraphContextMenu}>
+        {hasGraphContent ? (
           <>
             <TranslatorGraphView
               data={graphData}
               layout={layout}
               elkWorkerUrl="/elk-worker.min.js"
-              showEdgeLabels
+              showEdgeLabels={false}
+              showMiniMap={false}
               nodeHoverAnchor="topCenter"
               edgeHoverAnchor="midpoint"
               onNodeClick={onNodeClick}
@@ -92,6 +114,9 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
               onEdgeHover={onEdgeHover}
               hoveredNodeId={hoveredNodeId}
               selectedIds={selectedIds}
+              focusRequest={focusRequest}
+              annotations={annotations}
+              onAnnotationsChange={onAnnotationsChange}
             />
             {children}
           </>

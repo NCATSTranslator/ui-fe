@@ -1,8 +1,7 @@
 import type { GraphData, GraphNodeType, GraphEdgeType } from 'translator-graph-view';
 import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
-import type { ResultSet, Result, Path, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
-import { getNodeById, getEdgeById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
-import { isStringArray } from '@/features/Core/utils/resultHelpers';
+import type { ResultSet, Path, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
+import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
 export const canvasToGraphData = (canvas: Canvas): GraphData =>
@@ -85,19 +84,6 @@ export const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
   hidden: false,
 });
 
-const collectUnique = <T extends { id: string }>(
-  target: T[],
-  seen: Set<string>,
-  items: T[],
-): void => {
-  for (const item of items) {
-    if (!seen.has(item.id)) {
-      target.push(item);
-      seen.add(item.id);
-    }
-  }
-};
-
 export const extractNodesAndEdgesFromPath = (
   resultSet: ResultSet,
   path: Path,
@@ -117,49 +103,6 @@ export const extractNodesAndEdgesFromPath = (
   }
 
   return { nodes, edges };
-};
-
-export const extractNodesAndEdgesFromResult = (
-  resultSet: ResultSet,
-  result: Result,
-): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
-  const allNodes: CanvasNode[] = [];
-  const allEdges: CanvasEdge[] = [];
-  const seenNodes = new Set<string>();
-  const seenEdges = new Set<string>();
-
-  const subjectNode = getNodeById(resultSet, result.subject);
-  if (subjectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(subjectNode)]);
-  const objectNode = getNodeById(resultSet, result.object);
-  if (objectNode) collectUnique(allNodes, seenNodes, [resultNodeToCanvasNode(objectNode)]);
-
-  if (isStringArray(result.paths)) {
-    const paths = getPathsByIds(resultSet, result.paths as string[]);
-    for (const path of paths) {
-      const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, path);
-      collectUnique(allNodes, seenNodes, nodes);
-      collectUnique(allEdges, seenEdges, edges);
-    }
-  }
-
-  return { nodes: allNodes, edges: allEdges };
-};
-
-export const extractNodesAndEdgesFromAllResults = (
-  resultSet: ResultSet,
-): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
-  const allNodes: CanvasNode[] = [];
-  const allEdges: CanvasEdge[] = [];
-  const seenNodes = new Set<string>();
-  const seenEdges = new Set<string>();
-
-  for (const result of resultSet.data.results) {
-    const { nodes, edges } = extractNodesAndEdgesFromResult(resultSet, result);
-    collectUnique(allNodes, seenNodes, nodes);
-    collectUnique(allEdges, seenEdges, edges);
-  }
-
-  return { nodes: allNodes, edges: allEdges };
 };
 
 export const extractNodeFromResultSet = (

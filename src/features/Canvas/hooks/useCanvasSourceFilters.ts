@@ -67,7 +67,15 @@ const useCanvasSourceFilters = (canvas: Canvas | null): CanvasTagFiltersState =>
     return visible;
   }, [canvas, hiddenTagIds]);
 
-  return { tags, hiddenTagIds, toggleTag, showAll, hideAll, getVisibleNodes, getVisibleEdges };
+  return useMemo(() => ({
+    tags,
+    hiddenTagIds,
+    toggleTag,
+    showAll,
+    hideAll,
+    getVisibleNodes,
+    getVisibleEdges,
+  }), [tags, hiddenTagIds, toggleTag, showAll, hideAll, getVisibleNodes, getVisibleEdges]);
 };
 
 export default useCanvasSourceFilters;
