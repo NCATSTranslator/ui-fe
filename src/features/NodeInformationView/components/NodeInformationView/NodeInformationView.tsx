@@ -2,12 +2,9 @@ import { FC, ReactNode, useMemo } from "react";
 import styles from "./NodeInformationView.module.scss";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
-import { getDataFromQueryVar } from "@/features/Core/utils/urlHelpers";
 import { getFormattedNodeName, formatBiolinkEntity } from "@/features/Core/utils/stringFormatters";
 import { getNodeIcon } from "@/features/Core/utils/entityLinks";
-import { useDecodedParams } from "@/features/Core/hooks/useDecodedParams";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import Tab from "@/features/Core/components/Tabs/Tab";
 import { formatLabel, getNodeBiolinkLink, renderValue } from "@/features/NodeInformationView/utils/utilities";
@@ -16,7 +13,10 @@ import NodeViewSkeleton from "@/features/NodeInformationView/components/NodeView
 import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotFound";
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
-import ResultListTopBar from "@/features/ResultList/components/ResultListTopBar/ResultListTopBar";
+import ViewTopBar from "@/features/Navigation/components/ViewTopBar/ViewTopBar";
+import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
+import useCanvasEntityViewState from "@/features/Canvas/hooks/useCanvasEntityViewState";
+import type { ResultNode } from "@/features/ResultList/types/results.d";
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -32,16 +32,19 @@ const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
 
 const NodeInformationView: FC = () => {
   const { nodeId } = useParams();
-  const decodedParams = useDecodedParams();
-  const queryId = getDataFromQueryVar("q", decodedParams);
-  const resultSet = useSelector(getResultSetById(queryId));
+  const { isCanvasOnlyMode, queryId, resultSet, query, resultNode: canvasNode } = useCanvasNodeEntity();
   const queryStatus = useSelector(getQueryStatusById(queryId));
 
-  const node = nodeId ? resultSet?.data?.nodes?.[nodeId] ?? null : null;
+  const resultNode = nodeId ? resultSet?.data?.nodes?.[nodeId] ?? null : null;
+  const node: ResultNode | null = isCanvasOnlyMode ? canvasNode : resultNode;
+
   const nodeType = useMemo(() => node?.types[0] ?? null, [node?.types]);
-  const nodeName = useMemo(() => getFormattedNodeName(node?.names[0] ?? undefined, nodeType ?? null), [node?.names, nodeType]);
+  const nodeName = useMemo(
+    () => getFormattedNodeName(node?.names[0] ?? undefined, nodeType ?? null),
+    [node?.names, nodeType],
+  );
   const nodeBiolinkLink = node ? getNodeBiolinkLink(node) : "https://biolink.github.io/biolink-model/";
-  
+
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
 
   const annotationFields = useMemo<{label: string; content: ReactNode}[]>(() => {
@@ -75,27 +78,43 @@ const NodeInformationView: FC = () => {
     return null;
   }, [node]);
 
-  if (!queryId) {
-    return <ViewNotFound entity="query" id="missing" />;
-  }
+  const { showCanvasSkeleton, showCanvasNotFound } = useCanvasEntityViewState({
+    isCanvasOnlyMode,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    hasEntity: !!node,
+  });
 
-  // Loading: result set not loaded yet and query is still loading
-  if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
-    return <NodeViewSkeleton />;
-  }
-
-  // Not found: result set loaded but node not in it
-  if (!node) {
+  if (showCanvasSkeleton) return <NodeViewSkeleton />;
+  if (showCanvasNotFound) {
     return <ViewNotFound entity="node" id={nodeId || "unknown"} />;
+  }
+
+  if (isCanvasOnlyMode && !node) {
+    return <ViewNotFound entity="node" id={nodeId || "unknown"} />;
+  }
+
+  if (!isCanvasOnlyMode) {
+    if (!queryId) {
+      return <ViewNotFound entity="query" id="missing" />;
+    }
+
+    if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
+      return <NodeViewSkeleton />;
+    }
+
+    if (!node) {
+      return <ViewNotFound entity="node" id={nodeId || "unknown"} />;
+    }
   }
 
   return (
     <div className={styles.nodeInformationView}>
-      <ResultListTopBar/>
+      <ViewTopBar/>
       <div className={styles.top}>
         <div className={styles.nodeName}>
-          <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
-          <h5 className={styles.nodeTitle}>{nodeName}</h5>
+          {getNodeIcon(nodeType || "")}
+          <h1 className={styles.nodeTitle}>{nodeName}</h1>
         </div>
       </div>
       <Tabs
