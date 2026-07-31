@@ -72,7 +72,7 @@ export interface ExportedTrial {
   phase: number;
   size: number;
   start_date: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  status: string;
   type?: 'enrolled' | 'anticipated';
 }
 

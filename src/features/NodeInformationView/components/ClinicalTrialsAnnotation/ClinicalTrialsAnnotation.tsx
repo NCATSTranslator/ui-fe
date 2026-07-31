@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import useClinicalTrialMetadata from "@/features/NodeInformationView/hooks/useClinicalTrialMetadata";
-import SkeletonBar from "@/features/Core/components/SkeletonBar/SkeletonBar";
+import ClinicalTrialTitleLink from "@/features/NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink";
 import styles from "./ClinicalTrialsAnnotation.module.scss";
 
 const DISPLAY_LIMIT = 5;
@@ -24,19 +24,15 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
       <ul className={styles.trialList}>
         {trials.map((trial) => (
           <li key={trial.nctId} className={styles.trialItem}>
-            {isLoading && !trial.title ? (
-              <>
-                <SkeletonBar width="70%" height="1em" />
-                <SkeletonBar width="3em" height="0.85em" />
-              </>
-            ) : (
-              <>
-                <a href={trial.url} target="_blank" rel="noreferrer">
-                  {trial.title ?? trial.nctId}
-                </a>
-                {trial.year && <span className={styles.trialYear}>{trial.year}</span>}
-              </>
-            )}
+            <ClinicalTrialTitleLink
+              url={trial.url}
+              title={trial.title}
+              fallbackId={trial.nctId}
+              isLoading={isLoading}
+              skeletonWidth="70%"
+              year={trial.year}
+              yearClassName={styles.trialYear}
+            />
           </li>
         ))}
         <li>
