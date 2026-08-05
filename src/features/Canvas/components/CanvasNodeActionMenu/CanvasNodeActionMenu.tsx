@@ -1,26 +1,18 @@
-import { FC } from 'react';
-import type { CanvasNodeAction } from '@/features/Canvas/constants/canvasNodeActions';
-
-export interface CanvasNodeActionMenuItem {
-  action: CanvasNodeAction;
-  label: string;
-}
-
-interface CanvasNodeActionMenuProps {
-  actions: readonly CanvasNodeActionMenuItem[];
-  onAction: (action: CanvasNodeAction) => void;
+interface CanvasNodeActionMenuProps<T extends string = string> {
+  actions: readonly { action: T; label: string }[];
+  onAction: (action: T) => void;
   className?: string;
   itemClassName?: string;
   menuRole?: 'menu' | 'none';
 }
 
-const CanvasNodeActionMenu: FC<CanvasNodeActionMenuProps> = ({
+const CanvasNodeActionMenu = <T extends string = string>({
   actions,
   onAction,
   className,
   itemClassName,
   menuRole = 'none',
-}) => (
+}: CanvasNodeActionMenuProps<T>) => (
   <div className={className} role={menuRole === 'menu' ? 'menu' : undefined}>
     {actions.map(({ action, label }) => (
       <button
@@ -37,3 +29,4 @@ const CanvasNodeActionMenu: FC<CanvasNodeActionMenuProps> = ({
 );
 
 export default CanvasNodeActionMenu;
+export type CanvasNodeActionMenuItem<T extends string = string> = { action: T; label: string };
