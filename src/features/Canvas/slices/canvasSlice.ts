@@ -114,17 +114,35 @@ export const canvasSlice = createSlice({
     replaceCanvas: (state, action: PayloadAction<Canvas>) => {
       const index = state.canvases.findIndex(c => c.id === action.payload.id);
       if (index !== -1) {
-        const existing = state.canvases[index];
-        state.canvases[index] = {
-          ...action.payload,
-          annotations: existing.annotations,
-        };
+        state.canvases[index] = action.payload;
       }
     },
     setCanvasAnnotations: (state, action: PayloadAction<{ canvasId: number; annotations: Canvas['annotations'] }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
       if (canvas) {
         canvas.annotations = action.payload.annotations;
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    updateCanvasNodePositions: (
+      state,
+      action: PayloadAction<{ canvasId: number; positions: Array<{ nodeId: string; x: number; y: number }> }>,
+    ) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (!canvas) return;
+      for (const { nodeId, x, y } of action.payload.positions) {
+        const node = canvas.nodes[nodeId];
+        if (node) {
+          node.x = x;
+          node.y = y;
+        }
+      }
+      canvas.timeUpdated = new Date().toISOString();
+    },
+    updateCanvasLayout: (state, action: PayloadAction<{ canvasId: number; layout: Canvas['layout'] }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        canvas.layout = action.payload.layout;
         canvas.timeUpdated = new Date().toISOString();
       }
     },
@@ -177,6 +195,8 @@ export const {
   restoreCanvas,
   setCanvases,
   setCanvasAnnotations,
+  updateCanvasNodePositions,
+  updateCanvasLayout,
 } = canvasSlice.actions;
 
 export { getNextCanvasLabel };
