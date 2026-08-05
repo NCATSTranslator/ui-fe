@@ -125,7 +125,10 @@ const ContextMenuPopup: FC<{
     if (!canvas) return;
 
     const { nodeIds, edgeIds, entityName } = resolved;
-    const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds);
+    const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds, undefined, {
+      layout: canvas.layout,
+      existingNodes: canvas.nodes,
+    });
     try {
       const graph = await mergeCanvasGraph(canvas.id, submission);
       const { nodes, edges } = backendGraphToInternal(graph);
