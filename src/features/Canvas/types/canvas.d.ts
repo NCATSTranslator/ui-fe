@@ -55,9 +55,23 @@ export type BackendCanvasEdge = {
   time_deleted: string | null;
 };
 
+export type BackendCanvasAnnotation = {
+  canvas_id: number;
+  id: number;
+  content: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  time_created: string;
+  time_updated: string;
+  time_deleted: string | null;
+};
+
 export type BackendCanvasGraph = {
   nodes: BackendCanvasNode[];
   edges: BackendCanvasEdge[];
+  annotations?: BackendCanvasAnnotation[];
   tags: ResultSetTags | null;
 };
 
@@ -120,14 +134,47 @@ export type GraphSubmission = {
 export type GraphSelection = {
   nodes?: number[];
   edges?: number[];
+  annotations?: number[];
 };
 
-export type GraphMove = {
+export type GraphGeometry = {
+  nodes?: Array<{
+    data_id: number;
+    x: number;
+    y: number;
+  }>;
+  annotations?: Array<{
+    id: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>;
+};
+
+export type SaveGeometryOptions = {
+  immediate?: boolean;
+};
+
+/** @deprecated Use GraphGeometry */
+export type GraphMove = GraphGeometry & {
   nodes: Array<{
     data_id: number;
     x: number;
     y: number;
   }>;
+};
+
+export type CreateCanvasAnnotationRequest = {
+  content: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type UpdateCanvasAnnotationTextRequest = {
+  content: string;
 };
 
 export type UpdateCanvasElementRequest = {
@@ -180,8 +227,11 @@ export type CanvasEdge = Partial<ResultEdge> &
 
 export type CanvasAnnotation = {
   id: string;
+  dataId: number;
   text: string;
-  position?: { x: number; y: number };
+  position: { x: number; y: number };
+  width: number;
+  height: number;
   timeCreated: string;
 };
 

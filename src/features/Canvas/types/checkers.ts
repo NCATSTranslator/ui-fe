@@ -3,6 +3,7 @@ import { isEdgeProvenance } from '@/features/Evidence/types/checkers';
 import type {
   BackendUserCanvas,
   BackendCanvasNode,
+  BackendCanvasAnnotation,
   BackendCanvasGraph,
   CanvasNodeDetail,
   CanvasEdgeDetail,
@@ -26,10 +27,22 @@ export const isBackendCanvasNode = (obj: unknown): obj is BackendCanvasNode => {
 export const isBackendCanvasNodeArray = (obj: unknown): obj is BackendCanvasNode[] =>
   Array.isArray(obj) && obj.every(isBackendCanvasNode);
 
+export const isBackendCanvasAnnotation = (obj: unknown): obj is BackendCanvasAnnotation => {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return typeof o.id === 'number' && typeof o.content === 'string'
+    && typeof o.x === 'number' && typeof o.y === 'number';
+};
+
+export const isBackendCanvasAnnotationArray = (obj: unknown): obj is BackendCanvasAnnotation[] =>
+  Array.isArray(obj) && obj.every(isBackendCanvasAnnotation);
+
 export const isBackendCanvasGraph = (obj: unknown): obj is BackendCanvasGraph => {
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
-  return Array.isArray(o.nodes) && Array.isArray(o.edges);
+  if (!Array.isArray(o.nodes) || !Array.isArray(o.edges)) return false;
+  if (o.annotations !== undefined && !isBackendCanvasAnnotationArray(o.annotations)) return false;
+  return true;
 };
 
 export const isCanvasNodeDetail = (obj: unknown): obj is CanvasNodeDetail => {
