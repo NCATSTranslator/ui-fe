@@ -17,9 +17,12 @@ import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
+import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { useNavigate } from 'react-router-dom';
 import type { GraphFocusRequest } from 'translator-graph-view';
+import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
+import type { CanvasAnnotation } from '@/features/Canvas/types/canvas';
 
 type User = ReturnType<typeof useUser>[0];
 
@@ -37,7 +40,16 @@ const CanvasPane: FC = () => {
   const navigate = useNavigate();
   const [user] = useUser();
   const { paneOpen, paneMaximized, activeCanvas, togglePane, closePane } = useCanvasPane();
-  const { saveStatus, saveMerge, saveTrashElements, saveRename } = useCanvasPersistence();
+  const {
+    saveStatus,
+    saveMerge,
+    saveTrashElements,
+    saveRename,
+    saveGeometry,
+    saveLayout,
+    saveCreateAnnotation,
+    saveUpdateAnnotationText,
+  } = useCanvasPersistence();
   const { rename, undo, redo, canUndo, canRedo, removeNode, pushUndo } = useCanvas({ saveMerge, saveTrashElements, saveRename });
   const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
   const { hoveredNodeId, setHoveredNodeId, clearHover, handleNodeHover } = useCanvasHoverState();
@@ -47,29 +59,56 @@ const CanvasPane: FC = () => {
   const [focusRequest, setFocusRequest] = useState<GraphFocusRequest | null>(null);
   const focusTokenRef = useRef(0);
 
-  const focusNodeOnCanvas = useCallback((nodeId: string) => {
+  const focusOnCanvas = useCallback((elementId: string) => {
     focusTokenRef.current += 1;
-    setFocusRequest({ nodeId, token: focusTokenRef.current });
+    setFocusRequest({ nodeId: elementId, token: focusTokenRef.current });
   }, []);
 
   const findNodeOnCanvas = useCallback((nodeId: string) => {
     setSelectedNodeIds([nodeId]);
     setHoveredNodeId(nodeId);
-    focusNodeOnCanvas(nodeId);
-  }, [setSelectedNodeIds, setHoveredNodeId, focusNodeOnCanvas]);
+    focusOnCanvas(nodeId);
+  }, [setHoveredNodeId, focusOnCanvas]);
+
+  const findAnnotationOnCanvas = useCallback((annotationId: string) => {
+    setSelectedNodeIds([]);
+    focusOnCanvas(annotationId);
+  }, [focusOnCanvas]);
 
   const {
     graphAnnotations,
     handleAnnotationsChange,
     addAnnotation,
-  } = useCanvasAnnotations({ activeCanvas, pushUndo });
+    removeAnnotation,
+  } = useCanvasAnnotations({
+    activeCanvas,
+    pushUndo,
+    saveCreateAnnotation,
+    saveUpdateAnnotationText,
+    saveGeometry,
+    saveTrashElements,
+  });
 
-  const handleAddAnnotation = useCallback(() => {
-    const annotationId = addAnnotation();
+  const handleAddAnnotation = useCallback(async () => {
+    const annotationId = await addAnnotation();
     if (annotationId) {
-      focusNodeOnCanvas(annotationId);
+      findAnnotationOnCanvas(annotationId);
     }
-  }, [addAnnotation, focusNodeOnCanvas]);
+  }, [addAnnotation, findAnnotationOnCanvas]);
+
+  const handleAnnotationListAction = useCallback((
+    action: CanvasAnnotationAction,
+    annotation: CanvasAnnotation,
+  ) => {
+    switch (action) {
+      case 'find':
+        findAnnotationOnCanvas(annotation.id);
+        break;
+      case 'remove':
+        removeAnnotation(annotation.id);
+        break;
+    }
+  }, [findAnnotationOnCanvas, removeAnnotation]);
 
   const nodeActions = useCanvasNodeActions({
     activeCanvas,
@@ -110,6 +149,22 @@ const CanvasPane: FC = () => {
     nodeActions,
     setSelectedNodeIds,
     findNodeOnCanvas,
+  });
+
+  const {
+    graphLayout,
+    nodePositions,
+    isCustomLayoutReady,
+    layoutWarningOpen,
+    handleGraphNodeDragStop,
+    handleLayoutComplete,
+    requestLayoutChange,
+    confirmLayoutChange,
+    cancelLayoutChange,
+  } = useCanvasNodePositions({
+    canvas: activeCanvas,
+    saveGeometry,
+    saveLayout,
   });
 
   useCloseCanvasOnLogout(user, paneOpen, closePane);
@@ -160,6 +215,16 @@ const CanvasPane: FC = () => {
               canvas={activeCanvas}
               visibleNodes={visibleNodes}
               visibleEdges={visibleEdges}
+              graphLayout={graphLayout}
+              nodePositions={nodePositions}
+              isCustomLayoutReady={isCustomLayoutReady}
+              viewportSyncKey={`${activeCanvas.id}:${paneOpen}:${paneMaximized}:${isCustomLayoutReady}`}
+              layoutWarningOpen={layoutWarningOpen}
+              onLayoutChange={requestLayoutChange}
+              onGraphNodeDragStop={handleGraphNodeDragStop}
+              onLayoutComplete={handleLayoutComplete}
+              onConfirmLayoutChange={confirmLayoutChange}
+              onCancelLayoutChange={cancelLayoutChange}
               onRename={rename}
               onUndo={undo}
               onRedo={redo}
@@ -194,6 +259,7 @@ const CanvasPane: FC = () => {
             onHoverNode={setHoveredNodeId}
             onFindNode={findNodeOnCanvas}
             onAction={handleObjectListAction}
+            onAnnotationAction={handleAnnotationListAction}
             nodeMenuId={nodeMenuId}
             onNodeMenuIdChange={handleNodeMenuIdChange}
             onAddAnnotation={handleAddAnnotation}
