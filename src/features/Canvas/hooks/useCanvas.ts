@@ -10,27 +10,34 @@ import {
   renameCanvas,
   replaceCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
-import type { CanvasNode, CanvasEdge, GraphSubmission } from '@/features/Canvas/types/canvas';
+import type { CanvasNode, CanvasEdge, GraphSubmission, GraphSelection } from '@/features/Canvas/types/canvas';
 import { mergeEntityIntoCanvas } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { canvasNodesToGraphSubmission } from '@/features/Canvas/utils/canvasMappers';
+import { estimatePlacementNearNodes } from '@/features/Canvas/utils/canvasAnnotationUtils';
+import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
 import useCanvasHistory from './useCanvasHistory';
 import { canvasEntityAddedToast, canvasEntityAlreadyAddedToast } from '@/features/Core/utils/toastMessages';
 
 type UseCanvasOptions = {
   saveMerge?: (canvasId: number, submission: GraphSubmission) => Promise<void>;
-  saveTrashElements?: (canvasId: number, selection: { nodes?: number[]; edges?: number[] }) => Promise<void>;
+  saveTrashElements?: (canvasId: number, selection: GraphSelection) => Promise<void>;
   saveRename?: (canvasId: number, label: string) => Promise<void>;
 };
 
-const createCanvasNode = (id: string, name: string, types: string[]): CanvasNode => ({
+const createCanvasNode = (
+  id: string,
+  name: string,
+  types: string[],
+  position?: { x: number; y: number },
+): CanvasNode => ({
   id,
   dataId: 0,
   ref: id,
   names: [name],
   types,
   curies: [id],
-  x: 0,
-  y: 0,
+  x: position?.x ?? 0,
+  y: position?.y ?? 0,
   hidden: false,
   tags: {},
 });
@@ -91,7 +98,10 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
       canvasEntityAlreadyAddedToast(name);
       return;
     }
-    mergeEntities([createCanvasNode(id, name, types)], []);
+    const position = isCustomCanvasLayout(activeCanvas.layout)
+      ? estimatePlacementNearNodes(activeCanvas.nodes, Object.keys(activeCanvas.nodes).length)
+      : undefined;
+    mergeEntities([createCanvasNode(id, name, types, position)], []);
     canvasEntityAddedToast(name, activeCanvas.label);
   }, [activeCanvas, mergeEntities]);
 
