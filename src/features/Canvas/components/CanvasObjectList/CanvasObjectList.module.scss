@@ -361,8 +361,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  padding: 0;
+  margin: 0;
   border: none;
   border-radius: $defaultBorderRadius;
   background: transparent;
@@ -378,8 +378,8 @@
   }
 
   svg {
-    width: 14px;
-    height: 14px;
+    width: $m;
+    height: $m;
   }
 }
 
@@ -412,17 +412,23 @@
   }
 }
 
-.annotationItem {
-  padding: $xxs $xs;
-  border-bottom: 1px solid $midGray;
+.placeholderName {
+  color: $midDarkGray;
+  font-style: italic;
 }
 
-.annotationText {
-  font-size: $bodyTwoSize;
+.emptyAction {
+  padding: $xxs $xs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  font-size: $captionSize;
   color: $black;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+    border-color: $midDarkGray;
+  }
 }

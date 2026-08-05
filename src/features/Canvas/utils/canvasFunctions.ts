@@ -1,8 +1,41 @@
-import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasNode, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import type { ResultSet } from '@/features/ResultList/types/results.d';
 
 export type CanvasSortMode = 'date' | 'name';
 export type ObjectSortMode = 'relationships' | 'alphabetical' | 'type';
+export type AnnotationSortMode = 'alphabetical' | 'date';
+
+export const getAnnotationDisplayName = (annotation: CanvasAnnotation): string => {
+  const trimmed = annotation.text.trim();
+  return trimmed || 'Empty annotation';
+};
+
+export const filterCanvasAnnotations = (
+  annotations: CanvasAnnotation[],
+  search: string,
+): CanvasAnnotation[] => {
+  if (!search) return annotations;
+  const lower = search.toLowerCase();
+  return annotations.filter(annotation =>
+    annotation.text.toLowerCase().includes(lower) ||
+    annotation.id.toLowerCase().includes(lower),
+  );
+};
+
+export const sortCanvasAnnotations = (
+  annotations: CanvasAnnotation[],
+  mode: AnnotationSortMode,
+): CanvasAnnotation[] =>
+  [...annotations].sort((a, b) => {
+    switch (mode) {
+      case 'alphabetical':
+        return getAnnotationDisplayName(a).localeCompare(getAnnotationDisplayName(b));
+      case 'date':
+        return new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime();
+      default:
+        return 0;
+    }
+  });
 
 export const getCanvasNodeCount = (canvas: Canvas): number => Object.keys(canvas.nodes).length;
 
