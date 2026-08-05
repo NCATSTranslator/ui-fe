@@ -3,9 +3,12 @@ import type {
   BackendUserCanvas,
   BackendCanvasGraph,
   BackendCanvasNode,
+  BackendCanvasAnnotation,
   GraphSubmission,
   GraphSelection,
-  GraphMove,
+  GraphGeometry,
+  CreateCanvasAnnotationRequest,
+  UpdateCanvasAnnotationTextRequest,
   UpdateCanvasElementRequest,
   CanvasLayout,
   CanvasNodeDetail,
@@ -15,7 +18,7 @@ import {
   isBackendUserCanvas,
   isBackendUserCanvasArray,
   isBackendCanvasGraph,
-  isBackendCanvasNodeArray,
+  isBackendCanvasAnnotation,
   isCanvasNodeDetail,
   isCanvasEdgeDetail,
 } from '@/features/Canvas/types/checkers';
@@ -117,18 +120,21 @@ export const mergeCanvasGraph = async (
     isBackendCanvasGraph,
   );
 
-export const moveCanvasNodes = async (
+export const updateCanvasGeometry = async (
   saveId: number,
-  move: GraphMove,
+  geometry: GraphGeometry,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
-): Promise<BackendCanvasNode[]> =>
-  fetchWithErrorHandling<BackendCanvasNode[]>(
-    () => put(`${BASE}/${saveId}/graph/move`, move),
+): Promise<void> => {
+  await fetchWithErrorHandling<unknown>(
+    () => put(`${BASE}/${saveId}/graph/geometry`, geometry),
     httpErrorHandler,
     fetchErrorHandler,
-    isBackendCanvasNodeArray,
   );
+};
+
+/** @deprecated Use updateCanvasGeometry */
+export const moveCanvasNodes = updateCanvasGeometry;
 
 export const trashCanvasElements = async (
   saveId: number,
@@ -154,6 +160,37 @@ export const restoreCanvasElements = async (
     httpErrorHandler,
     fetchErrorHandler,
     isBackendCanvasGraph,
+  );
+
+// ---------------------------------------------------------------------------
+// Annotations
+// ---------------------------------------------------------------------------
+
+export const createCanvasAnnotation = async (
+  saveId: number,
+  request: CreateCanvasAnnotationRequest,
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler,
+): Promise<BackendCanvasAnnotation> =>
+  fetchWithErrorHandling<BackendCanvasAnnotation>(
+    () => post(`${BASE}/${saveId}/annotation`, request),
+    httpErrorHandler,
+    fetchErrorHandler,
+    isBackendCanvasAnnotation,
+  );
+
+export const updateCanvasAnnotationText = async (
+  saveId: number,
+  annotationId: number,
+  request: UpdateCanvasAnnotationTextRequest,
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler,
+): Promise<BackendCanvasAnnotation> =>
+  fetchWithErrorHandling<BackendCanvasAnnotation>(
+    () => put(`${BASE}/${saveId}/annotation/${annotationId}`, request),
+    httpErrorHandler,
+    fetchErrorHandler,
+    isBackendCanvasAnnotation,
   );
 
 // ---------------------------------------------------------------------------
