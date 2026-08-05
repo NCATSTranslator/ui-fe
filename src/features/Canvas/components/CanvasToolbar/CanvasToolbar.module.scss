@@ -6,7 +6,7 @@
   justify-content: space-between;
   height: 40px;
   min-height: 40px;
-  padding: 0 $s;
+  padding: $s;
   position: absolute;
   top: 0;
   left: 0;
@@ -165,31 +165,12 @@
 }
 
 .addButton {
-  display: flex;
-  align-items: center;
-  gap: $xxs;
-  padding: 4px $xs;
-  border: 1px solid $midGray;
-  border-radius: $defaultBorderRadius;
-  background: $white;
-  color: $black;
-  font-size: $captionSize;
-  font-weight: 600;
-  cursor: pointer;
-  transition: $defaultAnim;
-
-  &:hover {
-    background: $hoverGray;
-  }
-
   &.active {
-    background: $hoverGray;
-    border-color: $purpleTwo;
+    background: $purpleTwo;
   }
 
-  svg {
-    width: 14px;
-    height: 14px;
+  svg path {
+    stroke: $white;
   }
 }
 
@@ -223,31 +204,26 @@
   }
 }
 
-.processingIndicator {
-  font-size: $captionSize;
-  color: $purpleTwo;
-  font-style: italic;
-  margin-left: $xs;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
 .saveIndicator {
   font-size: $captionSize;
   color: $darkGray;
+  margin-left: $xs;
+  opacity: 0;
+  transition: $defaultAnim;
+
+  &.visible,
+  &.saving,
+  &.saveError {
+    opacity: 1;
+  }
 
   &.saving {
     font-style: italic;
-    animation: pulse 1.5s ease-in-out infinite;
   }
 
   &.saveError {
     color: $red;
   }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 .overflowWrapper {

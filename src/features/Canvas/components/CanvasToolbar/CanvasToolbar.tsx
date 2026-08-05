@@ -19,6 +19,7 @@ const layouts: { key: LayoutType; label: string }[] = [
   { key: 'hierarchicalLR', label: 'Horizontal' },
   { key: 'hierarchical', label: 'Vertical' },
   { key: 'force', label: 'Force' },
+  { key: 'custom', label: 'Custom' },
 ];
 
 interface CanvasToolbarProps {
@@ -35,7 +36,6 @@ interface CanvasToolbarProps {
   onZoomOut?: () => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
-  isProcessing?: boolean;
   saveStatus?: SaveStatus;
 }
 
@@ -53,7 +53,6 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   onZoomOut,
   onAddObject,
   onAddAnnotation,
-  isProcessing,
   saveStatus,
 }) => {
   const { closePane, togglePane, toggleMaximizePane, paneMaximized } = useCanvasPane();
@@ -134,7 +133,7 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
           </span>
         )}
         <AddMenu onAddObject={onAddObject} onAddAnnotation={onAddAnnotation} />
-        <StatusIndicator isProcessing={isProcessing} saveStatus={saveStatus} />
+        <StatusIndicator saveStatus={saveStatus} />
       </div>
       <div className={styles.center}>
         <div className={styles.zoomGroup}>
@@ -163,6 +162,7 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
           {layouts.map(({ key, label }) => (
             <button
               key={key}
+              type="button"
               className={joinClasses(styles.layoutButton, layout === key && styles.active)}
               onClick={() => onLayoutChange(key)}
             >
