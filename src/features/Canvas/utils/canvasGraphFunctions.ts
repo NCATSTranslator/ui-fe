@@ -4,6 +4,29 @@ import type { ResultSet, Path, ResultNode, ResultEdge } from '@/features/ResultL
 import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
+export const canvasNodesToNodePositions = (
+  nodes: Record<string, CanvasNode>,
+): Record<string, { x: number; y: number }> => {
+  const positions: Record<string, { x: number; y: number }> = {};
+  for (const [id, node] of Object.entries(nodes)) {
+    positions[id] = { x: node.x, y: node.y };
+  }
+  return positions;
+};
+
+export const nodePositionMapToStoreUpdates = (
+  positions: Record<string, { x: number; y: number }>,
+): Array<{ nodeId: string; x: number; y: number }> =>
+  Object.entries(positions).map(([nodeId, pos]) => ({ nodeId, x: pos.x, y: pos.y }));
+
+/** True when every node is at the origin — usually means coordinates have not loaded yet. */
+export const nodePositionsAreAllOrigin = (
+  positions: Record<string, { x: number; y: number }>,
+): boolean => {
+  const entries = Object.values(positions);
+  return entries.length > 0 && entries.every(p => p.x === 0 && p.y === 0);
+};
+
 export const canvasToGraphData = (canvas: Canvas): GraphData =>
   filteredCanvasToGraphData(canvas.nodes, canvas.edges);
 
