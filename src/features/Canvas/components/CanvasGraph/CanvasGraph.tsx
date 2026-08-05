@@ -1,18 +1,47 @@
-import { FC, ReactNode, useMemo, useState, MouseEvent, useCallback } from 'react';
+import { FC, ReactNode, useMemo, MouseEvent, useCallback } from 'react';
 import styles from './CanvasGraph.module.scss';
-import { GraphView as TranslatorGraphView, LayoutType, GraphNodeType, GraphEdgeType, HoverGeometry, type GraphFocusRequest, type GraphAnnotation } from 'translator-graph-view';
+import {
+  GraphView as TranslatorGraphView,
+  LayoutType,
+  GraphNodeType,
+  GraphEdgeType,
+  HoverGeometry,
+  type GraphFocusRequest,
+  type GraphAnnotation,
+  type NodePositionMap,
+  type FitViewPadding,
+} from 'translator-graph-view';
 import 'translator-graph-view/styles.css';
 import type { Canvas, CanvasNode, CanvasEdge, SaveStatus } from '@/features/Canvas/types/canvas';
 import { filteredCanvasToGraphData } from '@/features/Canvas/utils/canvasGraphFunctions';
 import CanvasToolbar from '@/features/Canvas/components/CanvasToolbar/CanvasToolbar';
 import CanvasEmptyState from '@/features/Canvas/components/CanvasEmptyState/CanvasEmptyState';
+import CanvasLayoutWarningModal from '@/features/Canvas/components/CanvasLayoutWarningModal/CanvasLayoutWarningModal';
+import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 
 const REACT_FLOW_NODE_SELECTOR = '.react-flow__node';
+
+/** Extra top inset keeps nodes below the overlay toolbar when fitView runs. */
+const CANVAS_FIT_VIEW_PADDING: FitViewPadding = {
+  top: '56px',
+  right: 0.2,
+  bottom: 0.2,
+  left: 0.2,
+};
 
 interface CanvasGraphProps {
   canvas: Canvas;
   visibleNodes?: Record<string, CanvasNode>;
   visibleEdges?: Record<string, CanvasEdge>;
+  graphLayout: LayoutType;
+  nodePositions?: NodePositionMap;
+  isCustomLayoutReady?: boolean;
+  layoutWarningOpen?: boolean;
+  onLayoutChange: (layout: LayoutType) => void;
+  onGraphNodeDragStop?: (nodeId: string, position: { x: number; y: number }, allPositions: NodePositionMap) => void;
+  onLayoutComplete?: (positions: NodePositionMap) => void;
+  onConfirmLayoutChange?: () => void;
+  onCancelLayoutChange?: () => void;
   onRename: (title: string) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -27,11 +56,11 @@ interface CanvasGraphProps {
   onAddAnnotation?: () => void;
   annotations?: GraphAnnotation[];
   onAnnotationsChange?: (annotations: GraphAnnotation[]) => void;
-  isProcessing?: boolean;
   saveStatus?: SaveStatus;
   hoveredNodeId?: string | null;
   selectedIds?: string[];
   focusRequest?: GraphFocusRequest | null;
+  viewportSyncKey?: string;
   children?: ReactNode;
 }
 
@@ -39,6 +68,15 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   canvas,
   visibleNodes,
   visibleEdges,
+  graphLayout,
+  nodePositions,
+  isCustomLayoutReady = true,
+  layoutWarningOpen = false,
+  onLayoutChange,
+  onGraphNodeDragStop,
+  onLayoutComplete,
+  onConfirmLayoutChange,
+  onCancelLayoutChange,
   onRename,
   onUndo,
   onRedo,
@@ -53,15 +91,13 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onAddAnnotation,
   annotations = [],
   onAnnotationsChange,
-  isProcessing,
   saveStatus,
   hoveredNodeId,
   selectedIds,
   focusRequest,
+  viewportSyncKey,
   children,
 }) => {
-  const [layout, setLayout] = useState<LayoutType>('hierarchicalLR');
-
   const graphData = useMemo(
     () => visibleNodes && visibleEdges
       ? filteredCanvasToGraphData(visibleNodes, visibleEdges)
@@ -70,6 +106,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   );
   const hasNodes = Object.keys(canvas.nodes).length > 0;
   const hasGraphContent = hasNodes || annotations.length > 0;
+  const isLayoutLoading = hasGraphContent && !isCustomLayoutReady;
 
   const handleGraphContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
     if (!onNodeContextMenu) return;
@@ -86,23 +123,30 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
       <CanvasToolbar
         title={canvas.label}
         onRename={onRename}
-        layout={layout}
-        onLayoutChange={setLayout}
+        layout={graphLayout}
+        onLayoutChange={onLayoutChange}
         onUndo={onUndo}
         onRedo={onRedo}
         canUndo={canUndo}
         canRedo={canRedo}
         onAddObject={onAddObject}
         onAddAnnotation={onAddAnnotation}
-        isProcessing={isProcessing}
         saveStatus={saveStatus}
       />
       <div className={styles.graphArea} onContextMenu={handleGraphContextMenu}>
-        {hasGraphContent ? (
+        {isLayoutLoading ? (
+          <div className={styles.graphLoading} aria-live="polite" aria-busy="true">
+            <LoadingIcon size="medium" />
+            <span>Loading layout…</span>
+          </div>
+        ) : hasGraphContent ? (
           <>
             <TranslatorGraphView
               data={graphData}
-              layout={layout}
+              layout={graphLayout}
+              nodePositions={nodePositions}
+              fitViewPadding={CANVAS_FIT_VIEW_PADDING}
+              viewportSyncKey={viewportSyncKey ?? String(canvas.id)}
               elkWorkerUrl="/elk-worker.min.js"
               showEdgeLabels={false}
               showMiniMap={false}
@@ -112,6 +156,8 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
               onEdgeClick={onEdgeClick}
               onNodeHover={onNodeHover}
               onEdgeHover={onEdgeHover}
+              onGraphNodeDragStop={onGraphNodeDragStop}
+              onLayoutComplete={onLayoutComplete}
               hoveredNodeId={hoveredNodeId}
               selectedIds={selectedIds}
               focusRequest={focusRequest}
@@ -124,6 +170,11 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           <CanvasEmptyState />
         )}
       </div>
+      <CanvasLayoutWarningModal
+        isOpen={layoutWarningOpen}
+        onConfirm={onConfirmLayoutChange ?? (() => undefined)}
+        onCancel={onCancelLayoutChange ?? (() => undefined)}
+      />
     </div>
   );
 };

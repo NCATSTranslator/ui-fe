@@ -1,3 +1,4 @@
+@use "@/assets/styles/variables" as *;
 
 .canvasGraph {
   display: flex;
@@ -12,4 +13,15 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+}
+
+.graphLoading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $s;
+  color: $darkGray;
+  font-size: $captionSize;
 }
