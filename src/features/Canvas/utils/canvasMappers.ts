@@ -6,12 +6,18 @@ import type {
   Canvas,
   CanvasNode,
   CanvasEdge,
+  CanvasLayout,
   GraphSubmission,
   GraphSubmissionNode,
   GraphSubmissionEdge,
 } from '@/features/Canvas/types/canvas';
 import type { ResultSet, ResultNode, ResultEdge, ResultSetTags } from '@/features/ResultList/types/results.d';
 import { getNodeById, getRawEdgeById } from '@/features/ResultList/slices/resultsSlice';
+import {
+  backendAnnotationsToCanvasAnnotations,
+  estimatePlacementNearNodes,
+} from '@/features/Canvas/utils/canvasAnnotationUtils';
+import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
 
 // ---------------------------------------------------------------------------
 // Backend → Internal
@@ -85,10 +91,10 @@ export const backendCanvasToCanvas = (
     tags: graph.tags ?? meta.data.tags,
     queryRef: meta.data.query_ref,
     resultRef: meta.data.result_ref,
-  annotations: [],
-  timeCreated: meta.time_created,
-  timeUpdated: meta.time_updated,
-  graphLoaded: true,
+    annotations: backendAnnotationsToCanvasAnnotations(graph.annotations),
+    timeCreated: meta.time_created,
+    timeUpdated: meta.time_updated,
+    graphLoaded: true,
   };
 };
 
@@ -189,7 +195,10 @@ export const canvasNodesToGraphSubmission = (
 // ResultSet → GraphSubmission (rich, for result-based additions)
 // ---------------------------------------------------------------------------
 
-const resultNodeToSubmissionNode = (node: ResultNode): GraphSubmissionNode => ({
+const resultNodeToSubmissionNode = (
+  node: ResultNode,
+  position?: { x: number; y: number },
+): GraphSubmissionNode => ({
   id: node.id,
   aras: [...node.aras],
   descriptions: [...node.descriptions],
@@ -201,8 +210,8 @@ const resultNodeToSubmissionNode = (node: ResultNode): GraphSubmissionNode => ({
   tags: node.tags,
   source_time: node.source_time,
   annotations: node.annotations,
-  x: 0,
-  y: 0,
+  x: position?.x ?? 0,
+  y: position?.y ?? 0,
   signature: node.signature,
 });
 
@@ -232,12 +241,22 @@ export const resultDataToGraphSubmission = (
   nodeIds: string[],
   edgeIds: string[],
   source?: { query_ref: string; result_ref: string },
+  options?: {
+    layout?: CanvasLayout;
+    existingNodes?: Record<string, CanvasNode>;
+  },
 ): GraphSubmission => {
+  const useCustomPlacement = options?.layout && isCustomCanvasLayout(options.layout);
+  const existingNodes = options?.existingNodes ?? {};
   const subNodes: Record<string, GraphSubmissionNode> = {};
-  for (const id of nodeIds) {
+  nodeIds.forEach((id, index) => {
     const node = getNodeById(resultSet, id);
-    if (node) subNodes[id] = resultNodeToSubmissionNode(node);
-  }
+    if (!node) return;
+    const position = useCustomPlacement
+      ? estimatePlacementNearNodes(existingNodes, index)
+      : undefined;
+    subNodes[id] = resultNodeToSubmissionNode(node, position);
+  });
   const subEdges: Record<string, GraphSubmissionEdge> = {};
   for (const id of edgeIds) {
     const edge = getRawEdgeById(resultSet, id);
