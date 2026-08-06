@@ -43,6 +43,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     toggleCollapse,
     activeTab,
     setActiveTab,
+    inputValue,
     searchTerm,
     handleSearch,
     sortDropdownOpen,
@@ -79,7 +80,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
         onClick={toggleCollapse}
         aria-label={collapsed ? 'Expand object list' : 'Collapse object list'}
       >
-        <span className={styles.collapseLabel}>On this Canvas</span>
+        <span className={styles.collapseLabel}>On this Canvas ({allNodes.length})</span>
         <ChevDown />
       </button>
       {
@@ -87,7 +88,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
           <div className={styles.contentWrapper}>
             <ObjectListControls
               activeTab={activeTab}
-              searchTerm={searchTerm}
+              searchInputValue={inputValue}
               searchPlaceholder={searchPlaceholder}
               onSearch={handleSearch}
               sortLabel={currentSortLabel}
@@ -116,6 +117,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           key={node.id}
                           node={node}
                           canvas={canvas}
+                          searchTerm={searchTerm}
                           nodeMenuId={nodeMenuId}
                           onNodeClick={node => handleItemClick(node.id)}
                           onHoverNode={onHoverNode}
@@ -134,6 +136,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                     entityLabel="annotations"
                     allCount={allAnnotations.length}
                     filteredCount={sortedAnnotations.length}
+                    searchTerm={searchTerm}
                     onAdd={onAddAnnotation}
                     addLabel="Add Annotation"
                   />
@@ -143,6 +146,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                         <AnnotationItem
                           key={annotation.id}
                           annotation={annotation}
+                          searchTerm={searchTerm}
                           menuId={nodeMenuId}
                           onAnnotationClick={item => handleItemClick(item.id)}
                           onHoverAnnotation={onHoverNode}
