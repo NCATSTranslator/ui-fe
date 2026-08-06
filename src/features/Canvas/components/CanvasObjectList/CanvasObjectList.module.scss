@@ -321,13 +321,31 @@
   min-width: 0;
 }
 
-.nodeName {
+.nodeName,
+.nodeName span,
+.nodeName mark {
   font-size: $bodyTwoSize;
   font-weight: 600;
   color: $black;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: inherit;
+}
+
+.nodeName mark.highlight {
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.nameMatch {
+  margin-left: $xxxs;
+}
+
+.nameMatchIndicator {
+  cursor: default;
 }
 
 .nodeMeta {
@@ -412,7 +430,9 @@
   }
 }
 
-.placeholderName {
+.placeholderName,
+.placeholderName span,
+.placeholderName mark {
   color: $midDarkGray;
   font-style: italic;
 }
