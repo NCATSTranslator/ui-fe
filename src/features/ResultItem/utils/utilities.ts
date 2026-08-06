@@ -241,6 +241,35 @@ export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) 
 }
 
 /**
+ * Determines whether a path ID should be treated as filtered out for display,
+ * accounting for compressed path groups (a compressed path is hidden only when
+ * all members are filtered).
+ */
+export const getIsPathIdFiltered = (
+  resultSet: ResultSet | null | undefined,
+  pathId: string,
+  paths: (string | Path)[] | undefined,
+  pathFilterState: PathFilterState | undefined,
+): boolean => {
+  if (!pathFilterState || !pathId) return false;
+
+  if (!resultSet || !paths?.length) {
+    return pathFilterState[pathId] === true;
+  }
+
+  const compressedPaths = getCompressedPaths(resultSet, paths);
+  const displayPath = compressedPaths.find(
+    (path) => path.id === pathId || path.compressedIDs?.includes(pathId),
+  );
+
+  if (!displayPath) {
+    return pathFilterState[pathId] === true;
+  }
+
+  return getIsPathFiltered(displayPath, pathFilterState);
+};
+
+/**
  * Takes a list of paths/path IDs and compresses them if any paths have the same nodes and their edges have
  * the same support status (provided by the getPathSequenceKey helper function).
  *

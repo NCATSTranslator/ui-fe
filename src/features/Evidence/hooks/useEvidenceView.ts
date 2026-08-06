@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import ResultListContext from '@/features/ResultList/context/ResultListContext';
+import { getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
 import useEvidenceViewRouteData from '@/features/Evidence/hooks/useEvidenceViewRouteData';
 import useEvidenceViewEdgeInteractions from '@/features/Evidence/hooks/useEvidenceViewEdgeInteractions';
 import { computeNonReadyStatus, resolveEvidenceSubtitle } from '@/features/Evidence/hooks/evidenceViewHelpers';
@@ -35,8 +36,13 @@ export const useEvidenceView = (): EvidenceViewModel => {
   if (nonReadyStatus) return nonReadyStatus;
 
   const isFilteredOut = !!routeData.pathId
-    && resultListContext?.pathFilterState?.[routeData.pathId] === true
-    && !resultListContext.showHiddenPaths;
+    && getIsPathIdFiltered(
+      routeData.resultSet,
+      routeData.pathId,
+      routeData.result?.paths,
+      resultListContext?.pathFilterState ?? undefined,
+    )
+    && !resultListContext?.showHiddenPaths;
 
   return {
     status: 'ready',
