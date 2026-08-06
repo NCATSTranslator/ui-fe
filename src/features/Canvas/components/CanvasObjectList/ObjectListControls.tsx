@@ -9,7 +9,7 @@ import { ANNOTATION_SORT_OPTIONS, OBJECT_SORT_OPTIONS } from './canvasObjectList
 
 interface ObjectListControlsProps {
   activeTab: CanvasObjectListTab;
-  searchTerm: string;
+  searchInputValue: string;
   searchPlaceholder: string;
   onSearch: (value: string) => void;
   sortLabel: string;
@@ -22,7 +22,7 @@ interface ObjectListControlsProps {
 
 const ObjectListControls: FC<ObjectListControlsProps> = ({
   activeTab,
-  searchTerm,
+  searchInputValue,
   searchPlaceholder,
   onSearch,
   sortLabel,
@@ -42,7 +42,7 @@ const ObjectListControls: FC<ObjectListControlsProps> = ({
           className={styles.searchInput}
           type="text"
           placeholder={searchPlaceholder}
-          value={searchTerm}
+          value={searchInputValue}
           onChange={e => onSearch(e.target.value)}
         />
       </div>

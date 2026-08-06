@@ -14,6 +14,7 @@ import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasA
 import {
   ANNOTATION_SORT_OPTIONS,
   OBJECT_SORT_OPTIONS,
+  CANVAS_OBJECT_LIST_MIN_SEARCH_LENGTH,
   type CanvasObjectListTab,
 } from '@/features/Canvas/components/CanvasObjectList/canvasObjectListConstants';
 
@@ -38,7 +39,7 @@ const useCanvasObjectList = ({
 }: UseCanvasObjectListOptions) => {
   const [collapsed, setCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState<CanvasObjectListTab>('objects');
-  const { searchTerm, handleSearch } = useSimpleSearch();
+  const { inputValue, searchTerm, handleSearch } = useSimpleSearch();
   const [sortMode, setSortMode] = useState<ObjectSortMode>('relationships');
   const [annotationSortMode, setAnnotationSortMode] = useState<AnnotationSortMode>('alphabetical');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
@@ -50,14 +51,19 @@ const useCanvasObjectList = ({
   );
   const allAnnotations = canvas.annotations;
 
+  const activeSearchTerm = useMemo(
+    () => (searchTerm.length >= CANVAS_OBJECT_LIST_MIN_SEARCH_LENGTH ? searchTerm : ''),
+    [searchTerm],
+  );
+
   const sortedNodes = useMemo(
-    () => sortCanvasNodes(filterCanvasNodes(allNodes, searchTerm), sortMode, canvas),
-    [allNodes, searchTerm, sortMode, canvas.edges],
+    () => sortCanvasNodes(filterCanvasNodes(allNodes, activeSearchTerm), sortMode, canvas),
+    [allNodes, activeSearchTerm, sortMode, canvas.edges],
   );
 
   const sortedAnnotations = useMemo(
-    () => sortCanvasAnnotations(filterCanvasAnnotations(allAnnotations, searchTerm), annotationSortMode),
-    [allAnnotations, searchTerm, annotationSortMode],
+    () => sortCanvasAnnotations(filterCanvasAnnotations(allAnnotations, activeSearchTerm), annotationSortMode),
+    [allAnnotations, activeSearchTerm, annotationSortMode],
   );
 
   useEffect(() => {
@@ -118,7 +124,8 @@ const useCanvasObjectList = ({
     toggleCollapse,
     activeTab,
     setActiveTab,
-    searchTerm,
+    inputValue,
+    searchTerm: activeSearchTerm,
     handleSearch,
     sortDropdownOpen,
     toggleSortDropdown,
