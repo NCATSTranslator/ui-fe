@@ -35,9 +35,9 @@ const buildPositionPersistence = (
 ) => {
   const positionUpdates = nodePositionMapToStoreUpdates(positions);
 
-  const moves = Object.entries(positions).flatMap(([nodeId, pos]) => {
+  const moves = positionUpdates.flatMap(({ nodeId, x, y }) => {
     const node = canvas.nodes[nodeId];
-    return node?.dataId ? [{ data_id: node.dataId, x: pos.x, y: pos.y }] : [];
+    return node?.dataId ? [{ data_id: node.dataId, x, y }] : [];
   });
 
   return { positionUpdates, moves };
@@ -89,7 +89,7 @@ const useCanvasNodePositions = ({
     const nextPositions = canvasNodesToNodePositions(canvas.nodes);
     if (Object.keys(nextPositions).length === 0) return;
 
-    setFrozenNodePositions((prev) => {
+    setFrozenNodePositions((prev: NodePositionMap | null) => {
       if (nodePositionsAreAllOrigin(nextPositions)) return prev;
       return nextPositions;
     });
