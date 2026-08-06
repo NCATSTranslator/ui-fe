@@ -10,16 +10,94 @@ export const getAnnotationDisplayName = (annotation: CanvasAnnotation): string =
   return trimmed || 'Empty annotation';
 };
 
+export const getCanvasNodeDisplayName = (node: CanvasNode): string =>
+  node.names[0] || node.id;
+
+export type CanvasSearchMatch = {
+  label: string;
+  value: string;
+};
+
+export const formatCanvasSearchMatchTooltip = (matches: CanvasSearchMatch[]): string =>
+  `Matched on: ${matches.map(({ label, value }) => `${label} (${value})`).join(', ')}`;
+
+const collectCanvasNodeSearchMatches = (
+  node: CanvasNode,
+  search: string,
+): CanvasSearchMatch[] => {
+  if (!search) return [];
+
+  const lower = search.toLowerCase();
+  const matches: CanvasSearchMatch[] = [];
+  const seen = new Set<string>();
+
+  const addMatch = (label: string, value: string) => {
+    const key = `${label}:${value}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    matches.push({ label, value });
+  };
+
+  node.names.forEach(name => {
+    if (name.toLowerCase().includes(lower)) addMatch('name', name);
+  });
+  node.curies.forEach(curie => {
+    if (curie.toLowerCase().includes(lower)) addMatch('curie', curie);
+  });
+
+  return matches;
+};
+
+export const canvasNodeMatchesSearch = (node: CanvasNode, search: string): boolean =>
+  collectCanvasNodeSearchMatches(node, search).length > 0;
+
+export const getCanvasNodeSearchMatchesOutsideDisplayName = (
+  node: CanvasNode,
+  search: string,
+): CanvasSearchMatch[] => {
+  if (!search) return [];
+
+  const displayName = getCanvasNodeDisplayName(node);
+  if (displayName.toLowerCase().includes(search.toLowerCase())) return [];
+
+  return collectCanvasNodeSearchMatches(node, search);
+};
+
+const collectCanvasAnnotationSearchMatches = (
+  annotation: CanvasAnnotation,
+  search: string,
+): CanvasSearchMatch[] => {
+  if (!search) return [];
+
+  const lower = search.toLowerCase();
+  if (!annotation.text.toLowerCase().includes(lower)) return [];
+
+  return [{ label: 'text', value: annotation.text.trim() || annotation.text }];
+};
+
+export const canvasAnnotationMatchesSearch = (
+  annotation: CanvasAnnotation,
+  search: string,
+): boolean => collectCanvasAnnotationSearchMatches(annotation, search).length > 0;
+
+export const getCanvasAnnotationSearchMatchesOutsideDisplayName = (
+  annotation: CanvasAnnotation,
+  search: string,
+): CanvasSearchMatch[] => {
+  if (!search) return [];
+
+  const displayName = getAnnotationDisplayName(annotation);
+  if (displayName.toLowerCase().includes(search.toLowerCase())) return [];
+
+  return collectCanvasAnnotationSearchMatches(annotation, search);
+};
+
 export const filterCanvasAnnotations = (
   annotations: CanvasAnnotation[],
   search: string,
 ): CanvasAnnotation[] => {
   if (!search) return annotations;
-  const lower = search.toLowerCase();
-  return annotations.filter(annotation =>
-    annotation.text.toLowerCase().includes(lower) ||
-    annotation.id.toLowerCase().includes(lower),
-  );
+  return annotations.filter(annotation => canvasAnnotationMatchesSearch(annotation, search));
 };
 
 export const sortCanvasAnnotations = (
@@ -67,7 +145,7 @@ export const sortCanvasNodes = (
       case 'relationships':
         return getNodeEdgeCount(canvas, b.id) - getNodeEdgeCount(canvas, a.id);
       case 'alphabetical':
-        return (a.names[0] ?? a.id).localeCompare(b.names[0] ?? b.id);
+        return getCanvasNodeDisplayName(a).localeCompare(getCanvasNodeDisplayName(b));
       case 'type':
         return (a.types[0] ?? '').localeCompare(b.types[0] ?? '');
       default:
@@ -77,11 +155,7 @@ export const sortCanvasNodes = (
 
 export const filterCanvasNodes = (nodes: CanvasNode[], search: string): CanvasNode[] => {
   if (!search) return nodes;
-  const lower = search.toLowerCase();
-  return nodes.filter(n =>
-    n.names.some(name => name.toLowerCase().includes(lower)) ||
-    n.curies.some(curie => curie.toLowerCase().includes(lower))
-  );
+  return nodes.filter(node => canvasNodeMatchesSearch(node, search));
 };
 
 export const mergeCanvasNode = (existing: CanvasNode, incoming: CanvasNode): CanvasNode => ({
