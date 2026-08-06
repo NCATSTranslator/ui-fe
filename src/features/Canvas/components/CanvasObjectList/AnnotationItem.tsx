@@ -1,7 +1,7 @@
 import { FC, MouseEvent } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { CanvasAnnotation } from '@/features/Canvas/types/canvas';
-import { getAnnotationDisplayName } from '@/features/Canvas/utils/canvasFunctions';
+import { getAnnotationDisplayName, getCanvasAnnotationSearchMatchesOutsideDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import ObjectListItem from './ObjectListItem';
 import {
   OBJECT_LIST_ANNOTATION_ACTIONS,
@@ -10,6 +10,7 @@ import {
 
 export interface AnnotationItemProps {
   annotation: CanvasAnnotation;
+  searchTerm?: string;
   menuId: string | null;
   onAnnotationClick: (annotation: CanvasAnnotation) => void;
   onHoverAnnotation: (annotationId: string | null) => void;
@@ -19,6 +20,7 @@ export interface AnnotationItemProps {
 
 const AnnotationItem: FC<AnnotationItemProps> = ({
   annotation,
+  searchTerm,
   menuId,
   onAnnotationClick,
   onHoverAnnotation,
@@ -26,11 +28,16 @@ const AnnotationItem: FC<AnnotationItemProps> = ({
   onMenuAction,
 }) => {
   const displayName = getAnnotationDisplayName(annotation);
+  const externalSearchMatches = searchTerm
+    ? getCanvasAnnotationSearchMatchesOutsideDisplayName(annotation, searchTerm)
+    : [];
 
   return (
     <ObjectListItem<CanvasAnnotationAction>
       itemId={annotation.id}
       displayName={displayName}
+      searchTerm={searchTerm}
+      externalSearchMatches={externalSearchMatches}
       isEmptyName={!annotation.text.trim()}
       meta={<span className={styles.typeChip}>Annotation</span>}
       menuId={menuId}

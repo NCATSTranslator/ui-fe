@@ -1,7 +1,7 @@
 import { FC, MouseEvent } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
-import { getNodeEdgeCount } from '@/features/Canvas/utils/canvasFunctions';
+import { getCanvasNodeDisplayName, getNodeEdgeCount, getCanvasNodeSearchMatchesOutsideDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import { formatBiolinkEntity } from '@/features/Core/utils/stringFormatters';
 import ObjectListItem from './ObjectListItem';
 import {
@@ -12,6 +12,7 @@ import {
 export interface NodeItemProps {
   node: CanvasNode;
   canvas: Canvas;
+  searchTerm?: string;
   nodeMenuId: string | null;
   onNodeClick: (node: CanvasNode) => void;
   onHoverNode: (nodeId: string | null) => void;
@@ -22,6 +23,7 @@ export interface NodeItemProps {
 const NodeItem: FC<NodeItemProps> = ({
   node,
   canvas,
+  searchTerm,
   nodeMenuId,
   onNodeClick,
   onHoverNode,
@@ -30,12 +32,17 @@ const NodeItem: FC<NodeItemProps> = ({
 }) => {
   const edgeCount = getNodeEdgeCount(canvas, node.id);
   const typeLabel = node.types[0] ? formatBiolinkEntity(node.types[0]) : '';
-  const displayName = node.names[0] || node.id;
+  const displayName = getCanvasNodeDisplayName(node);
+  const externalSearchMatches = searchTerm
+    ? getCanvasNodeSearchMatchesOutsideDisplayName(node, searchTerm)
+    : [];
 
   return (
     <ObjectListItem<CanvasNodeAction>
       itemId={node.id}
       displayName={displayName}
+      searchTerm={searchTerm}
+      externalSearchMatches={externalSearchMatches}
       meta={(
         <>
           {typeLabel && <span className={styles.typeChip}>{typeLabel}</span>}
