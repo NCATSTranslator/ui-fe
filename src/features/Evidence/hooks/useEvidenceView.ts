@@ -15,6 +15,7 @@ import { useEvidenceData, useEdgeInitialization } from '@/features/Evidence/hook
 import { resolveClickedEdge } from '@/features/Evidence/utils/utilities';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 import { derivePathKey, resolveEdgeFromPath, buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
+import { getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import { isValidEvidenceTabName } from '@/features/Evidence/types/checkers';
@@ -374,8 +375,13 @@ export const useEvidenceView = (): EvidenceViewModel => {
   if (nonReadyStatus) return nonReadyStatus;
 
   const isFilteredOut = !!routeData.pathId
-    && resultListContext?.pathFilterState?.[routeData.pathId] === true
-    && !resultListContext.showHiddenPaths;
+    && getIsPathIdFiltered(
+      routeData.resultSet,
+      routeData.pathId,
+      routeData.result?.paths,
+      resultListContext?.pathFilterState ?? undefined,
+    )
+    && !resultListContext?.showHiddenPaths;
 
   return {
     status: 'ready',

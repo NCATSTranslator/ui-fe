@@ -5,7 +5,7 @@ import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
-import { getCompressedPaths, getFilteredPathCount, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { getCompressedPaths, getFilteredPathCount, getIsPathFiltered, getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
 
 // ---------------------------------------------------------------------------
 // Minimal fixture factories
@@ -691,5 +691,42 @@ describe('getIsPathFiltered — compressed display semantics', () => {
     const pathFilterState = { P1: true };
 
     expect(getIsPathFiltered(path, pathFilterState)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getIsPathIdFiltered — evidence view lookup by member path ID
+// ---------------------------------------------------------------------------
+
+describe('getIsPathIdFiltered — evidence view lookup by member path ID', () => {
+  const buildTwoMemberFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2']),
+        P2: makePath('P2', ['n1', 'e2', 'n2']),
+      },
+    });
+    return rs;
+  };
+
+  it('does not treat a compressed member as filtered when siblings remain visible', () => {
+    const rs = buildTwoMemberFixture();
+    const pathFilterState = { P1: true, P2: false };
+
+    expect(getIsPathIdFiltered(rs, 'P1', ['P1', 'P2'], pathFilterState)).toBe(false);
+    expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(false);
+  });
+
+  it('treats a compressed member as filtered when every member is filtered', () => {
+    const rs = buildTwoMemberFixture();
+    const pathFilterState = { P1: true, P2: true };
+
+    expect(getIsPathIdFiltered(rs, 'P1', ['P1', 'P2'], pathFilterState)).toBe(true);
+    expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(true);
   });
 });
