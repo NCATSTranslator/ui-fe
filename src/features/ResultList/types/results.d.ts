@@ -148,8 +148,8 @@ export type ChemicalAnnotation = {
   descriptions: AnnotationSection<string[]> | null;
   indications: AnnotationSection<Indication[]> | null;
   otc_status: AnnotationSection<{code: number, label: string}> | null;
-  other_names: AnnotationSection<{commercial: string[], generic: string[]}> | null;
   roles: AnnotationSection<ChebiRole[]> | null;
+  synonyms: AnnotationSection<{commercial: string[], generic: string[]}> | null;
 }
 
 export type DiseaseAnnotation = {

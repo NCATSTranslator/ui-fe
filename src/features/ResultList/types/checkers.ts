@@ -120,8 +120,8 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       ["descriptions", tc.nullable(obj.descriptions, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.descriptions],
       ["indications", tc.nullable(obj.indications, _isAnnotationSection(tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.name) && tc.isStringArray(e.ids) && tc.isStringArray(e.urls)))), "AnnotationSection<Indication[]> | null", obj.indications],
       ["otc_status", tc.nullable(obj.otc_status, _isAnnotationSection((e) => tc.isObject(e) && tc.isNumber(e.code) && tc.isString(e.label))), "AnnotationSection<{code, label}> | null", obj.otc_status],
-      ["other_names", tc.nullable(obj.other_names, _isAnnotationSection(e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic))), "AnnotationSection<{commercial, generic}> | null", obj.other_names],
       ["roles", tc.nullable(obj.roles, _isAnnotationSection(tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.id) && tc.isString(e.name)))), "AnnotationSection<ChebiRole[]> | null", obj.roles],
+      ["synonyms", tc.nullable(obj.synonyms, _isAnnotationSection(e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic))), "AnnotationSection<{commercial, generic}> | null", obj.synonyms],
     ], warn);
   }
 

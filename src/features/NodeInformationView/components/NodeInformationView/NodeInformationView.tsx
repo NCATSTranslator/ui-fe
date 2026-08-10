@@ -25,29 +25,52 @@ interface AnnotationOverrideProps {
   nodeType: string;
 }
 
-const ANNOTATION_OVERRIDES: Record<string, FC<AnnotationOverrideProps>> = {
-  clinical_trials: ({ value, nodeName, nodeType }) => (
-    <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
-  ),
-  name: ({ value }) => (
-    <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
-  ),
-  synonyms: ({ value }) => (
-    <>{(value as string[]).map(synonym => capitalizeAllWords(synonym)).join(", ")}</>
-  ),
-  indications: ({ value }) => (
-    <>
-      {(value as Indication[])
-        .map((indication, i) => {
-          const url = indication.urls[0];
-          const name = capitalizeAllWords(indication.name);
-          return url
-            ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
-            : <span key={i}>{name}</span>;
-        })
-        .flatMap((el, i) => (i === 0 ? [el] : [", ", el]))}
-    </>
-  ),
+const ClinicalTrials: FC<AnnotationOverrideProps> = ({ value, nodeName, nodeType }) => (
+  <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
+);
+
+const GeneName: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
+);
+
+const SynonymList: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>{(value as string[]).map(synonym => capitalizeAllWords(synonym)).join(", ")}</>
+);
+
+const ChemicalSynonymList: FC<AnnotationOverrideProps> = ({ value }) => {
+  const { commercial = [], generic = [] } = (value ?? {}) as { commercial?: string[]; generic?: string[] };
+  const names = [...commercial, ...generic];
+  if (names.length === 0) return null;
+  return <>{names.map(name => capitalizeAllWords(name)).join(", ")}</>;
+};
+
+const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>
+    {(value as Indication[])
+      .map((indication, i) => {
+        const url = indication.urls[0];
+        const name = capitalizeAllWords(indication.name);
+        return url
+          ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
+          : <span key={i}>{name}</span>;
+      })
+      .flatMap((el, i) => (i === 0 ? [el] : [", ", el]))}
+  </>
+);
+
+const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideProps>>> = {
+  chemical: {
+    clinical_trials: ClinicalTrials,
+    indications: Indications,
+    synonyms: ChemicalSynonymList,
+  },
+  disease: {
+    clinical_trials: ClinicalTrials,
+    synonyms: SynonymList,
+  },
+  gene: {
+    name: GeneName,
+  },
 };
 
 const NodeInformationView: FC = () => {
@@ -67,11 +90,11 @@ const NodeInformationView: FC = () => {
   const annotationFields = useMemo<{label: string; content: ReactNode}[]>(() => {
     if(!node || !node.annotations) return [];
     const fields: {label: string; content: ReactNode}[] = [];
-    for(const category of Object.values(node.annotations)) {
+    for(const [categoryKey, category] of Object.entries(node.annotations)) {
       for(const [key, section] of Object.entries(category)) {
         if(key === "descriptions" || section === null || section === undefined) continue;
         const value = section.value;
-        const Override = ANNOTATION_OVERRIDES[key];
+        const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
         if(Override) {
           fields.push({ label: formatLabel(key), content: <Override value={value} nodeName={nodeName ?? ""} nodeType={nodeType ?? ""} /> });
           continue;

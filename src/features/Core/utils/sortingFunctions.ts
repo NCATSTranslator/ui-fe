@@ -447,8 +447,8 @@ export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): Ranke
         descriptions: null,
         indications: null,
         otc_status: null,
-        other_names: null,
-        roles: null
+        roles: null,
+        synonyms: null
       },
       disease: {
         curies: null,
