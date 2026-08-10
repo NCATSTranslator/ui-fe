@@ -138,8 +138,10 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       return false;
     }
     return tc.checkProperties("isResultNode.annotations.disease", obj, [
+      ["clinical_trials", tc.nullable(obj.clinical_trials, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.clinical_trials],
       ["curies", tc.nullable(obj.curies, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.curies],
       ["descriptions", tc.nullable(obj.descriptions, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.descriptions],
+      ["synonyms", tc.nullable(obj.synonyms, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.synonyms],
     ], warn);
   }
 

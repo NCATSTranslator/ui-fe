@@ -153,8 +153,10 @@ export type ChemicalAnnotation = {
 }
 
 export type DiseaseAnnotation = {
+  clinical_trials: AnnotationSection<string[]> | null;
   curies: AnnotationSection<string[]> | null;
   descriptions: AnnotationSection<string[]> | null;
+  synonyms: AnnotationSection<string[]> | null;
 }
 
 export type GeneAnnotation = {
