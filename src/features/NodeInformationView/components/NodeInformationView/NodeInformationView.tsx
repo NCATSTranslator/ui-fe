@@ -17,7 +17,7 @@ import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotF
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import ResultListTopBar from "@/features/ResultList/components/ResultListTopBar/ResultListTopBar";
-import { Indication } from "@/features/ResultList/types/results";
+import { ChebiRole, Indication } from "@/features/ResultList/types/results";
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -44,6 +44,12 @@ const ChemicalSynonymList: FC<AnnotationOverrideProps> = ({ value }) => {
   return <>{names.map(name => capitalizeAllWords(name)).join(", ")}</>;
 };
 
+const ChemicalRoleList: FC<AnnotationOverrideProps> = ({ value }) => {
+  const roles = (value ?? []) as ChebiRole[];
+  if (roles.length === 0) return null;
+  return <>{roles.map(role => capitalizeAllWords(role.name)).join(", ")}</>;
+};
+
 const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   <>
     {(value as Indication[])
@@ -62,6 +68,7 @@ const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideP
   chemical: {
     clinical_trials: ClinicalTrials,
     indications: Indications,
+    roles: ChemicalRoleList,
     synonyms: ChemicalSynonymList,
   },
   disease: {
