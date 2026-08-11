@@ -226,11 +226,11 @@
   }
 }
 
-.overflowWrapper {
+.settingsMenuWrapper {
   position: relative;
 }
 
-.overflowMenu {
+.settingsMenu {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -243,7 +243,7 @@
   z-index: 10;
 }
 
-.overflowItem {
+.settingsMenuItem {
   display: block;
   width: 100%;
   padding: $xxs $s;
@@ -262,5 +262,13 @@
   &:disabled {
     opacity: 0.4;
     cursor: default;
+  }
+}
+
+.settingsMenuItemDanger {
+  color: $red;
+
+  &:hover:not(:disabled) {
+    background: $hoverGray;
   }
 }

@@ -9,9 +9,8 @@ import RedoIcon from '@/assets/icons/directional/Undo & Redo/Redo.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import SettingsIcon from '@/assets/icons/navigation/Settings.svg?react';
 import ExpandIcon from '@/assets/icons/buttons/Expand.svg?react';
-import OverflowMenu from './OverflowMenu';
+import CanvasSettingsMenu from './CanvasSettingsMenu';
 import AddMenu from './AddMenu';
 import StatusIndicator from './StatusIndicator';
 
@@ -190,14 +189,7 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
         >
           <RedoIcon />
         </button>
-        <button
-          className={styles.toolButton}
-          aria-label="Settings"
-          title="Settings"
-        >
-          <SettingsIcon />
-        </button>
-        <OverflowMenu />
+        <CanvasSettingsMenu />
       </div>
     </div>
   );
