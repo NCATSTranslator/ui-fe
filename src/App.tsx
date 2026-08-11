@@ -23,6 +23,7 @@ import { ProjectModalsProvider } from '@/features/Projects/components/ProjectMod
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
 import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
 
 // Lazy so translator-graph-view stays out of the entry chunk.
 const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
@@ -80,52 +81,54 @@ const App = ({children}: {children?: ReactNode}) => {
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
-          <CanvasContextMenuProvider>
-          <div className={joinClasses('app', pathnameClass, additionalClasses)}>
-            <AppToastContainer />
-            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="layout">
-                <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
-                <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>
-                  <div id={MAIN_SCROLL_ELEMENT_ID} className='contentScroll scrollable'>
-                    <Header />
-                    {children}
-                    {
-                      isSmallScreen && <SmallScreenOverlay /> 
-                    }
-                    <Outlet />
-                    <Footer>
-                      <nav>
-                        <a
-                          href="https://ncats.nih.gov/translator/about"
-                          rel="noreferrer"
-                          target="_blank"
-                        >About Translator</a>
-                        <NavLink to={`/terms-of-use`}
-                          className={({isActive}) => joinClasses(isActive && 'active')}
-                        >Terms of Use</NavLink>
-                        <a
-                          href="https://ncats.nih.gov/privacy"
-                          rel="noreferrer"
-                          target="_blank"
-                        >Privacy Policy</a>
-                      </nav>
-                    </Footer>
+          <CanvasDeleteConfirmationProvider>
+            <CanvasContextMenuProvider>
+              <div className={joinClasses('app', pathnameClass, additionalClasses)}>
+                <AppToastContainer />
+                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <div className="layout">
+                    <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
+                    <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>
+                      <div id={MAIN_SCROLL_ELEMENT_ID} className='contentScroll scrollable'>
+                        <Header />
+                        {children}
+                        {
+                          isSmallScreen && <SmallScreenOverlay /> 
+                        }
+                        <Outlet />
+                        <Footer>
+                          <nav>
+                            <a
+                              href="https://ncats.nih.gov/translator/about"
+                              rel="noreferrer"
+                              target="_blank"
+                            >About Translator</a>
+                            <NavLink to={`/terms-of-use`}
+                              className={({isActive}) => joinClasses(isActive && 'active')}
+                            >Terms of Use</NavLink>
+                            <a
+                              href="https://ncats.nih.gov/privacy"
+                              rel="noreferrer"
+                              target="_blank"
+                            >Privacy Policy</a>
+                          </nav>
+                        </Footer>
+                      </div>
+                      <Suspense fallback={null}>
+                        <CanvasPane />
+                      </Suspense>
+                    </main>
                   </div>
-                  <Suspense fallback={null}>
-                    <CanvasPane />
-                  </Suspense>
-                </main>
+                  {createPortal(
+                    <DragOverlay>
+                      {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
+                    </DragOverlay>,
+                    document.body,
+                  )}
+                </DndContext>
               </div>
-              {createPortal(
-                <DragOverlay>
-                  {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
-                </DragOverlay>,
-                document.body,
-              )}
-            </DndContext>
-          </div>
-        </CanvasContextMenuProvider>
+            </CanvasContextMenuProvider>
+          </CanvasDeleteConfirmationProvider>
         </ProjectModalsProvider>
       </QueryClientProvider>
     </SidebarProvider>

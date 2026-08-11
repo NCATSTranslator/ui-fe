@@ -22,7 +22,6 @@ import {
   updateCanvasMetadata,
   getCanvasGraph,
   mergeCanvasGraph,
-  trashCanvases,
   trashCanvasElements,
   updateCanvasGeometry,
   createCanvasAnnotation,
@@ -364,11 +363,6 @@ const useCanvasPersistence = () => {
     queueAnnotationTextSave(canvasId, annotationId, text);
   }, [queueAnnotationTextSave]);
 
-  const deleteFromServer = useCallback(async (canvasId: number) => {
-    try { await trashCanvases([canvasId]); invalidate(); }
-    catch { canvasSaveErrorToast(); }
-  }, [invalidate]);
-
   return {
     saveStatus,
     loaded: listLoaded,
@@ -379,7 +373,6 @@ const useCanvasPersistence = () => {
     saveGeometry,
     saveCreateAnnotation,
     saveUpdateAnnotationText,
-    deleteFromServer,
   };
 };
 

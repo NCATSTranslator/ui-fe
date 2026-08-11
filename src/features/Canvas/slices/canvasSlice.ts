@@ -42,8 +42,8 @@ export const canvasSlice = createSlice({
     deleteCanvas: (state, action: PayloadAction<number>) => {
       state.canvases = state.canvases.filter(c => c.id !== action.payload);
       if (state.activeCanvasId === action.payload) {
-        state.activeCanvasId = state.canvases.length > 0 ? state.canvases[0].id : null;
-        if (!state.activeCanvasId) resetPaneState(state);
+        state.activeCanvasId = null;
+        resetPaneState(state);
       }
     },
     renameCanvas: (state, action: PayloadAction<{ id: number; label: string }>) => {

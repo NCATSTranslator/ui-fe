@@ -109,6 +109,9 @@ export const canvasEntityRemovedToast = (entityName: string) => {
 export const canvasSaveErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'Canvas save failed', bottomText: 'Your changes may not be saved' } });
 };
+export const canvasDeletedToast = () => {
+  return toast(AppToast, { data: { topText: 'Canvas deleted' } });
+};
 export const canvasDeleteErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'Canvas delete failed', bottomText: 'The canvas may not have been removed' } });
 };

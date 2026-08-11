@@ -5,17 +5,15 @@ import {
   selectCanvases,
   selectActiveCanvasId,
   setActiveCanvas,
-  deleteCanvas,
-  restoreCanvas,
   renameCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 import { filterCanvasesBySearch, sortCanvases, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
-import { canvasDeleteErrorToast } from '@/features/Core/utils/toastMessages';
-import { trashCanvases, updateCanvasMetadata } from '@/features/Canvas/utils/canvasApi';
+import { updateCanvasMetadata } from '@/features/Canvas/utils/canvasApi';
 import { useCanvasSync } from '@/features/Canvas/hooks/useCanvasPersistence';
+import { useCanvasDeleteConfirmation } from '@/features/Canvas/hooks/useCanvasDeleteConfirmation';
 
 interface UseCanvasListOptions {
   sortMode?: CanvasSortMode;
@@ -31,8 +29,7 @@ const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const renameInputRef = useRef<HTMLInputElement>(null);
-  const canvasesRef = useRef(canvases);
-  canvasesRef.current = canvases;
+  const { requestDeleteCanvas } = useCanvasDeleteConfirmation();
 
   useEffect(() => {
     if (renamingId) {
@@ -65,21 +62,6 @@ const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
     setRenamingId(null);
   }, [dispatch, queryClient, renamingId, renameValue, canvases]);
 
-  const handleDeleteCanvas = useCallback((canvasId: number) => {
-    const deletedCanvas = canvasesRef.current.find(c => c.id === canvasId);
-    dispatch(deleteCanvas(canvasId));
-    trashCanvases([canvasId])
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
-      })
-      .catch(() => {
-        canvasDeleteErrorToast();
-        if (deletedCanvas) {
-          dispatch(restoreCanvas(deletedCanvas));
-        }
-      });
-  }, [dispatch, queryClient]);
-
   const sortedFilteredCanvases = useMemo(
     () => sortCanvases(filterCanvasesBySearch(canvases, searchTerm), sortMode),
     [canvases, searchTerm, sortMode]
@@ -98,7 +80,7 @@ const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
     handleSelectCanvas,
     handleStartRename,
     handleSubmitRename,
-    handleDeleteCanvas,
+    handleDeleteCanvas: requestDeleteCanvas,
   };
 };
 
