@@ -5,7 +5,7 @@ import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
-import { getCompressedPaths, getFilteredPathCount, getIsPathFiltered, getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
+import { getCompressedPaths, getIsPathFiltered, getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
 
 // ---------------------------------------------------------------------------
 // Minimal fixture factories
@@ -30,7 +30,6 @@ const makeEdge = (id: string, overrides: Partial<ResultEdge> = {}): ResultEdge =
   id,
   aras: [],
   is_root: false,
-  inferred: false,
   knowledge_level: 'knowledge_assertion',
   metadata: { edge_bindings: [], inverted_id: null, is_root: false },
   object: '',
@@ -39,7 +38,6 @@ const makeEdge = (id: string, overrides: Partial<ResultEdge> = {}): ResultEdge =
   provenance: [],
   publications: {},
   subject: '',
-  support: [],
   tags: {},
   type: 'edge',
   ...overrides,
@@ -121,10 +119,10 @@ const buildCompressedFixture = (extraPaths: Record<string, Path> = {}) => {
       n3: makeNode('n3'),
     },
     edges: {
-      e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
-      e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
-      e3: makeEdge('e3', { predicate: 'biolink:causes', inferred: false }),
-      e4: makeEdge('e4', { predicate: 'biolink:related_to', inferred: false }),
+      e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+      e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      e3: makeEdge('e3', { predicate: 'biolink:causes' }),
+      e4: makeEdge('e4', { predicate: 'biolink:related_to' }),
     },
     paths: {
       P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
@@ -390,7 +388,7 @@ describe('applyFilters — uncompressed path predicate filtering', () => {
   const buildSinglePathFixture = () => {
     const rs = makeResultSet({
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
-      edges: { e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }) },
+      edges: { e1: makeEdge('e1', { predicate: 'biolink:treats' }) },
       paths: {
         P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
       },
@@ -442,8 +440,8 @@ describe('applyFilters — compressed path predicate filtering', () => {
     const rs = makeResultSet({
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
       edges: {
-        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
-        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
       },
       paths: {
         P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [PRED_TREATS]: null } }),
@@ -577,8 +575,8 @@ describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
     const rs = makeResultSet({
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
       edges: {
-        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
-        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
       },
       paths: {
         P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null } }),
@@ -609,8 +607,8 @@ describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
     const rs = makeResultSet({
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
       edges: {
-        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
-        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
       },
       paths: {
         P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: { [ARA_EXCLUDE]: null, [ARA_INCLUDE]: null } }),
@@ -634,32 +632,30 @@ describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// applyFilters — filtered path count consistency
+// applyFilters — per-member filter state consistency
 // ---------------------------------------------------------------------------
 
-describe('applyFilters — filtered path count consistency', () => {
-  it('counts only matching members as filtered for per-member exclusions', () => {
-    const { rs, result } = buildCompressedFixture();
+describe('applyFilters — per-member filter state consistency', () => {
+  it('marks only the matching member as filtered for per-member exclusions', () => {
+    const { rs } = buildCompressedFixture();
     const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
       makePathFilter(PRED_AFFECTS, true),
     ]);
 
-    const compressedPaths = getCompressedPaths(rs, ['P1', 'P2']);
-    const filteredCount = getFilteredPathCount(compressedPaths, updatedPathFilterState);
-
-    expect(filteredCount).toBe(1);
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(true);
   });
 
-  it('counts zero filtered paths when exclusion does not match any member', () => {
-    const { rs, result } = buildCompressedFixture();
+  it('marks no members as filtered when the exclusion matches nothing', () => {
+    const { rs } = buildCompressedFixture();
     const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
     const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
       makePathFilter(PRED_UNRELATED, true),
     ]);
 
-    const compressedPaths = getCompressedPaths(rs, ['P1', 'P2']);
-    expect(getFilteredPathCount(compressedPaths, updatedPathFilterState)).toBe(0);
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
   });
 });
 
@@ -703,8 +699,8 @@ describe('getIsPathIdFiltered — evidence view lookup by member path ID', () =>
     const rs = makeResultSet({
       nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
       edges: {
-        e1: makeEdge('e1', { predicate: 'biolink:treats', inferred: false }),
-        e2: makeEdge('e2', { predicate: 'biolink:affects', inferred: false }),
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
       },
       paths: {
         P1: makePath('P1', ['n1', 'e1', 'n2']),

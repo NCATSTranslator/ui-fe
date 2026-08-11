@@ -1,6 +1,5 @@
-import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
+import { getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { Path, ResultSet, PathFilterState, Tags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
-import { isResultEdge } from "@/features/ResultList/types/checkers";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
@@ -34,131 +33,6 @@ export const getARATagsFromResultTags = (tags: Tags): string[] => {
 };
 
 /**
- * Extracts all edge IDs from a Path's subgraph.
- *
- * This function returns the edge IDs from a Path object, whether it uses
- * the compressed or standard subgraph format. Edges are assumed to reside
- * at the odd-numbered indices of the subgraph array.
- *
- * @param {Path} path - The path object from which to extract edge IDs.
- * @returns {string[]} - An array of edge ID strings.
- */
-export const getEdgeIdsFromPath = (path: Path): string[] => {
-  const graph = path.compressedSubgraph ?? path.subgraph;
-  return graph.filter((_, i) => !isNodeIndex(i)).flat();
-};
-
-/**
- * Recursively collects all support path IDs from a list of initial paths.
- *
- * @param {Path[]} paths - The initial paths to analyze.
- * @param {ResultSet} resultSet - The result set used to resolve path and edge references.
- * @param {Set<string>} [visited=new Set()] - Used internally to track visited path IDs and avoid infinite loops.
- * @returns {string[]} - An array of all unique support path IDs reachable from the initial paths.
- */
-export const getAllSupportPathIDs = (
-  paths: Path[],
-  resultSet: ResultSet,
-  visited: Set<string> = new Set()
-): string[] => {
-  const supportPathIDs: Set<string> = new Set();
-
-  const traverseSupportPaths = (edgeIds: string[]) => {
-    const edges = getEdgesByIds(resultSet, edgeIds);
-
-    for (const edge of edges) {
-      if (!edge.support) continue;
-
-      const supports = Array.isArray(edge.support)
-        ? edge.support
-        : [];
-
-      for (const support of supports) {
-        const pathID = typeof support === 'string'
-          ? support
-          : support.id;
-
-        if (!pathID || visited.has(pathID)) continue;
-        visited.add(pathID);
-        supportPathIDs.add(pathID);
-
-        const supportPath = typeof support === 'string'
-          ? getPathById(resultSet, pathID)
-          : support;
-
-        if (!supportPath) continue;
-
-        const nestedEdgeIds = getEdgeIdsFromPath(supportPath);
-        traverseSupportPaths(nestedEdgeIds);
-      }
-    }
-  };
-
-  for (const path of paths) {
-    if (!path?.id || visited.has(path.id)) continue;
-    visited.add(path.id);
-
-    const edgeIds = getEdgeIdsFromPath(path);
-    traverseSupportPaths(edgeIds);
-  }
-
-  return Array.from(supportPathIDs);
-};
-
-/**
- * Returns a set of all path IDs from a list of paths, including their recursively supported paths if `full` is true and a resultSet is provided.
- *
- * @param {Path[]} paths - The initial list of paths to check.
- * @param {boolean} full - If true, includes all recursively supported paths via edges.
- * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
- * @returns {Set<string>} - A set of all path IDs.
- */
-export const getPathIdSet = (paths: Path[], full: boolean = false, resultSet?: ResultSet | null): Set<string> => {
-  const allPathIDs = new Set<string>();
-  if(full && !!resultSet) {
-    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
-    for (const id of supportPathIDs)
-      allPathIDs.add(id);
-  }
-  for(const path of paths) {
-    if(path.compressedIDs) {
-      for(const id of path.compressedIDs) {
-        allPathIDs.add(id);
-      }
-    } else if (path?.id) {
-      allPathIDs.add(path.id);
-    }
-  }
-  return allPathIDs;
-}
-
-/**
- * Counts how many of the provided paths are filtered, including their recursively supported paths if `full` is true.
- *
- * @param {Path[]} paths - The initial list of paths to check.
- * @param {PathFilterState} pathFilterState - A mapping of path IDs to their filtered status.
- * @param {boolean} full - If true, includes all recursively supported paths via edges.
- * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
- * @returns {number} - The total count of filtered paths (initial + supported).
- */
-export const getFilteredPathCount = (
-  paths: Path[],
-  pathFilterState: PathFilterState,
-  full: boolean = false,
-  resultSet?: ResultSet | null
-): number => {
-  const allPathIDs = getPathIdSet(paths, full, resultSet);
-
-  let count = 0;
-  for (const id of allPathIDs) {
-    if (pathFilterState[id])
-      count++;
-  }
-
-  return count;
-};
-
-/**
  * Returns an array of edge IDs extracted from a subgraph sequence, which consists of alternating
  * node and edge IDs, always starting and ending with a node ID.
  *
@@ -170,7 +44,7 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
 
 /**
  * Compresses paths and sorts them.
- * Paths are sorted via sortArrayByIndirect (inferred status, length, filter state).
+ * Paths are sorted via sortArrayByIndirect (length, filter state).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
@@ -188,9 +62,8 @@ export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | 
 
 /**
  * Sorts paths for top-level display. Priority order:
- * 1. Non-inferred before inferred
- * 2. Shorter subgraph (fewer hops) before longer
- * 3. Non-filtered before filtered
+ * 1. Shorter subgraph (fewer hops) before longer
+ * 2. Non-filtered before filtered
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {Path[]} paths - An array of paths.
@@ -201,10 +74,6 @@ export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], 
   if(!resultSet)
     return paths;
   return cloneDeep(paths).sort((a, b) => {
-      const inferredA = isPathInferred(resultSet, a) ? 1 : 0;
-      const inferredB = isPathInferred(resultSet, b) ? 1 : 0;
-      if(inferredA !== inferredB)
-        return inferredA - inferredB;
       const lengthDiff = (a.subgraph?.length ?? 0) - (b.subgraph?.length ?? 0);
       if(lengthDiff !== 0)
         return lengthDiff;
@@ -270,8 +139,8 @@ export const getIsPathIdFiltered = (
 };
 
 /**
- * Takes a list of paths/path IDs and compresses them if any paths have the same nodes and their edges have
- * the same support status (provided by the getPathSequenceKey helper function).
+ * Takes a list of paths/path IDs and compresses them if any paths share the same node
+ * sequence (provided by the getPathSequenceKey helper function).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
@@ -373,31 +242,6 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 }
 
 /**
- * Takes a Path object and returns a boolean value based on whether any of its edges have support paths.
- *
- * @param {ResultSet} resultSet - ResultSet Object.
- * @param {Path} path - Path Object.
- * @returns {boolean} - Does the path have any edges with support paths attached.
- */
-export const isPathInferred = (resultSet: ResultSet, path: Path) => {
-  if(!path || path === null)
-    return false;
-
-  for(const [i, itemID] of path.subgraph.entries()) {
-    if(isNodeIndex(i))
-      continue;
-
-    const edge = getEdgeById(resultSet, itemID);
-    if(!isResultEdge(edge))
-      continue;
-
-    if(edge.inferred)
-      return true;
-  }
-  return false;
-}
-
-/**
  * Generates a path data string for a path in a graph visualization.
  *
  * @param {number} index - The index of the path in the graph.
@@ -440,17 +284,6 @@ export const generatePathD = (
        C ${controlX1} ${endY}, ${controlX2} ${startY}, ${midEndX} ${startY}
        L ${endX} ${startY}`;
 };
-
-/**
- * Generates a unique identifier for a predicate based on the path and edge IDs.
- *
- * @param {Path} path - The path object.
- * @param {string[]} edgeIds - The edge IDs.
- * @returns {string} - The unique predicate ID.
- */
-export const generatePredicateId = (path: Path, edgeIds: string[]) => {
-    return `${path.id}-${edgeIds.join('-')}`;
-}
 
 /**
  * Checks if the notes on a save are empty.

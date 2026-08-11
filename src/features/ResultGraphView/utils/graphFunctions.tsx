@@ -18,34 +18,14 @@ export const resultToGraphData = (
   const distributeEntitiesInPath = (
     pathID: string,
     pathsArray: typeof summary.paths,
-    edgesArray: typeof summary.edges,
     nodeCollection: Set<string>,
-    edgeCollection: Set<string>,
-    supportStack: string[]
+    edgeCollection: Set<string>
   ) => {
     const path = pathsArray[pathID];
     if (path) {
-      supportStack.push(pathID);
       path.subgraph.forEach((elemID, i) => {
         if (isNodeIndex(i)) nodeCollection.add(elemID);
-        else {
-          edgeCollection.add(elemID);
-          const edge = edgesArray[elemID];
-          if (edge.inferred) {
-            const validSupport = edge.support.filter(p => {
-              const pid = typeof p === "string" ? p : p.id;
-              return !!pid && !supportStack.includes(pid);
-            });
-            for (const supportPathID of validSupport) {
-              const id = typeof supportPathID === "string" ? supportPathID : supportPathID.id;
-              if(!id) {
-                console.warn('unable to add support path to graph, id is missing.');
-                continue;
-              }
-              distributeEntitiesInPath(id, pathsArray, edgesArray, nodeCollection, edgeCollection, supportStack);
-            }
-          }
-        }
+        else edgeCollection.add(elemID);
       });
     } else {
       console.warn("Missing pathID:", pathID);
@@ -57,7 +37,7 @@ export const resultToGraphData = (
   for (const pathID of result.paths) {
     const pid = typeof pathID === "string" ? pathID : pathID.id;
     if(!!pid)
-      distributeEntitiesInPath(pid, summary.paths, summary.edges, ns, es, []);
+      distributeEntitiesInPath(pid, summary.paths, ns, es);
   }
 
   const nodes: Record<string, GraphNodeType> = {};
@@ -80,7 +60,6 @@ export const resultToGraphData = (
       subject: e.subject,
       object: e.object,
       predicate,
-      inferred: e.inferred,
     };
   }
 
