@@ -12,7 +12,7 @@ import {
 /**
  * Escapes a value for CSV format
  */
-const escapeCSVValue = (value: CSVValue): string => {
+export const escapeCSVValue = (value: CSVValue): string => {
   if (value === null || value === undefined) return '';
   const stringValue = String(value);
   // If value contains comma, quote, newline, or semicolon, wrap in quotes and escape quotes
@@ -27,7 +27,7 @@ const escapeCSVValue = (value: CSVValue): string => {
  * Joins array values with semicolon for CSV
  * Escapes any semicolons within individual values
  */
-const joinArrayForCSV = (arr: (string | number | null | undefined)[] | undefined): string => {
+export const joinArrayForCSV = (arr: (string | number | null | undefined)[] | undefined): string => {
   if (!arr || arr.length === 0) return '';
   return arr
     .map(item => {
