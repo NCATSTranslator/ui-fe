@@ -34,7 +34,7 @@ export const canvasNodeDetailToResultNode = (detail: CanvasNodeDetail): ResultNo
   provenance: [...detail.provenance],
   annotations: detail.annotations ?? EMPTY_ANNOTATIONS,
   other_names: {},
-  signature: '',
+  signature: detail.signature ?? detail.id,
   source_time: detail.source_time ?? '',
   tags: detail.tags,
 });
@@ -58,5 +58,5 @@ export const canvasEdgeDetailToResultEdge = (detail: CanvasEdgeDetail): ResultEd
   trials: [...detail.trials],
   source_time: detail.source_time ?? '',
   tags: detail.tags,
-  signature: '',
+  signature: detail.signature ?? detail.id,
 });

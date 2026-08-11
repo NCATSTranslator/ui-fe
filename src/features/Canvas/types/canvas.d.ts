@@ -243,6 +243,7 @@ export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error';
 
 export type CanvasNodeDetail = {
   id: string;
+  signature?: string;
   aras: string[];
   descriptions: string[];
   names: string[];
@@ -257,6 +258,7 @@ export type CanvasNodeDetail = {
 
 export type CanvasEdgeDetail = {
   id: string;
+  signature?: string;
   aras: string[];
   support: string[] | import('@/features/ResultList/types/results').Path[];
   is_root: boolean;
