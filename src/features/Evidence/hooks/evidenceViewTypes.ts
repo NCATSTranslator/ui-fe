@@ -17,7 +17,6 @@ export interface EvidenceViewContentProps {
   pk: string;
   selectedEdge: ResultEdge;
   selectedEdgeDomRef: RefObject<HTMLElement | null>;
-  isInferred: boolean;
   isFilteredOut: boolean;
   onClearFilters: () => void;
   publications: PublicationObject[];
