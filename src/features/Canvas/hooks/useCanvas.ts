@@ -10,17 +10,17 @@ import {
   renameCanvas,
   replaceCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
-import type { CanvasNode, CanvasEdge, GraphSubmission, GraphSelection } from '@/features/Canvas/types/canvas';
-import { mergeEntityIntoCanvas } from '@/features/Canvas/utils/canvasGraphFunctions';
+import type { CanvasNode, CanvasEdge, GraphSubmission } from '@/features/Canvas/types/canvas';
+import { mergeEntityIntoCanvas, selectionForRemovedNode } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { canvasNodesToGraphSubmission } from '@/features/Canvas/utils/canvasMappers';
 import { estimatePlacementNearNodes } from '@/features/Canvas/utils/canvasAnnotationUtils';
 import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
 import useCanvasHistory from './useCanvasHistory';
 import { canvasEntityAddedToast, canvasEntityAlreadyAddedToast } from '@/features/Core/utils/toastMessages';
+import type { CanvasHistoryPersistence } from '@/features/Canvas/utils/canvasHistoryUtils';
 
-type UseCanvasOptions = {
+type UseCanvasOptions = CanvasHistoryPersistence & {
   saveMerge?: (canvasId: number, submission: GraphSubmission) => Promise<void>;
-  saveTrashElements?: (canvasId: number, selection: GraphSelection) => Promise<void>;
   saveRename?: (canvasId: number, label: string) => Promise<void>;
 };
 
@@ -43,10 +43,12 @@ const createCanvasNode = (
 });
 
 const useCanvas = (options: UseCanvasOptions = {}) => {
-  const { saveMerge, saveTrashElements, saveRename } = options;
+  const {
+    saveMerge, saveTrashElements, saveRename,
+  } = options;
   const dispatch = useDispatch<AppDispatch>();
   const activeCanvas = useSelector(selectActiveCanvas);
-  const { pushUndo, undo, redo, canUndo, canRedo } = useCanvasHistory(activeCanvas);
+  const { pushUndo, undo, redo, canUndo, canRedo } = useCanvasHistory(activeCanvas, options);
 
   const addNode = useCallback((node: CanvasNode) => {
     if (!activeCanvas) return;
@@ -64,10 +66,10 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
 
   const removeNode = useCallback((nodeId: string) => {
     if (!activeCanvas) return;
-    const node = activeCanvas.nodes[nodeId];
+    const selection = selectionForRemovedNode(activeCanvas, nodeId);
     pushUndo();
     dispatch(removeCanvasNode({ canvasId: activeCanvas.id, nodeId }));
-    if (node?.dataId) saveTrashElements?.(activeCanvas.id, { nodes: [node.dataId] });
+    if (selection) saveTrashElements?.(activeCanvas.id, selection);
   }, [activeCanvas, dispatch, pushUndo, saveTrashElements]);
 
   const removeEdge = useCallback((edgeId: string) => {
@@ -78,11 +80,14 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
     if (edge?.dataId) saveTrashElements?.(activeCanvas.id, { edges: [edge.dataId] });
   }, [activeCanvas, dispatch, pushUndo, saveTrashElements]);
 
-  const mergeEntities = useCallback((nodes: CanvasNode[], edges: CanvasEdge[], submission?: GraphSubmission) => {
+  const mergeEntities = useCallback((
+    nodes: CanvasNode[],
+    edges: CanvasEdge[],
+    submission?: GraphSubmission,
+  ) => {
     if (!activeCanvas) return;
     pushUndo();
-    const merged = mergeEntityIntoCanvas(activeCanvas, nodes, edges);
-    dispatch(replaceCanvas(merged));
+    dispatch(replaceCanvas(mergeEntityIntoCanvas(activeCanvas, nodes, edges)));
     saveMerge?.(activeCanvas.id, submission ?? canvasNodesToGraphSubmission(nodes, edges));
   }, [activeCanvas, dispatch, pushUndo, saveMerge]);
 
@@ -106,19 +111,8 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
   }, [activeCanvas, mergeEntities]);
 
   return {
-    activeCanvas,
-    addNode,
-    addEdge,
-    removeNode,
-    removeEdge,
-    mergeEntities,
-    rename,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    addObject,
-    pushUndo,
+    activeCanvas, addNode, addEdge, removeNode, removeEdge,
+    mergeEntities, rename, undo, redo, canUndo, canRedo, addObject, pushUndo,
   };
 };
 

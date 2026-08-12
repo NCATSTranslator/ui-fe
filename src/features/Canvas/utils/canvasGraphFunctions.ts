@@ -1,8 +1,26 @@
 import type { GraphData, GraphNodeType, GraphEdgeType } from 'translator-graph-view';
-import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasNode, CanvasEdge, GraphSelection } from '@/features/Canvas/types/canvas';
 import type { ResultSet, Path, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
 import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
+
+/** Build a trash/restore selection for a node and its connected edges. */
+export const selectionForRemovedNode = (
+  canvas: Canvas,
+  nodeId: string,
+): GraphSelection | null => {
+  const node = canvas.nodes[nodeId];
+  const nodes = node?.dataId ? [node.dataId] : [];
+  const edges = Object.values(canvas.edges)
+    .filter(edge => edge.subject === nodeId || edge.object === nodeId)
+    .map(edge => edge.dataId)
+    .filter(id => id > 0);
+  if (nodes.length === 0 && edges.length === 0) return null;
+  return {
+    ...(nodes.length > 0 && { nodes }),
+    ...(edges.length > 0 && { edges }),
+  };
+};
 
 export const canvasNodesToNodePositions = (
   nodes: Record<string, CanvasNode>,

@@ -3,13 +3,22 @@ import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import { replaceCanvas } from '@/features/Canvas/slices/canvasSlice';
 import type { Canvas } from '@/features/Canvas/types/canvas';
+import {
+  persistCanvasHistoryTransition,
+  type CanvasHistoryPersistence,
+} from '@/features/Canvas/utils/canvasHistoryUtils';
 
 const MAX_UNDO_DEPTH = 20;
 
-const useCanvasHistory = (activeCanvas: Canvas | null) => {
+const useCanvasHistory = (
+  activeCanvas: Canvas | null,
+  persistence: CanvasHistoryPersistence = {},
+) => {
   const dispatch = useDispatch<AppDispatch>();
   const undoStacksRef = useRef<Record<string, Canvas[]>>({});
   const redoStacksRef = useRef<Record<string, Canvas[]>>({});
+  const persistenceRef = useRef(persistence);
+  persistenceRef.current = persistence;
   const [, forceUpdate] = useState(0);
 
   const pushUndo = useCallback(() => {
@@ -21,6 +30,7 @@ const useCanvasHistory = (activeCanvas: Canvas | null) => {
     if (redoStacksRef.current[key]?.length) {
       redoStacksRef.current[key] = [];
     }
+    forceUpdate(r => r + 1);
   }, [activeCanvas]);
 
   const undo = useCallback(() => {
@@ -35,6 +45,11 @@ const useCanvasHistory = (activeCanvas: Canvas | null) => {
     redoStacksRef.current[key] = [...redoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
     dispatch(replaceCanvas(snapshot));
     forceUpdate(r => r + 1);
+    const persistence = persistenceRef.current;
+    persistence.invalidatePendingGraphApplies?.();
+    persistence.clearPendingGeometry?.();
+    persistence.clearPendingAnnotationText?.();
+    void persistCanvasHistoryTransition(current, snapshot, persistence);
   }, [activeCanvas, dispatch]);
 
   const redo = useCallback(() => {
@@ -49,6 +64,11 @@ const useCanvasHistory = (activeCanvas: Canvas | null) => {
     undoStacksRef.current[key] = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), current];
     dispatch(replaceCanvas(snapshot));
     forceUpdate(r => r + 1);
+    const persistence = persistenceRef.current;
+    persistence.invalidatePendingGraphApplies?.();
+    persistence.clearPendingGeometry?.();
+    persistence.clearPendingAnnotationText?.();
+    void persistCanvasHistoryTransition(current, snapshot, persistence);
   }, [activeCanvas, dispatch]);
 
   const canUndo = !!activeCanvas && (undoStacksRef.current[String(activeCanvas.id)]?.length ?? 0) > 0;
