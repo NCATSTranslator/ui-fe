@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { AppDispatch } from '@/redux/store';
 import {
   selectCanvases,
@@ -22,12 +22,12 @@ import {
   toggleMaximizePane,
   togglePane,
 } from '@/features/Canvas/slices/canvasSlice';
-import type { BackendUserCanvas } from '@/features/Canvas/types/canvas';
+import type { BackendUserCanvas, Canvas } from '@/features/Canvas/types/canvas';
 import { trashCanvases } from '@/features/Canvas/utils/canvasApi';
 import { canvasDeleteErrorToast, canvasDeletedToast } from '@/features/Core/utils/toastMessages';
+import CanvasDeleteWarningModal from '@/features/Canvas/components/CanvasDeleteWarningModal/CanvasDeleteWarningModal';
 
 const USER_CANVASES_QUERY_KEY = ['userCanvases'] as const;
-import CanvasDeleteWarningModal from '@/features/Canvas/components/CanvasDeleteWarningModal/CanvasDeleteWarningModal';
 
 export interface CanvasDeleteConfirmationContextValue {
   canvasPendingDelete: ReturnType<typeof selectCanvases>[number] | null;
@@ -45,6 +45,59 @@ interface CanvasDeleteConfirmationProviderProps {
   children: ReactNode;
 }
 
+type DeleteRollbackState = {
+  canvasId: number;
+  deletedCanvas: Canvas | undefined;
+  deletedMeta: BackendUserCanvas | undefined;
+  wasActive: boolean;
+  wasPaneOpen: boolean;
+  wasPaneMaximized: boolean;
+};
+
+const useSyncedRef = <T,>(value: T) => {
+  const ref = useRef(value);
+  ref.current = value;
+  return ref;
+};
+
+const restoreMetaInQueryCache = (
+  queryClient: QueryClient,
+  deletedMeta: BackendUserCanvas,
+) => {
+  queryClient.setQueryData<BackendUserCanvas[]>(
+    USER_CANVASES_QUERY_KEY,
+    old => {
+      const current = old ?? [];
+      if (current.some(canvas => canvas.id === deletedMeta.id)) return current;
+      return [...current, deletedMeta];
+    },
+  );
+};
+
+const rollbackFailedDelete = (
+  dispatch: AppDispatch,
+  queryClient: QueryClient,
+  state: DeleteRollbackState,
+) => {
+  canvasDeleteErrorToast();
+
+  if (state.deletedMeta) {
+    restoreMetaInQueryCache(queryClient, state.deletedMeta);
+  }
+
+  if (!state.deletedCanvas) return;
+
+  dispatch(restoreCanvas(state.deletedCanvas));
+  if (!state.wasActive) return;
+
+  dispatch(setActiveCanvas(state.canvasId));
+  if (!state.wasPaneOpen) {
+    dispatch(togglePane());
+  } else if (state.wasPaneMaximized) {
+    dispatch(toggleMaximizePane());
+  }
+};
+
 export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProviderProps> = ({
   children,
 }) => {
@@ -54,15 +107,10 @@ export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProvid
   const activeCanvasId = useSelector(selectActiveCanvasId);
   const paneOpen = useSelector(selectPaneOpen);
   const paneMaximized = useSelector(selectPaneMaximized);
-
-  const canvasesRef = useRef(canvases);
-  canvasesRef.current = canvases;
-  const activeCanvasIdRef = useRef(activeCanvasId);
-  activeCanvasIdRef.current = activeCanvasId;
-  const paneOpenRef = useRef(paneOpen);
-  paneOpenRef.current = paneOpen;
-  const paneMaximizedRef = useRef(paneMaximized);
-  paneMaximizedRef.current = paneMaximized;
+  const canvasesRef = useSyncedRef(canvases);
+  const activeCanvasIdRef = useSyncedRef(activeCanvasId);
+  const paneOpenRef = useSyncedRef(paneOpen);
+  const paneMaximizedRef = useSyncedRef(paneMaximized);
 
   const [pendingDeleteCanvasId, setPendingDeleteCanvasId] = useState<number | null>(null);
 
@@ -84,13 +132,15 @@ export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProvid
     const canvasId = pendingDeleteCanvasId;
     setPendingDeleteCanvasId(null);
 
-    const deletedCanvas = canvasesRef.current.find(canvas => canvas.id === canvasId);
-    const wasActive = activeCanvasIdRef.current === canvasId;
-    const wasPaneOpen = paneOpenRef.current;
-    const wasPaneMaximized = paneMaximizedRef.current;
-
     const previousCanvases = queryClient.getQueryData<BackendUserCanvas[]>(USER_CANVASES_QUERY_KEY);
-    const deletedMeta = previousCanvases?.find(canvas => canvas.id === canvasId);
+    const rollbackState: DeleteRollbackState = {
+      canvasId,
+      deletedCanvas: canvasesRef.current.find(canvas => canvas.id === canvasId),
+      deletedMeta: previousCanvases?.find(canvas => canvas.id === canvasId),
+      wasActive: activeCanvasIdRef.current === canvasId,
+      wasPaneOpen: paneOpenRef.current,
+      wasPaneMaximized: paneMaximizedRef.current,
+    };
 
     queryClient.setQueryData<BackendUserCanvas[]>(
       USER_CANVASES_QUERY_KEY,
@@ -103,34 +153,8 @@ export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProvid
         queryClient.invalidateQueries({ queryKey: USER_CANVASES_QUERY_KEY });
         canvasDeletedToast();
       })
-      .catch(() => {
-        canvasDeleteErrorToast();
-
-        if (deletedMeta) {
-          queryClient.setQueryData<BackendUserCanvas[]>(
-            USER_CANVASES_QUERY_KEY,
-            old => {
-              const current = old ?? [];
-              return current.some(canvas => canvas.id === deletedMeta.id)
-                ? current
-                : [...current, deletedMeta];
-            },
-          );
-        }
-
-        if (!deletedCanvas) return;
-
-        dispatch(restoreCanvas(deletedCanvas));
-        if (wasActive) {
-          dispatch(setActiveCanvas(canvasId));
-          if (!wasPaneOpen) {
-            dispatch(togglePane());
-          } else if (wasPaneMaximized) {
-            dispatch(toggleMaximizePane());
-          }
-        }
-      });
-  }, [dispatch, pendingDeleteCanvasId, queryClient]);
+      .catch(() => rollbackFailedDelete(dispatch, queryClient, rollbackState));
+  }, [activeCanvasIdRef, canvasesRef, dispatch, paneMaximizedRef, paneOpenRef, pendingDeleteCanvasId, queryClient]);
 
   const value = useMemo(
     () => ({
