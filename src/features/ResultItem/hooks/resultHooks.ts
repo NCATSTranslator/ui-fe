@@ -1,7 +1,5 @@
 import { createContext, Dispatch, SetStateAction, useContext, useMemo } from "react";
-import { SupportPathDepthContext, ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
-import { ExpandedPredicateContext } from "@/features/ResultItem/components/PathContainer/PathContainer";
-import { SupportPathKeyContext } from "@/features/ResultItem/components/SupportPathGroup/SupportPathGroup";
+import { ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
@@ -21,42 +19,12 @@ export const useLastViewedPath = (): LastViewedPathIDContextType => {
 };
 
 /**
- * Custom hook to get the current depth level in the path hierarchy.
- * @returns {number} The current depth level.
- */
-export const useSupportPathDepth = (): number => {
-  return useContext(SupportPathDepthContext);
-};
-
-/**
  * Custom hook to get the id of the result that the current PathView belongs to.
  * Falls back to undefined when rendered outside of a PathView.
  * @returns {string | undefined} The result id, if available.
  */
 export const useResultItemId = (): string | undefined => {
   return useContext(ResultItemIdContext);
-};
-
-/**
- * Custom hook to get the current key of a support path in the path hierarchy.
- * @returns {string} The key expressed as a string (1, 1.a, 1.a.i, etc.)
- */
-export const useSupportPathKey = (): string => {
-  return useContext(SupportPathKeyContext);
-};
-
-/**
- * Custom hook to manage which predicate is expanded within a path.
- * Ensures only one predicate can be expanded at a time within each path.
- * @returns {Object} Object containing expandedPredicateId and setExpandedPredicateId function
- */
-export const useExpandedPredicate = () => {
-  const context = useContext(ExpandedPredicateContext);
-  if (!context) {
-    console.warn("useExpandedPredicate must be used within an ExpandedPredicateContext.Provider");
-    return { expandedPredicateId: null, setExpandedPredicateId: () => {} };
-  }
-  return context;
 };
 
 /**

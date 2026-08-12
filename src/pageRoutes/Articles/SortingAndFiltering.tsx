@@ -67,12 +67,12 @@ export const SortingAndFiltering = () => {
         Path Filters</h2>
       <p><strong>Objects within Paths</strong><br />
       Include or exclude paths from results that contain a particular type of object.</p>
+      <p><strong>Relationships</strong><br />
+      Include or exclude paths from results based on the types of relationships within them.</p>
+      <p><strong>Path Length</strong><br />
+      Include or exclude paths from results that contain a set number of connections.</p>
       <p><strong>Evidence Type</strong><br />
       Include or exclude paths supported by various evidence types.</p>
-      <p><strong>Path Type</strong><br />
-      Include or exclude paths from results that contain direct or inferred relationships to the indicated disease.</p>
-      <p><strong>Support Path Length</strong><br />
-      Include or exclude paths from results that contain a set number of relationships.</p>
       <p><strong>Reasoning Agent</strong><br />
       Include or exclude <Link to="/about-translator#reasoning-agents">reasoning agents</Link> used to return results.</p>
     </>

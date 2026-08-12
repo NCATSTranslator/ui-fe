@@ -1,5 +1,4 @@
 import { FC, KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
@@ -19,7 +18,6 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   pk,
   selectedEdge,
   selectedEdgeDomRef,
-  isInferred,
   isFilteredOut,
   onClearFilters,
   publications,
@@ -84,26 +82,18 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
             selectedEdgeRef={selectedEdgeDomRef}
           />
         )}
-        {isInferred ? (
-          <div className={styles.inferredDisclaimer}>
-            <p>Supporting evidence for this relationship, including intermediary connections, can be found in the next path(s).</p>
-            <p>Reasoning agents that use logic and pattern recognition to find connections between objects identified this path as a possible connection between this result and your search term.</p>
-            <Link to="/help#reasoner" target="_blank" rel="noreferrer">Learn More about Reasoning Agents</Link>
-          </div>
-        ) : (
-          <EvidenceTabs
-            isOpen={true}
-            publications={publications}
-            setPublications={setPublications}
-            clinicalTrials={clinicalTrials}
-            miscEvidence={miscEvidence}
-            sources={sources}
-            selectedEdge={selectedEdge}
-            pk={pk}
-            prefs={prefs}
-            initialTab={initialTab}
-          />
-        )}
+        <EvidenceTabs
+          isOpen={true}
+          publications={publications}
+          setPublications={setPublications}
+          clinicalTrials={clinicalTrials}
+          miscEvidence={miscEvidence}
+          sources={sources}
+          selectedEdge={selectedEdge}
+          pk={pk}
+          prefs={prefs}
+          initialTab={initialTab}
+        />
       </div>
     </FilteredOutWrapper>
   </div>

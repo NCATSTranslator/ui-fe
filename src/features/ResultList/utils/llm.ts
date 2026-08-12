@@ -20,35 +20,18 @@ export const genTopNResultsContext = (resultSet: ResultSet, results: Result[], n
 
 export const genResultContext = (resultSet: ResultSet, result: Result): ResultContextObject => {
   const name = result.drug_name;
-  const seenPids = new Set();
   const pathStrings = new Set<string>();
-  const pathsLeft = !!result.paths ?[...result.paths] : false;
-  while (!!pathsLeft && pathsLeft.length !== 0) {
-    const p = pathsLeft.pop();
-    if(!p)
-      break;
+  for (const p of result.paths ?? []) {
     const path = (typeof p === "string") ? getPathById(resultSet, p) : p;
     const pathID = (typeof p === "string") ? p : p.id;
     if(!path)
-      break;
-    seenPids.add(pathID);
-    const subgraph = path.subgraph;
-    const pathString = genPathString(resultSet, subgraph);
+      continue;
+    const pathString = genPathString(resultSet, path.subgraph);
     if (!pathString) {
       console.error(`Unexpected missing path in summary: ${pathID}`);
       continue;
     }
     pathStrings.add(pathString);
-    for (let i = 1; i < subgraph.length; i+=2) {
-      const nextEdgeItem = getEdgeById(resultSet, subgraph[i]);
-      if(!!nextEdgeItem?.support) {
-        for (let supPathID of nextEdgeItem.support) {
-          if (!seenPids.has(supPathID)) {
-            pathsLeft.push(supPathID);
-          }
-        }
-      }
-    }
   }
   return {
     name: name,

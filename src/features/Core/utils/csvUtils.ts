@@ -5,7 +5,6 @@ import {
   ExportedEdge,
   ExportedPublication,
   ExportedTrial,
-  ExportedResult,
   CSVValue,
 } from "@/features/ResultDownload/types/download.d";
 
@@ -205,144 +204,8 @@ const serializeProvenance = (provenance: ExportedEdge['provenance']): string => 
 };
 
 /**
- * Generates CSV rows for a support path and its nested support paths
- * @param pathId - The support path ID to process
- * @param exportedResultSet - The exported result set containing all entities
- * @param parentResult - The parent result for context
- * @param supportLevel - The current support nesting depth (1 = first level support)
- * @param parentPathId - The path ID that contains the edge with this support
- * @param parentEdgeId - The edge ID that this path supports
- * @param hierarchicalIndex - The hierarchical path index (e.g., "1.2.1" for support path 1 of edge 2 in path 1)
- * @param visitedPathIds - Set to track visited paths and prevent infinite loops
- */
-const generateSupportPathRows = (
-  pathId: string,
-  exportedResultSet: ExportedResultSet,
-  parentResult: ExportedResult,
-  supportLevel: number,
-  parentPathId: string,
-  parentEdgeId: string,
-  hierarchicalIndex: string,
-  visitedPathIds: Set<string>
-): DenormalizedCSVRow[] => {
-  // Prevent infinite recursion from circular references
-  if (visitedPathIds.has(pathId)) return [];
-  visitedPathIds.add(pathId);
-
-  const path = exportedResultSet.paths[pathId];
-  if (!path) return [];
-
-  const rows: DenormalizedCSVRow[] = [];
-  let edgeIndex = 0;
-
-  // Iterate through the subgraph - edges are at odd indices
-  for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edgeId = path.subgraph[i];
-    const sourceNodeId = path.subgraph[i - 1];
-    const targetNodeId = path.subgraph[i + 1];
-
-    const edge = exportedResultSet.edges[edgeId];
-    if (!edge) continue;
-
-    edgeIndex++;
-
-    const sourceNode = exportedResultSet.nodes[sourceNodeId];
-    const targetNode = exportedResultSet.nodes[targetNodeId];
-
-    const sourceFields = extractNodeFields(sourceNode);
-    const targetFields = extractNodeFields(targetNode);
-    const publicationFields = extractPublicationFields(edge, exportedResultSet);
-    const trialFields = extractTrialFields(edge, exportedResultSet);
-
-    const row: DenormalizedCSVRow = {
-      // Result context (from parent result)
-      result_id: parentResult.id,
-      result_name: parentResult.drug_name,
-      result_subject_id: parentResult.subject,
-      result_object_id: parentResult.object,
-
-      // Path context with hierarchical index
-      path_id: path.id || pathId,
-      path_index: hierarchicalIndex,
-      path_aras: joinArrayForCSV(path.aras),
-
-      // Edge data
-      edge_id: edge.id,
-      edge_index: edgeIndex,
-      edge_predicate: edge.predicate || '',
-      edge_knowledge_level: edge.knowledge_level || '',
-      edge_provenance: serializeProvenance(edge.provenance),
-      edge_aras: joinArrayForCSV(edge.aras),
-
-      // Source node
-      source_node_id: sourceFields.id,
-      source_node_name: sourceFields.name,
-      source_node_types: sourceFields.types,
-      source_node_curies: sourceFields.curies,
-      source_node_descriptions: sourceFields.descriptions,
-      source_node_species: sourceFields.species,
-      source_node_provenance: sourceFields.provenance,
-
-      // Target node
-      target_node_id: targetFields.id,
-      target_node_name: targetFields.name,
-      target_node_types: targetFields.types,
-      target_node_curies: targetFields.curies,
-      target_node_descriptions: targetFields.descriptions,
-      target_node_species: targetFields.species,
-      target_node_provenance: targetFields.provenance,
-
-      // Publications
-      publication_ids: publicationFields.ids,
-      publication_urls: publicationFields.urls,
-
-      // Trials
-      trial_ids: trialFields.ids,
-      trial_titles: trialFields.titles,
-      trial_urls: trialFields.urls,
-      trial_phases: trialFields.phases,
-      trial_sizes: trialFields.sizes,
-      trial_start_dates: trialFields.start_dates,
-      trial_statuses: trialFields.statuses,
-
-      // Support hierarchy
-      support_level: supportLevel,
-      parent_path_id: parentPathId,
-      parent_edge_id: parentEdgeId,
-      edge_support_path_ids: joinArrayForCSV(edge.support || []),
-    };
-
-    rows.push(row);
-
-    // Recursively generate rows for this edge's support paths
-    if (edge.support && edge.support.length > 0) {
-      edge.support.forEach((supportPathId, supportIndex) => {
-        // Build hierarchical index: currentIndex.edgeIndex.supportIndex (1-based)
-        const nestedHierarchicalIndex = `${hierarchicalIndex}.${edgeIndex}.${supportIndex + 1}`;
-        // Clone the visited set for each branch to allow the same support path
-        // to appear under different edges while preventing cycles within this branch
-        const branchVisitedPaths = new Set(visitedPathIds);
-        const supportRows = generateSupportPathRows(
-          supportPathId,
-          exportedResultSet,
-          parentResult,
-          supportLevel + 1,
-          path.id || pathId,
-          edge.id,
-          nestedHierarchicalIndex,
-          branchVisitedPaths
-        );
-        rows.push(...supportRows);
-      });
-    }
-  }
-
-  return rows;
-};
-
-/**
  * Generates denormalized CSV rows for a single result
- * Returns one row per edge in each path, including support paths
+ * Returns one row per edge in each path
  */
 export const generateDenormalizedRows = (
   resultId: string,
@@ -438,38 +301,9 @@ export const generateDenormalizedRows = (
         trial_sizes: trialFields.sizes,
         trial_start_dates: trialFields.start_dates,
         trial_statuses: trialFields.statuses,
-
-        // Support hierarchy (top-level paths have support_level 0)
-        support_level: 0,
-        parent_path_id: '',
-        parent_edge_id: '',
-        edge_support_path_ids: joinArrayForCSV(edge.support || []),
       };
 
       rows.push(row);
-
-      // Generate rows for support paths
-      if (edge.support && edge.support.length > 0) {
-        edge.support.forEach((supportPathId, supportIndex) => {
-          // Build hierarchical index: pathIndex.edgeIndex.supportIndex (1-based)
-          const hierarchicalIndex = `${pathIndex}.${edgeIndex}.${supportIndex + 1}`;
-          // Create a fresh visited set for this support branch, starting with current path
-          // This allows the same support path to appear under multiple edges while still
-          // preventing cycles within a single recursive chain
-          const branchVisitedPaths = new Set<string>([pathId]);
-          const supportRows = generateSupportPathRows(
-            supportPathId,
-            exportedResultSet,
-            result,
-            1, // First level of support
-            path.id || pathId,
-            edge.id,
-            hierarchicalIndex,
-            branchVisitedPaths
-          );
-          rows.push(...supportRows);
-        });
-      }
     }
   });
 
@@ -490,12 +324,6 @@ const CSV_HEADERS: (keyof DenormalizedCSVRow)[] = [
   'path_id',
   'path_index',
   'path_aras',
-
-  // Support hierarchy
-  'support_level',
-  'parent_path_id',
-  'parent_edge_id',
-  'edge_support_path_ids',
 
   // Edge data
   'edge_id',

@@ -1,28 +1,18 @@
-import { createContext, FC, Fragment, useCallback, useId, useRef, useState, MouseEvent } from 'react';
+import { FC, Fragment, useCallback, useId, MouseEvent } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
-import { Filter } from '@/features/ResultFiltering/types/filters';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
-import { extractEdgeIDsFromSubgraph, generatePathD, generatePredicateId, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { extractEdgeIDsFromSubgraph, generatePathD, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import { useLastViewedPath, useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { numberToWords } from '@/features/Core/utils/stringFormatters';
-import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
-import { getEdgeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { useSelector } from 'react-redux';
-import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
-
-export const ExpandedPredicateContext = createContext<{
-  expandedPredicateId: string | null;
-  setExpandedPredicateId: (id: string | null) => void;
-} | null>(null);
 
 interface PathContainerProps {
   path: Path;
@@ -31,7 +21,6 @@ interface PathContainerProps {
   handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   activeEntityFilters: string[];
   pathFilterState: PathFilterState;
-  activeFilters: Filter[];
   pk: string;
   showHiddenPaths: boolean;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
@@ -49,7 +38,6 @@ const PathContainer: FC<PathContainerProps> = ({
   handleEdgeClick,
   activeEntityFilters,
   pathFilterState,
-  activeFilters,
   pk,
   showHiddenPaths,
   selectedEdgeRef,
@@ -59,13 +47,10 @@ const PathContainer: FC<PathContainerProps> = ({
   styles,
   formattedPaths,
 }) => {
-  const resultSet = useSelector(getResultSetById(pk));
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
   const { openMenu } = useCanvasContextMenu();
   const itemResultId = useResultItemId();
-  const [expandedPredicateId, setExpandedPredicateId] = useState<string | null>(null);
-  const initialExpandedPredicateIdSet = useRef(false);
 
   const handlePathContextMenu = useCallback((e: MouseEvent) => {
     if (!path.id) return;
@@ -124,7 +109,6 @@ const PathContainer: FC<PathContainerProps> = ({
   }
 
   return (
-    <ExpandedPredicateContext.Provider value={{ expandedPredicateId, setExpandedPredicateId }}>
       <div className={formattedPathClass}>
         {
           ((!!lastViewedPathID && lastViewedPathID === path.id) || inModal) && 
@@ -191,7 +175,6 @@ const PathContainer: FC<PathContainerProps> = ({
                         return (
                           <PathObject
                             activeEntityFilters={[]}
-                            activeFilters={[]}
                             handleEdgeClick={handleEdgeClick}
                             id={edge.id}
                             index={i}
@@ -200,7 +183,6 @@ const PathContainer: FC<PathContainerProps> = ({
                             key={key}
                             parentPathKey={(indexInFullCollection + 1).toString()}
                             path={path}
-                            pathFilterState={{}}
                             pathViewStyles={styles}
                             pk={pk}
                             selected={selected}
@@ -233,7 +215,6 @@ const PathContainer: FC<PathContainerProps> = ({
                 return (
                   <PathObject
                     activeEntityFilters={[]}
-                    activeFilters={[]}
                     handleEdgeClick={handleEdgeClick}
                     id={key}
                     index={i}
@@ -242,7 +223,6 @@ const PathContainer: FC<PathContainerProps> = ({
                     key={key}
                     parentPathKey={(indexInFullCollection + 1).toString()}
                     path={path}
-                    pathFilterState={{}}
                     pk={pk}
                     pathViewStyles={styles}
                     selected={selected}
@@ -255,16 +235,6 @@ const PathContainer: FC<PathContainerProps> = ({
             subgraphToMap.map((subgraphItemID: string | string[], i: number) => {
               const selected = !!selectedEdge && (selectedEdge.id === subgraphItemID);
               const key = (Array.isArray(subgraphItemID)) ? subgraphItemID[0] : subgraphItemID;
-              // check for inferred edges and set the expanded predicate id if it's the first one in the path
-              if(!isNodeIndex(i)) {
-                const formattedEdge = (!isNodeIndex(i)) && (!!resultSet && Array.isArray(subgraphItemID) && subgraphItemID.length > 1) ? getCompressedEdge(resultSet, subgraphItemID) : getEdgeById(resultSet, subgraphItemID as string);
-                const isInferred = formattedEdge?.inferred ?? false;
-                if(isInferred && !initialExpandedPredicateIdSet.current) {
-                  const edgeIds = (Array.isArray(subgraphItemID)) ? subgraphItemID : [subgraphItemID];
-                  setExpandedPredicateId(generatePredicateId(path, edgeIds));  
-                  initialExpandedPredicateIdSet.current = true;
-                }
-              }
 
               if (path.id === undefined)
                 return null;
@@ -280,10 +250,7 @@ const PathContainer: FC<PathContainerProps> = ({
                   key={key}
                   handleEdgeClick={handleEdgeClick}
                   activeEntityFilters={activeEntityFilters}
-                  pathFilterState={pathFilterState}
-                  activeFilters={activeFilters}
                   pk={pk}
-                  showHiddenPaths={showHiddenPaths}
                   selected={selected}
                   selectedEdgeRef={selectedEdgeRef}
                 />
@@ -292,7 +259,6 @@ const PathContainer: FC<PathContainerProps> = ({
           )}
         </div>
       </div>
-    </ExpandedPredicateContext.Provider>
   );
 };
 

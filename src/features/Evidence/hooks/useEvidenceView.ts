@@ -57,7 +57,6 @@ export const useEvidenceView = (): EvidenceViewModel => {
       pk: routeData.pk,
       selectedEdge: edgeData.selectedEdge as ResultEdge,
       selectedEdgeDomRef: edgeData.selectedEdgeDomRef,
-      isInferred: edgeData.isInferred,
       isFilteredOut,
       onClearFilters: resultListContext?.handleClearAllFilters ?? NOOP,
       publications: edgeData.publications,

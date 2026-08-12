@@ -8,9 +8,8 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import Highlighter from 'react-highlight-words';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
-import { Path, PathFilterState, ResultNode } from '@/features/ResultList/types/results.d';
+import { Path, ResultNode } from '@/features/ResultList/types/results.d';
 import { isResultNode, isResultEdge } from '@/features/ResultList/types/checkers';
-import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
@@ -22,7 +21,6 @@ import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContext
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
-  activeFilters: Filter[];
   className?: string;
   handleEdgeClick?: (edgeIDs: string[], path: Path) => void;
   id: string | string[];
@@ -31,31 +29,26 @@ export interface PathObjectProps {
   isEven?: boolean;
   parentPathKey: string;
   path: Path;
-  pathFilterState: PathFilterState;
   pathViewStyles?: {[key: string]: string;} | null;
   pk: string;
   selected?: boolean;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
-  showHiddenPaths?: boolean;
 }
 
 const PathObject: FC<PathObjectProps> = ({
   activeEntityFilters,
-  activeFilters,
   className = "",
   handleEdgeClick,
   id,
   index,
   inModal = false,
   isEven = false,
-  pathFilterState,
   parentPathKey,
   path,
   pathViewStyles = null,
   pk,
   selected,
-  selectedEdgeRef,
-  showHiddenPaths = true}) => {
+  selectedEdgeRef}) => {
 
   const { resultId, resultsNavigate } = useResultListContext();
   const itemResultId = useResultItemId();
@@ -153,7 +146,6 @@ const PathObject: FC<PathObjectProps> = ({
                   edgeIds={(Array.isArray(id)) ? id : [id]}
                   selected={selected}
                   activeEntityFilters={activeEntityFilters}
-                  activeFilters={activeFilters}
                   uid={uid}
                   handleEdgeClick={handleEdgeClick}
                   hoverHandlers={hoverHandlers}
@@ -163,11 +155,9 @@ const PathObject: FC<PathObjectProps> = ({
                   isHighlighted={isHighlighted}
                   isSeen={isSeen}
                   className={className}
-                  pathFilterState={pathFilterState}
                   pathViewStyles={pathViewStyles}
                   parentStyles={styles}
                   pk={pk}
-                  showHiddenPaths={showHiddenPaths}
                   selectedEdgeRef={selectedEdgeRef}
                 />
               :
