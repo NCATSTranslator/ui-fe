@@ -142,18 +142,6 @@ export const collectRelatedEntities = (
               }
             });
           }
-
-          // Recursively collect support paths and their entities
-          if (edge.support && Array.isArray(edge.support)) {
-            edge.support.forEach(supportPathOrId => {
-              const supportPathId = typeof supportPathOrId === 'string'
-                ? supportPathOrId
-                : supportPathOrId.id;
-              if (supportPathId) {
-                collectFromPath(supportPathId);
-              }
-            });
-          }
         }
       }
     });
@@ -213,9 +201,6 @@ const cleanEdge = (edge: ResultEdge, edgeId: string, resultSet: ResultSet): Expo
   provenance: getEdgeProvenance(resultSet, edge),
   publications: edge.publications,
   trials: edge.trials,
-  support: Array.isArray(edge.support)
-    ? edge.support.map(s => (typeof s === 'string' ? s : s.id || ''))
-    : [],
   aras: edge.aras,
   description: edge.description,
   type: edge.type,

@@ -772,29 +772,13 @@ const getAllNodesFromPath = (resultSet: ResultSet, path: Path, nodes: {[key: str
     
   }
 }
-const collectSupportPaths = (resultSet: ResultSet, edge: ResultEdge, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
-  if(!edge.support)
-    return;
-
-  for(const supPathID of edge.support) {
-    const supPath = (typeof supPathID === "string") ? getPathById(resultSet, supPathID) : supPathID;
-    if(!supPath)
-      continue;
-
-    paths[resolvePathId(supPathID, supPath)] = supPath;
-    getAllEdgesFromPath(resultSet, supPath, paths, edges, nodes);
-    getAllNodesFromPath(resultSet, supPath, nodes);
-  }
-}
-
-const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
+const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, edges: {[key: string]: ResultEdge}) => {
   for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edge = getEdgeById(resultSet, path.subgraph[i]); 
+    const edge = getEdgeById(resultSet, path.subgraph[i]);
     if(!edge)
       continue;
 
     edges[path.subgraph[i]] = edge;
-    collectSupportPaths(resultSet, edge, paths, edges, nodes);
   }
 }
 const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string]: Path}) => {
@@ -802,7 +786,7 @@ const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string
   let nodes: {[key: string]: ResultNode} = {};
 
   for(const path of Object.values(paths)) {
-    getAllEdgesFromPath(resultSet, path, paths, edges, nodes);
+    getAllEdgesFromPath(resultSet, path, edges);
     getAllNodesFromPath(resultSet, path, nodes);
   }
 

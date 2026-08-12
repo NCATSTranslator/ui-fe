@@ -2,27 +2,6 @@
 
 .edge {
   height: 32px;
-  &.isInferred .nameShape {
-    border: none;
-    svg {
-      height: $l;
-    }
-    .border {
-      display: block !important;
-      position: absolute;
-      width: 100%;
-      top: 0;
-      bottom: 0;
-      left: -3px;
-      right: 0;
-      height: 100%;
-      min-width: auto;
-      min-height: auto;
-      path {
-        fill: $midPurpleTwo;
-      }
-    }
-  }
   .nameShape .background {
     background-color: $grayPathObject;
   }
@@ -188,61 +167,6 @@
     min-height: 20px;
   }
 }
-.supportExpansionButton {
-  margin: 0 6px 0 0;
-  border-radius: 50%;
-  background-color: $purpleTwo;
-  color: $white;
-  z-index: 100;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  position: relative;
-  svg {
-    margin: 0;
-    path {
-      stroke: $white;
-    }
-  }
-  .supportButtonIcon {
-    display: flex;
-    margin: 0;
-    transform: rotate(180deg);
-    z-index: 10;
-    position: relative;
-    border-radius: 50%;
-    transition: $defaultAnim;
-    width: 20px;
-    svg {
-      width: 20px;
-      min-width: 20px;
-      height: 20px;
-      min-height: 20px;
-    }
-  }
-  &.expanded {
-    .supportButtonIcon {
-      transform: rotate(0);
-    }
-    .supportConnector {
-      opacity: 1;
-      height: 22px;
-    }
-  }
-  .supportConnector {
-    opacity: 0;
-    transition: all .35s ease;
-    height: 0;
-    top: 100%;
-    background-color: $lightPurpleTwo;
-    width: 2px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-  }
-}
 .evidenceIcon {
   transform: none !important;
 }
@@ -279,11 +203,6 @@
     svg {
       top: 0px;
       right: 2px;
-    }
-  }
-  &.isInferred .nameShape {
-    .border {
-      left: -3px;
     }
   }
 }

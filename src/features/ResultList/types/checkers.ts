@@ -33,7 +33,6 @@ export const isResultEdge = (obj: unknown, warn = false): obj is ResultEdge => {
     ["provenance", tc.makeIsHomogeneousArray((p: unknown) => isEdgeProvenance(p, warn))(obj.provenance), "EdgeProvenance[]", obj.provenance],
     ["publications", tc.isObject(obj.publications), "object", obj.publications],
     ["subject", tc.isString(obj.subject), "string", obj.subject],
-    ["support", tc.isStringArray(obj.support), "string[]", obj.support],
     ["type", tc.isString(obj.type), "string", obj.type],
   ], warn);
 

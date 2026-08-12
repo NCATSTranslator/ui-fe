@@ -4,7 +4,7 @@ import isEqual from "lodash/isEqual";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
 import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
-import { getPathCount, hasSupport } from "@/features/Core/utils/resultHelpers";
+import { getPathCount } from "@/features/Core/utils/resultHelpers";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
@@ -135,7 +135,6 @@ const useResultsData = ({
     // Assign ids to edges
     for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
       edge.id = id;
-      edge.inferred = hasSupport(edge);
     }
     // Assign ids to nodes
     for (const [id, node] of Object.entries(newResultSet.data.nodes))
