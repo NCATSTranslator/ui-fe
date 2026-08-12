@@ -6,7 +6,6 @@ import {
   canvasEdgeDetailToResultEdge,
 } from '@/features/Canvas/utils/canvasEntityMappers';
 import { getFormattedNodeName } from '@/features/Core/utils/stringFormatters';
-import type { ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
 
 export const useCanvasEntityRoute = () => useCanvasOnlyMode();
 

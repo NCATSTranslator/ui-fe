@@ -61,6 +61,7 @@ interface CanvasGraphProps {
   selectedIds?: string[];
   focusRequest?: GraphFocusRequest | null;
   viewportSyncKey?: string;
+  toolbarRight?: ReactNode;
   children?: ReactNode;
 }
 
@@ -96,6 +97,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   selectedIds,
   focusRequest,
   viewportSyncKey,
+  toolbarRight,
   children,
 }) => {
   const graphData = useMemo(
@@ -118,6 +120,45 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
     onNodeContextMenu(nodeId, { x: event.clientX, y: event.clientY });
   }, [onNodeContextMenu]);
 
+  let graphAreaContent: ReactNode = <CanvasEmptyState />;
+  if (isLayoutLoading) {
+    graphAreaContent = (
+      <div className={styles.graphLoading} aria-live="polite" aria-busy="true">
+        <LoadingIcon size="medium" />
+        <span>Loading layout…</span>
+      </div>
+    );
+  } else if (hasGraphContent) {
+    graphAreaContent = (
+      <>
+        <TranslatorGraphView
+          data={graphData}
+          layout={graphLayout}
+          nodePositions={nodePositions}
+          fitViewPadding={CANVAS_FIT_VIEW_PADDING}
+          viewportSyncKey={viewportSyncKey ?? String(canvas.id)}
+          elkWorkerUrl="/elk-worker.min.js"
+          showEdgeLabels={false}
+          showMiniMap={false}
+          nodeHoverAnchor="topCenter"
+          edgeHoverAnchor="midpoint"
+          onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
+          onNodeHover={onNodeHover}
+          onEdgeHover={onEdgeHover}
+          onGraphNodeDragStop={onGraphNodeDragStop}
+          onLayoutComplete={onLayoutComplete}
+          hoveredNodeId={hoveredNodeId}
+          selectedIds={selectedIds}
+          focusRequest={focusRequest}
+          annotations={annotations}
+          onAnnotationsChange={onAnnotationsChange}
+        />
+        {children}
+      </>
+    );
+  }
+
   return (
     <div className={styles.canvasGraph}>
       <CanvasToolbar
@@ -132,43 +173,10 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
         onAddObject={onAddObject}
         onAddAnnotation={onAddAnnotation}
         saveStatus={saveStatus}
+        rightSlot={toolbarRight}
       />
       <div className={styles.graphArea} onContextMenu={handleGraphContextMenu}>
-        {isLayoutLoading ? (
-          <div className={styles.graphLoading} aria-live="polite" aria-busy="true">
-            <LoadingIcon size="medium" />
-            <span>Loading layout…</span>
-          </div>
-        ) : hasGraphContent ? (
-          <>
-            <TranslatorGraphView
-              data={graphData}
-              layout={graphLayout}
-              nodePositions={nodePositions}
-              fitViewPadding={CANVAS_FIT_VIEW_PADDING}
-              viewportSyncKey={viewportSyncKey ?? String(canvas.id)}
-              elkWorkerUrl="/elk-worker.min.js"
-              showEdgeLabels={false}
-              showMiniMap={false}
-              nodeHoverAnchor="topCenter"
-              edgeHoverAnchor="midpoint"
-              onNodeClick={onNodeClick}
-              onEdgeClick={onEdgeClick}
-              onNodeHover={onNodeHover}
-              onEdgeHover={onEdgeHover}
-              onGraphNodeDragStop={onGraphNodeDragStop}
-              onLayoutComplete={onLayoutComplete}
-              hoveredNodeId={hoveredNodeId}
-              selectedIds={selectedIds}
-              focusRequest={focusRequest}
-              annotations={annotations}
-              onAnnotationsChange={onAnnotationsChange}
-            />
-            {children}
-          </>
-        ) : (
-          <CanvasEmptyState />
-        )}
+        {graphAreaContent}
       </div>
       <CanvasLayoutWarningModal
         isOpen={layoutWarningOpen}

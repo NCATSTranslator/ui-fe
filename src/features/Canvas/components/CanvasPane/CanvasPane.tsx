@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState, useCallback } from 'react';
+import { FC, useEffect, useRef, useCallback } from 'react';
 import styles from './CanvasPane.module.scss';
 import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import useCanvas from '@/features/Canvas/hooks/useCanvas';
@@ -11,6 +11,7 @@ import useCanvasNodeActions from '@/features/Canvas/hooks/useCanvasNodeActions';
 import useCanvasPaneHandlers from '@/features/Canvas/hooks/useCanvasPaneHandlers';
 import useCanvasNodeMenu from '@/features/Canvas/hooks/useCanvasNodeMenu';
 import useCanvasAnnotations from '@/features/Canvas/hooks/useCanvasAnnotations';
+import useCanvasFocus from '@/features/Canvas/hooks/useCanvasFocus';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
@@ -20,9 +21,8 @@ import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHover
 import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { useNavigate } from 'react-router-dom';
-import type { GraphFocusRequest } from 'translator-graph-view';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
-import type { CanvasAnnotation } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 
 type User = ReturnType<typeof useUser>[0];
 
@@ -36,44 +36,36 @@ const useCloseCanvasOnLogout = (user: User, paneOpen: boolean, closePane: () => 
   }, [user, paneOpen, closePane]);
 };
 
-const CanvasPane: FC = () => {
+interface CanvasPaneContentProps {
+  activeCanvas: Canvas;
+  paneOpen: boolean;
+  paneMaximized: boolean;
+  togglePane: () => void;
+  paneClass: string;
+}
+
+const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
+  activeCanvas,
+  paneOpen,
+  paneMaximized,
+  togglePane,
+  paneClass,
+}) => {
   const navigate = useNavigate();
-  const [user] = useUser();
-  const { paneOpen, paneMaximized, activeCanvas, togglePane, closePane } = useCanvasPane();
+  const persistence = useCanvasPersistence();
   const {
-    saveStatus,
-    saveMerge,
-    saveTrashElements,
-    saveRename,
-    saveGeometry,
-    saveLayout,
-    saveCreateAnnotation,
-    saveUpdateAnnotationText,
-  } = useCanvasPersistence();
-  const { rename, undo, redo, canUndo, canRedo, removeNode, pushUndo } = useCanvas({ saveMerge, saveTrashElements, saveRename });
+    rename, undo, redo, canUndo, canRedo, removeNode, pushUndo,
+  } = useCanvas(persistence);
   const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
   const { hoveredNodeId, setHoveredNodeId, clearHover, handleNodeHover } = useCanvasHoverState();
   const { navigateToNode, navigateToEdge } = useCanvasEntityNavigation();
-  const { createCanvas } = useCreateCanvas();
-  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
-  const [focusRequest, setFocusRequest] = useState<GraphFocusRequest | null>(null);
-  const focusTokenRef = useRef(0);
-
-  const focusOnCanvas = useCallback((elementId: string) => {
-    focusTokenRef.current += 1;
-    setFocusRequest({ nodeId: elementId, token: focusTokenRef.current });
-  }, []);
-
-  const findNodeOnCanvas = useCallback((nodeId: string) => {
-    setSelectedNodeIds([nodeId]);
-    setHoveredNodeId(nodeId);
-    focusOnCanvas(nodeId);
-  }, [setHoveredNodeId, focusOnCanvas]);
-
-  const findAnnotationOnCanvas = useCallback((annotationId: string) => {
-    setSelectedNodeIds([]);
-    focusOnCanvas(annotationId);
-  }, [focusOnCanvas]);
+  const {
+    selectedNodeIds,
+    setSelectedNodeIds,
+    focusRequest,
+    findNodeOnCanvas,
+    findAnnotationOnCanvas,
+  } = useCanvasFocus(setHoveredNodeId);
 
   const {
     graphAnnotations,
@@ -83,31 +75,23 @@ const CanvasPane: FC = () => {
   } = useCanvasAnnotations({
     activeCanvas,
     pushUndo,
-    saveCreateAnnotation,
-    saveUpdateAnnotationText,
-    saveGeometry,
-    saveTrashElements,
+    saveCreateAnnotation: persistence.saveCreateAnnotation,
+    saveUpdateAnnotationText: persistence.saveUpdateAnnotationText,
+    saveGeometry: persistence.saveGeometry,
+    saveTrashElements: persistence.saveTrashElements,
   });
 
   const handleAddAnnotation = useCallback(async () => {
     const annotationId = await addAnnotation();
-    if (annotationId) {
-      findAnnotationOnCanvas(annotationId);
-    }
+    if (annotationId) findAnnotationOnCanvas(annotationId);
   }, [addAnnotation, findAnnotationOnCanvas]);
 
   const handleAnnotationListAction = useCallback((
     action: CanvasAnnotationAction,
     annotation: CanvasAnnotation,
   ) => {
-    switch (action) {
-      case 'find':
-        findAnnotationOnCanvas(annotation.id);
-        break;
-      case 'remove':
-        removeAnnotation(annotation.id);
-        break;
-    }
+    if (action === 'find') findAnnotationOnCanvas(annotation.id);
+    if (action === 'remove') removeAnnotation(annotation.id);
   }, [findAnnotationOnCanvas, removeAnnotation]);
 
   const nodeActions = useCanvasNodeActions({
@@ -118,15 +102,8 @@ const CanvasPane: FC = () => {
     clearHover,
     removeNode,
   });
-
   const graphHover = useCanvasGraphHover({ canvas: activeCanvas, navigateToEdge });
-
-  const {
-    handleCombinedNodeHover,
-    handleCombinedEdgeHover,
-    handleNodeClick,
-    handleEdgeClick,
-  } = useCanvasPaneHandlers({
+  const paneHandlers = useCanvasPaneHandlers({
     activeCanvas,
     navigateToEdge,
     setHoveredNodeId,
@@ -135,62 +112,18 @@ const CanvasPane: FC = () => {
     handleGraphEdgeHover: graphHover.handleGraphEdgeHover,
     nodeActions,
   });
-
-  const {
-    nodeContextMenu,
-    nodeMenuId,
-    closeNodeContextMenu,
-    handleNodeAction,
-    handleObjectListAction,
-    handleNodeMenuIdChange,
-    handleNodeContextMenu,
-  } = useCanvasNodeMenu({
+  const nodeMenu = useCanvasNodeMenu({
     activeCanvas,
     nodeActions,
     setSelectedNodeIds,
     findNodeOnCanvas,
   });
-
-  const {
-    graphLayout,
-    nodePositions,
-    isCustomLayoutReady,
-    layoutWarningOpen,
-    handleGraphNodeDragStop,
-    handleLayoutComplete,
-    requestLayoutChange,
-    confirmLayoutChange,
-    cancelLayoutChange,
-  } = useCanvasNodePositions({
+  const positions = useCanvasNodePositions({
     canvas: activeCanvas,
-    saveGeometry,
-    saveLayout,
+    pushUndo,
+    saveGeometry: persistence.saveGeometry,
+    saveLayout: persistence.saveLayout,
   });
-
-  useCloseCanvasOnLogout(user, paneOpen, closePane);
-
-  const paneClass = joinClasses(
-    styles.canvasPane,
-    !paneOpen && styles.collapsed,
-    paneOpen && !paneMaximized && styles.expanded,
-    paneOpen && paneMaximized && styles.maximized,
-  );
-
-  if (!activeCanvas) return (
-    <div className={paneClass}>
-      <div className={styles.collapsedTitle}>
-        <button
-          type="button"
-          className={styles.titleLeft}
-          onClick={createCanvas}
-          aria-label="Create new canvas"
-        >
-          <span className={styles.canvasTitle}>Create New Canvas</span>
-        </button>
-
-      </div>
-    </div>
-  );
 
   return (
     <div className={paneClass}>
@@ -215,33 +148,46 @@ const CanvasPane: FC = () => {
               canvas={activeCanvas}
               visibleNodes={visibleNodes}
               visibleEdges={visibleEdges}
-              graphLayout={graphLayout}
-              nodePositions={nodePositions}
-              isCustomLayoutReady={isCustomLayoutReady}
-              viewportSyncKey={`${activeCanvas.id}:${paneOpen}:${paneMaximized}:${isCustomLayoutReady}`}
-              layoutWarningOpen={layoutWarningOpen}
-              onLayoutChange={requestLayoutChange}
-              onGraphNodeDragStop={handleGraphNodeDragStop}
-              onLayoutComplete={handleLayoutComplete}
-              onConfirmLayoutChange={confirmLayoutChange}
-              onCancelLayoutChange={cancelLayoutChange}
+              graphLayout={positions.graphLayout}
+              nodePositions={positions.nodePositions}
+              isCustomLayoutReady={positions.isCustomLayoutReady}
+              viewportSyncKey={`${activeCanvas.id}:${paneOpen}:${paneMaximized}:${positions.isCustomLayoutReady}`}
+              layoutWarningOpen={positions.layoutWarningOpen}
+              onLayoutChange={positions.requestLayoutChange}
+              onGraphNodeDragStop={positions.handleGraphNodeDragStop}
+              onLayoutComplete={positions.handleLayoutComplete}
+              onConfirmLayoutChange={positions.confirmLayoutChange}
+              onCancelLayoutChange={positions.cancelLayoutChange}
               onRename={rename}
               onUndo={undo}
               onRedo={redo}
               canUndo={canUndo}
               canRedo={canRedo}
-              onNodeClick={handleNodeClick}
-              onEdgeClick={handleEdgeClick}
-              onNodeHover={handleCombinedNodeHover}
-              onEdgeHover={handleCombinedEdgeHover}
-              onNodeContextMenu={handleNodeContextMenu}
-              saveStatus={saveStatus}
+              onNodeClick={paneHandlers.handleNodeClick}
+              onEdgeClick={paneHandlers.handleEdgeClick}
+              onNodeHover={paneHandlers.handleCombinedNodeHover}
+              onEdgeHover={paneHandlers.handleCombinedEdgeHover}
+              onNodeContextMenu={nodeMenu.handleNodeContextMenu}
+              saveStatus={persistence.saveStatus}
               hoveredNodeId={hoveredNodeId}
               selectedIds={selectedNodeIds}
               focusRequest={focusRequest}
               annotations={graphAnnotations}
               onAnnotationsChange={handleAnnotationsChange}
               onAddAnnotation={handleAddAnnotation}
+              toolbarRight={(
+                <CanvasObjectList
+                  canvas={activeCanvas}
+                  visibleNodes={visibleNodes}
+                  onHoverNode={setHoveredNodeId}
+                  onFindNode={findNodeOnCanvas}
+                  onAction={nodeMenu.handleObjectListAction}
+                  onAnnotationAction={handleAnnotationListAction}
+                  nodeMenuId={nodeMenu.nodeMenuId}
+                  onNodeMenuIdChange={nodeMenu.handleNodeMenuIdChange}
+                  onAddAnnotation={handleAddAnnotation}
+                />
+              )}
             >
               <GraphHoverTooltips
                 onPredicateClick={graphHover.onPredicateClick}
@@ -253,27 +199,58 @@ const CanvasPane: FC = () => {
               />
             </CanvasGraph>
           </div>
-          <CanvasObjectList
-            canvas={activeCanvas}
-            visibleNodes={visibleNodes}
-            onHoverNode={setHoveredNodeId}
-            onFindNode={findNodeOnCanvas}
-            onAction={handleObjectListAction}
-            onAnnotationAction={handleAnnotationListAction}
-            nodeMenuId={nodeMenuId}
-            onNodeMenuIdChange={handleNodeMenuIdChange}
-            onAddAnnotation={handleAddAnnotation}
-          />
-          {nodeContextMenu && (
+          {nodeMenu.nodeContextMenu && (
             <CanvasNodeContextMenu
-              target={nodeContextMenu}
-              onClose={closeNodeContextMenu}
-              onAction={handleNodeAction}
+              target={nodeMenu.nodeContextMenu}
+              onClose={nodeMenu.closeNodeContextMenu}
+              onAction={nodeMenu.handleNodeAction}
             />
           )}
         </div>
       )}
     </div>
+  );
+};
+
+const CanvasPane: FC = () => {
+  const [user] = useUser();
+  const { paneOpen, paneMaximized, activeCanvas, togglePane, closePane } = useCanvasPane();
+  const { createCanvas } = useCreateCanvas();
+
+  useCloseCanvasOnLogout(user, paneOpen, closePane);
+
+  const paneClass = joinClasses(
+    styles.canvasPane,
+    !paneOpen && styles.collapsed,
+    paneOpen && !paneMaximized && styles.expanded,
+    paneOpen && paneMaximized && styles.maximized,
+  );
+
+  if (!activeCanvas) {
+    return (
+      <div className={paneClass}>
+        <div className={styles.collapsedTitle}>
+          <button
+            type="button"
+            className={styles.titleLeft}
+            onClick={createCanvas}
+            aria-label="Create new canvas"
+          >
+            <span className={styles.canvasTitle}>Create New Canvas</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <CanvasPaneContent
+      activeCanvas={activeCanvas}
+      paneOpen={paneOpen}
+      paneMaximized={paneMaximized}
+      togglePane={togglePane}
+      paneClass={paneClass}
+    />
   );
 };
 
