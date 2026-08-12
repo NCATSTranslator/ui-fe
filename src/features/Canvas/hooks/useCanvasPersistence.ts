@@ -8,14 +8,13 @@ import {
   replaceCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
 import type {
+  BackendCanvasGraph,
   BackendUserCanvas,
   CanvasLayout,
   CreateCanvasAnnotationRequest,
-  GraphGeometry,
   GraphSelection,
   GraphSubmission,
   SaveStatus,
-  SaveGeometryOptions,
 } from '@/features/Canvas/types/canvas';
 import {
   listCanvases,
@@ -23,9 +22,8 @@ import {
   getCanvasGraph,
   mergeCanvasGraph,
   trashCanvasElements,
-  updateCanvasGeometry,
+  restoreCanvasElements,
   createCanvasAnnotation,
-  updateCanvasAnnotationText,
 } from '@/features/Canvas/utils/canvasApi';
 import {
   backendCanvasListToCanvasList,
@@ -33,6 +31,8 @@ import {
 } from '@/features/Canvas/utils/canvasMappers';
 import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import useCanvasGeometryWrites from '@/features/Canvas/hooks/useCanvasGeometryWrites';
+import useCanvasAnnotationTextWrites from '@/features/Canvas/hooks/useCanvasAnnotationTextWrites';
 
 export const useCanvasListQuery = () => {
   const user = useSelector(currentUser);
@@ -47,17 +47,97 @@ export const useCanvasListQuery = () => {
   });
 };
 
+const selectionFromSubmission = (
+  submission: GraphSubmission,
+  graph: BackendCanvasGraph,
+): GraphSelection | null => {
+  const nodeRefs = new Set(Object.keys(submission.nodes ?? {}));
+  const edgeRefs = new Set(Object.keys(submission.edges ?? {}));
+  const nodes = graph.nodes
+    .filter(node => !node.time_deleted && nodeRefs.has(node.ref))
+    .map(node => node.data_id);
+  const edges = graph.edges
+    .filter(edge => !edge.time_deleted && edgeRefs.has(edge.ref))
+    .map(edge => edge.data_id);
+  if (nodes.length === 0 && edges.length === 0) return null;
+  return {
+    ...(nodes.length > 0 && { nodes }),
+    ...(edges.length > 0 && { edges }),
+  };
+};
+
 const applyGraphChange = async (
   canvasId: number,
   apiFn: () => Promise<Awaited<ReturnType<typeof mergeCanvasGraph>>>,
   dispatch: AppDispatch,
+  isStale?: () => boolean,
+  onStale?: (graph: BackendCanvasGraph) => Promise<void>,
 ) => {
   const graph = await apiFn();
+  if (isStale?.()) {
+    await onStale?.(graph);
+    return;
+  }
   const metas = await listCanvases();
+  if (isStale?.()) {
+    await onStale?.(graph);
+    return;
+  }
   const meta = metas.find(m => m.id === canvasId);
   if (meta) {
     dispatch(replaceCanvas(backendCanvasToCanvas(meta, graph)));
   }
+};
+
+/** Serialize graph trash/restore/merge per canvas so in-flight deletes can't beat undo restores. */
+const createCanvasGraphOpQueue = () => {
+  const tails = new Map<number, Promise<void>>();
+
+  return (canvasId: number, op: () => Promise<void>): Promise<void> => {
+    const previous = tails.get(canvasId) ?? Promise.resolve();
+    const next = previous
+      .catch(() => undefined)
+      .then(op)
+      .finally(() => {
+        if (tails.get(canvasId) === next) {
+          tails.delete(canvasId);
+        }
+      });
+    tails.set(canvasId, next);
+    return next;
+  };
+};
+
+type GraphOpQueue = ReturnType<typeof createCanvasGraphOpQueue>;
+type WrapFn = <T>(fn: () => Promise<T>) => Promise<T | null>;
+
+type QueuedGraphApplyArgs = {
+  enqueue: GraphOpQueue;
+  wrap: WrapFn;
+  dispatch: AppDispatch;
+  generationRef: { current: number };
+  canvasId: number;
+  generation: number;
+  apiFn: () => Promise<Awaited<ReturnType<typeof mergeCanvasGraph>>>;
+  onStale?: (graph: BackendCanvasGraph) => Promise<void>;
+};
+
+const executeQueuedGraphApply = async ({
+  enqueue,
+  wrap,
+  dispatch,
+  generationRef,
+  canvasId,
+  generation,
+  apiFn,
+  onStale,
+}: QueuedGraphApplyArgs) => {
+  const isStale = () => generation !== generationRef.current;
+  await enqueue(canvasId, async () => {
+    await wrap(async () => {
+      await applyGraphChange(canvasId, apiFn, dispatch, isStale, onStale);
+    });
+  });
 };
 
 const pendingGraphLoads = new Set<number>();
@@ -122,46 +202,13 @@ export const useCanvasSync = () => {
 };
 
 const SAVED_INDICATOR_MS = 2000;
-const GEOMETRY_DEBOUNCE_MS = 500;
-const ANNOTATION_TEXT_DEBOUNCE_MS = 500;
-
-type PendingGeometry = {
-  canvasId: number;
-  nodes: Map<number, NonNullable<GraphGeometry['nodes']>[number]>;
-  annotations: Map<number, NonNullable<GraphGeometry['annotations']>[number]>;
-};
-
-const buildGeometryPayload = (pending: PendingGeometry): GraphGeometry | null => {
-  const nodes = Array.from(pending.nodes.values());
-  const annotations = Array.from(pending.annotations.values());
-  if (nodes.length === 0 && annotations.length === 0) return null;
-  return {
-    ...(nodes.length > 0 && { nodes }),
-    ...(annotations.length > 0 && { annotations }),
-  };
-};
-
-const mergeGeometryIntoPending = (
-  pending: PendingGeometry,
-  geometry: GraphGeometry,
-): PendingGeometry => {
-  for (const node of geometry.nodes ?? []) {
-    pending.nodes.set(node.data_id, node);
-  }
-  for (const annotation of geometry.annotations ?? []) {
-    pending.annotations.set(annotation.id, annotation);
-  }
-  return pending;
-};
 
 const useSaveAction = (invalidate: () => void) => {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('unsaved');
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => {
-    if (savedTimeoutRef.current) {
-      clearTimeout(savedTimeoutRef.current);
-    }
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
   }, []);
 
   const wrap = useCallback(async <T>(fn: () => Promise<T>): Promise<T | null> => {
@@ -189,116 +236,86 @@ const useSaveAction = (invalidate: () => void) => {
   return { saveStatus, wrap };
 };
 
-const useCanvasPersistence = () => {
+const useCanvasGraphSaves = (
+  wrap: ReturnType<typeof useSaveAction>['wrap'],
+) => {
   const dispatch = useDispatch<AppDispatch>();
+  const graphApplyGenerationRef = useRef(0);
+  const enqueueGraphOpRef = useRef(createCanvasGraphOpQueue());
+
+  const invalidatePendingGraphApplies = useCallback(() => {
+    graphApplyGenerationRef.current += 1;
+  }, []);
+
+  const runGraphApply = useCallback(async (
+    canvasId: number,
+    generation: number,
+    apiFn: () => Promise<Awaited<ReturnType<typeof mergeCanvasGraph>>>,
+    onStale?: (graph: BackendCanvasGraph) => Promise<void>,
+  ) => {
+    await executeQueuedGraphApply({
+      enqueue: enqueueGraphOpRef.current,
+      wrap,
+      dispatch,
+      generationRef: graphApplyGenerationRef,
+      canvasId,
+      generation,
+      apiFn,
+      onStale,
+    });
+  }, [dispatch, wrap]);
+
+  const saveMerge = useCallback(async (canvasId: number, submission: GraphSubmission) => {
+    const generation = graphApplyGenerationRef.current;
+    await runGraphApply(
+      canvasId,
+      generation,
+      () => mergeCanvasGraph(canvasId, submission),
+      async (graph) => {
+        const selection = selectionFromSubmission(submission, graph);
+        if (selection) await trashCanvasElements(canvasId, selection);
+      },
+    );
+  }, [runGraphApply]);
+
+  const saveTrashElements = useCallback(async (canvasId: number, selection: GraphSelection) => {
+    const generation = graphApplyGenerationRef.current;
+    await runGraphApply(
+      canvasId,
+      generation,
+      () => trashCanvasElements(canvasId, selection),
+      async () => { await restoreCanvasElements(canvasId, selection); },
+    );
+  }, [runGraphApply]);
+
+  const saveRestoreElements = useCallback(async (canvasId: number, selection: GraphSelection) => {
+    const generation = graphApplyGenerationRef.current;
+    await runGraphApply(
+      canvasId,
+      generation,
+      () => restoreCanvasElements(canvasId, selection),
+      async () => { await trashCanvasElements(canvasId, selection); },
+    );
+  }, [runGraphApply]);
+
+  return {
+    saveMerge,
+    saveTrashElements,
+    saveRestoreElements,
+    invalidatePendingGraphApplies,
+  };
+};
+
+const useCanvasPersistence = () => {
   const queryClient = useQueryClient();
   const { listLoaded } = useCanvasSync();
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
   }, [queryClient]);
   const { saveStatus, wrap } = useSaveAction(invalidate);
-  const wrapRef = useRef(wrap);
-  wrapRef.current = wrap;
-  const pendingGeometryRef = useRef<PendingGeometry | null>(null);
-  const geometryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingTextUpdatesRef = useRef<Map<number, { canvasId: number; annotationId: number; text: string }>>(
-    new Map(),
-  );
-  const textDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const flushPendingGeometry = useCallback(async () => {
-    if (geometryDebounceRef.current) {
-      clearTimeout(geometryDebounceRef.current);
-      geometryDebounceRef.current = null;
-    }
-
-    const pending = pendingGeometryRef.current;
-    pendingGeometryRef.current = null;
-    if (!pending) return;
-
-    const payload = buildGeometryPayload(pending);
-    if (!payload) return;
-
-    await wrapRef.current(() => updateCanvasGeometry(pending.canvasId, payload));
-  }, []);
-
-  const flushPendingTextUpdates = useCallback(async () => {
-    if (textDebounceRef.current) {
-      clearTimeout(textDebounceRef.current);
-      textDebounceRef.current = null;
-    }
-
-    const updates = Array.from(pendingTextUpdatesRef.current.values());
-    pendingTextUpdatesRef.current.clear();
-    if (updates.length === 0) return;
-
-    await wrapRef.current(async () => {
-      await Promise.all(
-        updates.map(({ canvasId, annotationId, text }) =>
-          updateCanvasAnnotationText(canvasId, annotationId, { content: text }),
-        ),
-      );
-    });
-  }, []);
-
-  useEffect(() => () => {
-    if (geometryDebounceRef.current) {
-      clearTimeout(geometryDebounceRef.current);
-    }
-    if (textDebounceRef.current) {
-      clearTimeout(textDebounceRef.current);
-    }
-    void flushPendingGeometry();
-    void flushPendingTextUpdates();
-  }, [flushPendingGeometry, flushPendingTextUpdates]);
-
-  const queueGeometrySave = useCallback((
-    canvasId: number,
-    geometry: GraphGeometry,
-    options?: SaveGeometryOptions,
-  ) => {
-    if (
-      pendingGeometryRef.current
-      && pendingGeometryRef.current.canvasId !== canvasId
-    ) {
-      void flushPendingGeometry();
-    }
-
-    const pending = pendingGeometryRef.current?.canvasId === canvasId
-      ? pendingGeometryRef.current
-      : { canvasId, nodes: new Map(), annotations: new Map() };
-
-    pendingGeometryRef.current = mergeGeometryIntoPending(pending, geometry);
-
-    if (options?.immediate) {
-      if (geometryDebounceRef.current) {
-        clearTimeout(geometryDebounceRef.current);
-        geometryDebounceRef.current = null;
-      }
-      void flushPendingGeometry();
-      return;
-    }
-
-    if (geometryDebounceRef.current) {
-      clearTimeout(geometryDebounceRef.current);
-    }
-    geometryDebounceRef.current = setTimeout(() => {
-      geometryDebounceRef.current = null;
-      void flushPendingGeometry();
-    }, GEOMETRY_DEBOUNCE_MS);
-  }, [flushPendingGeometry]);
-
-  const queueAnnotationTextSave = useCallback((canvasId: number, annotationId: number, text: string) => {
-    pendingTextUpdatesRef.current.set(annotationId, { canvasId, annotationId, text });
-
-    if (textDebounceRef.current) {
-      clearTimeout(textDebounceRef.current);
-    }
-    textDebounceRef.current = setTimeout(() => {
-      textDebounceRef.current = null;
-      void flushPendingTextUpdates();
-    }, ANNOTATION_TEXT_DEBOUNCE_MS);
-  }, [flushPendingTextUpdates]);
+  const graphSaves = useCanvasGraphSaves(wrap);
+  const geometryWrites = useCanvasGeometryWrites(wrap);
+  const textWrites = useCanvasAnnotationTextWrites(wrap);
 
   const saveRename = useCallback(async (canvasId: number, label: string) => {
     await wrap(() => updateCanvasMetadata(canvasId, { label }));
@@ -308,71 +325,20 @@ const useCanvasPersistence = () => {
     await wrap(() => updateCanvasMetadata(canvasId, { layout }));
   }, [wrap]);
 
-  const saveMerge = useCallback(async (canvasId: number, submission: GraphSubmission) => {
-    await wrap(() => applyGraphChange(canvasId, () => mergeCanvasGraph(canvasId, submission), dispatch));
-  }, [dispatch, wrap]);
-
-  const saveTrashElements = useCallback(async (canvasId: number, selection: GraphSelection) => {
-    await wrap(() => applyGraphChange(canvasId, () => trashCanvasElements(canvasId, selection), dispatch));
-  }, [dispatch, wrap]);
-
-  const saveGeometry = useCallback(async (
-    canvasId: number,
-    geometry: GraphGeometry,
-    options?: SaveGeometryOptions,
-  ) => {
-    if (options?.immediate) {
-      const pending = pendingGeometryRef.current;
-      if (geometryDebounceRef.current) {
-        clearTimeout(geometryDebounceRef.current);
-        geometryDebounceRef.current = null;
-      }
-
-      if (pending && pending.canvasId !== canvasId) {
-        const stalePayload = buildGeometryPayload(pending);
-        pendingGeometryRef.current = null;
-        if (stalePayload) {
-          await wrap(() => updateCanvasGeometry(pending.canvasId, stalePayload));
-        }
-      }
-
-      let merged = geometry;
-      if (pending?.canvasId === canvasId) {
-        merged = buildGeometryPayload(mergeGeometryIntoPending({ ...pending }, geometry)) ?? geometry;
-        pendingGeometryRef.current = null;
-      }
-
-      if (!merged.nodes?.length && !merged.annotations?.length) return;
-      await wrap(() => updateCanvasGeometry(canvasId, merged));
-      return;
-    }
-
-    queueGeometrySave(canvasId, geometry);
-  }, [queueGeometrySave, wrap]);
-
   const saveCreateAnnotation = useCallback(async (
     canvasId: number,
     request: CreateCanvasAnnotationRequest,
   ) => wrap(() => createCanvasAnnotation(canvasId, request)), [wrap]);
-
-  const saveUpdateAnnotationText = useCallback((
-    canvasId: number,
-    annotationId: number,
-    text: string,
-  ) => {
-    queueAnnotationTextSave(canvasId, annotationId, text);
-  }, [queueAnnotationTextSave]);
 
   return {
     saveStatus,
     loaded: listLoaded,
     saveRename,
     saveLayout,
-    saveMerge,
-    saveTrashElements,
-    saveGeometry,
     saveCreateAnnotation,
-    saveUpdateAnnotationText,
+    ...graphSaves,
+    ...geometryWrites,
+    ...textWrites,
   };
 };
 
