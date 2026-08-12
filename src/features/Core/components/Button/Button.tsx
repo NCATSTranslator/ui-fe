@@ -1,9 +1,21 @@
-import { CSSProperties, FC, MouseEvent, ReactNode, RefObject } from "react";
+import {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  FC,
+  MouseEvent,
+  ReactNode,
+  RefObject,
+} from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 
-interface ButtonProps {
+type NativeButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'children' | 'className' | 'disabled' | 'style' | 'title' | 'type' | 'onClick'
+>;
+
+interface ButtonProps extends NativeButtonProps {
   ariaLabel?: string;
   variant?: "secondary" | "textOnly";
   inline?: boolean;
@@ -28,7 +40,10 @@ interface ButtonProps {
   style?: CSSProperties;
 }
 
-const getButtonClasses = (props: ButtonProps): string =>
+const getButtonClasses = (props: Pick<
+  ButtonProps,
+  'variant' | 'inline' | 'iconOnly' | 'small' | 'iconLeft' | 'iconRight' | 'smallFont' | 'className'
+>): string =>
   joinClasses(
     'button',
     styles.button,
@@ -75,10 +90,16 @@ const Button: FC<ButtonProps> = ({
   className = "",
   dataTooltipId = "",
   ref,
-  style
+  style,
+  ...rest
 }) => {
   const buttonStyle = getButtonClasses({ variant, inline, iconOnly, small, iconLeft, iconRight, smallFont, className });
   const content = <ButtonContent iconOnly={iconOnly} iconLeft={iconLeft} iconRight={iconRight}>{children}</ButtonContent>;
+  const {
+    'aria-label': ariaLabelAttr,
+    ...domProps
+  } = rest;
+  const resolvedAriaLabel = ariaLabel ?? (typeof ariaLabelAttr === 'string' ? ariaLabelAttr : undefined);
 
   const commonProps = {
     title: title,
@@ -86,14 +107,14 @@ const Button: FC<ButtonProps> = ({
     onClick: handleClick,
     'data-testid': testId,
     'data-tooltip-id': dataTooltipId,
-    style: style
+    style: style,
+    'aria-label': resolvedAriaLabel,
   };
 
   if (href) {
     const linkProps = {
       ...commonProps,
       rel: rel,
-      'aria-label': ariaLabel || '',
       ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
     };
     return link
@@ -103,6 +124,7 @@ const Button: FC<ButtonProps> = ({
 
   return (
     <button
+      {...domProps}
       {...commonProps}
       ref={ref}
       type={type}
