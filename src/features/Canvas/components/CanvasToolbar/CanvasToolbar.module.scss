@@ -2,16 +2,13 @@
 
 .toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  height: 40px;
-  min-height: 40px;
   padding: $s;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: var(--canvas-object-list-width, #{$panelWidth});
+  inset: 0;
   z-index: 10;
+  pointer-events: none;
 }
 
 .left {
@@ -19,15 +16,12 @@
   align-items: center;
   min-width: 0;
   gap: $s;
+  pointer-events: auto;
 }
 
 .interactions {
   display: flex;
   gap: $xxs;
-  svg {
-    width: $s;
-    height: $s;
-  }
   button {
     margin: 0;
     border-radius: 20px;
@@ -35,6 +29,10 @@
     padding: 0;
     display: flex;
     cursor: pointer;
+    height: $s;
+    width: $s;
+    justify-content: center;
+    align-items: center;
   }
   .closeButton {
     background: $red;
@@ -72,7 +70,16 @@
 .center {
   display: flex;
   align-items: center;
-  gap: $xs;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.right {
+  position: relative;
+  align-self: stretch;
+  width: $panelWidth;
+  min-width: $panelWidth;
+  pointer-events: none;
 }
 
 .zoomGroup {
@@ -83,49 +90,28 @@
 
 .zoomLevel {
   font-size: $captionSize;
-  color: $darkGray;
-  min-width: 36px;
+  color: $black;
+  font-weight: 800;
+  min-width: 35px;
   text-align: center;
   user-select: none;
 }
 
+.undoRedoGroup {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  .toolButton {
+    svg path {
+      fill: transparent;
+    }
+  }
+}
+
 .divider {
   width: 1px;
-  height: 20px;
-  background: $midGray;
-}
-
-.layoutGroup {
-  display: flex;
-  align-items: center;
-  gap: $xxs;
-}
-
-.layoutButton {
-  font-size: $captionSize;
-  padding: 4px $xs;
-  border: 1px solid $midGray;
-  border-radius: $defaultBorderRadius;
-  background: $white;
-  color: $black;
-  cursor: pointer;
-  transition: $defaultAnim;
-
-  &:hover {
-    background: $hoverGray;
-  }
-
-  &.active {
-    background: $purpleTwo;
-    border-color: $purpleTwo;
-    color: $white;
-  }
-}
-
-.right {
-  display: flex;
-  align-items: center;
-  gap: $xxs;
+  height: $s;
+  background-color: $midGray;
 }
 
 .toolButton {
@@ -153,15 +139,11 @@
   &.active {
     background: $grayHover;
   }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .addMenuWrapper {
   position: relative;
+  margin-right: $xxs;
 }
 
 .addButton {
@@ -210,6 +192,7 @@
   margin-left: $xs;
   opacity: 0;
   transition: $defaultAnim;
+  width: 100px;
 
   &.visible,
   &.saving,
@@ -243,8 +226,25 @@
   z-index: 10;
 }
 
+.settingsMenuLabel {
+  padding: $xxs $s $xxxs;
+  color: $darkGray;
+  font-size: $captionSize;
+  font-weight: 600;
+  user-select: none;
+}
+
+.settingsMenuDivider {
+  height: 1px;
+  margin: $xxs 0;
+  background: $midGray;
+}
+
 .settingsMenuItem {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $xs;
   width: 100%;
   padding: $xxs $s;
   border: none;
@@ -263,6 +263,10 @@
     opacity: 0.4;
     cursor: default;
   }
+}
+
+.settingsMenuItemActive {
+  font-weight: 600;
 }
 
 .settingsMenuItemDanger {

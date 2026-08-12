@@ -1,7 +1,9 @@
 import { KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 const getFocusableMenuItems = (menu: HTMLElement): HTMLElement[] =>
-  Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)'));
+  Array.from(menu.querySelectorAll<HTMLElement>(
+    '[role="menuitem"]:not(:disabled), [role="menuitemradio"]:not(:disabled)',
+  ));
 
 const useDropdownMenuA11y = () => {
   const [open, setOpen] = useState(false);
@@ -48,9 +50,12 @@ const useDropdownMenuA11y = () => {
 
     event.preventDefault();
     const currentIndex = items.indexOf(document.activeElement as HTMLElement);
-    const nextIndex = event.key === 'ArrowDown'
-      ? (currentIndex + 1) % items.length
-      : (currentIndex <= 0 ? items.length - 1 : currentIndex - 1);
+    let nextIndex = currentIndex + 1;
+    if (event.key === 'ArrowUp') {
+      nextIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+    } else {
+      nextIndex = nextIndex % items.length;
+    }
 
     items[nextIndex]?.focus();
   }, [close]);

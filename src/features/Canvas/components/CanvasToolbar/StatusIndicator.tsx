@@ -14,10 +14,8 @@ const STATUS_LABELS: Partial<Record<SaveStatus, string>> = {
 };
 
 const StatusIndicator: FC<StatusIndicatorProps> = ({ saveStatus }) => {
-  if (!saveStatus || saveStatus === 'unsaved') return null;
 
-  const label = STATUS_LABELS[saveStatus];
-  if (!label) return null;
+  const label = saveStatus ? STATUS_LABELS[saveStatus] : '';
 
   return (
     <span

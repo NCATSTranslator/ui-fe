@@ -1,25 +1,19 @@
-import { FC, useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
+import { FC, ReactNode, useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
 import styles from './CanvasToolbar.module.scss';
 import { LayoutType } from 'translator-graph-view';
-import { joinClasses } from '@/features/Core/utils/classHelpers';
 import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import type { SaveStatus } from '@/features/Canvas/types/canvas';
 import UndoIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import RedoIcon from '@/assets/icons/directional/Undo & Redo/Redo.svg?react';
-import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
+import ZoomInIcon from '@/assets/icons/buttons/ZoomIn.svg?react';
+import ZoomOutIcon from '@/assets/icons/buttons/ZoomOut.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import ExpandIcon from '@/assets/icons/buttons/Expand.svg?react';
 import CanvasSettingsMenu from './CanvasSettingsMenu';
 import AddMenu from './AddMenu';
 import StatusIndicator from './StatusIndicator';
-
-const layouts: { key: LayoutType; label: string }[] = [
-  { key: 'hierarchicalLR', label: 'Horizontal' },
-  { key: 'hierarchical', label: 'Vertical' },
-  { key: 'force', label: 'Force' },
-  { key: 'custom', label: 'Custom' },
-];
+import Button from '@/features/Core/components/Button/Button';
 
 interface CanvasToolbarProps {
   title: string;
@@ -36,6 +30,7 @@ interface CanvasToolbarProps {
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   saveStatus?: SaveStatus;
+  rightSlot?: ReactNode;
 }
 
 const CanvasToolbar: FC<CanvasToolbarProps> = ({
@@ -53,6 +48,7 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   onAddObject,
   onAddAnnotation,
   saveStatus,
+  rightSlot,
 }) => {
   const { closePane, togglePane, toggleMaximizePane, paneMaximized } = useCanvasPane();
   const [editing, setEditing] = useState(false);
@@ -131,65 +127,61 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
             {title}
           </span>
         )}
-        <AddMenu onAddObject={onAddObject} onAddAnnotation={onAddAnnotation} />
         <StatusIndicator saveStatus={saveStatus} />
       </div>
       <div className={styles.center}>
+        <AddMenu onAddObject={onAddObject} onAddAnnotation={onAddAnnotation} />
+        <CanvasSettingsMenu layout={layout} onLayoutChange={onLayoutChange} />
+        <div className={styles.divider} />
         <div className={styles.zoomGroup}>
-          <button
+          <Button
             className={styles.toolButton}
-            onClick={onZoomOut}
-            disabled={!onZoomOut}
-            aria-label="Zoom out"
-            title="Zoom out"
-          >
-            <SubtractIcon />
-          </button>
-          <span className={styles.zoomLevel}>{displayZoom}</span>
-          <button
-            className={styles.toolButton}
-            onClick={onZoomIn}
+            handleClick={onZoomIn}
             disabled={!onZoomIn}
-            aria-label="Zoom in"
+            ariaLabel="Zoom in"
             title="Zoom in"
-          >
-            <AddIcon />
-          </button>
+            iconLeft={<ZoomInIcon />}
+            iconOnly
+            variant="secondary"
+          />
+          <span className={styles.zoomLevel}>{displayZoom}</span>
+          <Button
+            className={styles.toolButton}
+            handleClick={onZoomOut}
+            disabled={!onZoomOut}
+            ariaLabel="Zoom out"
+            title="Zoom out"
+            iconLeft={<ZoomOutIcon />}
+            iconOnly
+            variant="secondary"
+          />
         </div>
         <div className={styles.divider} />
-        <div className={styles.layoutGroup}>
-          {layouts.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              className={joinClasses(styles.layoutButton, layout === key && styles.active)}
-              onClick={() => onLayoutChange(key)}
-            >
-              {label}
-            </button>
-          ))}
+        <div className={styles.undoRedoGroup}>
+          <Button
+            className={styles.toolButton}
+            handleClick={onUndo}
+            disabled={!canUndo}
+            ariaLabel="Undo"
+            title="Undo"
+            iconLeft={<UndoIcon />}
+            iconOnly
+            variant="secondary"
+          />
+          <Button
+            className={styles.toolButton}
+            handleClick={onRedo}
+            disabled={!canRedo}
+            ariaLabel="Redo"
+            title="Redo"
+            iconLeft={<RedoIcon />}
+            iconOnly
+            variant="secondary"
+          />
         </div>
       </div>
       <div className={styles.right}>
-        <button
-          className={styles.toolButton}
-          onClick={onUndo}
-          disabled={!canUndo}
-          aria-label="Undo"
-          title="Undo"
-        >
-          <UndoIcon />
-        </button>
-        <button
-          className={styles.toolButton}
-          onClick={onRedo}
-          disabled={!canRedo}
-          aria-label="Redo"
-          title="Redo"
-        >
-          <RedoIcon />
-        </button>
-        <CanvasSettingsMenu />
+        {rightSlot}
       </div>
     </div>
   );

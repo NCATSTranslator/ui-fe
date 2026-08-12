@@ -4,6 +4,7 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import useDropdownMenuA11y from './useDropdownMenuA11y';
+import Button from '@/features/Core/components/Button/Button';
 
 interface AddMenuProps {
   onAddObject?: () => void;
@@ -25,17 +26,16 @@ const AddMenu: FC<AddMenuProps> = ({ onAddObject, onAddAnnotation }) => {
 
   return (
     <OutsideClickHandler className={styles.addMenuWrapper} onOutsideClick={close}>
-      <button
-        ref={triggerRef}
-        type="button"
+      <Button
         className={joinClasses(styles.addButton, open && styles.active)}
-        onClick={toggle}
-        aria-label="Add to canvas"
+        iconLeft={<AddIcon />}
+        handleClick={toggle}
+        ariaLabel="Add to canvas"
         title="Add to canvas"
+        ref={triggerRef}
         {...triggerA11yProps}
-      >
-        <AddIcon />
-      </button>
+        iconOnly
+      />
       {open && (
         <div ref={menuRef} className={styles.addMenu} {...menuA11yProps}>
           <button
