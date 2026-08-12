@@ -26,7 +26,7 @@ const backendAnnotation = (overrides: Partial<BackendCanvasAnnotation> = {}): Ba
   ...overrides,
 });
 
-describe('canvasAnnotationUtils', () => {
+describe('canvasAnnotationUtils mapping', () => {
   it('maps backend annotations to canvas annotations', () => {
     expect(backendAnnotationToCanvasAnnotation(backendAnnotation())).toEqual({
       id: 'annotation-42',
@@ -78,7 +78,9 @@ describe('canvasAnnotationUtils', () => {
       { id: 'annotation-1', text: 'Note', position: { x: 10, y: 20 } },
     ]);
   });
+});
 
+describe('canvasAnnotationUtils sync and geometry', () => {
   it('preserves metadata when syncing graph annotation updates', () => {
     const previous: CanvasAnnotation[] = [{
       id: 'annotation-1',

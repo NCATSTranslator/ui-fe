@@ -5,6 +5,7 @@ import type { AppDispatch } from '@/redux/store';
 import { setCanvasAnnotations } from '@/features/Canvas/slices/canvasSlice';
 import type {
   Canvas,
+  CanvasAnnotation,
   CreateCanvasAnnotationRequest,
   GraphGeometry,
   GraphSelection,
@@ -37,6 +38,41 @@ const positionsEqual = (
   b: { x: number; y: number },
 ): boolean => a.x === b.x && a.y === b.y;
 
+const withUpdatedHeights = (
+  previousById: Map<string, CanvasAnnotation>,
+  synced: CanvasAnnotation[],
+): CanvasAnnotation[] => synced.map(annotation => {
+  const prev = previousById.get(annotation.id);
+  if (!prev || prev.text === annotation.text || annotation.dataId <= 0) return annotation;
+  const height = estimateAnnotationHeightFromText(annotation.text);
+  return height !== annotation.height ? { ...annotation, height } : annotation;
+});
+
+const getMovedAnnotations = (
+  previousById: Map<string, CanvasAnnotation>,
+  annotations: CanvasAnnotation[],
+): CanvasAnnotation[] => annotations.filter(annotation => {
+  const prev = previousById.get(annotation.id);
+  return Boolean(
+    prev
+    && annotation.dataId > 0
+    && !positionsEqual(prev.position, annotation.position),
+  );
+});
+
+const persistAnnotationTextUpdates = (
+  canvasId: number,
+  previousById: Map<string, CanvasAnnotation>,
+  annotations: CanvasAnnotation[],
+  saveUpdateAnnotationText: UseCanvasAnnotationsOptions['saveUpdateAnnotationText'],
+) => {
+  for (const annotation of annotations) {
+    const prev = previousById.get(annotation.id);
+    if (!prev || prev.text === annotation.text || annotation.dataId <= 0) continue;
+    saveUpdateAnnotationText(canvasId, annotation.dataId, annotation.text);
+  }
+};
+
 const useCanvasAnnotations = ({
   activeCanvas,
   pushUndo,
@@ -65,21 +101,10 @@ const useCanvasAnnotations = ({
     const deleted = previous.filter(
       annotation => !nextIds.has(annotation.id) && annotation.dataId > 0,
     );
-
-    const withHeights = synced.map(annotation => {
-      const prev = previousById.get(annotation.id);
-      if (!prev || prev.text === annotation.text || annotation.dataId <= 0) {
-        return annotation;
-      }
-      const height = estimateAnnotationHeightFromText(annotation.text);
-      return height !== annotation.height ? { ...annotation, height } : annotation;
-    });
+    const withHeights = withUpdatedHeights(previousById, synced);
 
     pushUndo();
-    dispatch(setCanvasAnnotations({
-      canvasId: canvas.id,
-      annotations: withHeights,
-    }));
+    dispatch(setCanvasAnnotations({ canvasId: canvas.id, annotations: withHeights }));
 
     if (deleted.length > 0) {
       void saveTrashElements(canvas.id, {
@@ -87,32 +112,15 @@ const useCanvasAnnotations = ({
       });
     }
 
-    const movedAnnotations = withHeights.filter(annotation => {
-      const prev = previousById.get(annotation.id);
-      return (
-        prev
-        && annotation.dataId > 0
-        && !positionsEqual(prev.position, annotation.position)
-      );
-    });
+    const movedAnnotations = getMovedAnnotations(previousById, withHeights);
     if (movedAnnotations.length > 0) {
       void saveGeometry(canvas.id, {
         annotations: canvasAnnotationsToGeometryPayload(movedAnnotations),
       });
     }
 
-    for (const annotation of withHeights) {
-      const prev = previousById.get(annotation.id);
-      if (!prev || prev.text === annotation.text || annotation.dataId <= 0) continue;
-      saveUpdateAnnotationText(canvas.id, annotation.dataId, annotation.text);
-    }
-  }, [
-    dispatch,
-    pushUndo,
-    saveGeometry,
-    saveTrashElements,
-    saveUpdateAnnotationText,
-  ]);
+    persistAnnotationTextUpdates(canvas.id, previousById, withHeights, saveUpdateAnnotationText);
+  }, [dispatch, pushUndo, saveGeometry, saveTrashElements, saveUpdateAnnotationText]);
 
   const addAnnotation = useCallback(async (): Promise<string | null> => {
     const canvas = activeCanvasRef.current;
