@@ -18,8 +18,11 @@ export type CanvasSearchMatch = {
   value: string;
 };
 
+const formatSearchMatch = ({ label, value }: CanvasSearchMatch): string =>
+  `${label} (${value})`;
+
 export const formatCanvasSearchMatchTooltip = (matches: CanvasSearchMatch[]): string =>
-  `Matched on: ${matches.map(({ label, value }) => `${label} (${value})`).join(', ')}`;
+  `Matched on: ${matches.map(formatSearchMatch).join(', ')}`;
 
 const collectCanvasNodeSearchMatches = (
   node: CanvasNode,

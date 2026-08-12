@@ -3,23 +3,24 @@
 .objectList {
   display: flex;
   flex-direction: column;
-  width: var(--canvas-object-list-width, #{$panelWidth});
-  min-width: var(--canvas-object-list-width, #{$panelWidth});
+  width: $panelWidth;
+  min-width: $panelWidth;
   overflow: hidden;
   position: absolute;
-  top: $s;
-  right: $s;
-  bottom: $s;
+  top: 0;
+  right: 0;
+  bottom: 0;
   z-index: 20;
   gap: 2px;
   transition: $defaultAnim;
   background: $lightGray;
+  pointer-events: auto;
 }
 
 .collapsed {
   display: flex;
   flex-direction: column;
-  bottom: calc(100% - 50px);
+  bottom: calc(100% - $l);
   .collapseToggle {
     svg {
       width: 18px;
@@ -36,7 +37,7 @@
   display: flex;
   justify-content: space-between;
   gap: $xs;
-  padding: $xs;
+  padding: 7px $xs;
   border: none;
   background: transparent;
   cursor: pointer;

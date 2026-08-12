@@ -28,6 +28,34 @@ interface UseCanvasObjectListOptions {
   onNodeMenuIdChange: (nodeId: string | null) => void;
 }
 
+const useObjectListSortState = (activeTab: CanvasObjectListTab) => {
+  const [sortMode, setSortMode] = useState<ObjectSortMode>('relationships');
+  const [annotationSortMode, setAnnotationSortMode] = useState<AnnotationSortMode>('alphabetical');
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const activeSortKey = activeTab === 'objects' ? sortMode : annotationSortMode;
+  const options = activeTab === 'objects' ? OBJECT_SORT_OPTIONS : ANNOTATION_SORT_OPTIONS;
+  const currentSortLabel = options.find(o => o.key === activeSortKey)?.label ?? '';
+  const searchPlaceholder = activeTab === 'objects' ? 'Search objects...' : 'Search annotations...';
+  const closeSortDropdown = useCallback(() => setSortDropdownOpen(false), []);
+  const handleSortSelect = useCallback((key: ObjectSortMode | AnnotationSortMode) => {
+    if (activeTab === 'objects') setSortMode(key as ObjectSortMode);
+    else setAnnotationSortMode(key as AnnotationSortMode);
+    setSortDropdownOpen(false);
+  }, [activeTab]);
+
+  return {
+    sortMode,
+    annotationSortMode,
+    sortDropdownOpen,
+    activeSortKey,
+    currentSortLabel,
+    searchPlaceholder,
+    handleSortSelect,
+    toggleSortDropdown: useCallback(() => setSortDropdownOpen(prev => !prev), []),
+    closeSortDropdown,
+  };
+};
+
 const useCanvasObjectList = ({
   canvas,
   visibleNodes,
@@ -40,30 +68,29 @@ const useCanvasObjectList = ({
   const [collapsed, setCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState<CanvasObjectListTab>('objects');
   const { inputValue, searchTerm, handleSearch } = useSimpleSearch();
-  const [sortMode, setSortMode] = useState<ObjectSortMode>('relationships');
-  const [annotationSortMode, setAnnotationSortMode] = useState<AnnotationSortMode>('alphabetical');
-  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const {
+    sortMode, annotationSortMode, sortDropdownOpen, activeSortKey, currentSortLabel,
+    searchPlaceholder, handleSortSelect, toggleSortDropdown, closeSortDropdown,
+  } = useObjectListSortState(activeTab);
   const prevTabRef = useRef(activeTab);
-
   const allNodes = useMemo(
     () => Object.values(visibleNodes ?? canvas.nodes),
     [visibleNodes, canvas.nodes],
   );
-  const allAnnotations = canvas.annotations;
-
   const activeSearchTerm = useMemo(
     () => (searchTerm.length >= CANVAS_OBJECT_LIST_MIN_SEARCH_LENGTH ? searchTerm : ''),
     [searchTerm],
   );
-
   const sortedNodes = useMemo(
     () => sortCanvasNodes(filterCanvasNodes(allNodes, activeSearchTerm), sortMode, canvas),
-    [allNodes, activeSearchTerm, sortMode, canvas.edges],
+    [allNodes, activeSearchTerm, sortMode, canvas],
   );
-
   const sortedAnnotations = useMemo(
-    () => sortCanvasAnnotations(filterCanvasAnnotations(allAnnotations, activeSearchTerm), annotationSortMode),
-    [allAnnotations, activeSearchTerm, annotationSortMode],
+    () => sortCanvasAnnotations(
+      filterCanvasAnnotations(canvas.annotations, activeSearchTerm),
+      annotationSortMode,
+    ),
+    [canvas.annotations, activeSearchTerm, annotationSortMode],
   );
 
   useEffect(() => {
@@ -71,78 +98,36 @@ const useCanvasObjectList = ({
     prevTabRef.current = activeTab;
     onNodeMenuIdChange(null);
     handleSearch('');
-    setSortDropdownOpen(false);
-  }, [activeTab, onNodeMenuIdChange, handleSearch]);
-
-  const handleItemClick = useCallback((itemId: string) => {
-    onFindNode(itemId);
-  }, [onFindNode]);
+    closeSortDropdown();
+  }, [activeTab, onNodeMenuIdChange, handleSearch, closeSortDropdown]);
 
   const handleMenuToggle = useCallback((itemId: string, e: MouseEvent) => {
     e.stopPropagation();
     onNodeMenuIdChange(nodeMenuId === itemId ? null : itemId);
   }, [nodeMenuId, onNodeMenuIdChange]);
 
-  const handleNodeMenuAction = useCallback((action: CanvasNodeAction, node: CanvasNode) => {
-    onNodeMenuIdChange(null);
-    onAction?.(action, node);
-  }, [onAction, onNodeMenuIdChange]);
-
-  const handleAnnotationMenuAction = useCallback((
-    action: CanvasAnnotationAction,
-    annotation: CanvasAnnotation,
-  ) => {
-    onNodeMenuIdChange(null);
-    onAnnotationAction?.(action, annotation);
-  }, [onAnnotationAction, onNodeMenuIdChange]);
-
-  const handleCloseMenu = useCallback(() => onNodeMenuIdChange(null), [onNodeMenuIdChange]);
-
-  const toggleCollapse = useCallback(() => setCollapsed(prev => !prev), []);
-
-  const activeSortKey = activeTab === 'objects' ? sortMode : annotationSortMode;
-
-  const currentSortLabel = (activeTab === 'objects' ? OBJECT_SORT_OPTIONS : ANNOTATION_SORT_OPTIONS)
-    .find(o => o.key === activeSortKey)?.label ?? '';
-
-  const handleSortSelect = useCallback((key: ObjectSortMode | AnnotationSortMode) => {
-    if (activeTab === 'objects') {
-      setSortMode(key as ObjectSortMode);
-    } else {
-      setAnnotationSortMode(key as AnnotationSortMode);
-    }
-    setSortDropdownOpen(false);
-  }, [activeTab]);
-
-  const toggleSortDropdown = useCallback(() => setSortDropdownOpen(prev => !prev), []);
-  const closeSortDropdown = useCallback(() => setSortDropdownOpen(false), []);
-
-  const searchPlaceholder = activeTab === 'objects' ? 'Search objects...' : 'Search annotations...';
-
   return {
     collapsed,
-    toggleCollapse,
-    activeTab,
-    setActiveTab,
-    inputValue,
-    searchTerm: activeSearchTerm,
-    handleSearch,
-    sortDropdownOpen,
-    toggleSortDropdown,
-    closeSortDropdown,
-    activeSortKey,
-    currentSortLabel,
-    handleSortSelect,
-    searchPlaceholder,
-    allNodes,
-    allAnnotations,
-    sortedNodes,
-    sortedAnnotations,
-    handleItemClick,
+    toggleCollapse: useCallback(() => setCollapsed(prev => !prev), []),
+    activeTab, setActiveTab, inputValue,
+    searchTerm: activeSearchTerm, handleSearch,
+    sortDropdownOpen, toggleSortDropdown, closeSortDropdown,
+    activeSortKey, currentSortLabel, handleSortSelect, searchPlaceholder,
+    allNodes, allAnnotations: canvas.annotations, sortedNodes, sortedAnnotations,
+    handleItemClick: useCallback((itemId: string) => onFindNode(itemId), [onFindNode]),
     handleMenuToggle,
-    handleNodeMenuAction,
-    handleAnnotationMenuAction,
-    handleCloseMenu,
+    handleNodeMenuAction: useCallback((action: CanvasNodeAction, node: CanvasNode) => {
+      onNodeMenuIdChange(null);
+      onAction?.(action, node);
+    }, [onAction, onNodeMenuIdChange]),
+    handleAnnotationMenuAction: useCallback((
+      action: CanvasAnnotationAction,
+      annotation: CanvasAnnotation,
+    ) => {
+      onNodeMenuIdChange(null);
+      onAnnotationAction?.(action, annotation);
+    }, [onAnnotationAction, onNodeMenuIdChange]),
+    handleCloseMenu: useCallback(() => onNodeMenuIdChange(null), [onNodeMenuIdChange]),
   };
 };
 
