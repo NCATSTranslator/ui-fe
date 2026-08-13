@@ -104,7 +104,6 @@ export type GraphSubmissionEdge = {
   object: string;
   predicate: string;
   aras: string[];
-  support: unknown[];
   is_root: boolean;
   knowledge_level: string;
   description: string | null;
@@ -260,7 +259,6 @@ export type CanvasEdgeDetail = {
   id: string;
   signature?: string;
   aras: string[];
-  support: string[] | import('@/features/ResultList/types/results').Path[];
   is_root: boolean;
   knowledge_level: string;
   description: string | null;

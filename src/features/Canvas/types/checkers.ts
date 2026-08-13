@@ -66,7 +66,6 @@ export const isCanvasEdgeDetail = (obj: unknown): obj is CanvasEdgeDetail => {
   return tc.checkProperties('isCanvasEdgeDetail', obj, [
     ['id', tc.isString(obj.id), 'string', obj.id],
     ['aras', tc.isStringArray(obj.aras), 'string[]', obj.aras],
-    ['support', Array.isArray(obj.support), 'array', obj.support],
     ['is_root', tc.isBoolean(obj.is_root), 'boolean', obj.is_root],
     ['knowledge_level', tc.isString(obj.knowledge_level), 'string', obj.knowledge_level],
     ['description', tc.nullable(obj.description, tc.isString), 'string | null', obj.description],

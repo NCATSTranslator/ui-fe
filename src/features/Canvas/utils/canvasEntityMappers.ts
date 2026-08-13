@@ -42,12 +42,10 @@ export const canvasNodeDetailToResultNode = (detail: CanvasNodeDetail): ResultNo
 export const canvasEdgeDetailToResultEdge = (detail: CanvasEdgeDetail): ResultEdge => ({
   id: detail.id,
   aras: [...detail.aras],
-  support: detail.support as ResultEdge['support'],
   is_root: detail.is_root,
   knowledge_level: detail.knowledge_level as ResultEdge['knowledge_level'],
   description: detail.description,
   type: detail.type,
-  inferred: detail.type === 'indirect',
   subject: detail.subject,
   object: detail.object,
   predicate: detail.predicate,
