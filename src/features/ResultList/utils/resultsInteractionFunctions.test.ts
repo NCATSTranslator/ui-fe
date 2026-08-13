@@ -538,7 +538,7 @@ describe('applyFilters — compressed path predicate filtering', () => {
   });
 
   it('excludes only the matching member in a three-member compression group', () => {
-    const { rs, result } = buildCompressedFixture();
+    const { rs } = buildCompressedFixture();
     const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3'] });
     const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
       makePathFilter(PRED_CAUSES, true),

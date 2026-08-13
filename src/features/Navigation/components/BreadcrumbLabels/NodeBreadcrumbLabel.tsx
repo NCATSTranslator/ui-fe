@@ -1,6 +1,5 @@
 import { FC, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 import { getFormattedNodeName } from '@/features/Core/utils/stringFormatters';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';

@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 
