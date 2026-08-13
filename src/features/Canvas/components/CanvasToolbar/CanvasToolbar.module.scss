@@ -114,33 +114,6 @@
   background-color: $midGray;
 }
 
-.toolButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: $defaultBorderRadius;
-  background: transparent;
-  color: $darkGray;
-  cursor: pointer;
-  transition: $defaultAnim;
-
-  &:hover:not(:disabled) {
-    background: $grayHover;
-  }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-
-  &.active {
-    background: $grayHover;
-  }
-}
-
 .addMenuWrapper {
   position: relative;
   margin-right: $xxs;
