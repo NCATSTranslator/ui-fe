@@ -9,8 +9,9 @@ interface CanvasNodeActions {
 interface UseCanvasPaneHandlersOptions {
   activeCanvas: Canvas | null;
   navigateToEdge: (canvas: Canvas, edge: Canvas['edges'][string]) => void;
-  setHoveredNodeId: (nodeId: string | null) => void;
   handleNodeHover: (node: GraphNodeType | null) => void;
+  handleEdgeHover: (edge: GraphEdgeType | null) => void;
+  handleAnnotationHover: (annotationId: string | null) => void;
   handleGraphNodeHover: (node: GraphNodeType | null, geometry: HoverGeometry | null) => void;
   handleGraphEdgeHover: (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => void;
   nodeActions: CanvasNodeActions;
@@ -19,8 +20,9 @@ interface UseCanvasPaneHandlersOptions {
 const useCanvasPaneHandlers = ({
   activeCanvas,
   navigateToEdge,
-  setHoveredNodeId,
   handleNodeHover,
+  handleEdgeHover,
+  handleAnnotationHover,
   handleGraphNodeHover,
   handleGraphEdgeHover,
   nodeActions,
@@ -33,11 +35,13 @@ const useCanvasPaneHandlers = ({
   }, [handleNodeHover, handleGraphNodeHover]);
 
   const handleCombinedEdgeHover = useCallback((edge: GraphEdgeType | null, geometry: HoverGeometry | null) => {
-    if (edge && geometry) {
-      setHoveredNodeId(null);
-    }
+    handleEdgeHover(edge);
     handleGraphEdgeHover(edge, geometry);
-  }, [handleGraphEdgeHover, setHoveredNodeId]);
+  }, [handleEdgeHover, handleGraphEdgeHover]);
+
+  const handleCombinedAnnotationHover = useCallback((annotationId: string | null) => {
+    handleAnnotationHover(annotationId);
+  }, [handleAnnotationHover]);
 
   const handleNodeClick = useCallback((node: GraphNodeType) => {
     navigateToCanvasNode(node.id);
@@ -53,6 +57,7 @@ const useCanvasPaneHandlers = ({
   return {
     handleCombinedNodeHover,
     handleCombinedEdgeHover,
+    handleCombinedAnnotationHover,
     handleNodeClick,
     handleEdgeClick,
   };
