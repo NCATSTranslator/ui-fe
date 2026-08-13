@@ -57,7 +57,17 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
     rename, undo, redo, canUndo, canRedo, removeNode, pushUndo,
   } = useCanvas(persistence);
   const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
-  const { hoveredNodeId, setHoveredNodeId, clearHover, handleNodeHover } = useCanvasHoverState();
+  const {
+    hoveredNodeId,
+    hoveredEdgeId,
+    hoveredAnnotationId,
+    setHoveredNodeId,
+    setHoveredAnnotationId,
+    clearHover,
+    handleNodeHover,
+    handleEdgeHover,
+    handleAnnotationHover,
+  } = useCanvasHoverState();
   const { navigateToNode, navigateToEdge } = useCanvasEntityNavigation();
   const {
     selectedNodeIds,
@@ -106,8 +116,9 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
   const paneHandlers = useCanvasPaneHandlers({
     activeCanvas,
     navigateToEdge,
-    setHoveredNodeId,
     handleNodeHover,
+    handleEdgeHover,
+    handleAnnotationHover,
     handleGraphNodeHover: graphHover.handleGraphNodeHover,
     handleGraphEdgeHover: graphHover.handleGraphEdgeHover,
     nodeActions,
@@ -167,9 +178,12 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
               onEdgeClick={paneHandlers.handleEdgeClick}
               onNodeHover={paneHandlers.handleCombinedNodeHover}
               onEdgeHover={paneHandlers.handleCombinedEdgeHover}
+              onAnnotationHover={paneHandlers.handleCombinedAnnotationHover}
               onNodeContextMenu={nodeMenu.handleNodeContextMenu}
               saveStatus={persistence.saveStatus}
               hoveredNodeId={hoveredNodeId}
+              hoveredEdgeId={hoveredEdgeId}
+              hoveredAnnotationId={hoveredAnnotationId}
               selectedIds={selectedNodeIds}
               focusRequest={focusRequest}
               annotations={graphAnnotations}
@@ -180,6 +194,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
                   canvas={activeCanvas}
                   visibleNodes={visibleNodes}
                   onHoverNode={setHoveredNodeId}
+                  onHoverAnnotation={setHoveredAnnotationId}
                   onFindNode={findNodeOnCanvas}
                   onAction={nodeMenu.handleObjectListAction}
                   onAnnotationAction={handleAnnotationListAction}

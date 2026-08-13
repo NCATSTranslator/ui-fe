@@ -51,6 +51,7 @@ interface CanvasGraphProps {
   onEdgeClick?: (edge: GraphEdgeType) => void;
   onNodeHover?: (node: GraphNodeType | null, geometry: HoverGeometry | null) => void;
   onEdgeHover?: (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => void;
+  onAnnotationHover?: (annotationId: string | null) => void;
   onNodeContextMenu?: (nodeId: string, position: { x: number; y: number }) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
@@ -58,6 +59,8 @@ interface CanvasGraphProps {
   onAnnotationsChange?: (annotations: GraphAnnotation[]) => void;
   saveStatus?: SaveStatus;
   hoveredNodeId?: string | null;
+  hoveredEdgeId?: string | null;
+  hoveredAnnotationId?: string | null;
   selectedIds?: string[];
   focusRequest?: GraphFocusRequest | null;
   viewportSyncKey?: string;
@@ -87,6 +90,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onEdgeClick,
   onNodeHover,
   onEdgeHover,
+  onAnnotationHover,
   onNodeContextMenu,
   onAddObject,
   onAddAnnotation,
@@ -94,6 +98,8 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onAnnotationsChange,
   saveStatus,
   hoveredNodeId,
+  hoveredEdgeId,
+  hoveredAnnotationId,
   selectedIds,
   focusRequest,
   viewportSyncKey,
@@ -146,9 +152,12 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           onEdgeClick={onEdgeClick}
           onNodeHover={onNodeHover}
           onEdgeHover={onEdgeHover}
+          onAnnotationHover={onAnnotationHover}
           onGraphNodeDragStop={onGraphNodeDragStop}
           onLayoutComplete={onLayoutComplete}
           hoveredNodeId={hoveredNodeId}
+          hoveredEdgeId={hoveredEdgeId}
+          hoveredAnnotationId={hoveredAnnotationId}
           selectedIds={selectedIds}
           focusRequest={focusRequest}
           annotations={annotations}

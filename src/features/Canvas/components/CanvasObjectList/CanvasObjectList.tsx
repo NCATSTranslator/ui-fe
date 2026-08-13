@@ -17,6 +17,7 @@ interface CanvasObjectListProps {
   canvas: Canvas;
   visibleNodes?: Record<string, CanvasNode>;
   onHoverNode: (nodeId: string | null) => void;
+  onHoverAnnotation: (annotationId: string | null) => void;
   onFindNode: (nodeId: string) => void;
   onAction?: (action: CanvasNodeAction, node: CanvasNode) => void;
   onAnnotationAction?: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
@@ -30,6 +31,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   canvas,
   visibleNodes,
   onHoverNode,
+  onHoverAnnotation,
   onFindNode,
   onAction,
   onAnnotationAction,
@@ -149,7 +151,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           searchTerm={searchTerm}
                           menuId={nodeMenuId}
                           onAnnotationClick={item => handleItemClick(item.id)}
-                          onHoverAnnotation={onHoverNode}
+                          onHoverAnnotation={onHoverAnnotation}
                           onMenuToggle={handleMenuToggle}
                           onMenuAction={handleAnnotationMenuAction}
                         />
