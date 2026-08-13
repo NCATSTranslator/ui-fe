@@ -18,7 +18,6 @@ const useEvidenceViewRouteData = () => {
   const { resultId, edgeId, pathId } = useParams();
   const {
     canvasId,
-    dataId,
     isCanvasOnlyMode,
     decodedParams,
     queryId,

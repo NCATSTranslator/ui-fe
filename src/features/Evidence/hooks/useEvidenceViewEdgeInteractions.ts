@@ -143,7 +143,6 @@ const useEvidenceViewEdgeInteractions = ({
     edgeLabel,
   } = useEvidenceData();
 
-  const isInferred = selectedEdge?.inferred ?? false;
   const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
   const compressedSubgraph = useMemo(
     () => buildCompressedSubgraph(path, resultSet, compressedEdgeSets),
@@ -192,7 +191,6 @@ const useEvidenceViewEdgeInteractions = ({
     selectedEdge,
     selectedEdgeDomRef,
     edgeLabel,
-    isInferred,
     edgeSeen,
     compressedSubgraph,
     handleEdgeClick,
