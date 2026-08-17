@@ -26,7 +26,6 @@ const EMPTY_EDGE: ResultEdge = {
   subject: "",
   trials: [],
   tags: {},
-  type: "",
 };
 
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => {

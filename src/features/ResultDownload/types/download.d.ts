@@ -40,7 +40,6 @@ export interface ExportedEdge {
   trials: string[];
   aras: string[];
   description?: string | null;
-  type: string;
 }
 
 export interface ExportedResult {

@@ -45,7 +45,6 @@ export const canvasEdgeDetailToResultEdge = (detail: CanvasEdgeDetail): ResultEd
   is_root: detail.is_root,
   knowledge_level: detail.knowledge_level as ResultEdge['knowledge_level'],
   description: detail.description,
-  type: detail.type,
   subject: detail.subject,
   object: detail.object,
   predicate: detail.predicate,

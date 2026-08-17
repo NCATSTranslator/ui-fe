@@ -107,7 +107,6 @@ export type GraphSubmissionEdge = {
   is_root: boolean;
   knowledge_level: string;
   description: string | null;
-  type: string;
   predicate_url: string | null;
   provenance: unknown[];
   publications: Record<string, unknown>;
@@ -262,7 +261,6 @@ export type CanvasEdgeDetail = {
   is_root: boolean;
   knowledge_level: string;
   description: string | null;
-  type: string;
   subject: string;
   object: string;
   predicate: string;
