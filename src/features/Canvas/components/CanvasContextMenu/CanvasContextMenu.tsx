@@ -2,16 +2,15 @@ import { FC, createContext, useContext, useState, useCallback, useEffect, useRef
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
-import { selectActiveCanvas, addCanvas, replaceCanvas, getNextCanvasLabel, selectCanvases } from '@/features/Canvas/slices/canvasSlice';
+import { selectActiveCanvas, addCanvas, getNextCanvasLabel, selectCanvases } from '@/features/Canvas/slices/canvasSlice';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { resultDataToGraphSubmission, backendGraphToInternal } from '@/features/Canvas/utils/canvasMappers';
-import { extractNodeFromResultSet, extractNodesAndEdgesFromPath } from '@/features/Canvas/utils/canvasGraphFunctions';
-import { mergeCanvasGraph, createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
-import { canvasEntityAddedToast, canvasEntitiesAddedToast, canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
+import { createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
+import { addResultEntityToCanvas } from '@/features/Canvas/utils/addResultEntityToCanvas';
+import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
-import type { Path, ResultSet } from '@/features/ResultList/types/results';
+import type { Path } from '@/features/ResultList/types/results';
 import styles from './CanvasContextMenu.module.scss';
 
 type MenuTarget = {
@@ -27,26 +26,6 @@ type CanvasContextMenuContextValue = {
 };
 
 const CanvasContextMenuContext = createContext<CanvasContextMenuContextValue | null>(null);
-
-const resolveTarget = (
-  resultSet: ResultSet,
-  target: MenuTarget,
-): { nodeIds: string[]; edgeIds: string[]; entityName: string } | null => {
-  if (target.type === 'path') {
-    if (!target.path) return null;
-    const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, target.path);
-    if (nodes.length === 0) return null;
-    return { nodeIds: nodes.map(n => n.id), edgeIds: edges.map(e => e.id), entityName: target.id };
-  }
-  if (target.type === 'node') {
-    const node = extractNodeFromResultSet(resultSet, target.id);
-    if (!node) return null;
-    return { nodeIds: [target.id], edgeIds: [], entityName: node.names[0] || target.id };
-  }
-  const edge = resultSet.data.edges[target.id];
-  if (!edge) return null;
-  return { nodeIds: [edge.subject, edge.object], edgeIds: [target.id], entityName: edge.predicate };
-};
 
 const getButtonLabel = (type: MenuTarget['type'], hasCanvas: boolean): string => {
   if (type === 'path') return hasCanvas ? 'Add path to graph' : 'New canvas + add path to graph';
@@ -119,35 +98,16 @@ const ContextMenuPopup: FC<{
 
   const handleAdd = useCallback(async () => {
     if (!resultSet) return;
-    const resolved = resolveTarget(resultSet, target);
-    if (!resolved) return;
     const canvas = await ensureCanvas();
     if (!canvas) return;
 
-    const { nodeIds, edgeIds, entityName } = resolved;
-    const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds, undefined, {
-      layout: canvas.layout,
-      existingNodes: canvas.nodes,
+    await addResultEntityToCanvas({
+      resultSet,
+      target: { type: target.type, id: target.id, pk: target.pk, path: target.path },
+      canvas,
+      dispatch,
+      queryClient,
     });
-    try {
-      const graph = await mergeCanvasGraph(canvas.id, submission);
-      const { nodes, edges } = backendGraphToInternal(graph);
-      dispatch(replaceCanvas({
-        ...canvas,
-        nodes,
-        edges,
-        tags: graph.tags ?? canvas.tags,
-        timeUpdated: new Date().toISOString(),
-      }));
-      queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
-      if (target.type === 'path') {
-        canvasEntitiesAddedToast(nodeIds.length, canvas.label);
-      } else {
-        canvasEntityAddedToast(entityName, canvas.label);
-      }
-    } catch {
-      canvasSaveErrorToast();
-    }
     onClose();
   }, [resultSet, ensureCanvas, target, dispatch, queryClient, onClose]);
 
