@@ -231,6 +231,7 @@ const ResultDetailView: FC = () => {
               pathArray={result.paths}
               pathFilterState={pathFilterState ?? {}}
               pk={pk ?? ''}
+              resultId={result.id}
               setShowHiddenPaths={setShowHiddenPaths}
               showHiddenPaths={showHiddenPaths}
             />

@@ -7,11 +7,11 @@ import {
   getResultSetById,
 } from '@/features/ResultList/slices/resultsSlice';
 import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipMappers';
-import { formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
+import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
+import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
-import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import type { DraggableData } from '@/features/DragAndDrop/types/types';
-import type { ResultNode, ResultSet } from '@/features/ResultList/types/results';
+import type { Path, Result, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import styles from './ResultEntityDragOverlay.module.scss';
 
 export type ResultEntityDragOverlayData = Extract<
@@ -28,13 +28,22 @@ const formatNodeLabel = (node: ResultNode | null | undefined, fallback: string):
   return nodeToTooltipProps(node).nameString;
 };
 
-const formatResultName = (resultSet: ResultSet, resultId: string | undefined): string | null => {
-  if (!resultId) return null;
-  const result = getResultById(resultSet, resultId);
+const resultContainsPath = (result: Result, pathId: string): boolean => {
+  if (isStringArray(result.paths)) return result.paths.includes(pathId);
+  return result.paths.some(path => path.id === pathId);
+};
+
+const formatResultName = (
+  resultSet: ResultSet,
+  resultId: string | undefined,
+  path: Path | undefined,
+): string | null => {
+  const result = (resultId && getResultById(resultSet, resultId))
+    || (path?.id ? resultSet.data.results.find(item => resultContainsPath(item, path.id as string)) : undefined);
   if (!result?.drug_name) return null;
   const subjectNode = getNodeById(resultSet, result.subject);
-  const type = subjectNode?.types?.[0]?.replace('biolink:', '') ?? '';
-  return formatBiolinkNode(result.drug_name, type, subjectNode ? getNodeSpecies(subjectNode) : null);
+  const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
+  return formatBiolinkNode(result.drug_name, typeString, subjectNode ? getNodeSpecies(subjectNode) : null);
 };
 
 const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData }) => {
@@ -70,7 +79,7 @@ const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData })
       };
     }
 
-    const resultName = formatResultName(resultSet, dragData.data.resultId);
+    const resultName = formatResultName(resultSet, dragData.data.resultId, dragData.data.path);
     const pathNumber = dragData.data.pathNumber;
     const pathLabel = pathNumber != null
       ? `Path ${pathNumber}`

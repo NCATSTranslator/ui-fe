@@ -11,6 +11,7 @@ import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/fe
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
+import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import { useSelector } from 'react-redux';
 import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
@@ -64,6 +65,7 @@ const PathView: FC<PathViewProps> = ({
   showHiddenPaths }) => {
   
   const prefs = useSelector(currentPrefs);
+  const hasActiveCanvas = !!useSelector(selectActiveCanvas);
   const { resultId } = useResultListContext();
   const effectiveResultId = resultItemId ?? resultId;
   const resultSet = useSelector(getResultSetById(pk));
@@ -121,14 +123,18 @@ const PathView: FC<PathViewProps> = ({
       {
         (!inModal && !isLookup) && 
         <div className={styles.header}>
-          <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+          <p>
+            {hasActiveCanvas
+              ? 'Drag and drop a path, object, or relationship to add it to the canvas.'
+              : 'Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.'}
+          </p>
         </div>
       }
       {
         (!active)
         ? <></>
         :
-        <ResultItemIdContext.Provider value={resultItemId}>
+        <ResultItemIdContext.Provider value={effectiveResultId}>
         <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
             <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
