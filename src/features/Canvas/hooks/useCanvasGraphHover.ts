@@ -20,6 +20,7 @@ import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import type { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 import type { CanvasEdgeDetail, CanvasNodeDetail } from '@/features/Canvas/types/canvas';
 import { useSelector } from 'react-redux';
+import type { RootState } from '@/redux/store';
 
 interface HoveredEntity {
   id: string;
@@ -55,7 +56,10 @@ const resolveHoverTarget = (
 
 const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOptions) => {
   const queryClient = useQueryClient();
-  const resultSet = useSelector(getResultSetById(canvas?.queryRef ?? undefined));
+  const queryRef = canvas?.queryRef;
+  const resultSet = useSelector((state: RootState) => (
+    queryRef ? getResultSetById(queryRef)(state) : null
+  ));
 
   const [hoveredNode, setHoveredNode] = useState<HoveredEntity | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<HoveredEntity | null>(null);
