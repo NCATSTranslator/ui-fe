@@ -22,6 +22,7 @@ interface UseCanvasObjectListOptions {
   canvas: Canvas;
   visibleNodes?: Record<string, CanvasNode>;
   onFindNode: (nodeId: string) => void;
+  onFindAnnotation: (annotationId: string) => void;
   onAction?: (action: CanvasNodeAction, node: CanvasNode) => void;
   onAnnotationAction?: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
   nodeMenuId: string | null;
@@ -60,6 +61,7 @@ const useCanvasObjectList = ({
   canvas,
   visibleNodes,
   onFindNode,
+  onFindAnnotation,
   onAction,
   onAnnotationAction,
   nodeMenuId,
@@ -114,7 +116,11 @@ const useCanvasObjectList = ({
     sortDropdownOpen, toggleSortDropdown, closeSortDropdown,
     activeSortKey, currentSortLabel, handleSortSelect, searchPlaceholder,
     allNodes, allAnnotations: canvas.annotations, sortedNodes, sortedAnnotations,
-    handleItemClick: useCallback((itemId: string) => onFindNode(itemId), [onFindNode]),
+    handleNodeClick: useCallback((nodeId: string) => onFindNode(nodeId), [onFindNode]),
+    handleAnnotationClick: useCallback(
+      (annotationId: string) => onFindAnnotation(annotationId),
+      [onFindAnnotation],
+    ),
     handleMenuToggle,
     handleNodeMenuAction: useCallback((action: CanvasNodeAction, node: CanvasNode) => {
       onNodeMenuIdChange(null);

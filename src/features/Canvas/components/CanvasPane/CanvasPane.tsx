@@ -12,6 +12,7 @@ import useCanvasPaneHandlers from '@/features/Canvas/hooks/useCanvasPaneHandlers
 import useCanvasNodeMenu from '@/features/Canvas/hooks/useCanvasNodeMenu';
 import useCanvasAnnotations from '@/features/Canvas/hooks/useCanvasAnnotations';
 import useCanvasFocus from '@/features/Canvas/hooks/useCanvasFocus';
+import { useCanvasEntityDrop } from '@/features/Canvas/hooks/useCanvasEntityDrop';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
@@ -20,6 +21,7 @@ import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContex
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
 import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
+import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
 import { useNavigate } from 'react-router-dom';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
 import type { Canvas, CanvasAnnotation } from '@/features/Canvas/types/canvas';
@@ -75,7 +77,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
     focusRequest,
     findNodeOnCanvas,
     findAnnotationOnCanvas,
-  } = useCanvasFocus(setHoveredNodeId);
+  } = useCanvasFocus(setHoveredNodeId, setHoveredAnnotationId);
 
   const {
     graphAnnotations,
@@ -135,9 +137,22 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
     saveGeometry: persistence.saveGeometry,
     saveLayout: persistence.saveLayout,
   });
+  const handleEntityDrop = useCanvasEntityDrop(activeCanvas);
 
   return (
-    <div className={paneClass}>
+    <DroppableArea
+      id={`canvas-zone-${activeCanvas.id}`}
+      className={paneClass}
+      canAccept={(draggedData) =>
+        draggedData.type === 'node' || draggedData.type === 'edge' || draggedData.type === 'path'
+      }
+      data={{
+        type: 'canvas',
+        id: String(activeCanvas.id),
+        onDrop: handleEntityDrop,
+      }}
+      indicatorText={`Add to ${activeCanvas.label}`}
+    >
       <div className={styles.collapsedTitle}>
         <button
           type="button"
@@ -196,6 +211,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
                   onHoverNode={setHoveredNodeId}
                   onHoverAnnotation={setHoveredAnnotationId}
                   onFindNode={findNodeOnCanvas}
+                  onFindAnnotation={findAnnotationOnCanvas}
                   onAction={nodeMenu.handleObjectListAction}
                   onAnnotationAction={handleAnnotationListAction}
                   nodeMenuId={nodeMenu.nodeMenuId}
@@ -223,7 +239,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
           )}
         </div>
       )}
-    </div>
+    </DroppableArea>
   );
 };
 

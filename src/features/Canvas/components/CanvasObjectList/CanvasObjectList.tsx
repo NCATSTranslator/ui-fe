@@ -19,6 +19,7 @@ interface CanvasObjectListProps {
   onHoverNode: (nodeId: string | null) => void;
   onHoverAnnotation: (annotationId: string | null) => void;
   onFindNode: (nodeId: string) => void;
+  onFindAnnotation: (annotationId: string) => void;
   onAction?: (action: CanvasNodeAction, node: CanvasNode) => void;
   onAnnotationAction?: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
   onAddObject?: () => void;
@@ -33,6 +34,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   onHoverNode,
   onHoverAnnotation,
   onFindNode,
+  onFindAnnotation,
   onAction,
   onAnnotationAction,
   onAddObject,
@@ -59,7 +61,8 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     allAnnotations,
     sortedNodes,
     sortedAnnotations,
-    handleItemClick,
+    handleNodeClick,
+    handleAnnotationClick,
     handleMenuToggle,
     handleNodeMenuAction,
     handleAnnotationMenuAction,
@@ -68,6 +71,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     canvas,
     visibleNodes,
     onFindNode,
+    onFindAnnotation,
     onAction,
     onAnnotationAction,
     nodeMenuId,
@@ -121,7 +125,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           canvas={canvas}
                           searchTerm={searchTerm}
                           nodeMenuId={nodeMenuId}
-                          onNodeClick={node => handleItemClick(node.id)}
+                          onNodeClick={node => handleNodeClick(node.id)}
                           onHoverNode={onHoverNode}
                           onMenuToggle={handleMenuToggle}
                           onMenuAction={handleNodeMenuAction}
@@ -150,7 +154,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           annotation={annotation}
                           searchTerm={searchTerm}
                           menuId={nodeMenuId}
-                          onAnnotationClick={item => handleItemClick(item.id)}
+                          onAnnotationClick={item => handleAnnotationClick(item.id)}
                           onHoverAnnotation={onHoverAnnotation}
                           onMenuToggle={handleMenuToggle}
                           onMenuAction={handleAnnotationMenuAction}
