@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useMemo, RefObject } from 'react';
+import { FC, MouseEvent, useCallback, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
@@ -20,6 +20,8 @@ import { useResultListContext } from '@/features/ResultList/context/ResultListCo
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -72,6 +74,24 @@ const Predicate: FC<PredicateProps> = ({
   const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
+  const {
+    attributes: edgeDragAttributes,
+    listeners: edgeDragListeners,
+    setNodeRef: setEdgeDragRef,
+    isDragging: isEdgeDragging,
+    canDrag: canDragEdge,
+  } = useResultEntityDraggable({
+    type: 'edge',
+    data: { id: edgeIds[0], pk },
+  });
+
+  const setEdgeRef = useCallback((node: HTMLSpanElement | null) => {
+    setEdgeDragRef(node);
+    if (selected && selectedEdgeRef) {
+      selectedEdgeRef.current = node;
+    }
+  }, [setEdgeDragRef, selected, selectedEdgeRef]);
+
   const { navigateToEvidenceView } = useResultListContext();
   const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
@@ -101,7 +121,9 @@ const Predicate: FC<PredicateProps> = ({
     (selected && parentStyles) && `${parentStyles.selected} ${styles.selected}`,
     (inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`,
     (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`,
-    (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
+    (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`,
+    canDragEdge && dragStyles.draggable,
+    isEdgeDragging && dragStyles.dragging,
   )
 
   const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string, options?: PredicateClickOptions) => {
@@ -124,14 +146,16 @@ const Predicate: FC<PredicateProps> = ({
 
   return (
     <span
+      ref={setEdgeRef}
       className={edgeClass}
       data-tooltip-id={`${formattedEdge.predicate}${uid}`}
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
       onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, parentPathKey)}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu('edge', edgeIds[0], pk, { x: e.clientX, y: e.clientY }); }}
-      ref={selected ? selectedEdgeRef : null}
       {...hoverHandlers}
+      {...edgeDragListeners}
+      {...edgeDragAttributes}
       >
       <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
         <div className={`${parentStyles && parentStyles.background} ${styles.background}`}></div>

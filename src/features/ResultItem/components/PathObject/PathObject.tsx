@@ -18,6 +18,8 @@ import { HoverContext } from '@/features/ResultItem/components/PathView/PathView
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 export interface PathObjectProps {
   activeEntityFilters: string[];
@@ -74,6 +76,17 @@ const PathObject: FC<PathObjectProps> = ({
   const { getHoverHandlers } = useHoverPathObject(setHoveredItem);
   const hoverHandlers = (isEdge) ? getHoverHandlers(true, itemID, index) : getHoverHandlers(false, itemID, index);
 
+  const nodeDragData = (isNode && pathObject)
+    ? { type: 'node' as const, data: { id: pathObject.id, pk } }
+    : null;
+  const {
+    attributes: nodeDragAttributes,
+    listeners: nodeDragListeners,
+    setNodeRef: setNodeDragRef,
+    isDragging: isNodeDragging,
+    canDrag: canDragNode,
+  } = useResultEntityDraggable(nodeDragData);
+
   const nodeClass = joinClasses(
     styles.nameContainer,
     styles.pathObject,
@@ -81,7 +94,9 @@ const PathObject: FC<PathObjectProps> = ({
     pathViewStyles && pathViewStyles.nameContainer,
     inModal && styles.inModal,
     isEven && styles.isEven,
-    isHighlighted && styles.highlighted
+    isHighlighted && styles.highlighted,
+    canDragNode && dragStyles.draggable,
+    isNodeDragging && dragStyles.dragging,
   );
 
   const handleNodeClick = useCallback((node: ResultNode) => {
@@ -110,12 +125,15 @@ const PathObject: FC<PathObjectProps> = ({
         isNode
           ?
             <span
+              ref={setNodeDragRef}
               className={nodeClass}
               data-tooltip-id={`${uid}`}
               data-node-id={pathObject.id}
               onClick={(e)=> {e.stopPropagation(); handleNodeClick(pathObject);}}
               onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu('node', pathObject.id, pk, { x: e.clientX, y: e.clientY }); }}
               {...hoverHandlers}
+              {...nodeDragListeners}
+              {...nodeDragAttributes}
               >
               <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
                 <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>

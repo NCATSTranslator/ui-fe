@@ -13,6 +13,8 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { numberToWords } from '@/features/Core/utils/stringFormatters';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 interface PathContainerProps {
   path: Path;
@@ -66,7 +68,28 @@ const PathContainer: FC<PathContainerProps> = ({
   const generatedId = useId();
   const tooltipID: string = path?.id ?? generatedId;
   const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
+  const pathNumber = indexInFullCollection !== -1 ? indexInFullCollection + 1 : undefined;
   const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
+
+  const pathDragData = path.id
+    ? {
+        type: 'path' as const,
+        data: {
+          id: path.id,
+          pk,
+          path,
+          pathNumber,
+          resultId: itemResultId,
+        },
+      }
+    : null;
+  const {
+    attributes: pathDragAttributes,
+    listeners: pathDragListeners,
+    setNodeRef: setPathDragRef,
+    isDragging: isPathDragging,
+    canDrag: canDragPath,
+  } = useResultEntityDraggable(pathDragData);
   
   // Return null if path is filtered and hidden paths are not shown
   if (isPathFiltered && !showHiddenPaths)
@@ -115,6 +138,7 @@ const PathContainer: FC<PathContainerProps> = ({
           <LastViewedTag inModal={inModal} inGroup={!!(inModal && compressedSubgraph)} />
         }
         <button
+          ref={setPathDragRef}
           onClick={() => {
             if (!!path?.id) {
               setLastViewedPathID(path.id);
@@ -130,8 +154,14 @@ const PathContainer: FC<PathContainerProps> = ({
             }
           }}
           onContextMenu={path.id ? handlePathContextMenu : undefined}
-          className={styles.pathEvidenceButton}
+          className={joinClasses(
+            styles.pathEvidenceButton,
+            canDragPath && dragStyles.draggable,
+            isPathDragging && dragStyles.dragging,
+          )}
           data-tooltip-id={tooltipID}
+          {...pathDragListeners}
+          {...pathDragAttributes}
         >
           <div className={styles.icon}>
             <ResearchMultiple />
