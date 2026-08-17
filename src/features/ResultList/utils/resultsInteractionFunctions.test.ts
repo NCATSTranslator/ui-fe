@@ -39,7 +39,6 @@ const makeEdge = (id: string, overrides: Partial<ResultEdge> = {}): ResultEdge =
   publications: {},
   subject: '',
   tags: {},
-  type: 'edge',
   ...overrides,
 } as unknown as ResultEdge);
 
