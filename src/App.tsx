@@ -21,6 +21,7 @@ import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
+import ResultEntityDragOverlay, { ResultEntityDragOverlayData } from '@/features/DragAndDrop/components/ResultEntityDragOverlay/ResultEntityDragOverlay';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
 import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
@@ -51,6 +52,7 @@ const App = ({children}: {children?: ReactNode}) => {
 
   // Drag and drop state
   const [activeQuery, setActiveQuery] = useState<UserQueryObject | null>(null);
+  const [activeResultEntity, setActiveResultEntity] = useState<ResultEntityDragOverlayData | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }, // Require 8px movement before drag starts
@@ -58,14 +60,22 @@ const App = ({children}: {children?: ReactNode}) => {
   );
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    if (active.data.current?.type === 'query') {
-      const query = active.data.current?.data as UserQueryObject;
-      setActiveQuery(query);
+    const dragType = active.data.current?.type;
+    if (dragType === 'query') {
+      setActiveQuery(active.data.current?.data as UserQueryObject);
+      setActiveResultEntity(null);
+    } else if (dragType === 'node' || dragType === 'edge' || dragType === 'path') {
+      setActiveResultEntity(active.data.current as ResultEntityDragOverlayData);
+      setActiveQuery(null);
+    } else {
+      setActiveQuery(null);
+      setActiveResultEntity(null);
     }
   }
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveQuery(null);
+    setActiveResultEntity(null);
     
     if (over?.data.current?.onDrop) {
       try {
@@ -120,8 +130,18 @@ const App = ({children}: {children?: ReactNode}) => {
                     </main>
                   </div>
                   {createPortal(
-                    <DragOverlay>
-                      {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
+                    <DragOverlay
+                      // Path/node/edge sources are small chips; don't lock overlay to source rect.
+                      style={activeResultEntity ? { width: 'auto', height: 'auto' } : undefined}
+                    >
+                      {activeQuery && (
+                        <DraggableQueryCardWrapper>
+                          <SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" />
+                        </DraggableQueryCardWrapper>
+                      )}
+                      {activeResultEntity && (
+                        <ResultEntityDragOverlay dragData={activeResultEntity} />
+                      )}
                     </DragOverlay>,
                     document.body,
                   )}
