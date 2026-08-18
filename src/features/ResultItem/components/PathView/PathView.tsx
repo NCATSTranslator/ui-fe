@@ -18,7 +18,6 @@ import { useResultListContext } from '@/features/ResultList/context/ResultListCo
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 
-export const SupportPathDepthContext = createContext<number>(1);
 export const HoverContext = createContext<{
   hoveredItem: HoverTarget;
   setHoveredItem: (target: HoverTarget) => void;
@@ -131,7 +130,6 @@ const PathView: FC<PathViewProps> = ({
         :
         <ResultItemIdContext.Provider value={resultItemId}>
         <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
-          <SupportPathDepthContext.Provider value={0}>
             <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
                 displayedPaths.map((path: Path, i: number)=> {
@@ -147,7 +145,6 @@ const PathView: FC<PathViewProps> = ({
                         handleEdgeClick={handleEdgeClick}
                         activeEntityFilters={activeEntityFilters}
                         pathFilterState={pathFilterState}
-                        activeFilters={activeFilters}
                         pk={pk}
                         showHiddenPaths={showHiddenPaths}
                         selectedEdgeRef={selectedEdgeRef}
@@ -181,7 +178,6 @@ const PathView: FC<PathViewProps> = ({
                 </Tooltip>
               </Button>
             }
-          </SupportPathDepthContext.Provider>
         </HoverContext.Provider>
         </ResultItemIdContext.Provider>
       }

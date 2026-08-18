@@ -38,7 +38,6 @@ export interface EvidenceViewContentProps {
   pk: string;
   selectedEdge: ResultEdge;
   selectedEdgeDomRef: RefObject<HTMLElement | null>;
-  isInferred: boolean;
   isFilteredOut: boolean;
   onClearFilters: () => void;
   publications: PublicationObject[];
@@ -300,7 +299,6 @@ const useEvidenceViewEdgeInteractions = ({
     setPublications,
   } = useEvidenceData({ setEdgeLabel });
 
-  const isInferred = selectedEdge?.inferred ?? false;
   const edgeSeen = !!selectedEdge?.id && isEdgeSeen(selectedEdge.id);
   const compressedSubgraph = useMemo(
     () => buildCompressedSubgraph(path, resultSet, compressedEdgeSets),
@@ -340,7 +338,6 @@ const useEvidenceViewEdgeInteractions = ({
     selectedEdge,
     selectedEdgeDomRef,
     edgeLabel,
-    isInferred,
     edgeSeen,
     compressedSubgraph,
     handleEdgeClick,
@@ -396,7 +393,6 @@ export const useEvidenceView = (): EvidenceViewModel => {
       pk: routeData.pk,
       selectedEdge: edgeData.selectedEdge as ResultEdge,
       selectedEdgeDomRef: edgeData.selectedEdgeDomRef,
-      isInferred: edgeData.isInferred,
       isFilteredOut,
       onClearFilters: resultListContext?.handleClearAllFilters ?? NOOP,
       publications: edgeData.publications,

@@ -60,11 +60,6 @@ export interface Path {
   tags: Tags;
 }
 
-export interface RankedPath extends Path {
-  // array of nodes and edges in order
-  subgraph: (RankedEdge | ResultNode)[];
-}
-
 export type PathRank = {
   path: Path;
   rank: number;
@@ -87,7 +82,6 @@ export interface ResultEdge {
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
   id: string;
-  inferred: boolean;
   knowledge_level: KnowledgeLevel;
   metadata: EdgeMetadata;
   // nodeID
@@ -99,15 +93,9 @@ export interface ResultEdge {
   publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
   // nodeID
   subject: string;
-  // array of path ids or Path objects
-  support: string[] | Path[];
   tags: Tags;
   trials: string[];
   type: string;
-}
-
-export interface RankedEdge extends ResultEdge {
-  support: RankedPath[];
 }
 
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;

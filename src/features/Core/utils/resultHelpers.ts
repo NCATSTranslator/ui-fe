@@ -2,10 +2,6 @@ import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/t
 import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
-export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
-  return !!item && Array.isArray(item.support) && item.support.length > 0;
-};
-
 const DEFAULT_EDGE_METADATA = {
   edge_bindings: [],
   inverted_id: null,
@@ -15,7 +11,6 @@ const DEFAULT_EDGE_METADATA = {
 const EMPTY_EDGE: ResultEdge = {
   aras: [],
   id: "",
-  inferred: false,
   is_root: false,
   compressed_edges: [],
   knowledge_level: "unknown",
@@ -27,7 +22,6 @@ const EMPTY_EDGE: ResultEdge = {
   provenance: [],
   publications: {},
   subject: "",
-  support: [],
   trials: [],
   tags: {},
   type: "",
@@ -38,19 +32,18 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => {
   return { ...EMPTY_EDGE, ...edge };
 };
 
-export const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
-  return subgraph.map((item, i) => {
-    if(isNodeIndex(i))
-      return item;
-    const edge = getEdgeById(resultSet, item);
-    return (edge?.inferred ?? false) ? "indirect" : "direct";
-  });
+/**
+ * Reduces a subgraph to its node sequence. Paths sharing a node sequence are
+ * interchangeable for display and get compressed into a single group.
+ */
+export const extractPathSequence = (subgraph: string[]): string[] => {
+  return subgraph.filter((_, i) => isNodeIndex(i));
 };
 
 export const getPathSequenceKey = (resultSet: ResultSet, path: string | Path): string | null => {
   const resolved = (typeof path === "string") ? getPathById(resultSet, path) : path;
   if (!resolved) return null;
-  return JSON.stringify(extractPathSequence(resultSet, resolved.subgraph));
+  return JSON.stringify(extractPathSequence(resolved.subgraph));
 };
 
 export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): number => {
@@ -64,18 +57,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
   return sequences.size;
 };
 
-export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
-  if (!(path.subgraph && path.subgraph.length === 3)) return false;
-  const edge = getEdgeById(resultSet, path.subgraph[1]);
-  return edge?.inferred ?? false;
-};
-
 const mergeArrays = <T,>(arr1: T[], arr2: T[]): T[] => Array.from(new Set([...arr1, ...arr2]));
-
-const mergeSupport = (baseEdge: ResultEdge, edge: ResultEdge) => {
-  if (Array.isArray(baseEdge.support) && Array.isArray(edge.support))
-    baseEdge.support = mergeArrays(baseEdge.support as string[], edge.support as string[]);
-};
 
 const mergePublications = (target: ResultEdge, source: ResultEdge) => {
   for (const [key, value] of Object.entries(source.publications)) {
@@ -97,7 +79,6 @@ const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void 
   if (currentEdge.predicate === baseEdge.predicate) {
     baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
     baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
-    mergeSupport(baseEdge, currentEdge);
     mergePublications(baseEdge, currentEdge);
     return;
   }
@@ -105,12 +86,9 @@ const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void 
   if (compressedEdge) {
     compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
     compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-    mergeSupport(compressedEdge, currentEdge);
     mergePublications(compressedEdge, currentEdge);
   } else {
-    if (currentEdge.support.length > 0 && baseEdge.support.length > 0)
-      mergeSupport(baseEdge, currentEdge);
-    baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: [] });
+    baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: [] });
   }
 };
 
@@ -129,7 +107,6 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
     mergeEdgeIntoBase(baseEdge, getDefaultEdge(edge));
   }
 
-  baseEdge.inferred = hasSupport(baseEdge);
   return baseEdge;
 };
 
@@ -140,10 +117,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
   for(let i = 0; i < edges.length; i++) {
     let edge = edges[i];
     let nextEdge: undefined | ResultEdge = edges[i+1];
-    if(!!nextEdge
-      && nextEdge.predicate === edge.predicate
-      && nextEdge.inferred === edge.inferred
-    ) {
+    if(!!nextEdge && nextEdge.predicate === edge.predicate) {
       if(!edgeIDsToCompress.has(edge.id))
         edgeIDsToCompress.add(edge.id);
       edgeIDsToCompress.add(nextEdge.id);

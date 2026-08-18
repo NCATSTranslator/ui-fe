@@ -1,12 +1,10 @@
-import { getPathCount, getStringNameFromPath, getDefaultEdge } from '@/features/Core/utils/resultHelpers';
+import { getPathCount } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
-import { EdgeRank, Path, PathRank, RankedEdge, RankedPath, Result, ResultEdge, ResultNode, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
+import { EdgeRank, Path, PathRank, Result, ResultEdge, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
 import { Filter, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
 import { getFilterFamily, getTagFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
-import { getEdgeById, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
-import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 const compareWithFallback = (
   aValue: string | undefined | null,
@@ -126,37 +124,6 @@ export const sortByEntityStrings = (items: Result[], strings: string[]) => {
         return -1;
     }
     return 1;
-  });
-}
-
-export const sortSupportByEntityStrings = (resultSet: ResultSet, items: Path[], strings: string[]) => {
-  return items.sort((a, b) => {
-    const nameA = getStringNameFromPath(resultSet, a).toLowerCase();
-    const nameB = getStringNameFromPath(resultSet, b).toLowerCase();
-
-    const nameAIncludesString = strings.some(string => nameA.includes(string.toLowerCase()));
-    const nameBIncludesString = strings.some(string => nameB.includes(string.toLowerCase()));
-
-    if (nameAIncludesString && !nameBIncludesString) {
-      return -1;
-    }
-    if (!nameAIncludesString && nameBIncludesString) {
-      return 1;
-    }
-
-    // If both or neither include a string, sort by the length of subgraph
-    const lengthA = a.subgraph.length;
-    const lengthB = b.subgraph.length;
-
-    return lengthA - lengthB;
-  });
-}
-
-export const sortSupportByLength = (items: Path[]) => {
-  return items.sort((a, b) => {
-    if(!a?.subgraph.length || !b?.subgraph.length)
-      return 1;
-    return a.subgraph.length - b.subgraph.length;
   });
 }
 
@@ -409,86 +376,4 @@ export const updateEdgeRank = (edge: ResultEdge, edgeFilters: Filter[], edgeRank
 const pathRankCompare = (a: PathRank, b: PathRank) => {
   if (b === undefined) return -1;
   return a.rank - b.rank;
-}
-
-export const convertResultEdgeToRankedEdge = (resultSet: ResultSet, edge: ResultEdge): RankedEdge => {
-  const convertSupportToRankedPaths = (support: (string | Path)[]): RankedPath[] => {
-    return support.map((item) => {
-      const path = typeof item === "string" ? getPathById(resultSet, item) : item;
-      if (!path) {
-        throw new Error(`Invalid path ID or missing Path object: ${item}`);
-      }
-      return convertPathToRankedPath(resultSet, path);
-    });
-  };
-
-  const rankedSupport = convertSupportToRankedPaths(edge.support);
-
-  return {
-    ...edge,
-    support: rankedSupport,
-  };
-}
-
-export const convertPathToRankedPath = (resultSet: ResultSet, path: Path): RankedPath => {
-  const defaultNode: ResultNode = {
-    aras: [],
-    curies: [],
-    descriptions: [],
-    id: "",
-    names: [],
-    other_names: {},
-    provenance: [""],
-    synonyms: [],
-    annotations: {
-      chemical: {
-        approval: null,
-        clinical_trials: null,
-        descriptions: null,
-        indications: null,
-        otc_status: null,
-        roles: null,
-        synonyms: null
-      },
-      disease: {
-        clinical_trials: null,
-        curies: null,
-        descriptions: null,
-        synonyms: null
-      },
-      gene: {
-        descriptions: null,
-        name: null,
-        species: null,
-        tdl: null
-      }
-    },
-    tags: {},
-    types: [],
-  };
-
-  const transformedSubgraph = path.subgraph.map((id, i) => {
-    if(isNodeIndex(i)) {
-      const node = getNodeById(resultSet, id);
-      return node || defaultNode;
-    } else {
-      const edge = getEdgeById(resultSet, id) || getDefaultEdge(undefined);
-      return convertResultEdgeToRankedEdge(resultSet, edge);
-    }
-  });
-
-  // Return the converted object
-  return {
-    ...path,
-    subgraph: transformedSubgraph,
-  };
-}
-
-export const genRankedPaths = (resultSet: ResultSet | null, pathRanks: PathRank[]) => {
-  if(!resultSet) {
-    console.warn("no result set available to generate ranked paths.");
-    return [];
-  }
-
-  return pathRanks.map((pr) => convertPathToRankedPath(resultSet, pr.path));
 }
