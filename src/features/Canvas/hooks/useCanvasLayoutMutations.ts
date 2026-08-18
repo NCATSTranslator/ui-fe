@@ -98,7 +98,7 @@ const useCanvasLayoutMutations = ({
     if (node.x === position.x && node.y === position.y) return;
     pushUndo();
     setFrozenNodePositions(allPositions);
-    await syncPositionsToStore({ [nodeId]: position }, { immediate: false });
+    await syncPositionsToStore(allPositions, { immediate: false });
   }, [canvas, enterCustomLayout, pushUndo, setFrozenNodePositions, syncPositionsToStore]) };
 };
 
