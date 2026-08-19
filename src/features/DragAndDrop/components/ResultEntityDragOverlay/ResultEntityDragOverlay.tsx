@@ -81,7 +81,7 @@ const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData })
 
     const resultName = formatResultName(resultSet, dragData.data.resultId, dragData.data.path);
     const pathNumber = dragData.data.pathNumber;
-    const pathLabel = pathNumber != null
+    const pathLabel = typeof pathNumber === 'number'
       ? `Path ${pathNumber}`
       : 'Path';
     const label = resultName ? `${resultName} ${pathLabel}` : pathLabel;

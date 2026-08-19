@@ -45,7 +45,6 @@ const App = ({children}: {children?: ReactNode}) => {
 
   const { pathnameClass, additionalClasses } = getPathnameClasses(location.pathname);
 
-
   const [sessionStatus] = useGetSessionStatus();
   useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
   useScrollToHash();
@@ -131,8 +130,7 @@ const App = ({children}: {children?: ReactNode}) => {
                   </div>
                   {createPortal(
                     <DragOverlay
-                      // Path/node/edge sources are small chips; don't lock overlay to source rect.
-                      style={activeResultEntity ? { width: 'auto', height: 'auto' } : undefined}
+                      className={activeResultEntity ? 'dragOverlay' : undefined}
                     >
                       {activeQuery && (
                         <DraggableQueryCardWrapper>
