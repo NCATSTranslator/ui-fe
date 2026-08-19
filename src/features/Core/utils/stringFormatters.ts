@@ -141,3 +141,7 @@ export const getFormattedNodeName = (nodeName: string | undefined, nodeType: str
     return nodeName.toUpperCase() ?? '';
   return capitalizeAllWords(nodeName ?? '');
 };
+
+export const getFormattedNodeDisplayName = (
+  node?: { names?: string[]; types?: string[] } | null,
+): string => getFormattedNodeName(node?.names?.[0], node?.types?.[0] ?? null);

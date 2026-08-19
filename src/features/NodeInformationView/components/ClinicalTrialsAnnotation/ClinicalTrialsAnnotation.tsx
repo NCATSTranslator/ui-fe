@@ -4,6 +4,14 @@ import ClinicalTrialTitleLink from "@/features/NodeInformationView/components/Cl
 import styles from "./ClinicalTrialsAnnotation.module.scss";
 
 const DISPLAY_LIMIT = 5;
+const DRUG_NODE_TYPES = new Set(['biolink:Drug', 'biolink:SmallMolecule']);
+const CONDITION_NODE_TYPES = new Set(['biolink:Disease', 'biolink:PhenotypicFeature']);
+
+const getClinicalTrialsSearchParam = (nodeType: string) => {
+  if (DRUG_NODE_TYPES.has(nodeType)) return 'intr';
+  if (CONDITION_NODE_TYPES.has(nodeType)) return 'cond';
+  return 'term';
+};
 
 interface ClinicalTrialsAnnotationProps {
   nctIds: string[];
@@ -15,7 +23,7 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
   const uniqueIds = useMemo(() => [...new Set(nctIds)], [nctIds]);
   const displayedIds = useMemo(() => uniqueIds.slice(0, DISPLAY_LIMIT), [uniqueIds]);
   const { trials, isLoading } = useClinicalTrialMetadata(displayedIds);
-  const param = (nodeType === 'biolink:Drug' || nodeType === 'biolink:SmallMolecule') ? 'intr' : (nodeType === 'biolink:Disease' || nodeType === 'biolink:PhenotypicFeature') ? 'cond' : 'term';
+  const param = getClinicalTrialsSearchParam(nodeType);
   const searchUrl = `https://clinicaltrials.gov/search?${param}=${encodeURIComponent(nodeName)}&viewType=Card`;
 
   return (

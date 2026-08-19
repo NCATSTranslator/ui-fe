@@ -5,7 +5,7 @@ import {
   canvasNodeDetailToResultNode,
   canvasEdgeDetailToResultEdge,
 } from '@/features/Canvas/utils/canvasEntityMappers';
-import { getFormattedNodeName } from '@/features/Core/utils/stringFormatters';
+import { getFormattedNodeDisplayName } from '@/features/Core/utils/stringFormatters';
 
 export const useCanvasEntityRoute = () => useCanvasOnlyMode();
 
@@ -17,9 +17,7 @@ export const useCanvasNodeEntity = () => {
     [query.data],
   );
   const formattedName = useMemo(
-    () => (resultNode
-      ? getFormattedNodeName(resultNode.names[0] ?? undefined, resultNode.types[0] ?? null)
-      : null),
+    () => (resultNode ? getFormattedNodeDisplayName(resultNode) : null),
     [resultNode],
   );
 

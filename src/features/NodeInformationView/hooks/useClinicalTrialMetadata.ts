@@ -67,6 +67,42 @@ const emptyClinicalTrialMeta = (nctId: string): ClinicalTrialMeta => ({
   enrollmentType: null,
 });
 
+const getPath = (obj: unknown, keys: string[]): unknown => {
+  let current = obj;
+  for (const key of keys) {
+    if (typeof current !== 'object' || current === null) return undefined;
+    current = (current as Record<string, unknown>)[key];
+  }
+  return current;
+};
+
+const asString = (value: unknown): string | null => (typeof value === 'string' ? value : null);
+const asNumber = (value: unknown): number | null => (typeof value === 'number' ? value : null);
+const asStringArray = (value: unknown): string[] => (
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+);
+
+const parseClinicalTrialMetadata = (
+  nctId: string,
+  protocol: unknown,
+): ClinicalTrialMeta => {
+  const lastUpdateDate = asString(getPath(protocol, ['statusModule', 'lastUpdatePostDateStruct', 'date']));
+  const phases = asStringArray(getPath(protocol, ['designModule', 'phases']));
+  const enrollmentType = getPath(protocol, ['designModule', 'enrollmentInfo', 'type']);
+  return {
+    nctId,
+    title: asString(getPath(protocol, ['identificationModule', 'briefTitle'])),
+    year: lastUpdateDate ? lastUpdateDate.split("-")[0] : null,
+    url: `${CLINICAL_TRIALS_URL}/${nctId}`,
+    startDate: asString(getPath(protocol, ['statusModule', 'startDateStruct', 'date'])),
+    phases,
+    phase: parsePhaseNumber(phases),
+    status: asString(getPath(protocol, ['statusModule', 'overallStatus'])),
+    enrollmentCount: asNumber(getPath(protocol, ['designModule', 'enrollmentInfo', 'count'])),
+    enrollmentType: parseEnrollmentType(typeof enrollmentType === 'string' ? enrollmentType : undefined),
+  };
+};
+
 const fetchClinicalTrialMetadata = async (nctId: string): Promise<ClinicalTrialMeta> => {
   const res = await fetch(
     `${CLINICAL_TRIALS_API}/${nctId}?format=json&fields=${encodeURIComponent(METADATA_FIELDS)}`,
@@ -77,28 +113,7 @@ const fetchClinicalTrialMetadata = async (nctId: string): Promise<ClinicalTrialM
   }
 
   const data = await res.json();
-  const protocol = data?.protocolSection;
-  const title = protocol?.identificationModule?.briefTitle ?? null;
-  const lastUpdateDate = protocol?.statusModule?.lastUpdatePostDateStruct?.date ?? null;
-  const year = lastUpdateDate ? lastUpdateDate.split("-")[0] : null;
-  const startDate = protocol?.statusModule?.startDateStruct?.date ?? null;
-  const phases: string[] = protocol?.designModule?.phases ?? [];
-  const status = protocol?.statusModule?.overallStatus ?? null;
-  const enrollmentInfo = protocol?.designModule?.enrollmentInfo;
-  const enrollmentCount = enrollmentInfo?.count ?? null;
-
-  return {
-    nctId,
-    title,
-    year,
-    url: `${CLINICAL_TRIALS_URL}/${nctId}`,
-    startDate,
-    phases,
-    phase: parsePhaseNumber(phases),
-    status,
-    enrollmentCount,
-    enrollmentType: parseEnrollmentType(enrollmentInfo?.type),
-  };
+  return parseClinicalTrialMetadata(nctId, data?.protocolSection);
 };
 
 const useClinicalTrialMetadata = (nctIds: string[]) => {
