@@ -2,7 +2,6 @@ import { FC } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { Canvas, CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canvas';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
-import type { CanvasNodeAction } from '@/features/Canvas/constants/canvasNodeActions';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
 import useCanvasObjectList from '@/features/Canvas/hooks/useCanvasObjectList';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
@@ -20,12 +19,12 @@ interface CanvasObjectListProps {
   onHoverAnnotation: (annotationId: string | null) => void;
   onFindNode: (nodeId: string) => void;
   onFindAnnotation: (annotationId: string) => void;
-  onAction?: (action: CanvasNodeAction, node: CanvasNode) => void;
   onAnnotationAction?: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
-  nodeMenuId: string | null;
-  onNodeMenuIdChange: (nodeId: string | null) => void;
+  onNodeMenu: (nodeId: string, position: { x: number; y: number }) => void;
+  onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
+  onCloseNodeMenus?: () => void;
 }
 
 const CanvasObjectList: FC<CanvasObjectListProps> = ({
@@ -35,12 +34,12 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   onHoverAnnotation,
   onFindNode,
   onFindAnnotation,
-  onAction,
   onAnnotationAction,
   onAddObject,
   onAddAnnotation,
-  nodeMenuId,
-  onNodeMenuIdChange,
+  onNodeMenu,
+  onQueryMenu,
+  onCloseNodeMenus,
 }) => {
   const {
     collapsed,
@@ -61,10 +60,12 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     allAnnotations,
     sortedNodes,
     sortedAnnotations,
+    annotationMenuId,
     handleNodeClick,
     handleAnnotationClick,
+    handleNodeMenu,
+    handleQueryMenu,
     handleMenuToggle,
-    handleNodeMenuAction,
     handleAnnotationMenuAction,
     handleCloseMenu,
   } = useCanvasObjectList({
@@ -72,10 +73,10 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     visibleNodes,
     onFindNode,
     onFindAnnotation,
-    onAction,
     onAnnotationAction,
-    nodeMenuId,
-    onNodeMenuIdChange,
+    onNodeMenu,
+    onQueryMenu,
+    onCloseNodeMenus,
   });
 
   return (
@@ -117,21 +118,19 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                     addLabel="Add Object"
                   />
                   {sortedNodes.length > 0 && (
-                    <ObjectListBody menuId={nodeMenuId} onCloseMenu={handleCloseMenu}>
+                    <div className={styles.nodeList}>
                       {sortedNodes.map(node => (
                         <NodeItem
                           key={node.id}
                           node={node}
-                          canvas={canvas}
                           searchTerm={searchTerm}
-                          nodeMenuId={nodeMenuId}
                           onNodeClick={node => handleNodeClick(node.id)}
                           onHoverNode={onHoverNode}
-                          onMenuToggle={handleMenuToggle}
-                          onMenuAction={handleNodeMenuAction}
+                          onMenu={handleNodeMenu}
+                          onQueryMenu={handleQueryMenu}
                         />
                       ))}
-                    </ObjectListBody>
+                    </div>
                   )}
                 </>
               )}
@@ -147,13 +146,13 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                     addLabel="Add Annotation"
                   />
                   {sortedAnnotations.length > 0 && (
-                    <ObjectListBody menuId={nodeMenuId} onCloseMenu={handleCloseMenu}>
+                    <ObjectListBody menuId={annotationMenuId} onCloseMenu={handleCloseMenu}>
                       {sortedAnnotations.map(annotation => (
                         <AnnotationItem
                           key={annotation.id}
                           annotation={annotation}
                           searchTerm={searchTerm}
-                          menuId={nodeMenuId}
+                          menuId={annotationMenuId}
                           onAnnotationClick={item => handleAnnotationClick(item.id)}
                           onHoverAnnotation={onHoverAnnotation}
                           onMenuToggle={handleMenuToggle}

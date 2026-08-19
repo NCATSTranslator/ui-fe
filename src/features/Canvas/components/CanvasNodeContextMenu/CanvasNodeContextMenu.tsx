@@ -1,30 +1,32 @@
-import { FC, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import { clampFixedPosition } from '@/features/Core/utils/domHelpers';
-import {
-  CONTEXT_MENU_NODE_ACTIONS,
-  type CanvasNodeAction,
-} from '@/features/Canvas/constants/canvasNodeActions';
+import type { CanvasNodeAction } from '@/features/Canvas/constants/canvasNodeActions';
 import CanvasNodeActionMenu from '@/features/Canvas/components/CanvasNodeActionMenu/CanvasNodeActionMenu';
 import styles from './CanvasNodeContextMenu.module.scss';
+
+export type CanvasNodeMenuSource = 'contextMenu' | 'objectList';
 
 export interface CanvasNodeContextMenuTarget {
   nodeId: string;
   position: { x: number; y: number };
+  source?: CanvasNodeMenuSource;
 }
 
-interface CanvasNodeContextMenuProps {
+interface CanvasNodeContextMenuProps<T extends string = CanvasNodeAction> {
   target: CanvasNodeContextMenuTarget;
+  actions: readonly { action: T; label: string }[];
   onClose: () => void;
-  onAction: (action: CanvasNodeAction, nodeId: string) => void;
+  onAction: (action: T, nodeId: string) => void;
 }
 
-const CanvasNodeContextMenu: FC<CanvasNodeContextMenuProps> = ({
+const CanvasNodeContextMenu = <T extends string = CanvasNodeAction>({
   target,
+  actions,
   onClose,
   onAction,
-}) => {
+}: CanvasNodeContextMenuProps<T>) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(target.position);
 
@@ -48,7 +50,7 @@ const CanvasNodeContextMenu: FC<CanvasNodeContextMenuProps> = ({
     };
   }, [onClose]);
 
-  const runAction = useCallback((action: CanvasNodeAction) => {
+  const runAction = useCallback((action: T) => {
     onAction(action, target.nodeId);
   }, [onAction, target.nodeId]);
 
@@ -61,7 +63,7 @@ const CanvasNodeContextMenu: FC<CanvasNodeContextMenuProps> = ({
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
       >
         <CanvasNodeActionMenu
-          actions={CONTEXT_MENU_NODE_ACTIONS}
+          actions={actions}
           onAction={runAction}
           menuRole="menu"
         />

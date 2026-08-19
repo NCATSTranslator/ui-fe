@@ -20,6 +20,9 @@
     .collapsedTitle {
       display: flex;
     }
+    .indicatorClass {
+      font-size: $subOneSize;
+    }
   }
 
   &.expanded {

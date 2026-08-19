@@ -1,4 +1,4 @@
-export type CanvasNodeAction = 'newQuery' | 'information' | 'find' | 'remove';
+export type CanvasNodeAction = 'information' | 'find' | 'remove';
 
 export interface CanvasNodeActionConfig {
   action: CanvasNodeAction;
@@ -9,7 +9,6 @@ export interface CanvasNodeActionConfig {
 
 export const CANVAS_NODE_ACTIONS: CanvasNodeActionConfig[] = [
   { action: 'information', label: 'Information', showInObjectList: true, showInContextMenu: true },
-  { action: 'newQuery', label: 'New Query', showInObjectList: true, showInContextMenu: true },
   { action: 'find', label: 'Find on Canvas', showInObjectList: true, showInContextMenu: false },
   { action: 'remove', label: 'Remove from Canvas', showInObjectList: true, showInContextMenu: true },
 ];

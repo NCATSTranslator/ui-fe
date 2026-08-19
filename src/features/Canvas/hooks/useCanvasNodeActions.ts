@@ -1,6 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
+import { getHomeQueryPath, type HomeQueryTab } from '@/features/Query/utils/homeQueryParams';
+import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import { canvasEntityRemovedToast } from '@/features/Core/utils/toastMessages';
 
 interface UseCanvasNodeActionsOptions {
@@ -28,11 +30,12 @@ const useCanvasNodeActions = ({
     navigateToNode(activeCanvas, canvasNode);
   }, [activeCanvas, navigateToNode, setSelectedNodeIds]);
 
-  const navigateToNewQuery = useCallback((nodeId: string) => {
+  const navigateToHomeQuery = useCallback((kind: HomeQueryTab, nodeId: string) => {
     clearHover();
     const canvasNode = activeCanvas?.nodes[nodeId];
-    const term = canvasNode?.names[0] || canvasNode?.id;
-    navigate(term ? `/new-query?prefill=${encodeURIComponent(term)}` : '/new-query');
+    const id = canvasNode?.id || nodeId;
+    const label = canvasNode ? getCanvasNodeDisplayName(canvasNode) : undefined;
+    navigate(getHomeQueryPath(kind, id, label));
   }, [activeCanvas, navigate, clearHover]);
 
   const handleRemove = useCallback((nodeId: string) => {
@@ -47,12 +50,12 @@ const useCanvasNodeActions = ({
     navigateToCanvasNode(nodeId);
   }, [clearHover, navigateToCanvasNode]);
 
-  return {
+  return useMemo(() => ({
     navigateToCanvasNode,
-    navigateToNewQuery,
+    navigateToHomeQuery,
     handleRemove,
     handleInformation,
-  };
+  }), [navigateToCanvasNode, navigateToHomeQuery, handleRemove, handleInformation]);
 };
 
 export default useCanvasNodeActions;

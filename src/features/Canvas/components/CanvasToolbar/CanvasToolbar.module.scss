@@ -1,9 +1,10 @@
 @use "@/assets/styles/variables" as *;
 
 .toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
   align-items: flex-start;
-  justify-content: space-between;
   padding: $s;
   position: absolute;
   inset: 0;
@@ -13,10 +14,27 @@
 
 .left {
   display: flex;
+  justify-self: flex-start;
   align-items: center;
   min-width: 0;
   gap: $s;
   pointer-events: auto;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.right {
+  position: relative;
+  justify-self: flex-end;
+  align-self: stretch;
+  width: $panelWidth;
+  min-width: $panelWidth;
+  pointer-events: none;
 }
 
 .interactions {
@@ -53,6 +71,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 3px 5px;
   max-width: 240px;
 }
 
@@ -65,21 +84,6 @@
   padding: 2px $xxs;
   outline: none;
   width: 200px;
-}
-
-.center {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  pointer-events: auto;
-}
-
-.right {
-  position: relative;
-  align-self: stretch;
-  width: $panelWidth;
-  min-width: $panelWidth;
-  pointer-events: none;
 }
 
 .zoomGroup {

@@ -1,13 +1,23 @@
 import { useState, useCallback } from 'react';
-import type { CanvasNodeAction } from '@/features/Canvas/constants/canvasNodeActions';
-import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
-import type { CanvasNodeContextMenuTarget } from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
+import {
+  CONTEXT_MENU_NODE_ACTIONS,
+  OBJECT_LIST_NODE_ACTIONS,
+  type CanvasNodeAction,
+} from '@/features/Canvas/constants/canvasNodeActions';
+import type { Canvas } from '@/features/Canvas/types/canvas';
+import type {
+  CanvasNodeContextMenuTarget,
+  CanvasNodeMenuSource,
+} from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
+import type { HomeQueryTab } from '@/features/Query/utils/homeQueryParams';
+
+type NodeMenuKind = 'actions' | 'query';
 
 interface UseCanvasNodeMenuOptions {
   activeCanvas: Canvas | null;
   nodeActions: {
     handleInformation: (nodeId: string) => void;
-    navigateToNewQuery: (nodeId: string) => void;
+    navigateToHomeQuery: (kind: HomeQueryTab, nodeId: string) => void;
     handleRemove: (nodeId: string) => void;
   };
   setSelectedNodeIds: (ids: string[]) => void;
@@ -20,58 +30,81 @@ const useCanvasNodeMenu = ({
   setSelectedNodeIds,
   findNodeOnCanvas,
 }: UseCanvasNodeMenuOptions) => {
+  const { handleInformation, handleRemove, navigateToHomeQuery } = nodeActions;
   const [nodeContextMenu, setNodeContextMenu] = useState<CanvasNodeContextMenuTarget | null>(null);
-  const [nodeMenuId, setNodeMenuId] = useState<string | null>(null);
+  const [nodeQueryMenu, setNodeQueryMenu] = useState<CanvasNodeContextMenuTarget | null>(null);
 
   const closeNodeContextMenu = useCallback(() => setNodeContextMenu(null), []);
-  const closeObjectListMenu = useCallback(() => setNodeMenuId(null), []);
+  const closeQueryMenu = useCallback(() => setNodeQueryMenu(null), []);
+  const closeAllMenus = useCallback(() => {
+    setNodeContextMenu(null);
+    setNodeQueryMenu(null);
+  }, []);
 
   const handleNodeAction = useCallback((action: CanvasNodeAction, nodeId: string) => {
-    closeNodeContextMenu();
-    closeObjectListMenu();
+    closeAllMenus();
 
     switch (action) {
       case 'information':
-        nodeActions.handleInformation(nodeId);
-        break;
-      case 'newQuery':
-        nodeActions.navigateToNewQuery(nodeId);
+        handleInformation(nodeId);
         break;
       case 'find':
         findNodeOnCanvas(nodeId);
         break;
       case 'remove':
-        nodeActions.handleRemove(nodeId);
+        handleRemove(nodeId);
         break;
     }
-  }, [nodeActions, findNodeOnCanvas, closeNodeContextMenu, closeObjectListMenu]);
+  }, [handleInformation, handleRemove, findNodeOnCanvas, closeAllMenus]);
 
-  const handleObjectListAction = useCallback((action: CanvasNodeAction, node: CanvasNode) => {
-    handleNodeAction(action, node.id);
-  }, [handleNodeAction]);
-
-  const handleNodeMenuIdChange = useCallback((menuNodeId: string | null) => {
-    setNodeMenuId(menuNodeId);
-    if (menuNodeId !== null) {
+  const openMenu = useCallback((
+    nodeId: string,
+    position: { x: number; y: number },
+    kind: NodeMenuKind,
+    source?: CanvasNodeMenuSource,
+  ) => {
+    if (!activeCanvas?.nodes[nodeId]) return;
+    setSelectedNodeIds([nodeId]);
+    if (kind === 'query') {
       setNodeContextMenu(null);
+      setNodeQueryMenu({ nodeId, position });
+      return;
     }
-  }, []);
+    setNodeQueryMenu(null);
+    setNodeContextMenu({ nodeId, position, source });
+  }, [activeCanvas, setSelectedNodeIds]);
 
   const handleNodeContextMenu = useCallback((nodeId: string, position: { x: number; y: number }) => {
-    if (!activeCanvas?.nodes[nodeId]) return;
-    setNodeMenuId(null);
-    setSelectedNodeIds([nodeId]);
-    setNodeContextMenu({ nodeId, position });
-  }, [activeCanvas, setSelectedNodeIds]);
+    openMenu(nodeId, position, 'actions', 'contextMenu');
+  }, [openMenu]);
+
+  const handleObjectListNodeMenu = useCallback((nodeId: string, position: { x: number; y: number }) => {
+    openMenu(nodeId, position, 'actions', 'objectList');
+  }, [openMenu]);
+
+  const handleQueryMenu = useCallback((nodeId: string, position: { x: number; y: number }) => {
+    openMenu(nodeId, position, 'query');
+  }, [openMenu]);
+
+  const handleQueryAction = useCallback((action: HomeQueryTab, nodeId: string) => {
+    closeAllMenus();
+    navigateToHomeQuery(action, nodeId);
+  }, [closeAllMenus, navigateToHomeQuery]);
 
   return {
     nodeContextMenu,
-    nodeMenuId,
+    nodeContextMenuActions: nodeContextMenu?.source === 'objectList'
+      ? OBJECT_LIST_NODE_ACTIONS
+      : CONTEXT_MENU_NODE_ACTIONS,
+    nodeQueryMenu,
     closeNodeContextMenu,
+    closeQueryMenu,
+    closeAllMenus,
     handleNodeAction,
-    handleObjectListAction,
-    handleNodeMenuIdChange,
+    handleQueryAction,
     handleNodeContextMenu,
+    handleObjectListNodeMenu,
+    handleQueryMenu,
   };
 };
 

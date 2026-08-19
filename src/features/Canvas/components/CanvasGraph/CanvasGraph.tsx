@@ -1,4 +1,4 @@
-import { FC, ReactNode, useMemo, MouseEvent, useCallback } from 'react';
+import { FC, ReactNode, useCallback, useMemo } from 'react';
 import styles from './CanvasGraph.module.scss';
 import {
   GraphView as TranslatorGraphView,
@@ -18,8 +18,8 @@ import CanvasToolbar from '@/features/Canvas/components/CanvasToolbar/CanvasTool
 import CanvasEmptyState from '@/features/Canvas/components/CanvasEmptyState/CanvasEmptyState';
 import CanvasLayoutWarningModal from '@/features/Canvas/components/CanvasLayoutWarningModal/CanvasLayoutWarningModal';
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
-
-const REACT_FLOW_NODE_SELECTOR = '.react-flow__node';
+import { canvasNodeChrome } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
+import { getNodeIcon as getCategoryIcon } from '@/features/Core/utils/entityLinks';
 
 /** Extra top inset keeps nodes below the overlay toolbar when fitView runs. */
 const CANVAS_FIT_VIEW_PADDING: FitViewPadding = {
@@ -112,19 +112,10 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
       : filteredCanvasToGraphData(canvas.nodes, canvas.edges),
     [canvas.nodes, canvas.edges, visibleNodes, visibleEdges],
   );
+  const getNodeIcon = useCallback((type: string) => getCategoryIcon(type, null), []);
   const hasNodes = Object.keys(canvas.nodes).length > 0;
   const hasGraphContent = hasNodes || annotations.length > 0;
   const isLayoutLoading = hasGraphContent && !isCustomLayoutReady;
-
-  const handleGraphContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    if (!onNodeContextMenu) return;
-    const nodeElement = (event.target as HTMLElement).closest(REACT_FLOW_NODE_SELECTOR);
-    if (!nodeElement) return;
-    event.preventDefault();
-    const nodeId = nodeElement.getAttribute('data-id');
-    if (!nodeId) return;
-    onNodeContextMenu(nodeId, { x: event.clientX, y: event.clientY });
-  }, [onNodeContextMenu]);
 
   let graphAreaContent: ReactNode = <CanvasEmptyState />;
   if (isLayoutLoading) {
@@ -146,6 +137,10 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           elkWorkerUrl="/elk-worker.min.js"
           showEdgeLabels={false}
           showMiniMap={false}
+          showHandles={false}
+          nodeChrome={canvasNodeChrome}
+          getNodeIcon={getNodeIcon}
+          onNodeMenu={onNodeContextMenu}
           nodeHoverAnchor="topCenter"
           edgeHoverAnchor="midpoint"
           onNodeClick={onNodeClick}
@@ -184,7 +179,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
         saveStatus={saveStatus}
         rightSlot={toolbarRight}
       />
-      <div className={styles.graphArea} onContextMenu={handleGraphContextMenu}>
+      <div className={styles.graphArea}>
         {graphAreaContent}
       </div>
       <CanvasLayoutWarningModal

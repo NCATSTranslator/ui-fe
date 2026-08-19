@@ -46,9 +46,15 @@ const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   'biolink:GrossAnatomicalStructure': AnatomicalEntity,
 };
 
-export const getNodeIcon = (category: string): ReactNode => {
-  const IconComponent = NODE_ICON_MAP[category];
-  return IconComponent ? <IconComponent /> : <BlankIcon />;
+export const getNodeIconComponent = (category: string): FC<SVGProps<SVGSVGElement>> | null => {
+  if (!category) return null;
+  const prefixed = category.startsWith('biolink:') ? category : `biolink:${category}`;
+  return NODE_ICON_MAP[prefixed] ?? NODE_ICON_MAP[category] ?? null;
+};
+
+export const getNodeIcon = (category: string, fallback: ReactNode = <BlankIcon />): ReactNode => {
+  const IconComponent = getNodeIconComponent(category);
+  return IconComponent ? <IconComponent /> : fallback;
 };
 
 interface EntityUrlConfig {
