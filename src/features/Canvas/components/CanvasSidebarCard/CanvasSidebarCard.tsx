@@ -5,6 +5,7 @@ import Button from '@/features/Core/components/Button/Button';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
+import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { getCanvasObjectCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
 import type { Canvas } from '@/features/Canvas/types/canvas';
@@ -47,24 +48,30 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
   );
 
   return (
-    <SidebarCard
-      className={isActive ? styles.activeCanvas : ''}
-      leftIcon={<WorkspaceIcon />}
-      title={isRenaming ? renameValue : canvas.label}
-      searchTerm={searchTerm}
-      onClick={() => onSelect(canvas)}
-      bottomLeft={
-        <span className={styles.meta}>
-          {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
-        </span>
-      }
-      bottomRight={showUpdatedTime ? <span className={styles.meta}>{updatedTime}</span> : undefined}
-      options={options}
-      isRenaming={isRenaming}
-      onTitleChange={onRenameValueChange}
-      onFormSubmit={onSubmitRename}
-      textInputRef={renameInputRef}
-    />
+    <OutsideClickHandler
+      onOutsideClick={() => {
+        if (isRenaming) onSubmitRename();
+      }}
+    >
+      <SidebarCard
+        className={isActive ? styles.activeCanvas : ''}
+        leftIcon={<WorkspaceIcon />}
+        title={isRenaming ? renameValue : canvas.label}
+        searchTerm={searchTerm}
+        onClick={() => onSelect(canvas)}
+        bottomLeft={
+          <span className={styles.meta}>
+            {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
+          </span>
+        }
+        bottomRight={showUpdatedTime ? <span className={styles.meta}>{updatedTime}</span> : undefined}
+        options={options}
+        isRenaming={isRenaming}
+        onTitleChange={onRenameValueChange}
+        onFormSubmit={onSubmitRename}
+        textInputRef={renameInputRef}
+      />
+    </OutsideClickHandler>
   );
 };
 

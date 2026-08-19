@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AppDispatch } from '@/redux/store';
 import { selectCanvases, addCanvas } from '@/features/Canvas/slices/canvasSlice';
-import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
+import type { BackendUserCanvas, Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
 import { createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
 import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { getNextCanvasLabel } from '@/features/Canvas/slices/canvasSlice';
@@ -33,6 +33,11 @@ const useCreateCanvas = () => {
         graphLoaded: true,
       };
       dispatch(addCanvas(canvas));
+      queryClient.setQueryData<BackendUserCanvas[]>(['userCanvases'], (current) => {
+        if (!current) return [meta];
+        if (current.some(item => item.id === meta.id)) return current;
+        return [meta, ...current];
+      });
       queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
       return canvas;
     } catch {

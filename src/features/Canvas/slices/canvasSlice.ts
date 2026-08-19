@@ -153,7 +153,8 @@ export const canvasSlice = createSlice({
     },
     setCanvases: (state, action: PayloadAction<Canvas[]>) => {
       const existingById = new Map(state.canvases.map(c => [c.id, c]));
-      state.canvases = action.payload.map(canvas => {
+      const incomingIds = new Set(action.payload.map(c => c.id));
+      const canvases = action.payload.map(canvas => {
         const existing = existingById.get(canvas.id);
         if (
           existing &&
@@ -170,8 +171,15 @@ export const canvasSlice = createSlice({
         }
         return canvas;
       });
-      if (state.activeCanvasId && !action.payload.some(c => c.id === state.activeCanvasId)) {
-        state.activeCanvasId = action.payload.length > 0 ? action.payload[0].id : null;
+      for (const existing of state.canvases) {
+        if (incomingIds.has(existing.id)) continue;
+        if (existing.id === state.activeCanvasId || existing.graphLoaded) {
+          canvases.push(existing);
+        }
+      }
+      state.canvases = canvases;
+      if (state.activeCanvasId && !canvases.some(c => c.id === state.activeCanvasId)) {
+        state.activeCanvasId = canvases.length > 0 ? canvases[0].id : null;
         if (!state.activeCanvasId) resetPaneState(state);
       }
     },

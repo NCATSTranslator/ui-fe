@@ -178,7 +178,7 @@ export const sortCanvases = (canvases: Canvas[], mode: CanvasSortMode = 'date'):
   [...canvases].sort((a, b) =>
     mode === 'name'
       ? a.label.localeCompare(b.label)
-      : new Date(b.timeUpdated).getTime() - new Date(a.timeUpdated).getTime()
+      : new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
   );
 
 const LARGE_RESULT_THRESHOLD = 50;

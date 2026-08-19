@@ -2,16 +2,15 @@ import { FC, createContext, useContext, useState, useCallback, useEffect, useRef
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
-import { selectActiveCanvas, addCanvas, getNextCanvasLabel, selectCanvases } from '@/features/Canvas/slices/canvasSlice';
+import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
 import { addResultEntityToCanvas } from '@/features/Canvas/utils/addResultEntityToCanvas';
-import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
-import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
+import type { Canvas } from '@/features/Canvas/types/canvas';
 import type { Path } from '@/features/ResultList/types/results';
 import styles from './CanvasContextMenu.module.scss';
+import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 
 type MenuTarget = {
   type: 'node' | 'edge' | 'path';
@@ -27,9 +26,15 @@ type CanvasContextMenuContextValue = {
 
 const CanvasContextMenuContext = createContext<CanvasContextMenuContextValue | null>(null);
 
+const ENTITY_NOUNS: Record<MenuTarget['type'], string> = {
+  path: 'path',
+  node: 'object',
+  edge: 'relationship',
+};
+
 const getButtonLabel = (type: MenuTarget['type'], hasCanvas: boolean): string => {
-  if (type === 'path') return hasCanvas ? 'Add path to graph' : 'New canvas + add path to graph';
-  return hasCanvas ? `Add ${type} to canvas` : `New canvas + add ${type}`;
+  const noun = ENTITY_NOUNS[type];
+  return hasCanvas ? `Add ${noun} to canvas` : `New canvas + add ${noun}`;
 };
 
 export const useCanvasContextMenu = (): CanvasContextMenuContextValue => {
@@ -45,9 +50,9 @@ const ContextMenuPopup: FC<{
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const activeCanvas = useSelector(selectActiveCanvas);
-  const canvases = useSelector(selectCanvases);
   const resultSet = useSelector(getResultSetById(target.pk));
   const menuRef = useRef<HTMLDivElement>(null);
+  const { handleCreateCanvas } = useCreateCanvas();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -69,32 +74,8 @@ const ContextMenuPopup: FC<{
 
   const ensureCanvas = useCallback(async (): Promise<Canvas | null> => {
     if (activeCanvas) return activeCanvas;
-    const label = getNextCanvasLabel(canvases);
-    const layout: CanvasLayout = 'horizontal';
-    try {
-      const meta = await createCanvasApi(label, layout);
-      const canvas: Canvas = {
-        id: meta.id,
-        label: meta.label,
-        layout: meta.layout,
-        nodes: {},
-        edges: {},
-        tags: meta.data.tags,
-        queryRef: meta.data.query_ref,
-        resultRef: meta.data.result_ref,
-        annotations: [],
-        timeCreated: meta.time_created,
-        timeUpdated: meta.time_updated,
-        graphLoaded: true,
-      };
-      dispatch(addCanvas(canvas));
-      queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
-      return canvas;
-    } catch {
-      canvasSaveErrorToast();
-      return null;
-    }
-  }, [activeCanvas, canvases, dispatch, queryClient]);
+    return handleCreateCanvas();
+  }, [activeCanvas, handleCreateCanvas]);
 
   const handleAdd = useCallback(async () => {
     if (!resultSet) return;
