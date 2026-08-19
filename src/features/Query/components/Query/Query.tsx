@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries, useNameResolverEndpoint } from "@/features/Query/hooks/customQueryHooks";
+import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries, useNameResolverEndpoint, noop } from "@/features/Query/hooks/customQueryHooks";
 import { withGeneMatchLabel } from "@/features/Query/utils/autocompleteFunctions";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import styles from './Query.module.scss';
@@ -32,7 +32,7 @@ const Query: FC<QueryProps> = ({
   selectedProject = null,
   combinedStyles,
   shouldNavigate = true,
-  submissionCallback = () => {}
+  submissionCallback = noop
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
