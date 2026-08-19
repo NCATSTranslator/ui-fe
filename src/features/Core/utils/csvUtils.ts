@@ -3,7 +3,9 @@ import {
   DenormalizedCSVRow,
   ExportedNode,
   ExportedEdge,
+  ExportedPath,
   ExportedPublication,
+  ExportedResult,
   ExportedTrial,
   CSVValue,
 } from "@/features/ResultDownload/types/download.d";
@@ -203,6 +205,62 @@ const serializeProvenance = (provenance: ExportedEdge['provenance']): string => 
   }));
 };
 
+const buildDenormalizedRow = (params: {
+  result: ExportedResult;
+  path: ExportedPath;
+  pathId: string;
+  pathIndex: string;
+  edgeIndex: number;
+  edge: ExportedEdge;
+  sourceNodeId: string;
+  targetNodeId: string;
+  exportedResultSet: ExportedResultSet;
+}): DenormalizedCSVRow => {
+  const sourceFields = extractNodeFields(params.exportedResultSet.nodes[params.sourceNodeId]);
+  const targetFields = extractNodeFields(params.exportedResultSet.nodes[params.targetNodeId]);
+  const publicationFields = extractPublicationFields(params.edge, params.exportedResultSet);
+  const trialFields = extractTrialFields(params.edge, params.exportedResultSet);
+
+  return {
+    result_id: params.result.id,
+    result_name: params.result.drug_name,
+    result_subject_id: params.result.subject,
+    result_object_id: params.result.object,
+    path_id: params.path.id || params.pathId,
+    path_index: params.pathIndex,
+    path_aras: joinArrayForCSV(params.path.aras),
+    edge_id: params.edge.id,
+    edge_index: params.edgeIndex,
+    edge_predicate: params.edge.predicate || '',
+    edge_knowledge_level: params.edge.knowledge_level || '',
+    edge_provenance: serializeProvenance(params.edge.provenance),
+    edge_aras: joinArrayForCSV(params.edge.aras),
+    source_node_id: sourceFields.id,
+    source_node_name: sourceFields.name,
+    source_node_types: sourceFields.types,
+    source_node_curies: sourceFields.curies,
+    source_node_descriptions: sourceFields.descriptions,
+    source_node_species: sourceFields.species,
+    source_node_provenance: sourceFields.provenance,
+    target_node_id: targetFields.id,
+    target_node_name: targetFields.name,
+    target_node_types: targetFields.types,
+    target_node_curies: targetFields.curies,
+    target_node_descriptions: targetFields.descriptions,
+    target_node_species: targetFields.species,
+    target_node_provenance: targetFields.provenance,
+    publication_ids: publicationFields.ids,
+    publication_urls: publicationFields.urls,
+    trial_ids: trialFields.ids,
+    trial_titles: trialFields.titles,
+    trial_urls: trialFields.urls,
+    trial_phases: trialFields.phases,
+    trial_sizes: trialFields.sizes,
+    trial_start_dates: trialFields.start_dates,
+    trial_statuses: trialFields.statuses,
+  };
+};
+
 /**
  * Generates denormalized CSV rows for a single result
  * Returns one row per edge in each path
@@ -222,88 +280,30 @@ export const generateDenormalizedRows = (
 
   // Iterate through each top-level path
   result.paths.forEach((pathId, pathArrayIndex) => {
-    // Skip if already visited (shouldn't happen at top level, but safety check)
     if (visitedPathIds.has(pathId)) return;
     visitedPathIds.add(pathId);
 
     const path = exportedResultSet.paths[pathId];
     if (!path) return;
 
-    const pathIndex = String(pathArrayIndex + 1); // 1-based index as string
+    const pathIndex = String(pathArrayIndex + 1);
     let edgeIndex = 0;
 
-    // Iterate through the subgraph - edges are at odd indices
     for (let i = 1; i < path.subgraph.length; i += 2) {
-      const edgeId = path.subgraph[i];
-      const sourceNodeId = path.subgraph[i - 1];
-      const targetNodeId = path.subgraph[i + 1];
-
-      const edge = exportedResultSet.edges[edgeId];
+      const edge = exportedResultSet.edges[path.subgraph[i]];
       if (!edge) continue;
-
       edgeIndex++;
-
-      const sourceNode = exportedResultSet.nodes[sourceNodeId];
-      const targetNode = exportedResultSet.nodes[targetNodeId];
-
-      const sourceFields = extractNodeFields(sourceNode);
-      const targetFields = extractNodeFields(targetNode);
-      const publicationFields = extractPublicationFields(edge, exportedResultSet);
-      const trialFields = extractTrialFields(edge, exportedResultSet);
-
-      const row: DenormalizedCSVRow = {
-        // Result context
-        result_id: result.id,
-        result_name: result.drug_name,
-        result_subject_id: result.subject,
-        result_object_id: result.object,
-
-        // Path context
-        path_id: path.id || pathId,
-        path_index: pathIndex,
-        path_aras: joinArrayForCSV(path.aras),
-
-        // Edge data
-        edge_id: edge.id,
-        edge_index: edgeIndex,
-        edge_predicate: edge.predicate || '',
-        edge_knowledge_level: edge.knowledge_level || '',
-        edge_provenance: serializeProvenance(edge.provenance),
-        edge_aras: joinArrayForCSV(edge.aras),
-
-        // Source node
-        source_node_id: sourceFields.id,
-        source_node_name: sourceFields.name,
-        source_node_types: sourceFields.types,
-        source_node_curies: sourceFields.curies,
-        source_node_descriptions: sourceFields.descriptions,
-        source_node_species: sourceFields.species,
-        source_node_provenance: sourceFields.provenance,
-
-        // Target node
-        target_node_id: targetFields.id,
-        target_node_name: targetFields.name,
-        target_node_types: targetFields.types,
-        target_node_curies: targetFields.curies,
-        target_node_descriptions: targetFields.descriptions,
-        target_node_species: targetFields.species,
-        target_node_provenance: targetFields.provenance,
-
-        // Publications
-        publication_ids: publicationFields.ids,
-        publication_urls: publicationFields.urls,
-
-        // Trials
-        trial_ids: trialFields.ids,
-        trial_titles: trialFields.titles,
-        trial_urls: trialFields.urls,
-        trial_phases: trialFields.phases,
-        trial_sizes: trialFields.sizes,
-        trial_start_dates: trialFields.start_dates,
-        trial_statuses: trialFields.statuses,
-      };
-
-      rows.push(row);
+      rows.push(buildDenormalizedRow({
+        result,
+        path,
+        pathId,
+        pathIndex,
+        edgeIndex,
+        edge,
+        sourceNodeId: path.subgraph[i - 1],
+        targetNodeId: path.subgraph[i + 1],
+        exportedResultSet,
+      }));
     }
   });
 

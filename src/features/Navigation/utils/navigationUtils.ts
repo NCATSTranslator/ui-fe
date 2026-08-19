@@ -168,9 +168,11 @@ export const resultsLoader = ({ request }: { request: Request }) => {
 
   // Current format: r= is a plain query param
   if (url.searchParams.has('r')) {
-    const resultId = url.searchParams.get('r')!;
-    url.searchParams.delete('r');
-    return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    const resultId = url.searchParams.get('r');
+    if (resultId) {
+      url.searchParams.delete('r');
+      return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    }
   }
 
   // Legacy format: r= may be inside a base64-encoded segment

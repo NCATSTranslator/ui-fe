@@ -68,6 +68,29 @@ const ButtonContent: FC<Pick<ButtonProps, 'iconOnly' | 'iconLeft' | 'iconRight' 
   </>
 );
 
+const resolveAriaLabel = (ariaLabel?: string, ariaLabelAttr?: unknown) => {
+  if (ariaLabel) return ariaLabel;
+  if (typeof ariaLabelAttr === 'string') return ariaLabelAttr;
+  return undefined;
+};
+
+interface LinkedButtonProps {
+  href: string;
+  link: boolean;
+  blank: boolean;
+  rel: string;
+  commonProps: Record<string, unknown>;
+  content: ReactNode;
+}
+
+const LinkedButton: FC<LinkedButtonProps> = ({ href, link, blank, rel, commonProps, content }) => {
+  const linkProps = blank
+    ? { ...commonProps, target: '_blank', rel: 'noopener noreferrer' }
+    : { ...commonProps, rel };
+  if (link) return <Link {...linkProps} to={href}>{content}</Link>;
+  return <a {...linkProps} href={href}>{content}</a>;
+};
+
 const Button: FC<ButtonProps> = ({
   title,
   ariaLabel,
@@ -99,8 +122,6 @@ const Button: FC<ButtonProps> = ({
     'aria-label': ariaLabelAttr,
     ...domProps
   } = rest;
-  const resolvedAriaLabel = ariaLabel ?? (typeof ariaLabelAttr === 'string' ? ariaLabelAttr : undefined);
-
   const commonProps = {
     title: title,
     className: buttonStyle,
@@ -108,18 +129,20 @@ const Button: FC<ButtonProps> = ({
     'data-testid': testId,
     'data-tooltip-id': dataTooltipId,
     style: style,
-    'aria-label': resolvedAriaLabel,
+    'aria-label': resolveAriaLabel(ariaLabel, ariaLabelAttr),
   };
 
   if (href) {
-    const linkProps = {
-      ...commonProps,
-      rel: rel,
-      ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
-    };
-    return link
-    ? <Link {...linkProps} to={href}>{content}</Link>
-    : <a {...linkProps} href={href}>{content}</a>;
+    return (
+      <LinkedButton
+        href={href}
+        link={link}
+        blank={_blank}
+        rel={rel}
+        commonProps={commonProps}
+        content={content}
+      />
+    );
   }
 
   return (

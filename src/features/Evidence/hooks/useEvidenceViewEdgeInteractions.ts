@@ -96,6 +96,14 @@ const useToggleSeenHandler = (
   else markEdgeSeen(selectedEdge.id);
 }, [selectedEdge?.id, edgeSeen, markEdgeSeen, markEdgeUnseen]);
 
+const useSelectedEdgeState = () => {
+  const selectedEdgeDomRef = useRef<HTMLElement | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
+  const selectedEdgeRef = useRef(selectedEdge);
+  selectedEdgeRef.current = selectedEdge;
+  return { selectedEdge, setSelectedEdge, selectedEdgeRef, selectedEdgeDomRef };
+};
+
 interface EdgeInteractionParams {
   edgeId?: string;
   pathId?: string;
@@ -126,11 +134,7 @@ const useEvidenceViewEdgeInteractions = ({
   const resultsNavigate = useResultsNavigate();
   const decodedParamsRef = useRef(decodedParams);
   decodedParamsRef.current = decodedParams;
-
-  const selectedEdgeDomRef = useRef<HTMLElement | null>(null);
-  const [selectedEdge, setSelectedEdge] = useState<ResultEdge | null>(null);
-  const selectedEdgeRef = useRef(selectedEdge);
-  selectedEdgeRef.current = selectedEdge;
+  const { selectedEdge, setSelectedEdge, selectedEdgeRef, selectedEdgeDomRef } = useSelectedEdgeState();
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
   const {
@@ -183,7 +187,7 @@ const useEvidenceViewEdgeInteractions = ({
 
   useEffect(() => {
     if (selectedEdge) scrollToRef(selectedEdgeDomRef);
-  }, [selectedEdge]);
+  }, [selectedEdge, selectedEdgeDomRef]);
 
   const handleToggleSeen = useToggleSeenHandler(selectedEdge, edgeSeen, markEdgeSeen, markEdgeUnseen);
 

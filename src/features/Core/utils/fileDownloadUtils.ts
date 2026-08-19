@@ -19,14 +19,23 @@ export const triggerDownload = (content: string, filename: string, mimeType: str
  * - Limits length
  * - Converts spaces to dashes
  */
+const trimTrailingFilenameSeparators = (value: string): string => {
+  let end = value.length;
+  while (end > 0 && (value[end - 1] === '-' || value[end - 1] === '_')) {
+    end -= 1;
+  }
+  return value.slice(0, end);
+};
+
 export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
   if (!str) return '';
 
-  return str
+  const sanitized = str
     .replace(/[^a-zA-Z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/_+/g, '_')
-    .slice(0, maxLength)
-    .replace(/[_-]+$/, '');
+    .slice(0, maxLength);
+
+  return trimTrailingFilenameSeparators(sanitized);
 };
