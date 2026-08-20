@@ -203,7 +203,6 @@ const cleanEdge = (edge: ResultEdge, edgeId: string, resultSet: ResultSet): Expo
   trials: edge.trials,
   aras: edge.aras,
   description: edge.description,
-  type: edge.type,
 });
 
 /**

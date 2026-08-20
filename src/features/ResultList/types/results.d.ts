@@ -95,7 +95,6 @@ export interface ResultEdge {
   subject: string;
   tags: Tags;
   trials: string[];
-  type: string;
 }
 
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
