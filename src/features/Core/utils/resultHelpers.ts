@@ -24,12 +24,73 @@ const EMPTY_EDGE: ResultEdge = {
   subject: "",
   trials: [],
   tags: {},
-  type: "",
+};
+
+const EMPTY_ANNOTATIONS: ResultNode['annotations'] = {
+  chemical: {
+    approval: null,
+    clinical_trials: null,
+    descriptions: null,
+    indications: null,
+    otc_status: null,
+    roles: null,
+    synonyms: null,
+  },
+  disease: {
+    clinical_trials: null,
+    curies: null,
+    descriptions: null,
+    synonyms: null,
+  },
+  gene: {
+    descriptions: null,
+    name: null,
+    species: null,
+    tdl: null,
+  },
+};
+
+const cloneEmptyAnnotations = (): ResultNode['annotations'] => ({
+  chemical: { ...EMPTY_ANNOTATIONS.chemical },
+  disease: { ...EMPTY_ANNOTATIONS.disease },
+  gene: { ...EMPTY_ANNOTATIONS.gene },
+});
+
+const EMPTY_NODE: ResultNode = {
+  annotations: EMPTY_ANNOTATIONS,
+  aras: [],
+  curies: [],
+  descriptions: [],
+  id: "",
+  names: [],
+  other_names: {},
+  provenance: [],
+  synonyms: [],
+  tags: {},
+  types: [],
 };
 
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => {
   if (!edge) return { ...EMPTY_EDGE, metadata: { ...DEFAULT_EDGE_METADATA } };
   return { ...EMPTY_EDGE, ...edge };
+};
+
+export const getDefaultNode = (node: ResultNode | undefined): ResultNode => {
+  if (!node) {
+    return {
+      ...EMPTY_NODE,
+      annotations: cloneEmptyAnnotations(),
+      other_names: {},
+      tags: {},
+    };
+  }
+  return {
+    ...EMPTY_NODE,
+    ...node,
+    annotations: node.annotations ?? cloneEmptyAnnotations(),
+    other_names: node.other_names ?? {},
+    tags: node.tags ?? {},
+  };
 };
 
 /**

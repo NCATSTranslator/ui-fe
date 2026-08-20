@@ -1,6 +1,6 @@
+import { getDefaultEdge, getDefaultNode } from "@/features/Core/utils/resultHelpers";
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
 import { ResultEdge, ResultNode, ResultSet, Result } from "@/features/ResultList/types/results.d";
-import { isResultNode, isResultEdge } from "@/features/ResultList/types/checkers";
 import { isNodeIndex } from "./resultsInteractionFunctions";
 
 export type ResultContextObject = {
@@ -45,31 +45,26 @@ const genPathString = (resultSet: ResultSet, subgraph: string[]) => {
     return false;
   }
   const pathNames = subgraph.map((id, i) => {
-    let obj;
-    if(isNodeIndex(i))
-      obj = getNodeById(resultSet, id);
-    else 
-      obj = getEdgeById(resultSet, id);
+    if (isNodeIndex(i)) {
+      const node = getNodeById(resultSet, id);
+      if (!node) return id || "";
+      return getNodeName(getDefaultNode(node));
+    }
 
-    if(isResultNode(obj)) 
-      return getNodeName(obj);
-
-    if(isResultEdge(obj))
-      return `[${getPredicateName(obj)}]`;
-
-    return "";
+    const edge = getEdgeById(resultSet, id);
+    if (!edge) return id ? `[${id}]` : "";
+    return `[${getPredicateName(getDefaultEdge(edge))}]`;
   });
   return pathNames.join('-');
 }
 
 const getNodeName = (node: ResultNode) => {
-  return node.names[0];
+  return node.names[0] || node.id || "";
 }
 
 const getPredicateName = (edge: ResultEdge) => {
-  if(edge.predicate)
-    return edge.predicate;
+  if (edge.predicate) return edge.predicate;
 
   console.warn(`No predicate found for edge: ${edge} when generating result context for summarization.`);
-  return "";
+  return "Unknown relationship";
 }

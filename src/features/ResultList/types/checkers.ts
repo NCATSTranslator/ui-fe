@@ -7,6 +7,15 @@ export const isSpecies = tc.makeIsOneOf(["Zebrafish", "Mouse", "Rat"] as const);
 const _isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
 const _isTdlArray = tc.makeIsHomogeneousArray(_isTdl);
 
+const _isAnnotationSource = (e: unknown): boolean =>
+  tc.isObject(e) && tc.isString(e.name) && tc.isString(e.url);
+
+const _isAnnotationSection = (isValue: (v: unknown) => boolean) => (e: unknown): boolean =>
+  tc.isObject(e)
+  && isValue(e.value)
+  && tc.isObject(e.metadata)
+  && tc.makeIsHomogeneousArray(_isAnnotationSource)(e.metadata.sources);
+
 
 /**
  * Type guard to check if an object is a ResultEdge object.
@@ -105,13 +114,13 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       return false;
     }
     return tc.checkProperties("isResultNode.annotations.chemical", obj, [
-      ["approval", tc.nullable(obj.approval, tc.isNumber), "number | null", obj.approval],
-      ["clinical_trials", tc.nullable(obj.clinical_trials, tc.isStringArray), "string[] | null", obj.clinical_trials],
-      ["descriptions", tc.nullable(obj.descriptions, tc.isStringArray), "string[] | null", obj.descriptions],
-      ["indications", tc.nullable(obj.indications, tc.isStringArray), "string[] | null", obj.indications],
-      ["otc_status", tc.nullable(obj.otc_status, (e) => tc.isObject(e) && tc.isNumber(e.code) && tc.isString(e.label)), "{code, label} | null", obj.otc_status],
-      ["other_names", tc.nullable(obj.other_names, e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic)), "{commercial, generic} | null", obj.other_names],
-      ["roles", tc.nullable(obj.roles, tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.id) && tc.isString(e.name))), "ChebiRole[] | null", obj.roles],
+      ["approval", tc.nullable(obj.approval, _isAnnotationSection(tc.isNumber)), "AnnotationSection<number> | null", obj.approval],
+      ["clinical_trials", tc.nullable(obj.clinical_trials, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.clinical_trials],
+      ["descriptions", tc.nullable(obj.descriptions, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.descriptions],
+      ["indications", tc.nullable(obj.indications, _isAnnotationSection(tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.name) && tc.isStringArray(e.ids) && tc.isStringArray(e.urls)))), "AnnotationSection<Indication[]> | null", obj.indications],
+      ["otc_status", tc.nullable(obj.otc_status, _isAnnotationSection((e) => tc.isObject(e) && tc.isNumber(e.code) && tc.isString(e.label))), "AnnotationSection<{code, label}> | null", obj.otc_status],
+      ["roles", tc.nullable(obj.roles, _isAnnotationSection(tc.makeIsHomogeneousArray(e => tc.isObject(e) && tc.isString(e.id) && tc.isString(e.name)))), "AnnotationSection<ChebiRole[]> | null", obj.roles],
+      ["synonyms", tc.nullable(obj.synonyms, _isAnnotationSection(e => tc.isObject(e) && tc.isStringArray(e.commercial) && tc.isStringArray(e.generic))), "AnnotationSection<{commercial, generic}> | null", obj.synonyms],
     ], warn);
   }
 
@@ -128,8 +137,10 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       return false;
     }
     return tc.checkProperties("isResultNode.annotations.disease", obj, [
-      ["curies", tc.nullable(obj.curies, tc.isStringArray), "string[] | null", obj.curies],
-      ["descriptions", tc.nullable(obj.descriptions, tc.isStringArray), "string[] | null", obj.descriptions],
+      ["clinical_trials", tc.nullable(obj.clinical_trials, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.clinical_trials],
+      ["curies", tc.nullable(obj.curies, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.curies],
+      ["descriptions", tc.nullable(obj.descriptions, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.descriptions],
+      ["synonyms", tc.nullable(obj.synonyms, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.synonyms],
     ], warn);
   }
 
@@ -146,10 +157,10 @@ export const isResultNode = (obj: unknown, warn = false): obj is ResultNode => {
       return false;
     }
     return tc.checkProperties("isResultNode.annotations.gene", obj, [
-      ["descriptions", tc.nullable(obj.descriptions, tc.isStringArray), "string[] | null", obj.descriptions],
-      ["name", tc.nullable(obj.name, tc.isString), "string | null", obj.name],
-      ["species", tc.nullable(obj.species, isSpecies), "Species | null", obj.species],
-      ["tdl", tc.nullable(obj.tdl, _isTdlArray), "Tdl | null", obj.tdl],
+      ["descriptions", tc.nullable(obj.descriptions, _isAnnotationSection(tc.isStringArray)), "AnnotationSection<string[]> | null", obj.descriptions],
+      ["name", tc.nullable(obj.name, _isAnnotationSection(tc.isString)), "AnnotationSection<string> | null", obj.name],
+      ["species", tc.nullable(obj.species, _isAnnotationSection(isSpecies)), "AnnotationSection<Species> | null", obj.species],
+      ["tdl", tc.nullable(obj.tdl, _isAnnotationSection(_isTdlArray)), "AnnotationSection<Tdl[]> | null", obj.tdl],
     ], warn);
   }
 }
