@@ -23,6 +23,11 @@ const ccTooltipMarkup = (
     </span>
   </>
 )
+const tdlTooltipMarkup = (
+  <span className={styles.tooltipParagraph}>
+    <span className={styles.tooltipBold}>Target Development Level (TDL)</span> is a classification system used to describe how much is known about a potential drug target, particularly in terms of its validation and availability of chemical modulators.
+  </span>
+)
 
 type FacetHeadingProps = {
   className?: string;
@@ -58,6 +63,8 @@ const FacetHeading: FC<FacetHeadingProps> = ({
         return pcTooltipMarkup;
       case 'cc':
         return ccTooltipMarkup;
+      case 'tdl':
+        return tdlTooltipMarkup;
       default:
         return null;
     }

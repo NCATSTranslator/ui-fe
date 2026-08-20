@@ -102,6 +102,18 @@ export interface ResultEdge {
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
 export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
 
+export type AnnotationSource = {
+  name: string;
+  url: string;
+}
+
+export type AnnotationSection<T> = {
+  value: T;
+  metadata: {
+    sources: AnnotationSource[];
+  };
+}
+
 export type Annotation = {
   chemical: ChemicalAnnotation;
   disease: DiseaseAnnotation;
@@ -113,26 +125,34 @@ export type ChebiRole = {
   name: string;
 }
 
+export type Indication = {
+  name: string;
+  ids: string[];
+  urls: string[];
+}
+
 export type ChemicalAnnotation = {
-  approval: number | null;
-  clinical_trials: string[] | null;
-  descriptions: string[] | null;
-  indications: string[] | null;
-  otc_status: {code: number, label: string} | null;
-  other_names: {commercial: string[], generic: string[]} | null;
-  roles: ChebiRole[] | null;
+  approval: AnnotationSection<number> | null;
+  clinical_trials: AnnotationSection<string[]> | null;
+  descriptions: AnnotationSection<string[]> | null;
+  indications: AnnotationSection<Indication[]> | null;
+  otc_status: AnnotationSection<{code: number, label: string}> | null;
+  roles: AnnotationSection<ChebiRole[]> | null;
+  synonyms: AnnotationSection<{commercial: string[], generic: string[]}> | null;
 }
 
 export type DiseaseAnnotation = {
-  curies: string[] | null;
-  descriptions: string[] | null;
+  clinical_trials: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<string[]> | null;
+  descriptions: AnnotationSection<string[]> | null;
+  synonyms: AnnotationSection<string[]> | null;
 }
 
 export type GeneAnnotation = {
-  descriptions: string[] | null;
-  name: string | null;
-  species: Species;
-  tdl: Tdl;
+  descriptions: AnnotationSection<string[]> | null;
+  name: AnnotationSection<string> | null;
+  species: AnnotationSection<Species> | null;
+  tdl: AnnotationSection<Tdl[]> | null;
 }
 
 export type ResultNode = {
