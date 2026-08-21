@@ -20,6 +20,8 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
+import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
@@ -112,17 +114,36 @@ const ResultItem: FC<ResultItemProps> = ({
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
+  const {
+    setNodeRef: setResultDragRef,
+    attributes: resultDragAttributes,
+    listeners: resultDragListeners,
+    isDragging: isResultDragging,
+    canDrag: canDragResult,
+    onContextMenu: handleResultContextMenu,
+  } = useResultCanvasDrag(result.id, pk);
+
   if(!resultSet)
     return null;
 
 
   return (
     <div
-      className={joinClasses('result', styles.result, isPathfinder && styles.pathfinder)}
+      ref={setResultDragRef}
+      className={joinClasses(
+        'result',
+        styles.result,
+        isPathfinder && styles.pathfinder,
+        canDragResult && dragStyles.draggable,
+        isResultDragging && dragStyles.dragging,
+      )}
       data-result-curie={result.subject}
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}
       onClick={handleResultClick}
+      onContextMenu={handleResultContextMenu}
+      {...resultDragListeners}
+      {...resultDragAttributes}
     >
       <div className={styles.top}>
         <div className={joinClasses(styles.nameContainer, styles.resultSub)}>

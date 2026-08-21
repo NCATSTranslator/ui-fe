@@ -26,6 +26,9 @@ import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -114,6 +117,15 @@ const ResultDetailView: FC = () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
+  const {
+    setNodeRef: setResultDragRef,
+    attributes: resultDragAttributes,
+    listeners: resultDragListeners,
+    isDragging: isResultDragging,
+    canDrag: canDragResult,
+    onContextMenu: handleResultContextMenu,
+  } = useResultCanvasDrag(result?.id, pk);
+
   const graph = useMemo(() => {
     if (!graphActive || !resultSet?.data || !result) return { nodes: {}, edges: {} };
       return resultToGraphData(result, resultSet.data);
@@ -152,7 +164,17 @@ const ResultDetailView: FC = () => {
         <div className={styles.header}>
           <div className={styles.top}>
             <div className={styles.infoContainer}>
-              <div className={styles.nameContainer}>
+              <div
+                ref={setResultDragRef}
+                className={joinClasses(
+                  styles.nameContainer,
+                  canDragResult && dragStyles.draggable,
+                  isResultDragging && dragStyles.dragging,
+                )}
+                onContextMenu={handleResultContextMenu}
+                {...resultDragListeners}
+                {...resultDragAttributes}
+              >
                 <ResultItemName
                   isPathfinder={isPathfinder}
                   subjectNode={subjectNode}

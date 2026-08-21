@@ -125,7 +125,7 @@ const PathView: FC<PathViewProps> = ({
         <div className={styles.header}>
           <p>
             {hasActiveCanvas
-              ? 'Drag and drop a path, object, or relationship to add it to the canvas.'
+              ? 'Drag and drop a result, path, object, or relationship to add it to the canvas.'
               : 'Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.'}
           </p>
         </div>
