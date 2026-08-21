@@ -9,11 +9,12 @@ import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import type { Path } from '@/features/ResultList/types/results';
+import type { ResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import styles from './CanvasContextMenu.module.scss';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 
 type MenuTarget = {
-  type: 'node' | 'edge' | 'path';
+  type: ResultEntityDragType;
   id: string;
   pk: string;
   position: { x: number; y: number };
@@ -21,7 +22,7 @@ type MenuTarget = {
 };
 
 type CanvasContextMenuContextValue = {
-  openMenu: (type: 'node' | 'edge' | 'path', id: string, pk: string, position: { x: number; y: number }, path?: Path) => void;
+  openMenu: (type: ResultEntityDragType, id: string, pk: string, position: { x: number; y: number }, path?: Path) => void;
 };
 
 const CanvasContextMenuContext = createContext<CanvasContextMenuContextValue | null>(null);
@@ -30,6 +31,7 @@ const ENTITY_NOUNS: Record<MenuTarget['type'], string> = {
   path: 'path',
   node: 'object',
   edge: 'relationship',
+  result: 'result',
 };
 
 const getButtonLabel = (type: MenuTarget['type'], hasCanvas: boolean): string => {
@@ -112,7 +114,7 @@ const ContextMenuPopup: FC<{
 export const CanvasContextMenuProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [target, setTarget] = useState<MenuTarget | null>(null);
 
-  const openMenu = useCallback((type: 'node' | 'edge' | 'path', id: string, pk: string, position: { x: number; y: number }, path?: Path) => {
+  const openMenu = useCallback((type: ResultEntityDragType, id: string, pk: string, position: { x: number; y: number }, path?: Path) => {
     setTarget({ type, id, pk, position, path });
   }, []);
 

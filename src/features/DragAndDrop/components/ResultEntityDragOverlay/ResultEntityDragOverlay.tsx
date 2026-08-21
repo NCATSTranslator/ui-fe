@@ -10,14 +10,11 @@ import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipM
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
-import type { DraggableData } from '@/features/DragAndDrop/types/types';
+import type { ResultEntityDraggableData } from '@/features/DragAndDrop/types/types';
 import type { Path, Result, ResultNode, ResultSet } from '@/features/ResultList/types/results';
 import styles from './ResultEntityDragOverlay.module.scss';
 
-export type ResultEntityDragOverlayData = Extract<
-  DraggableData,
-  { type: 'node' | 'edge' | 'path' }
->;
+export type ResultEntityDragOverlayData = ResultEntityDraggableData;
 
 interface ResultEntityDragOverlayProps {
   dragData: ResultEntityDragOverlayData;
@@ -76,6 +73,23 @@ const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData })
         kind: 'edge' as const,
         label: `${subjectLabel} ${edge.predicate} ${objectLabel}`,
         icon: null as ReactNode,
+      };
+    }
+
+    if (dragData.type === 'result') {
+      const result = getResultById(resultSet, dragData.data.id);
+      const resultNode = result ? getNodeById(resultSet, result.subject) : undefined;
+      const label = result?.drug_name
+        ? formatBiolinkNode(
+          result.drug_name,
+          resultNode?.types[0] ? formatBiolinkEntity(resultNode.types[0]) : '',
+          resultNode ? getNodeSpecies(resultNode) : null,
+        )
+        : dragData.data.id;
+      return {
+        kind: 'result' as const,
+        label,
+        icon: getNodeIcon(resultNode?.types[0] ?? ''),
       };
     }
 

@@ -22,6 +22,7 @@ import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
 import ResultEntityDragOverlay, { ResultEntityDragOverlayData } from '@/features/DragAndDrop/components/ResultEntityDragOverlay/ResultEntityDragOverlay';
+import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
 import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
@@ -63,7 +64,7 @@ const App = ({children}: {children?: ReactNode}) => {
     if (dragType === 'query') {
       setActiveQuery(active.data.current?.data as UserQueryObject);
       setActiveResultEntity(null);
-    } else if (dragType === 'node' || dragType === 'edge' || dragType === 'path') {
+    } else if (isResultEntityDragType(dragType)) {
       setActiveResultEntity(active.data.current as ResultEntityDragOverlayData);
       setActiveQuery(null);
     } else {

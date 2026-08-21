@@ -23,6 +23,7 @@ import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHover
 import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
+import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import { useNavigate } from 'react-router-dom';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
 import { getEnabledHomeQueryActions, homeQueryTabOptionsFromConfig } from '@/features/Query/utils/homeQueryParams';
@@ -297,9 +298,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
     <DroppableArea
       id={`canvas-zone-${activeCanvas.id}`}
       className={paneClass}
-      canAccept={(draggedData) =>
-        draggedData.type === 'node' || draggedData.type === 'edge' || draggedData.type === 'path'
-      }
+      canAccept={(draggedData) => isResultEntityDragType(draggedData.type)}
       data={{
         type: 'canvas',
         id: String(activeCanvas.id),
