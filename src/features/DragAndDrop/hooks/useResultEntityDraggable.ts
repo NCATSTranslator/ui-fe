@@ -2,17 +2,14 @@ import { useId } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useSelector } from 'react-redux';
 import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
-import type { DraggableData, ResultEntityDragData } from '@/features/DragAndDrop/types/types';
-import type { Path } from '@/features/ResultList/types/results';
+import type { DraggableData, ResultEntityDraggableData } from '@/features/DragAndDrop/types/types';
 
-export type ResultEntityDraggableData =
-  | { type: 'node'; data: ResultEntityDragData }
-  | { type: 'edge'; data: ResultEntityDragData }
-  | { type: 'path'; data: ResultEntityDragData & { path: Path } };
+export type { ResultEntityDraggableData };
 
 /**
- * Makes a result node/edge/path draggable onto an active canvas.
- * Disabled when there is no active canvas. Unique dnd-kit ids via useId.
+ * Makes a result, node, edge, or path draggable onto an active canvas.
+ * Disabled when there is no active canvas — listeners/attributes are omitted so
+ * drag is only enabled while a canvas is active. Unique dnd-kit ids via useId.
  */
 export const useResultEntityDraggable = (
   data: ResultEntityDraggableData | null,
@@ -23,6 +20,7 @@ export const useResultEntityDraggable = (
   const hasActiveCanvas = !!activeCanvas;
   const extraDisabled = options?.disabled ?? false;
   const disabled = !data || !hasActiveCanvas || extraDisabled;
+  const canDrag = !disabled;
 
   const dragId = data
     ? `${data.type}-${data.data.id}-${uid}`
@@ -35,11 +33,11 @@ export const useResultEntityDraggable = (
   });
 
   return {
-    attributes,
-    listeners,
+    attributes: canDrag ? attributes : {},
+    listeners: canDrag ? listeners : {},
     setNodeRef,
-    isDragging,
+    isDragging: canDrag && isDragging,
     disabled,
-    canDrag: !disabled,
+    canDrag,
   };
 };

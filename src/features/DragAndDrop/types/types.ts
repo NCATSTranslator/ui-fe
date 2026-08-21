@@ -2,7 +2,10 @@ import { UserQueryObject } from "@/features/Projects/types/projects.d";
 import { Project } from "@/features/Projects/types/projects.d";
 import type { Path } from "@/features/ResultList/types/results";
 
-export type DraggableType = 'query' | 'project' | 'node' | 'edge' | 'path';
+export const RESULT_ENTITY_DRAG_TYPES = ['node', 'edge', 'path', 'result'] as const;
+export type ResultEntityDragType = typeof RESULT_ENTITY_DRAG_TYPES[number];
+
+export type DraggableType = 'query' | 'project' | ResultEntityDragType;
 export type DroppableAreaType = 'project' | 'canvas';
 
 export type ResultEntityDragData = {
@@ -20,8 +23,17 @@ export type DraggableData =
   | { type: 'project'; data: Project }
   | { type: 'node'; data: ResultEntityDragData }
   | { type: 'edge'; data: ResultEntityDragData }
-  | { type: 'path'; data: ResultEntityDragData & { path: Path } };
+  | { type: 'path'; data: ResultEntityDragData & { path: Path } }
+  | { type: 'result'; data: ResultEntityDragData };
 
+export type ResultEntityDraggableData = Extract<DraggableData, { type: ResultEntityDragType }>;
+
+export const isResultEntityDragType = (type: unknown): type is ResultEntityDragType =>
+  typeof type === 'string'
+  && (RESULT_ENTITY_DRAG_TYPES as readonly string[]).includes(type);
+
+export const isResultEntityDragData = (data: DraggableData): data is ResultEntityDraggableData =>
+  isResultEntityDragType(data.type);
 
 export type DroppableAreaData = {
   type: DroppableAreaType;
