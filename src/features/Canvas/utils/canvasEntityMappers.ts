@@ -8,12 +8,14 @@ const EMPTY_ANNOTATIONS: Annotation = {
     descriptions: null,
     indications: null,
     otc_status: null,
-    other_names: null,
     roles: null,
+    synonyms: null,
   },
   disease: {
+    clinical_trials: null,
     curies: null,
     descriptions: null,
+    synonyms: null,
   },
   gene: {
     descriptions: null,
