@@ -1,7 +1,8 @@
 import type { GraphData, GraphNodeType, GraphEdgeType } from 'translator-graph-view';
 import type { Canvas, CanvasNode, CanvasEdge, GraphSelection } from '@/features/Canvas/types/canvas';
-import type { ResultSet, Path, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
-import { getNodeById, getEdgeById } from '@/features/ResultList/slices/resultsSlice';
+import type { ResultSet, Path, Result, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
+import { getNodeById, getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { isPath } from '@/features/ResultList/types/checkers';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
 /** Build a trash/restore selection for a node and its connected edges. */
@@ -144,6 +145,28 @@ export const extractNodesAndEdgesFromPath = (
   }
 
   return { nodes, edges };
+};
+
+/** Union nodes and edges from every path in a result. */
+export const extractNodesAndEdgesFromResult = (
+  resultSet: ResultSet,
+  result: Result,
+): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
+  const nodeById = new Map<string, CanvasNode>();
+  const edgeById = new Map<string, CanvasEdge>();
+
+  for (const pathRef of result.paths) {
+    const path = isPath(pathRef) ? pathRef : getPathById(resultSet, pathRef);
+    if (!path) continue;
+    const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, path);
+    for (const node of nodes) nodeById.set(node.id, node);
+    for (const edge of edges) edgeById.set(edge.id, edge);
+  }
+
+  return {
+    nodes: Array.from(nodeById.values()),
+    edges: Array.from(edgeById.values()),
+  };
 };
 
 export const extractNodeFromResultSet = (
