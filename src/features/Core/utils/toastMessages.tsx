@@ -56,6 +56,14 @@ export const queryUpdatedToast = () => {
 export const errorToast = (message: string) => {
   return toast.error(AppToast, { data: { topText: message } });
 };
+export const unsupportedSmartQueryCategoryToast = () => {
+  return toast.error(AppToast, {
+    toastId: 'unsupportedSmartQueryCategoryToast',
+    data: {
+      topText: 'The node category in this link is not supported for Smart Query. Select a query type and entity manually.',
+    },
+  });
+};
 export const unableToReachLinkToast = () => {
   return toast.error(AppToast, { toastId: 'unableToReachLinkToast', data: { topText: 'Unable to reach link' } });
 };
