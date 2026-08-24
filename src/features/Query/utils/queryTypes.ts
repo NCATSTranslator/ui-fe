@@ -2,6 +2,11 @@ import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from '@/featu
 import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { QueryType, AutocompleteItem } from '@/features/Query/types/querySubmission';
+import {
+  isBiolinkChemicalCategory,
+  isBiolinkDiseaseCategory,
+  isBiolinkGeneCategory,
+} from '@/features/Query/utils/biolinkCategories';
 
 export const queryTypes: QueryType[] = [
   {
@@ -89,7 +94,40 @@ export const queryTypes: QueryType[] = [
     searchTypeString: 'chemical',
     iconString: 'genedown'
   }
-]
+];
+
+const queryTypeByFilterType = (
+  filterType: string,
+  direction: 'increased' | 'decreased' | null,
+): QueryType | null =>
+  queryTypes.find((queryType) =>
+    queryType.filterType === filterType && queryType.direction === direction,
+  ) ?? null;
+
+/**
+ * Returns the Smart Query type that best fits a biolink category, or null when
+ * no Smart Query accepts that category (e.g. AnatomicalEntity).
+ */
+export const getQueryTypeForCategory = (
+  category: string | null | undefined,
+): QueryType | null => {
+  if (!category) return null;
+  if (isBiolinkDiseaseCategory(category)) {
+    return queryTypeByFilterType('DiseaseOrPhenotypicFeature', null);
+  }
+  if (isBiolinkGeneCategory(category)) {
+    return queryTypeByFilterType('Gene', 'increased');
+  }
+  if (isBiolinkChemicalCategory(category)) {
+    return queryTypeByFilterType('SmallMolecule', 'increased');
+  }
+  return null;
+};
+
+/** True when `nc` is present but does not map to a Smart Query type. */
+export const isUnsupportedSmartQueryCategory = (
+  category: string | null | undefined,
+): boolean => !!category && getQueryTypeForCategory(category) === null;
 
 export const generatePathfinderQuestionText = (labelOne: string, labelTwo: string, constraintText?: string) => {
   if(!labelOne || !labelTwo) {
@@ -100,7 +138,7 @@ export const generatePathfinderQuestionText = (labelOne: string, labelTwo: strin
   } else {
     return `What paths begin with ${labelOne} and end with ${labelTwo}?`;
   }
-}
+};
 
 export const generateSmartQueryQuestionText = (label: string, item: AutocompleteItem) => {
   const resultsPaneQuestionText = label
@@ -108,7 +146,7 @@ export const generateSmartQueryQuestionText = (label: string, item: Autocomplete
     .replaceAll("a chemical?", "")
     .replaceAll("a gene?", "");
   return `${resultsPaneQuestionText}${item.label}?`;
-}
+};
 export const getQueryTitle = (type: 'smart' | 'pathfinder', queryType: QueryType | null, itemOne: AutocompleteItem, itemTwo?: AutocompleteItem, constraintText?: string) => {
   if(type === 'smart' && !!queryType) {
     return generateSmartQueryQuestionText(queryType.label, itemOne);
@@ -116,4 +154,4 @@ export const getQueryTitle = (type: 'smart' | 'pathfinder', queryType: QueryType
     return generatePathfinderQuestionText(itemOne?.label || '', itemTwo?.label || '', constraintText) || 'New Pathfinder Query';
   }
   return '';
-}
+};
