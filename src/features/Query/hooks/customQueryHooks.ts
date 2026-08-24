@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from 'react';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
@@ -9,9 +9,11 @@ import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath, getLookupResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
-import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { buildInitialQueryItemState } from '@/features/Query/utils/queryInitState';
+import { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+import { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { errorToast } from '@/features/Core/utils/toastMessages';
+import { errorToast, unsupportedSmartQueryCategoryToast } from '@/features/Core/utils/toastMessages';
 import { noop } from '@/features/Core/utils/constants';
 
 export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
@@ -35,16 +37,6 @@ export const HOME_QUERY_AUTOCOMPLETE_CONFIG: AutocompleteConfig = {
   ],
   limitPrefixes: [],
   excludePrefixes: ["UMLS"],
-};
-
-const useStateSyncedTo = <T,>(source: T) => {
-  const [state, setState] = useState(source);
-  const [prevSource, setPrevSource] = useState(source);
-  if (prevSource !== source) {
-    setPrevSource(source);
-    setState(source);
-  }
-  return [state, setState] as const;
 };
 
 /**
@@ -378,28 +370,17 @@ export const useAutocompleteConfig = (queryType: QueryType): AutocompleteConfig 
  *   - setInputText: Function to update input text
  *   - clear: Function to reset state to initial values
  */
-export const autocompleteItemFromNodeParams = (
-  nodeId: string | null | undefined,
-  nodeLabel: string | null | undefined,
-): AutocompleteItem | null => {
-  if (!nodeId) return null;
-  return {
-    id: nodeId,
-    label: nodeLabel || nodeId,
-    match: '',
-    isExact: false,
-    score: Infinity,
-    types: [],
-  };
-};
+export { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+export { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
 
 export const useSyncedAutocompleteFromNodeParams = (
   initNodeIdParam: string | null | undefined,
   initNodeLabelParam: string | null | undefined,
+  initNodeCategoryParam?: string | null,
 ) => {
   const initItem = useMemo(
-    () => autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam),
-    [initNodeIdParam, initNodeLabelParam],
+    () => autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam),
+    [initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
   );
   const initInputText = initNodeLabelParam || initNodeIdParam || '';
   const [queryItem, setQueryItem] = useStateSyncedTo(initItem);
@@ -411,20 +392,29 @@ export const useSyncedAutocompleteFromNodeParams = (
 export const useQueryItem = (
   initPresetTypeObject: QueryType | null,
   initNodeLabelParam: string | null,
-  initNodeIdParam: string | null
+  initNodeIdParam: string | null,
+  initNodeCategoryParam?: string | null,
 ) => {
-  // Compute derived initial query item
-  const initQueryItem = useMemo((): QueryItem => {
-    const initPresetType = initPresetTypeObject || queryTypes[0];
-    const initSelectedNode = autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam);
+  const initState = useMemo(
+    () => buildInitialQueryItemState(
+      initPresetTypeObject,
+      initNodeLabelParam,
+      initNodeIdParam,
+      initNodeCategoryParam,
+    ),
+    [initPresetTypeObject, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
+  );
+  const toastKeyRef = useRef<string | null>(null);
 
-    return {
-      type: initPresetType,
-      node: initSelectedNode
-    };
-  }, [initPresetTypeObject, initNodeIdParam, initNodeLabelParam]);
+  useEffect(() => {
+    if (!initState.categoryUnsupported) return;
+    const toastKey = initNodeCategoryParam ?? '';
+    if (toastKeyRef.current === toastKey) return;
+    toastKeyRef.current = toastKey;
+    unsupportedSmartQueryCategoryToast();
+  }, [initState.categoryUnsupported, initNodeCategoryParam]);
 
-  const initInputText = initNodeLabelParam || initNodeIdParam || "";
+  const { queryItem: initQueryItem, inputText: initInputText } = initState;
   const [queryItem, setQueryItem] = useStateSyncedTo(initQueryItem);
   const [inputText, setInputText] = useStateSyncedTo(initInputText);
 
