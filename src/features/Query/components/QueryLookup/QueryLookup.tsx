@@ -5,7 +5,8 @@ import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/qu
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Core/components/Select/Select';
-import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, HOME_QUERY_AUTOCOMPLETE_CONFIG, noop } from '@/features/Query/hooks/customQueryHooks';
+import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { noop } from '@/features/Core/utils/constants';
 import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import { ProjectRaw } from '@/features/Projects/types/projects';

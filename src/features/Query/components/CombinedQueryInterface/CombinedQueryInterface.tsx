@@ -26,7 +26,7 @@ import {
   isHomeQueryTabEnabled,
   homeQueryTabOptionsFromConfig,
 } from "@/features/Query/utils/homeQueryParams";
-import { noop } from "@/features/Query/hooks/customQueryHooks";
+import { noop } from "@/features/Core/utils/constants";
 
 interface CombinedQueryInterfaceProps {
   className?: string;

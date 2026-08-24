@@ -12,10 +12,9 @@ import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { errorToast } from '@/features/Core/utils/toastMessages';
+import { noop } from '@/features/Core/utils/constants';
 
 export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
-
-export const noop = () => undefined;
 
 export const HOME_QUERY_AUTOCOMPLETE_CONFIG: AutocompleteConfig = {
   functions: {

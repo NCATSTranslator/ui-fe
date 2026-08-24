@@ -4,12 +4,11 @@ import { getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
 import useEvidenceViewRouteData from '@/features/Evidence/hooks/useEvidenceViewRouteData';
 import useEvidenceViewEdgeInteractions from '@/features/Evidence/hooks/useEvidenceViewEdgeInteractions';
 import { computeNonReadyStatus, resolveEvidenceSubtitle } from '@/features/Evidence/hooks/evidenceViewHelpers';
+import { noop } from '@/features/Core/utils/constants';
 import type { EvidenceViewModel } from '@/features/Evidence/hooks/evidenceViewTypes';
 import type { ResultEdge } from '@/features/ResultList/types/results.d';
 
 export type { EvidenceViewContentProps, EvidenceViewModel } from '@/features/Evidence/hooks/evidenceViewTypes';
-
-const NOOP = () => { return; };
 
 /**
  * Custom hook encapsulating all data, derivation, and callbacks for EvidenceView.
@@ -58,7 +57,7 @@ export const useEvidenceView = (): EvidenceViewModel => {
       selectedEdge: edgeData.selectedEdge as ResultEdge,
       selectedEdgeDomRef: edgeData.selectedEdgeDomRef,
       isFilteredOut,
-      onClearFilters: resultListContext?.handleClearAllFilters ?? NOOP,
+      onClearFilters: resultListContext?.handleClearAllFilters ?? noop,
       publications: edgeData.publications,
       setPublications: edgeData.setPublications,
       clinicalTrials: edgeData.clinicalTrials,
