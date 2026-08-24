@@ -131,7 +131,7 @@ const App = ({children}: {children?: ReactNode}) => {
                   </div>
                   {createPortal(
                     <DragOverlay
-                      className={activeResultEntity ? 'dragOverlay' : undefined}
+                      className={joinClasses('dragOverlayBase', activeResultEntity && 'dragOverlay')}
                     >
                       {activeQuery && (
                         <DraggableQueryCardWrapper>

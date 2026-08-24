@@ -7,4 +7,7 @@
   .contentScroll { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .contentScroll > footer { margin-top: auto; }
 }
+// pointer-events must stay off so the overlay never hit-tests under the cursor,
+// which would fire hover events on whatever it passes over mid-drag.
+.dragOverlayBase { pointer-events: none; }
 .dragOverlay { width: auto; height: auto; }
