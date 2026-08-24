@@ -1,4 +1,4 @@
-import { HoverTarget, ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
+import { ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo, RefObject } from "react";
 import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
@@ -18,38 +18,6 @@ const QUERY_AMOUNT = 200;
 const PUBMED_API_URL = 'https://docmetadata.transltr.io/publications';
 const REQUEST_ID = '26394fad-bfd9-4e32-bb90-ef9d5044f593';
 export const DEFAULT_ITEMS_PER_PAGE = 5;
-
-/**
- * Custom hook to track the index of hovered compressed edges in the evidence modal 
- *
- * @param {(target: HoverTarget) => void} setHoveredItem - Function to set the currently hovered item.
- * @returns {{hoveredIndex: number | null, getHoverHandlers: Function, resetHoveredIndex: Function}} Returns an object containing the hovered index, hover handlers, and reset function.
- */
-export const useHoverPathObject = (setHoveredItem: (target: HoverTarget) => void) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const getHoverHandlers = useCallback(
-    (isEdge: boolean, id: string, index?: number) => ({
-      onMouseEnter: () => {
-        const type = isEdge ? 'edge' : 'node';
-        setHoveredItem({ id: id, type: type});
-        if(typeof index === 'number')
-          setHoveredIndex(index);
-      },
-      onMouseLeave: () => {
-        setHoveredItem(null);
-        setHoveredIndex(null)
-      },
-    }),
-    [setHoveredItem]
-  );
-
-  return {
-    hoveredIndex,
-    getHoverHandlers,
-    resetHoveredIndex: () => setHoveredIndex(null),
-  };
-};
 
 interface FetchState {
   isFetching: boolean;

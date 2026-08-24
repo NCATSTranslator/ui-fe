@@ -1,4 +1,4 @@
-import { FC, Fragment, useCallback, useId, MouseEvent } from 'react';
+import { FC, Fragment, memo, useCallback, useId, MouseEvent } from 'react';
 import LastViewedTag from '@/features/ResultItem/components/LastViewedTag/LastViewedTag';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
@@ -7,14 +7,16 @@ import PathObject from '@/features/ResultItem/components/PathObject/PathObject';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results';
 import { PathFilterState } from '@/features/ResultList/types/results';
 import { RefObject } from 'react';
-import { extractEdgeIDsFromSubgraph, generatePathD, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
+import { extractEdgeIDsFromSubgraph, getIsPathFiltered } from '@/features/ResultItem/utils/utilities';
 import { useLastViewedPath, useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { EMPTY_STRING_ARRAY } from '@/features/Core/utils/constants';
 import { numberToWords } from '@/features/Core/utils/stringFormatters';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
+import PathGroupConnectors from '@/features/ResultItem/components/PathContainer/PathGroupConnectors';
 
 interface PathContainerProps {
   path: Path;
@@ -28,9 +30,9 @@ interface PathContainerProps {
   selectedEdgeRef?: RefObject<HTMLElement | null>;
   selectedEdge?: ResultEdge | null;
   isEven: boolean;
-  hoveredIndex: number | null;
   styles: { [key: string]: string;};
-  formattedPaths: Path[];
+  /** Position of this path in the full collection, or -1 when not found. */
+  pathIndex: number;
 }
 
 const PathContainer: FC<PathContainerProps> = ({
@@ -45,9 +47,8 @@ const PathContainer: FC<PathContainerProps> = ({
   selectedEdgeRef,
   selectedEdge,
   isEven,
-  hoveredIndex,
   styles,
-  formattedPaths,
+  pathIndex,
 }) => {
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
@@ -67,8 +68,8 @@ const PathContainer: FC<PathContainerProps> = ({
   const isSeen = isPathSeen(edgeIds);
   const generatedId = useId();
   const tooltipID: string = path?.id ?? generatedId;
-  const indexInFullCollection = (!!formattedPaths) ? formattedPaths.findIndex(item => item.id === path.id) : -1;
-  const pathNumber = indexInFullCollection !== -1 ? indexInFullCollection + 1 : undefined;
+  const pathNumber = pathIndex !== -1 ? pathIndex + 1 : undefined;
+  const parentPathKey = (pathIndex + 1).toString();
   const subgraphToMap = (!!path.compressedSubgraph && path.compressedSubgraph.length > 0) ? path.compressedSubgraph : path.subgraph;
 
   const pathDragData = path.id
@@ -109,28 +110,6 @@ const PathContainer: FC<PathContainerProps> = ({
     numberToWords(path.subgraph.length)
   );
 
-  const edgeHeight = 32;
-  const svgWidth = 198;
-  const curveOffset = 50;
-  const straightSegmentLength = 20;
-  const pathColor = "#8C8C8C26";
-  const hoveredPathColor = "#6A5C8259";
-  const selectedPathColor = "#5D4E778C";
-  const hoveredSelectedPathColor = "#3F2E5E59";
-  const pathThickness = 32;
-
-  const getStrokeColor = (index: number, hoveredIndex: number | null, selected: boolean) => {
-    const hovered = hoveredIndex !== null && hoveredIndex === index;
-    if(hovered && selected)
-      return hoveredSelectedPathColor;
-    if(hovered)
-      return hoveredPathColor;
-    if(selected)
-      return selectedPathColor;
-
-    return pathColor;
-  }
-
   return (
       <div className={formattedPathClass}>
         {
@@ -142,12 +121,11 @@ const PathContainer: FC<PathContainerProps> = ({
           onClick={() => {
             if (!!path?.id) {
               setLastViewedPathID(path.id);
-              const pathKey = indexInFullCollection !== -1 ? (indexInFullCollection + 1).toString() : "-";
               if (path.subgraph[1]) {
                 navigateToEvidenceView({
                   edgeId: path.subgraph[1],
                   path,
-                  pathKey,
+                  pathKey: pathNumber?.toString() ?? "-",
                   resultId: itemResultId,
                 });
               }
@@ -167,7 +145,7 @@ const PathContainer: FC<PathContainerProps> = ({
             <ResearchMultiple />
           </div>
           <span className={styles.num}>
-            <span className={styles.val}>{indexInFullCollection + 1}</span>
+            <span className={styles.val}>{pathIndex + 1}</span>
             <PathArrow />
           </span>
         </button>
@@ -178,40 +156,29 @@ const PathContainer: FC<PathContainerProps> = ({
           {inModal && compressedSubgraph ? (
             compressedSubgraph.map((subgraphItem, i) => {
               if (Array.isArray(subgraphItem) && subgraphItem.length > 1) {
-                const svgHeight = (subgraphItem.length * (edgeHeight + 8)) - 8;
                 const hasSelected = !!selectedEdge && !!subgraphItem.find(edge => edge.id === selectedEdge.id);
                 return (
                   <Fragment key={subgraphItem[0].id}>
-                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
-                      {/* Render node → edge connections */}
-                      {subgraphItem.map((edge, index) => {
-                        const selected = (!!selectedEdge && selectedEdge.id === edge.id) ? true : false;
-                        const strokeColor = getStrokeColor(index, hoveredIndex, selected);
-                        return (
-                          <path
-                            key={`node-to-edge-${edge.id}`}
-                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, true, curveOffset, straightSegmentLength)}
-                            stroke={strokeColor}
-                            fill="transparent"
-                            strokeWidth={pathThickness}
-                          />
-                        );
-                      })}
-                    </svg>
+                    <PathGroupConnectors
+                      className={styles.connectors}
+                      edges={subgraphItem}
+                      nodeToEdge
+                      selectedEdgeId={selectedEdge?.id}
+                    />
                     <div className={`${styles.groupedPreds} ${hasSelected && styles.hasSelected}`}>
                       {subgraphItem.map((edge) => {
                         const key = `${edge.id}`;
                         const selected = !!selectedEdge && (selectedEdge.id === edge.id);
                         return (
                           <PathObject
-                            activeEntityFilters={[]}
+                            activeEntityFilters={EMPTY_STRING_ARRAY}
                             handleEdgeClick={handleEdgeClick}
                             id={edge.id}
                             index={i}
                             inModal
                             isEven={false}
                             key={key}
-                            parentPathKey={(indexInFullCollection + 1).toString()}
+                            parentPathKey={parentPathKey}
                             path={path}
                             pathViewStyles={styles}
                             pk={pk}
@@ -221,22 +188,12 @@ const PathContainer: FC<PathContainerProps> = ({
                         );
                       })}
                     </div>
-                    <svg width={svgWidth} height={svgHeight} className={styles.connectors}>
-                      {/* Render edge → node connections */}
-                      {subgraphItem.map((edge, index) => {
-                        const selected = !!selectedEdge && (selectedEdge.id === edge.id);
-                        const strokeColor = getStrokeColor(index, hoveredIndex, selected);
-                        return (
-                          <path
-                            key={`edge-to-node-${edge.id}`}
-                            d={generatePathD(index, svgHeight, svgWidth, edgeHeight, false, curveOffset, straightSegmentLength)}
-                            stroke={strokeColor}
-                            fill="transparent"
-                            strokeWidth={pathThickness}
-                          />
-                        );
-                      })}
-                    </svg>
+                    <PathGroupConnectors
+                      className={styles.connectors}
+                      edges={subgraphItem}
+                      nodeToEdge={false}
+                      selectedEdgeId={selectedEdge?.id}
+                    />
                   </Fragment>
                 )
               } else {
@@ -244,14 +201,14 @@ const PathContainer: FC<PathContainerProps> = ({
                 const selected = !!selectedEdge && (selectedEdge.id === key);
                 return (
                   <PathObject
-                    activeEntityFilters={[]}
+                    activeEntityFilters={EMPTY_STRING_ARRAY}
                     handleEdgeClick={handleEdgeClick}
                     id={key}
                     index={i}
                     inModal
                     isEven={false}
                     key={key}
-                    parentPathKey={(indexInFullCollection + 1).toString()}
+                    parentPathKey={parentPathKey}
                     path={path}
                     pk={pk}
                     pathViewStyles={styles}
@@ -275,7 +232,7 @@ const PathContainer: FC<PathContainerProps> = ({
                   isEven={isEven}
                   inModal={inModal}
                   path={path}
-                  parentPathKey={(indexInFullCollection + 1).toString()}
+                  parentPathKey={parentPathKey}
                   id={subgraphItemID}
                   key={key}
                   handleEdgeClick={handleEdgeClick}
@@ -292,4 +249,4 @@ const PathContainer: FC<PathContainerProps> = ({
   );
 };
 
-export default PathContainer; 
+export default memo(PathContainer);

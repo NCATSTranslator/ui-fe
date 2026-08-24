@@ -7,9 +7,9 @@ import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?reac
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getIsPathFiltered, getPathsPerPage, getFormattedPaths } from '@/features/ResultItem/utils/utilities';
-import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
+import { PathFilterState, ResultNode, Path, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
+import { createHoverStore, HoverContext } from '@/features/ResultItem/hooks/hoverHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
 import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import { useSelector } from 'react-redux';
@@ -18,50 +18,53 @@ import PathContainer from '@/features/ResultItem/components/PathContainer/PathCo
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { EMPTY_STRING_ARRAY, noop } from '@/features/Core/utils/constants';
+import { useDragActiveRef } from '@/features/DragAndDrop/hooks/useDragActiveRef';
 
-export const HoverContext = createContext<{
-  hoveredItem: HoverTarget;
-  setHoveredItem: (target: HoverTarget) => void;
-} | null>(null);
 // Supplies the id of the result this PathView belongs to, so node/edge navigation
 // works even when the route has no result id (e.g. the results list view).
 export const ResultItemIdContext = createContext<string | undefined>(undefined);
 
+// Stable defaults for callers that have nothing to filter by, so memoized
+// descendants aren't invalidated by a fresh literal on every render.
+const NO_FILTERS: Filter[] = [];
+const NO_PATH_FILTER_STATE: PathFilterState = {};
+
 interface PathViewProps {
   active: boolean;
-  activeEntityFilters: string[];
-  activeFilters: Filter[];
+  activeEntityFilters?: string[];
+  activeFilters?: Filter[];
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleEdgeSpecificEvidence?:(edgeIDs: string[], path: Path) => void;
   inModal?: boolean;
   isEven: boolean;
   isLookup?: boolean;
   pathArray: string[] | Path[];
-  pathFilterState: PathFilterState;
+  pathFilterState?: PathFilterState;
   pk: string;
   resultId?: string;
   selectedEdge?: ResultEdge | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
-  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
+  setShowHiddenPaths?: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
 }
 
 const PathView: FC<PathViewProps> = ({ 
   active,
-  activeEntityFilters,
-  activeFilters,
+  activeEntityFilters = EMPTY_STRING_ARRAY,
+  activeFilters = NO_FILTERS,
   compressedSubgraph,
   handleEdgeSpecificEvidence,
   inModal = false,
   isEven,
   isLookup = false,
   pathArray,
-  pathFilterState,
+  pathFilterState = NO_PATH_FILTER_STATE,
   pk,
   resultId: resultItemId,
   selectedEdge,
   selectedEdgeRef,
-  setShowHiddenPaths,
+  setShowHiddenPaths = noop,
   showHiddenPaths }) => {
   
   const prefs = useSelector(currentPrefs);
@@ -74,8 +77,25 @@ const PathView: FC<PathViewProps> = ({
   const formattedPaths = useMemo(() => getFormattedPaths(resultSet, paths, pathFilterState), [paths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
-  const { hoveredIndex } = useHoverPathObject(setHoveredItem);
+  const [hoverStore] = useState(createHoverStore);
+  // Clearing on both edges of a drag avoids leaving a stale highlight behind,
+  // since the hover handlers themselves are inert while dragging.
+  const handleDragActiveChange = useCallback(() => hoverStore.setHoveredItem(null), [hoverStore]);
+  const isDragActiveRef = useDragActiveRef(handleDragActiveChange);
+  const hoverContextValue = useMemo(
+    () => ({ store: hoverStore, isDragActiveRef }),
+    [hoverStore, isDragActiveRef]
+  );
+
+  // Path numbering is based on position in the full collection. Building the lookup
+  // once here keeps each PathContainer from scanning the whole array.
+  const pathIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    formattedPaths.forEach((path, index) => {
+      if (path.id) map.set(path.id, index);
+    });
+    return map;
+  }, [formattedPaths]);
   
   const { formattedPathsToDisplay, filteredPathCount } = useMemo(() => {
     let filteredCount = 0;
@@ -135,7 +155,7 @@ const PathView: FC<PathViewProps> = ({
         ? <></>
         :
         <ResultItemIdContext.Provider value={effectiveResultId}>
-        <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
+        <HoverContext.Provider value={hoverContextValue}>
             <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
                 displayedPaths.map((path: Path, i: number)=> {
@@ -156,9 +176,8 @@ const PathView: FC<PathViewProps> = ({
                         selectedEdgeRef={selectedEdgeRef}
                         selectedEdge={selectedEdge}
                         isEven={isEven}
-                        hoveredIndex={hoveredIndex}
                         styles={styles}
-                        formattedPaths={formattedPaths}
+                        pathIndex={pathIndexMap.get(path.id) ?? -1}
                       />
                     </div>
                   )
