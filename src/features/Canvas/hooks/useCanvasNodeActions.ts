@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import { getHomeQueryPath, type HomeQueryTab } from '@/features/Query/utils/homeQueryParams';
-import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
+import { getCanvasNodeDisplayName, getCanvasNodePrimaryCategory } from '@/features/Canvas/utils/canvasFunctions';
+import { formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
 import { canvasEntityRemovedToast } from '@/features/Core/utils/toastMessages';
 
 interface UseCanvasNodeActionsOptions {
@@ -34,8 +35,11 @@ const useCanvasNodeActions = ({
     clearHover();
     const canvasNode = activeCanvas?.nodes[nodeId];
     const id = canvasNode?.id || nodeId;
-    const label = canvasNode ? getCanvasNodeDisplayName(canvasNode) : undefined;
-    navigate(getHomeQueryPath(kind, id, label));
+    const label = canvasNode
+      ? formatBiolinkNode(getCanvasNodeDisplayName(canvasNode), getCanvasNodePrimaryCategory(canvasNode) ?? null, null)
+      : undefined;
+    const category = getCanvasNodePrimaryCategory(canvasNode);
+    navigate(getHomeQueryPath(kind, id, label, category));
   }, [activeCanvas, navigate, clearHover]);
 
   const handleRemove = useCallback((nodeId: string) => {
