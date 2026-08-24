@@ -18,6 +18,7 @@ interface QueryProps {
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
+  initNodeCategoryParam?: string | null;
   selectedProject?: ProjectRaw | null;
   combinedStyles?: { [key: string]: string };
   shouldNavigate?: boolean;
@@ -30,6 +31,7 @@ const Query: FC<QueryProps> = ({
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
+  initNodeCategoryParam = null,
   selectedProject = null,
   combinedStyles,
   shouldNavigate = true,
@@ -47,7 +49,7 @@ const Query: FC<QueryProps> = ({
     clear: clearQueryItem,
     inputText,
     setInputText,
-  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam, initNodeCategoryParam);
 
   const autocompleteConfig = useAutocompleteConfig(queryItem.type);
 

@@ -5,13 +5,13 @@ import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/qu
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Core/components/Select/Select';
-import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, useStateSyncedTo, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
 import { noop } from '@/features/Core/utils/constants';
 import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
-import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
+import { BIOLINK_CATEGORIES, getDefaultLookupObjectCategory } from '@/features/Query/utils/biolinkCategories';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import DividerVert from '@/features/Core/components/DividerVert/DividerVert';
 
@@ -23,6 +23,7 @@ type QueryLookupProps = {
   user?: User | null;
   initNodeIdParam?: string | null;
   initNodeLabelParam?: string | null;
+  initNodeCategoryParam?: string | null;
 }
 
 const QueryLookup: FC<QueryLookupProps> = ({
@@ -33,6 +34,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
   user = null,
   initNodeIdParam = null,
   initNodeLabelParam = null,
+  initNodeCategoryParam = null,
 }) => {
   const disabled = user === null;
   const nameResolverEndpoint = useNameResolverEndpoint();
@@ -43,8 +45,13 @@ const QueryLookup: FC<QueryLookupProps> = ({
   const { queryItem, setQueryItem, inputText, setInputText } = useSyncedAutocompleteFromNodeParams(
     initNodeIdParam,
     initNodeLabelParam,
+    initNodeCategoryParam,
   );
-  const [objectCategory, setObjectCategory] = useState<string>("biolink:ChemicalEntity");
+  const lookupSubjectKey = `${initNodeIdParam ?? ''}|${initNodeCategoryParam ?? ''}`;
+  const [objectCategory, setObjectCategory] = useStateSyncedTo(
+    getDefaultLookupObjectCategory(initNodeCategoryParam),
+    lookupSubjectKey,
+  );
 
   const {
     autocompleteItems,

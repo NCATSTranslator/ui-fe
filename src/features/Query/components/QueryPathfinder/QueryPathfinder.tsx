@@ -25,6 +25,7 @@ type QueryPathfinderProps = {
   user?: User | null;
   initNodeIdParam?: string | null;
   initNodeLabelParam?: string | null;
+  initNodeCategoryParam?: string | null;
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({
@@ -35,6 +36,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   user = null,
   initNodeIdParam = null,
   initNodeLabelParam = null,
+  initNodeCategoryParam = null,
 }) => {
 
   const autocompleteOneId = 'ac1';
@@ -51,7 +53,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     setQueryItem: setQueryItemOne,
     inputText: inputOneText,
     setInputText: setInputOneText,
-  } = useSyncedAutocompleteFromNodeParams(initNodeIdParam, initNodeLabelParam);
+  } = useSyncedAutocompleteFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam);
   const [inputTwoText, setInputTwoText] = useState("");
   const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);

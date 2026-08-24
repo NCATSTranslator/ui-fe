@@ -21,6 +21,7 @@ import {
   getHomeQueryTabHeading,
   HOME_QUERY_NODE_ID_PARAM,
   HOME_QUERY_NODE_LABEL_PARAM,
+  HOME_QUERY_NODE_CATEGORY_PARAM,
   HOME_QUERY_TAB_HEADING,
   HOME_QUERY_TAB_PARAM,
   isHomeQueryTabEnabled,
@@ -37,6 +38,7 @@ interface CombinedQueryInterfaceProps {
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
+  initNodeCategoryParam?: string | null;
   submissionCallback?: () => void;
 }
 
@@ -49,6 +51,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
+  initNodeCategoryParam = null,
   submissionCallback = noop,
 }) => {
   const config = useSelector(currentConfig);
@@ -69,6 +72,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const [searchParams] = useSearchParams();
   const nodeId = searchParams.get(HOME_QUERY_NODE_ID_PARAM) ?? initNodeIdParam;
   const nodeLabel = searchParams.get(HOME_QUERY_NODE_LABEL_PARAM) ?? initNodeLabelParam;
+  const nodeCategory = searchParams.get(HOME_QUERY_NODE_CATEGORY_PARAM) ?? initNodeCategoryParam;
   const tabFromUrl = getHomeQueryTabHeading(searchParams.get(HOME_QUERY_TAB_PARAM), homeQueryTabOptionsFromConfig(config));
   const fallbackTab = isLookupEnabled ? HOME_QUERY_TAB_HEADING.lookup : HOME_QUERY_TAB_HEADING.smart;
   const [activeTab, setActiveTab] = useState(tabFromUrl ?? fallbackTab);
@@ -166,6 +170,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               submissionCallback={onSubmitCallback}
               initNodeIdParam={nodeId}
               initNodeLabelParam={nodeLabel}
+              initNodeCategoryParam={nodeCategory}
             />
           </Tab>
           : null
@@ -176,6 +181,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
             initPresetTypeObject={initPresetTypeObject}
             initNodeLabelParam={nodeLabel}
             initNodeIdParam={nodeId}
+            initNodeCategoryParam={nodeCategory}
             selectedProject={selectedProject}
             combinedStyles={styles}
             shouldNavigate={shouldNavigate}
@@ -195,6 +201,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
               submissionCallback={onSubmitCallback}
               initNodeIdParam={nodeId}
               initNodeLabelParam={nodeLabel}
+              initNodeCategoryParam={nodeCategory}
             />
           </Tab>
           : null
