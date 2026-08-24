@@ -13,6 +13,10 @@ export const getAnnotationDisplayName = (annotation: CanvasAnnotation): string =
 export const getCanvasNodeDisplayName = (node: CanvasNode): string =>
   node.names[0] || node.id;
 
+export const getCanvasNodePrimaryCategory = (
+  node: CanvasNode | null | undefined,
+): string | undefined => node?.types[0];
+
 export type CanvasSearchMatch = {
   label: string;
   value: string;
