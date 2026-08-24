@@ -3,6 +3,7 @@ import type { CanvasNode } from '@/features/Canvas/types/canvas';
 import {
   formatCanvasSearchMatchTooltip,
   getCanvasNodeDisplayName,
+  getCanvasNodePrimaryCategory,
   getCanvasNodeSearchMatchesOutsideDisplayName,
 } from '@/features/Canvas/utils/canvasFunctions';
 import { formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
@@ -14,7 +15,6 @@ export interface NodeItemProps {
   onNodeClick: (node: CanvasNode) => void;
   onHoverNode: (nodeId: string | null) => void;
   onMenu: (nodeId: string, position: { x: number; y: number }) => void;
-  onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
 }
 
 const NodeItem: FC<NodeItemProps> = ({
@@ -23,10 +23,10 @@ const NodeItem: FC<NodeItemProps> = ({
   onNodeClick,
   onHoverNode,
   onMenu,
-  onQueryMenu,
 }) => {
   const rawName = getCanvasNodeDisplayName(node);
-  const displayName = formatBiolinkNode(rawName, node.types[0] ?? null, null);
+  const primaryCategory = getCanvasNodePrimaryCategory(node) ?? null;
+  const displayName = formatBiolinkNode(rawName, primaryCategory, null);
   const externalSearchMatches = searchTerm
     ? getCanvasNodeSearchMatchesOutsideDisplayName(node, searchTerm)
     : [];
@@ -43,7 +43,7 @@ const NodeItem: FC<NodeItemProps> = ({
   return (
     <CanvasNodeChip
       nodeId={node.id}
-      type={node.types[0] ?? ''}
+      type={primaryCategory ?? ''}
       displayName={displayName}
       searchTerm={searchTerm}
       externalSearchMatches={externalSearchMatches}
@@ -51,7 +51,6 @@ const NodeItem: FC<NodeItemProps> = ({
       onClick={() => onNodeClick(node)}
       onHover={onHoverNode}
       onMenu={handleMenu}
-      onQueryMenu={onQueryMenu}
     />
   );
 };

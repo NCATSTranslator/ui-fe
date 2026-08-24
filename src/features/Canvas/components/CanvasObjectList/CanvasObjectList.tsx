@@ -23,7 +23,6 @@ interface CanvasObjectListProps {
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   onNodeMenu: (nodeId: string, position: { x: number; y: number }) => void;
-  onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
   onCloseNodeMenus?: () => void;
 }
 
@@ -38,7 +37,6 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   onAddObject,
   onAddAnnotation,
   onNodeMenu,
-  onQueryMenu,
   onCloseNodeMenus,
 }) => {
   const {
@@ -64,7 +62,6 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     handleNodeClick,
     handleAnnotationClick,
     handleNodeMenu,
-    handleQueryMenu,
     handleMenuToggle,
     handleAnnotationMenuAction,
     handleCloseMenu,
@@ -75,7 +72,6 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
     onFindAnnotation,
     onAnnotationAction,
     onNodeMenu,
-    onQueryMenu,
     onCloseNodeMenus,
   });
 
@@ -127,7 +123,6 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           onNodeClick={node => handleNodeClick(node.id)}
                           onHoverNode={onHoverNode}
                           onMenu={handleNodeMenu}
-                          onQueryMenu={handleQueryMenu}
                         />
                       ))}
                     </div>

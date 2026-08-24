@@ -26,7 +26,8 @@ import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/D
 import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import { useNavigate } from 'react-router-dom';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
-import { getEnabledHomeQueryActions, homeQueryTabOptionsFromConfig } from '@/features/Query/utils/homeQueryParams';
+import { getQueryActionsForNodeCategory, homeQueryTabOptionsFromConfig } from '@/features/Query/utils/homeQueryParams';
+import { getCanvasNodePrimaryCategory } from '@/features/Canvas/utils/canvasFunctions';
 import type { Canvas, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
@@ -76,8 +77,11 @@ type CanvasPaneHoverModel = {
 };
 
 type CanvasPaneMenuModel = {
-  queryActions: ReturnType<typeof getEnabledHomeQueryActions>;
-  chromeActions: { onQueryMenu: ReturnType<typeof useCanvasNodeMenu>['handleQueryMenu'] };
+  queryActions: ReturnType<typeof getQueryActionsForNodeCategory>;
+  chromeActions: {
+    onQueryMenu: ReturnType<typeof useCanvasNodeMenu>['handleQueryMenu'];
+    isQueryMenuAvailable: (nodeId: string) => boolean;
+  };
   nodeMenu: ReturnType<typeof useCanvasNodeMenu>;
   handleAnnotationListAction: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
 };
@@ -159,7 +163,6 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
               onFindAnnotation={hover.findAnnotationOnCanvas}
               onAnnotationAction={menus.handleAnnotationListAction}
               onNodeMenu={menus.nodeMenu.handleObjectListNodeMenu}
-              onQueryMenu={menus.nodeMenu.handleQueryMenu}
               onCloseNodeMenus={menus.nodeMenu.closeAllMenus}
               onAddAnnotation={graph.handleAddAnnotation}
             />
@@ -183,7 +186,7 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
           onAction={menus.nodeMenu.handleNodeAction}
         />
       )}
-      {menus.nodeMenu.nodeQueryMenu && (
+      {menus.nodeMenu.nodeQueryMenu && menus.queryActions.length > 0 && (
         <CanvasNodeContextMenu
           target={menus.nodeMenu.nodeQueryMenu}
           actions={menus.queryActions}
@@ -204,7 +207,6 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
 }) => {
   const navigate = useNavigate();
   const config = useSelector(currentConfig);
-  const queryActions = getEnabledHomeQueryActions(homeQueryTabOptionsFromConfig(config));
   const persistence = useCanvasPersistence();
   const {
     rename, undo, redo, canUndo, canRedo, removeNode, pushUndo,
@@ -282,6 +284,34 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
     setSelectedNodeIds,
     findNodeOnCanvas,
   });
+  const homeQueryOptions = useMemo(
+    () => homeQueryTabOptionsFromConfig(config),
+    [config],
+  );
+  const getQueryActionsForNodeId = useCallback(
+    (nodeId: string | undefined) => {
+      const nodeCategory = nodeId
+        ? getCanvasNodePrimaryCategory(activeCanvas.nodes[nodeId])
+        : undefined;
+      return getQueryActionsForNodeCategory(homeQueryOptions, nodeCategory);
+    },
+    [activeCanvas.nodes, homeQueryOptions],
+  );
+  const queryActions = useMemo(
+    () => getQueryActionsForNodeId(nodeMenu.nodeQueryMenu?.nodeId),
+    [getQueryActionsForNodeId, nodeMenu.nodeQueryMenu?.nodeId],
+  );
+  const isQueryMenuAvailable = useCallback(
+    (nodeId: string) => getQueryActionsForNodeId(nodeId).length > 0,
+    [getQueryActionsForNodeId],
+  );
+  const handleQueryMenu = useCallback(
+    (nodeId: string, position: { x: number; y: number }) => {
+      if (!isQueryMenuAvailable(nodeId)) return;
+      nodeMenu.handleQueryMenu(nodeId, position);
+    },
+    [isQueryMenuAvailable, nodeMenu.handleQueryMenu],
+  );
   const positions = useCanvasNodePositions({
     canvas: activeCanvas,
     pushUndo,
@@ -290,8 +320,8 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
   });
   const handleEntityDrop = useCanvasEntityDrop(activeCanvas);
   const chromeActions = useMemo(
-    () => ({ onQueryMenu: nodeMenu.handleQueryMenu }),
-    [nodeMenu.handleQueryMenu],
+    () => ({ onQueryMenu: handleQueryMenu, isQueryMenuAvailable }),
+    [handleQueryMenu, isQueryMenuAvailable],
   );
 
   return (

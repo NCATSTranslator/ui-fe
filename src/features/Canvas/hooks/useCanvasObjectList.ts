@@ -24,7 +24,6 @@ interface UseCanvasObjectListOptions {
   onFindAnnotation: (annotationId: string) => void;
   onAnnotationAction?: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
   onNodeMenu: (nodeId: string, position: { x: number; y: number }) => void;
-  onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
   onCloseNodeMenus?: () => void;
 }
 
@@ -94,7 +93,6 @@ const useCanvasObjectList = ({
   onFindAnnotation,
   onAnnotationAction,
   onNodeMenu,
-  onQueryMenu,
   onCloseNodeMenus,
 }: UseCanvasObjectListOptions) => {
   const [collapsed, setCollapsed] = useState(true);
@@ -132,11 +130,6 @@ const useCanvasObjectList = ({
     setAnnotationMenuId(null);
     onNodeMenu(nodeId, position);
   }, [onNodeMenu]);
-
-  const handleQueryMenu = useCallback((nodeId: string, position: { x: number; y: number }) => {
-    setAnnotationMenuId(null);
-    onQueryMenu(nodeId, position);
-  }, [onQueryMenu]);
   const toggleCollapse = useCallback(() => setCollapsed(prev => !prev), []);
   const handleNodeClick = useCallback((nodeId: string) => onFindNode(nodeId), [onFindNode]);
   const handleAnnotationClick = useCallback(
@@ -164,7 +157,6 @@ const useCanvasObjectList = ({
     handleNodeClick,
     handleAnnotationClick,
     handleNodeMenu,
-    handleQueryMenu,
     handleMenuToggle,
     handleAnnotationMenuAction,
     handleCloseMenu,

@@ -10,12 +10,13 @@ import styles from './CanvasNodeChrome.module.scss';
 
 type CanvasNodeChromeActions = {
   onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
+  isQueryMenuAvailable: (nodeId: string) => boolean;
 };
 
 /**
  * Graph node chrome (the "+" query button) cannot receive callbacks from
  * translator-graph-view, so CanvasPane must wrap the graph in this provider.
- * Object-list chips may still pass `onQueryMenu` directly.
+ * Object-list chips read query actions from this context as well.
  */
 export const CanvasNodeChromeActionsContext = createContext<CanvasNodeChromeActions | null>(null);
 
@@ -42,18 +43,17 @@ export const NodeMenuChromeButton: FC<{ onMenu?: (event?: MouseEvent) => void }>
   </NodeChromeButton>
 );
 
-export const NodeQueryChromeButton: FC<{
-  nodeId: string;
-  onQueryMenu?: (nodeId: string, position: { x: number; y: number }) => void;
-}> = ({ nodeId, onQueryMenu }) => {
+export const NodeQueryChromeButton: FC<{ nodeId: string }> = ({ nodeId }) => {
   const chromeActions = useContext(CanvasNodeChromeActionsContext);
-  // Graph chrome relies on CanvasNodeChromeActionsContext; list chips may pass onQueryMenu.
-  const handleQueryMenu = onQueryMenu ?? chromeActions?.onQueryMenu;
+  const isAvailable = chromeActions?.isQueryMenuAvailable?.(nodeId) ?? false;
+
+  if (!isAvailable || !chromeActions?.onQueryMenu) return null;
+
   return (
     <NodeChromeButton
       label="New query"
       onClick={(event) => {
-        handleQueryMenu?.(nodeId, { x: event.clientX, y: event.clientY });
+        chromeActions.onQueryMenu(nodeId, { x: event.clientX, y: event.clientY });
       }}
     >
       <AddIcon />
@@ -87,7 +87,6 @@ interface CanvasNodeChipProps {
   onClick: () => void;
   onHover: (id: string | null) => void;
   onMenu: (event?: MouseEvent) => void;
-  onQueryMenu: (nodeId: string, position: { x: number; y: number }) => void;
 }
 
 export const CanvasNodeChip: FC<CanvasNodeChipProps> = ({
@@ -100,7 +99,6 @@ export const CanvasNodeChip: FC<CanvasNodeChipProps> = ({
   onClick,
   onHover,
   onMenu,
-  onQueryMenu,
 }) => (
   <div
     className={styles.canvasNode}
@@ -128,7 +126,7 @@ export const CanvasNodeChip: FC<CanvasNodeChipProps> = ({
       <NodeMenuChromeButton onMenu={onMenu} />
     </NodeChromeSlot>
     <NodeChromeSlot position="bottomRight">
-      <NodeQueryChromeButton nodeId={nodeId} onQueryMenu={onQueryMenu} />
+      <NodeQueryChromeButton nodeId={nodeId} />
     </NodeChromeSlot>
   </div>
 );
