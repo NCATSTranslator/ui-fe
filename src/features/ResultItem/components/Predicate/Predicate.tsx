@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useCallback, useMemo, RefObject } from 'react';
+import { FC, MouseEvent, memo, useCallback, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
@@ -71,7 +71,10 @@ const Predicate: FC<PredicateProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
   const { openMenu } = useCanvasContextMenu();
-  const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
+  const formattedEdge = useMemo(
+    () => (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge,
+    [resultSet, edgeIds, edge]
+  );
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
   const {
@@ -96,17 +99,22 @@ const Predicate: FC<PredicateProps> = ({
   const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
 
-  const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
-  const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
-  const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
-  const isAcceptedOntology = isAcceptedOntologyEdge(formattedEdge);
-
-  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
-  ? [...formattedEdge.compressed_edges, formattedEdge]
-  : [formattedEdge];
+  const { hasPubs, hasCTs, isAcceptedOntology } = useMemo(() => {
+    const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0)
+      ? [...formattedEdge.compressed_edges, formattedEdge]
+      : [formattedEdge];
+    return {
+      hasPubs: checkEdgesForPubs(edgeArrayToCheck),
+      hasCTs: checkEdgesForClinicalTrials(edgeArrayToCheck),
+      isAcceptedOntology: isAcceptedOntologyEdge(formattedEdge),
+    };
+  }, [formattedEdge]);
 
   const tooltipEdgeEntries = useMemo(() => {
     if (!resultSet) return [];
+    const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
+      ? [...formattedEdge.compressed_edges, formattedEdge]
+      : [formattedEdge];
     return edgesToTooltipEntries(resultSet, edgesToDisplay.filter(Boolean) as ResultEdge[]);
   }, [resultSet, formattedEdge]);
 
@@ -209,4 +217,4 @@ const Predicate: FC<PredicateProps> = ({
   )
 }
 
-export default Predicate;
+export default memo(Predicate);
