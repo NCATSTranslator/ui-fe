@@ -5,8 +5,6 @@ import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import type { SaveStatus } from '@/features/Canvas/types/canvas';
 import UndoIcon from '@/assets/icons/directional/Undo & Redo/Undo.svg?react';
 import RedoIcon from '@/assets/icons/directional/Undo & Redo/Redo.svg?react';
-import ZoomInIcon from '@/assets/icons/buttons/ZoomIn.svg?react';
-import ZoomOutIcon from '@/assets/icons/buttons/ZoomOut.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import ExpandIcon from '@/assets/icons/buttons/Expand.svg?react';
@@ -24,9 +22,6 @@ interface CanvasToolbarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  zoomLevel?: number;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   saveStatus?: SaveStatus;
@@ -42,9 +37,6 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
   onRedo,
   canUndo,
   canRedo,
-  zoomLevel,
-  onZoomIn,
-  onZoomOut,
   onAddObject,
   onAddAnnotation,
   saveStatus,
@@ -74,7 +66,6 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
     if (e.key === 'Escape') { setEditValue(title); setEditing(false); }
   }, [commitRename, title]);
 
-  const displayZoom = (zoomLevel !== null && zoomLevel !== undefined) ? `${Math.round(zoomLevel * 100)}%` : '100%';
   const maximizeLabel = paneMaximized ? 'Restore canvas' : 'Maximize canvas';
 
   return (
@@ -132,30 +123,6 @@ const CanvasToolbar: FC<CanvasToolbarProps> = ({
       <div className={styles.center}>
         <AddMenu onAddObject={onAddObject} onAddAnnotation={onAddAnnotation} />
         <CanvasSettingsMenu layout={layout} onLayoutChange={onLayoutChange} />
-        <div className={styles.divider} />
-        <div className={styles.zoomGroup}>
-          <Button
-            className={styles.toolButton}
-            handleClick={onZoomIn}
-            disabled={!onZoomIn}
-            ariaLabel="Zoom in"
-            title="Zoom in"
-            iconLeft={<ZoomInIcon />}
-            iconOnly
-            variant="secondary"
-          />
-          <span className={styles.zoomLevel}>{displayZoom}</span>
-          <Button
-            className={styles.toolButton}
-            handleClick={onZoomOut}
-            disabled={!onZoomOut}
-            ariaLabel="Zoom out"
-            title="Zoom out"
-            iconLeft={<ZoomOutIcon />}
-            iconOnly
-            variant="secondary"
-          />
-        </div>
         <div className={styles.divider} />
         <div className={styles.undoRedoGroup}>
           <Button

@@ -86,21 +86,6 @@
   width: 200px;
 }
 
-.zoomGroup {
-  display: flex;
-  align-items: center;
-  gap: $xxs;
-}
-
-.zoomLevel {
-  font-size: $captionSize;
-  color: $black;
-  font-weight: 800;
-  min-width: 35px;
-  text-align: center;
-  user-select: none;
-}
-
 .undoRedoGroup {
   display: flex;
   align-items: center;
