@@ -15,6 +15,7 @@ import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?rea
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import BlankIcon from '@/assets/icons/blank.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
+import { toPrefixedBiolinkCategory } from '@/features/Query/utils/biolinkCategories';
 
 const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   'biolink:ChemicalEntity': Chemical,
@@ -48,7 +49,7 @@ const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
 
 export const getNodeIconComponent = (category: string): FC<SVGProps<SVGSVGElement>> | null => {
   if (!category) return null;
-  const prefixed = category.startsWith('biolink:') ? category : `biolink:${category}`;
+  const prefixed = toPrefixedBiolinkCategory(category);
   return NODE_ICON_MAP[prefixed] ?? NODE_ICON_MAP[category] ?? null;
 };
 
