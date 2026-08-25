@@ -461,6 +461,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     queryNodeDescription: nodeDescription,
     queryType: presetTypeObject,
     resultsComplete,
+    resultsLoading: isLoading,
     scoreWeights,
     setExpandSharedResult,
     setShareModalOpen,
@@ -479,7 +480,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     effectiveNodeId, effectiveNodeLabel, nodeDescription,
-    presetTypeObject, resultsComplete, scoreWeights,
+    presetTypeObject, resultsComplete, isLoading, scoreWeights,
     showHiddenPaths, pathfinderIdOne, pathfinderLabelOne,
     pathfinderIdTwo, pathfinderLabelTwo, constraintText,
   ]);

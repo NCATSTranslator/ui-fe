@@ -2,7 +2,6 @@ import { FC, useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
-import { getQueryStatusById } from '@/features/ResultList/slices/queryStatusSlice';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
 import { getPathCount } from '@/features/Core/utils/resultHelpers';
@@ -37,7 +36,6 @@ const ResultDetailView: FC = () => {
   const decodedParams = useDecodedParams();
   const queryId = getDataFromQueryVar("q", decodedParams);
   const resultSet = useSelector(getResultSetById(queryId));
-  const queryStatus = useSelector(getQueryStatusById(queryId));
 
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
@@ -59,6 +57,7 @@ const ResultDetailView: FC = () => {
     queryNodeID,
     queryNodeLabel,
     queryType,
+    resultsLoading,
     setShowHiddenPaths,
     showHiddenPaths,
     shouldUpdateResultsAfterBookmark,
@@ -135,8 +134,9 @@ const ResultDetailView: FC = () => {
     return <ViewNotFound entity="query" id="missing" />;
   }
 
-  // Loading state
-  if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
+  // The result set can be cached in Redux while the list refetches, so this reads
+  // the list's own loading state to stay in sync with `visibleResultIds` below.
+  if (resultsLoading) {
     return <ResultDetailViewSkeleton />;
   }
 

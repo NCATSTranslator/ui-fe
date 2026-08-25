@@ -29,6 +29,8 @@ export interface ResultListContextValue {
   queryNodeDescription: string | null;
   queryType: QueryType | null;
   resultsComplete: boolean;
+  /** True until the list has produced its first batch of results, which is when `visibleResultIds` becomes meaningful. */
+  resultsLoading: boolean;
   scoreWeights: ScoreWeights;
   setExpandSharedResult: (state: boolean) => void;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
