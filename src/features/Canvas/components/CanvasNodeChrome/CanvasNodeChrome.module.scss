@@ -1,0 +1,120 @@
+@use "@/assets/styles/variables" as *;
+
+.chromeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $m;
+  height: $m;
+  padding: 0;
+  border: 1px solid $midGray;
+  border-radius: 50%;
+  background-color: $white;
+  color: $darkGray;
+  cursor: pointer;
+
+  &:hover {
+    color: $black;
+    border-color: $placeholderGray;
+    background-color: $hoverGray;
+  }
+
+  svg {
+    width: $m;
+    height: $m;
+  }
+}
+
+.chrome {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.chromeTopLeft {
+  top: -8px;
+  left: -8px;
+}
+
+.chromeBottomRight {
+  right: -8px;
+  bottom: -8px;
+}
+
+.canvasNode {
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: 4px 8px;
+  background-color: #DCDCE6;
+  color: $black;
+  border-radius: 4px;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease;
+
+  &:hover,
+  &:focus-within {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    .chrome {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}
+
+.canvasNodeBody {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.canvasNodeIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  svg {
+    width: $m;
+    height: $m;
+  }
+}
+
+.canvasNodeLabel {
+  min-width: 0;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: $black;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  span,
+  mark {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  mark.highlight {
+    padding: 0;
+  }
+}

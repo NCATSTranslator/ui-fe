@@ -5,6 +5,7 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
 .nodeInformationView {
   background-color: $white;
   max-width: $maxWidth;
+  width: 100%;
   margin: 0 auto;
   padding: 0 $l;
   .top, .tabs {
@@ -71,5 +72,15 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
     display: flex;
     gap: $xxs;
     align-items: center;
+  }
+  .nodeName {
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+  }
+  .nodeTitle {
+    font-size: $h6Size;
+    color: $black;
+    margin: 0;
   }
 }

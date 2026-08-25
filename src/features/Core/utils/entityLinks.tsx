@@ -15,6 +15,7 @@ import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?rea
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import BlankIcon from '@/assets/icons/blank.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
+import { toPrefixedBiolinkCategory } from '@/features/Query/utils/biolinkCategories';
 
 const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   'biolink:ChemicalEntity': Chemical,
@@ -46,9 +47,15 @@ const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   'biolink:GrossAnatomicalStructure': AnatomicalEntity,
 };
 
-export const getNodeIcon = (category: string): ReactNode => {
-  const IconComponent = NODE_ICON_MAP[category];
-  return IconComponent ? <IconComponent /> : <BlankIcon />;
+export const getNodeIconComponent = (category: string): FC<SVGProps<SVGSVGElement>> | null => {
+  if (!category) return null;
+  const prefixed = toPrefixedBiolinkCategory(category);
+  return NODE_ICON_MAP[prefixed] ?? NODE_ICON_MAP[category] ?? null;
+};
+
+export const getNodeIcon = (category: string, fallback: ReactNode = <BlankIcon />): ReactNode => {
+  const IconComponent = getNodeIconComponent(category);
+  return IconComponent ? <IconComponent /> : fallback;
 };
 
 interface EntityUrlConfig {

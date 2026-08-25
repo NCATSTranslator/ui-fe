@@ -3,7 +3,7 @@ import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Preferences } from '@/features/UserAuth/types/user';
-import { GraphHoverTarget } from '@/features/ResultGraphView/types/graphTypes';
+import { GraphHoverTarget, HoverAnchor } from '@/features/ResultGraphView/types/graphTypes';
 
 /**
  * Converts a result to a graph data object.
@@ -18,34 +18,14 @@ export const resultToGraphData = (
   const distributeEntitiesInPath = (
     pathID: string,
     pathsArray: typeof summary.paths,
-    edgesArray: typeof summary.edges,
     nodeCollection: Set<string>,
-    edgeCollection: Set<string>,
-    supportStack: string[]
+    edgeCollection: Set<string>
   ) => {
     const path = pathsArray[pathID];
     if (path) {
-      supportStack.push(pathID);
       path.subgraph.forEach((elemID, i) => {
         if (isNodeIndex(i)) nodeCollection.add(elemID);
-        else {
-          edgeCollection.add(elemID);
-          const edge = edgesArray[elemID];
-          if (edge.inferred) {
-            const validSupport = edge.support.filter(p => {
-              const pid = typeof p === "string" ? p : p.id;
-              return !!pid && !supportStack.includes(pid);
-            });
-            for (const supportPathID of validSupport) {
-              const id = typeof supportPathID === "string" ? supportPathID : supportPathID.id;
-              if(!id) {
-                console.warn('unable to add support path to graph, id is missing.');
-                continue;
-              }
-              distributeEntitiesInPath(id, pathsArray, edgesArray, nodeCollection, edgeCollection, supportStack);
-            }
-          }
-        }
+        else edgeCollection.add(elemID);
       });
     } else {
       console.warn("Missing pathID:", pathID);
@@ -57,7 +37,7 @@ export const resultToGraphData = (
   for (const pathID of result.paths) {
     const pid = typeof pathID === "string" ? pathID : pathID.id;
     if(!!pid)
-      distributeEntitiesInPath(pid, summary.paths, summary.edges, ns, es, []);
+      distributeEntitiesInPath(pid, summary.paths, ns, es);
   }
 
   const nodes: Record<string, GraphNodeType> = {};
@@ -80,7 +60,6 @@ export const resultToGraphData = (
       subject: e.subject,
       object: e.object,
       predicate,
-      inferred: e.inferred,
     };
   }
 
@@ -131,6 +110,19 @@ export const sameTarget = (a: GraphHoverTarget, b: GraphHoverTarget): boolean =>
   return a.kind === b.kind && a.id === b.id;
 };
 
+export const toGraphHoverTarget = (
+  kind: 'node' | 'edge',
+  id: string,
+  entity: ResultNode | ResultEdge,
+  anchor: HoverAnchor | undefined,
+): GraphHoverTarget => {
+  if (!anchor) return null;
+  if (kind === 'node') {
+    return { kind: 'node', id, node: entity as ResultNode, anchor };
+  }
+  return { kind: 'edge', id, edge: entity as ResultEdge, anchor };
+};
+
 /**
  * Converts a node to a hover target.
  * @param node - The node to convert.
@@ -146,7 +138,7 @@ export const resolveNodeTarget = (
   if (!node || !resultSet) return null;
   const resultNode = resultSet.data.nodes[node.id];
   if (!resultNode) return null;
-  return { kind: 'node', id: node.id, node: resultNode, anchor: geometry?.anchor };
+  return toGraphHoverTarget('node', node.id, resultNode, geometry?.anchor);
 };
 
 /**
@@ -164,5 +156,5 @@ export const resolveEdgeTarget = (
   if (!edge || !resultSet) return null;
   const resultEdge = resultSet.data.edges[edge.id];
   if (!resultEdge) return null;
-  return { kind: 'edge', id: edge.id, edge: resultEdge, anchor: geometry?.anchor };
+  return toGraphHoverTarget('edge', edge.id, resultEdge, geometry?.anchor);
 };

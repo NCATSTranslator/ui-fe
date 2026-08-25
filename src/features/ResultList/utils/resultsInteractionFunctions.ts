@@ -15,12 +15,12 @@ import { FILTERING_CONSTANTS, makeFilter, applyPredicateFilterDisplayNames } fro
  *
  * This function checks the `Result` object for a match with the provided search term by:
  * - Comparing the term against the `drug_name` and the primary description of the subject node
- * - Recursively traversing all paths and their support subpaths
+ * - Traversing each of the result's paths
  * - Matching the term against node names, curies, descriptions, and edge predicates
  *
  * During traversal, the function also mutates the corresponding `PathRank` objects to influence relevance scoring:
- * - Decreases rank when a direct match is found
- * - Increases rank when a supporting subpath contains a match
+ * - Decreases rank for each matching element on a path
+ * - Sets an excluding rank when the term is an exclusion and the path matches
  *
  * @param resultSet - The full ResultSet containing all nodes, edges, and paths
  * @param result - The individual result to check for a string match
@@ -401,9 +401,9 @@ export const injectDynamicFilters = (
   for (const tagEntry of tagsAdded) {
     const tag = tagEntry.tag;
     const ridx = tagEntry.index;
-    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
-    modifiedFormattedResults[ridx].tags[tag.id] = null;
-    modifiedOriginalResults[ridx].tags[tag.id] = null;
+    modifiedSummary.data.tags[tag.id] = tag.description;
+    modifiedFormattedResults[ridx].tags[tag.id] = tag;
+    modifiedOriginalResults[ridx].tags[tag.id] = tag;
   }
   return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }

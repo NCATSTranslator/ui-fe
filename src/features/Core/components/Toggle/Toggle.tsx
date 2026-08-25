@@ -7,9 +7,10 @@ type ToggleProps = {
   setActive?: (newActive: boolean) => void;
   labelOne?: string;
   labelTwo?: string;
+  ariaLabel?: string;
 }
 
-const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, labelOne, labelTwo}) => {
+const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, labelOne, labelTwo, ariaLabel}) => {
   const toggleId = useId();
 
   const handleToggle = () => {
@@ -23,6 +24,7 @@ const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, lab
         id={toggleId} 
         checked={active}
         onChange={handleToggle}
+        aria-label={ariaLabel}
       />
       {labelOne && <span className={`${styles.label} ${styles.labelOne} ${active ? styles.active : styles.inactive}`}>{labelOne}</span>}
       <label 

@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 import ResultBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/ResultBreadcrumbLabel';
 import NodeBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/NodeBreadcrumbLabel';
+import CanvasEvidenceBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/CanvasEvidenceBreadcrumbLabel';
 import PathBreadcrumbLabel from '@/features/Navigation/components/BreadcrumbLabels/PathBreadcrumbLabel';
 import PathRedirect from '@/features/Navigation/components/PathRedirect/PathRedirect';
 import { resultsLoader } from '@/features/Navigation/utils/navigationUtils';
@@ -43,6 +44,7 @@ const ExploringRelationships = lazy(() => import('@/pageRoutes/Articles/Explorin
 const ReviewIdentify = lazy(() => import('@/pageRoutes/Articles/ReviewIdentify').then(m => ({ default: m.ReviewIdentify })));
 const WorkspaceHelp = lazy(() => import('@/pageRoutes/Articles/Workspace').then(m => ({ default: m.WorkspaceHelp })));
 const UserPreferences = lazy(() => import('@/pageRoutes/Articles/UserPreferences').then(m => ({ default: m.UserPreferences })));
+const Canvases = lazy(() => import('@/pageRoutes/Canvases/Canvases'));
 const NewQuery = lazy(() => import('@/pageRoutes/NewQuery/NewQuery'));
 const NodeInformationView = lazy(() => import('@/features/NodeInformationView/components/NodeInformationView/NodeInformationView'));
 const EvidenceView = lazy(() => import('@/features/Evidence/components/EvidenceView/EvidenceView'));
@@ -218,7 +220,7 @@ const routes = [
   {
     path: "evidence/:edgeId",
     element: <Suspense fallback={<LoadingWrapper />}><EvidenceView /></Suspense>,
-    handle: { breadcrumb: 'Canvas Evidence' },
+    handle: { breadcrumb: CanvasEvidenceBreadcrumbLabel },
   },
   {
     // old search history page, redirect to query history
@@ -242,8 +244,17 @@ const routes = [
     element: <Page title="Query History"><Suspense fallback={<LoadingWrapper />}><Queries /></Suspense></Page>
   },
   {
+    path: "canvases",
+    element: <Page title="Canvases"><Suspense fallback={<LoadingWrapper />}><Canvases /></Suspense></Page>
+  },
+  {
     path: "new-query",
     element: <Page title="New Query"><Suspense fallback={<LoadingWrapper />}><NewQuery /></Suspense></Page>
+  },
+  {
+    path: "node/:nodeId",
+    element: <Suspense fallback={<LoadingWrapper />}><NodeInformationView /></Suspense>,
+    handle: { breadcrumb: NodeBreadcrumbLabel },
   },
   {
     path: "*",

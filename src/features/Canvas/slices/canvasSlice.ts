@@ -1,0 +1,220 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@/redux/store';
+import { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
+
+export interface CanvasState {
+  canvases: Canvas[];
+  activeCanvasId: number | null;
+  paneOpen: boolean;
+  paneMaximized: boolean;
+}
+
+const initialState: CanvasState = {
+  canvases: [],
+  activeCanvasId: null,
+  paneOpen: false,
+  paneMaximized: false,
+};
+
+const resetPaneState = (state: CanvasState) => {
+  state.paneOpen = false;
+  state.paneMaximized = false;
+};
+
+const getNextCanvasLabel = (canvases: Canvas[]) => {
+  const existing = canvases
+    .map(c => c.label)
+    .filter(t => /^New Canvas \d+$/.test(t))
+    .map(t => parseInt(t.replace('New Canvas ', ''), 10));
+  const max = existing.length > 0 ? Math.max(...existing) : 0;
+  return `New Canvas ${max + 1}`;
+};
+
+export const canvasSlice = createSlice({
+  name: 'canvas',
+  initialState,
+  reducers: {
+    addCanvas: (state, action: PayloadAction<Canvas>) => {
+      state.canvases.push(action.payload);
+      state.activeCanvasId = action.payload.id;
+      state.paneOpen = true;
+    },
+    deleteCanvas: (state, action: PayloadAction<number>) => {
+      state.canvases = state.canvases.filter(c => c.id !== action.payload);
+      if (state.activeCanvasId === action.payload) {
+        state.activeCanvasId = null;
+        resetPaneState(state);
+      }
+    },
+    renameCanvas: (state, action: PayloadAction<{ id: number; label: string }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.id);
+      if (canvas) {
+        canvas.label = action.payload.label;
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    setActiveCanvas: (state, action: PayloadAction<number>) => {
+      if (state.canvases.some(c => c.id === action.payload)) {
+        state.activeCanvasId = action.payload;
+        state.paneOpen = true;
+      }
+    },
+    togglePane: (state) => {
+      state.paneOpen = !state.paneOpen;
+      if (!state.paneOpen) state.paneMaximized = false;
+    },
+    openPane: (state) => {
+      state.paneOpen = true;
+    },
+    closePane: (state) => {
+      resetPaneState(state);
+      state.activeCanvasId = null;
+    },
+    toggleMaximizePane: (state) => {
+      state.paneOpen = true;
+      state.paneMaximized = !state.paneMaximized;
+    },
+    addCanvasNode: (state, action: PayloadAction<{ canvasId: number; node: CanvasNode }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        const { node } = action.payload;
+        canvas.nodes[node.id] = node;
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    addCanvasEdge: (state, action: PayloadAction<{ canvasId: number; edge: CanvasEdge }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        const { edge } = action.payload;
+        if (!canvas.edges[edge.id]) {
+          canvas.edges[edge.id] = edge;
+          canvas.timeUpdated = new Date().toISOString();
+        }
+      }
+    },
+    removeCanvasNode: (state, action: PayloadAction<{ canvasId: number; nodeId: string }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        delete canvas.nodes[action.payload.nodeId];
+        for (const [edgeId, edge] of Object.entries(canvas.edges)) {
+          if (edge.subject === action.payload.nodeId || edge.object === action.payload.nodeId) {
+            delete canvas.edges[edgeId];
+          }
+        }
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    removeCanvasEdge: (state, action: PayloadAction<{ canvasId: number; edgeId: string }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        delete canvas.edges[action.payload.edgeId];
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    replaceCanvas: (state, action: PayloadAction<Canvas>) => {
+      const index = state.canvases.findIndex(c => c.id === action.payload.id);
+      if (index !== -1) {
+        state.canvases[index] = action.payload;
+      }
+    },
+    setCanvasAnnotations: (state, action: PayloadAction<{ canvasId: number; annotations: Canvas['annotations'] }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        canvas.annotations = action.payload.annotations;
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    updateCanvasNodePositions: (
+      state,
+      action: PayloadAction<{ canvasId: number; positions: Array<{ nodeId: string; x: number; y: number }> }>,
+    ) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (!canvas) return;
+      for (const { nodeId, x, y } of action.payload.positions) {
+        const node = canvas.nodes[nodeId];
+        if (node) {
+          node.x = x;
+          node.y = y;
+        }
+      }
+      canvas.timeUpdated = new Date().toISOString();
+    },
+    updateCanvasLayout: (state, action: PayloadAction<{ canvasId: number; layout: Canvas['layout'] }>) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) {
+        canvas.layout = action.payload.layout;
+        canvas.timeUpdated = new Date().toISOString();
+      }
+    },
+    restoreCanvas: (state, action: PayloadAction<Canvas>) => {
+      if (!state.canvases.some(c => c.id === action.payload.id)) {
+        state.canvases.push(action.payload);
+      }
+    },
+    setCanvases: (state, action: PayloadAction<Canvas[]>) => {
+      const existingById = new Map(state.canvases.map(c => [c.id, c]));
+      const incomingIds = new Set(action.payload.map(c => c.id));
+      const canvases = action.payload.map(canvas => {
+        const existing = existingById.get(canvas.id);
+        if (
+          existing &&
+          (existing.graphLoaded || Object.keys(existing.nodes).length > 0)
+        ) {
+          return {
+            ...canvas,
+            nodes: existing.nodes,
+            edges: existing.edges,
+            tags: existing.tags,
+            annotations: existing.annotations,
+            graphLoaded: true,
+          };
+        }
+        return canvas;
+      });
+      for (const existing of state.canvases) {
+        if (incomingIds.has(existing.id)) continue;
+        if (existing.id === state.activeCanvasId || existing.graphLoaded) {
+          canvases.push(existing);
+        }
+      }
+      state.canvases = canvases;
+      if (state.activeCanvasId && !canvases.some(c => c.id === state.activeCanvasId)) {
+        state.activeCanvasId = canvases.length > 0 ? canvases[0].id : null;
+        if (!state.activeCanvasId) resetPaneState(state);
+      }
+    },
+  },
+});
+
+export const {
+  addCanvas,
+  deleteCanvas,
+  renameCanvas,
+  setActiveCanvas,
+  togglePane,
+  openPane,
+  closePane,
+  toggleMaximizePane,
+  addCanvasNode,
+  addCanvasEdge,
+  removeCanvasNode,
+  removeCanvasEdge,
+  replaceCanvas,
+  restoreCanvas,
+  setCanvases,
+  setCanvasAnnotations,
+  updateCanvasNodePositions,
+  updateCanvasLayout,
+} = canvasSlice.actions;
+
+export { getNextCanvasLabel };
+
+// Selectors
+export const selectCanvases = (state: RootState) => state.canvas.canvases;
+export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCanvasId;
+export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
+export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
+export const selectActiveCanvas = (state: RootState) =>
+  state.canvas.canvases.find(c => c.id === state.canvas.activeCanvasId) ?? null;
+
+export default canvasSlice.reducer;

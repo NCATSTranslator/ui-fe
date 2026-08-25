@@ -7,7 +7,12 @@ import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWor
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { findPublicationOnEdge } from "@/features/Evidence/utils/utilities";
 
-const buildSupportSnippet = (resultSet: ResultSet, selectedEdge: ResultEdge | null, support: PublicationSupport): ReactNode => {
+const buildSupportSnippet = (
+  resultSet: ResultSet | null,
+  selectedEdge: ResultEdge | null,
+  support: PublicationSupport,
+): ReactNode => {
+  if (!resultSet) return support.text;
   const objectNode = getNodeById(resultSet, selectedEdge?.object);
   const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
   return (
@@ -23,7 +28,7 @@ const buildSupportSnippet = (resultSet: ResultSet, selectedEdge: ResultEdge | nu
 
 const PublicationRow: FC<{
   pub: PublicationObject;
-  resultSet: ResultSet;
+  resultSet: ResultSet | null;
   selectedEdge: ResultEdge | null;
 }> = ({ pub, resultSet, selectedEdge }) => {
   const getSupportTextOrSnippet = useCallback((): ReactNode | string => {

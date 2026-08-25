@@ -1,12 +1,12 @@
 import { FC } from 'react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import styles from './ResultDetailViewSkeleton.module.scss';
-import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
 const ResultDetailViewSkeleton: FC = () => {
   return (
     <div className={styles.container}>
-      <ResultListTopBar/>
+      <ViewTopBar/>
       <div className={styles.tableHeader}>
         <div />
         <div />

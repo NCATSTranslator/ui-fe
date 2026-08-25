@@ -43,7 +43,7 @@ Foundation layer used across the app. Includes reusable components (Accordion, A
 
 #### **Query** — Query Interface
 
-Query submission and input: CombinedQueryInterface (preset and Pathfinder tabs), AutocompleteInput, ExampleQueryList, QueryBar, QueryPathfinder, and query type selection components.
+Query submission and input: CombinedQueryInterface (Smart Query, Pathfinder, and Lookup tabs), AutocompleteInput, ExampleQueryList, QueryBar, QueryPathfinder, and query type selection components. Home-page deep links accept URL params for tab, node id/label, and biolink category (`nc`); see `src/features/Query/README.md`.
 
 #### **QueryList** — Query List Display
 

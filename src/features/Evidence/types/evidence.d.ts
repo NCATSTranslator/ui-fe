@@ -75,7 +75,7 @@ export type TrialObject = {
   phase: number;
   size: number;
   start_date: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  status: string;
   title?: string;
   type?: 'enrolled' | 'anticipated';
   url: string;

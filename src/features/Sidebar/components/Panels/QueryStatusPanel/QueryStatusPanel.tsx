@@ -23,14 +23,14 @@ const QueryStatusPanel: FC<QueryStatusPanelProps> = ({
   const percentage = arsStatus ? getQueryStatusPercentage(arsStatus) : 5;
   const isComplete = arsStatus?.status === 'complete';
 
-  const { label: statusLabel, status: statusIndicatorStatus } = useMemo(() => getQueryStatusIndicatorStatus(
+  const { label: statusLabel, status: statusIndicatorStatus } = useMemo(() => getQueryStatusIndicatorStatus({
     arsStatus,
-    data.isFetchingARAStatus || false,
-    data.hasFreshResults || false,
-    data.isFetchingResults || false,
+    isFetchingARAStatus: data.isFetchingARAStatus || false,
+    hasFreshResults: data.hasFreshResults || false,
+    isFetchingResults: data.isFetchingResults || false,
     resultStatus,
-    resultCount
-  ), [arsStatus, data.isFetchingARAStatus, data.hasFreshResults, data.isFetchingResults, resultStatus, resultCount]);
+    resultCount,
+  }), [arsStatus, data.isFetchingARAStatus, data.hasFreshResults, data.isFetchingResults, resultStatus, resultCount]);
 
   const hideLoadingBar = useMemo(() => {
     return isComplete || statusLabel === 'All Results Shown' || statusLabel === 'No Results' || statusLabel === 'Error';

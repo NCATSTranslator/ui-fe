@@ -72,6 +72,27 @@
     display: flex;
     gap: $xxxs;
   }
+  .featureToggle {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $s;
+    padding: $s;
+    .featureToggleText {
+      flex: 1;
+      min-width: 0;
+      .prefLabel {
+        margin-bottom: $xxxs;
+      }
+      .helpText {
+        margin: 0;
+      }
+    }
+    .canvasToggle {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+  }
   .prefValueButton {
     width: 100%;
     background-color: $white;

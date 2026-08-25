@@ -1,4 +1,4 @@
-import { FC, RefObject } from 'react';
+import { FC, RefObject, useMemo } from 'react';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
@@ -22,18 +22,16 @@ const PathViewSection: FC<PathViewSectionProps> = ({
   selectedEdge,
   selectedEdgeRef,
 }) => {
+  const pathArray = useMemo(() => [path], [path]);
+
   return (
     <div className={styles.pathViewContainer}>
       <PathView
-        pathArray={[path]}
+        pathArray={pathArray}
         handleEdgeSpecificEvidence={handleEdgeClick}
-        activeEntityFilters={[]}
-        pathFilterState={{}}
         isEven={false}
         active={isOpen}
-        activeFilters={[]}
         pk={pk}
-        setShowHiddenPaths={() => {}}
         showHiddenPaths={true}
         inModal={true}
         compressedSubgraph={compressedSubgraph}

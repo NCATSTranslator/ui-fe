@@ -1,4 +1,4 @@
-import { HoverTarget, ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
+import { ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo, RefObject } from "react";
 import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
@@ -8,7 +8,7 @@ import chunk from "lodash/chunk";
 import isEqual from "lodash/isEqual";
 import { useQuery } from "@tanstack/react-query";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
-  getFormattedEdgeLabel, flattenPublicationObject, flattenTrialObject } from "@/features/Evidence/utils/utilities";
+  flattenPublicationObject, flattenTrialObject, formatEvidenceEdgeLabel } from "@/features/Evidence/utils/utilities";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
 import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
@@ -18,38 +18,6 @@ const QUERY_AMOUNT = 200;
 const PUBMED_API_URL = 'https://docmetadata.transltr.io/publications';
 const REQUEST_ID = '26394fad-bfd9-4e32-bb90-ef9d5044f593';
 export const DEFAULT_ITEMS_PER_PAGE = 5;
-
-/**
- * Custom hook to track the index of hovered compressed edges in the evidence modal 
- *
- * @param {(target: HoverTarget) => void} setHoveredItem - Function to set the currently hovered item.
- * @returns {{hoveredIndex: number | null, getHoverHandlers: Function, resetHoveredIndex: Function}} Returns an object containing the hovered index, hover handlers, and reset function.
- */
-export const useHoverPathObject = (setHoveredItem: (target: HoverTarget) => void) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const getHoverHandlers = useCallback(
-    (isEdge: boolean, id: string, index?: number) => ({
-      onMouseEnter: () => {
-        const type = isEdge ? 'edge' : 'node';
-        setHoveredItem({ id: id, type: type});
-        if(typeof index === 'number')
-          setHoveredIndex(index);
-      },
-      onMouseLeave: () => {
-        setHoveredItem(null);
-        setHoveredIndex(null)
-      },
-    }),
-    [setHoveredItem]
-  );
-
-  return {
-    hoveredIndex,
-    getHoverHandlers,
-    resetHoveredIndex: () => setHoveredIndex(null),
-  };
-};
 
 interface FetchState {
   isFetching: boolean;
@@ -329,28 +297,23 @@ export const usePubTableState = (): [TableState, (updates: Partial<TableState>) 
   return [state, updateState];
 };
 
-interface UseEvidenceDataProps {
-  setEdgeLabel: (label: string) => void;
-}
-
 interface EvidenceData {
   publications: PublicationObject[];
   sources: Provenance[];
   clinicalTrials: TrialObject[];
   miscEvidence: PublicationObject[];
+  edgeLabel: string | null;
 }
 
 /**
  * Custom hook to manage evidence data including publications, sources, clinical trials, and miscellaneous evidence.
- *
- * @param {UseEvidenceDataProps} props - Object containing setEdgeLabel function.
- * @returns {EvidenceData & {handleSelectedEdge: Function, setPublications: Function}} Returns evidence data and utility functions.
  */
-export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
+export const useEvidenceData = () => {
   const [publications, setPublications] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
   const [clinicalTrials, setClinicalTrials] = useState<TrialObject[]>([]);
   const [miscEvidence, setMiscEvidence] = useState<PublicationObject[]>([]);
+  const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
 
   /**
    * Processes evidence data by filtering and sorting publications, trials, and sources.
@@ -387,13 +350,17 @@ export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
    * @param {ResultEdge} selEdge - Selected edge object.
    * @returns {void} - This function does not return a value but updates the state directly.
    */
-  const handleSelectedEdge = useCallback((resultSet: ResultSet, selEdge: ResultEdge) => {
+  const handleSelectedEdge = useCallback((
+    resultSet: ResultSet | null,
+    selEdge: ResultEdge,
+    nodeNameLookup: Record<string, string> = {},
+  ) => {
     if (!selEdge) return;
 
     const filteredEvidence = {
       publications: new Set<PublicationObject>(),
       sources: new Set<Provenance>(),
-      trials: new Set<TrialObject>()
+      trials: new Set<TrialObject>(),
     };
 
     filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications, selEdge));
@@ -401,10 +368,8 @@ export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
     filteredEvidence.sources = new Set(getEdgeProvenance(resultSet, selEdge));
 
     processEvidence(filteredEvidence);
-    
-    const formatted = getFormattedEdgeLabel(resultSet, selEdge).replaceAll("|", " ");
-    setEdgeLabel(formatted);
-  }, [processEvidence, setEdgeLabel]);
+    setEdgeLabel(formatEvidenceEdgeLabel(selEdge, resultSet, nodeNameLookup));
+  }, [processEvidence]);
 
   // Memoized evidence data for performance
   const evidenceData = useMemo((): EvidenceData => ({
@@ -412,7 +377,8 @@ export const useEvidenceData = ({ setEdgeLabel }: UseEvidenceDataProps) => {
     sources,
     clinicalTrials,
     miscEvidence,
-  }), [publications, sources, clinicalTrials, miscEvidence]);
+    edgeLabel,
+  }), [publications, sources, clinicalTrials, miscEvidence, edgeLabel]);
 
   return {
     ...evidenceData,
@@ -425,8 +391,9 @@ interface UseEdgeInitializationProps {
   edgeId: string | undefined;
   resolvedEdge: ResultEdge | null;
   resultSet: ResultSet | null | undefined;
+  isCanvasOnlyMode?: boolean;
   setSelectedEdge: (edge: ResultEdge) => void;
-  handleEvidenceData: (resultSet: ResultSet, edge: ResultEdge) => void;
+  handleEvidenceData: (resultSet: ResultSet | null, edge: ResultEdge, nodeNameLookup?: Record<string, string>) => void;
   markEdgeSeen: (id: string) => void;
 }
 
@@ -445,6 +412,7 @@ export const useEdgeInitialization = ({
   edgeId,
   resolvedEdge,
   resultSet,
+  isCanvasOnlyMode = false,
   setSelectedEdge,
   handleEvidenceData,
   markEdgeSeen,
@@ -452,11 +420,12 @@ export const useEdgeInitialization = ({
   const lastInitEdge = useRef<ResultEdge | null>(null);
 
   useEffect(() => {
-    if ((resolvedEdge && resultSet) && !isEqual(lastInitEdge.current, resolvedEdge)) {
+    const canInit = resolvedEdge && (resultSet || isCanvasOnlyMode);
+    if (canInit && !isEqual(lastInitEdge.current, resolvedEdge)) {
       setSelectedEdge(resolvedEdge);
-      handleEvidenceData(resultSet, resolvedEdge);
+      handleEvidenceData(resultSet ?? null, resolvedEdge);
       markEdgeSeen(resolvedEdge.id);
       lastInitEdge.current = resolvedEdge;
     }
-  }, [edgeId, resolvedEdge, resultSet, setSelectedEdge, handleEvidenceData, markEdgeSeen]);
+  }, [edgeId, resolvedEdge, resultSet, isCanvasOnlyMode, setSelectedEdge, handleEvidenceData, markEdgeSeen]);
 };

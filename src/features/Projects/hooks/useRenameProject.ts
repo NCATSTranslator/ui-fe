@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, FormEvent, useMemo, RefObject } from "react";
 import { Project } from "@/features/Projects/types/projects";
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers } from "@/features/Projects/hooks/useEditProjectHandlers";
 import { getBlankProjectTitle } from "@/features/Projects/utils/utilities";
 
 interface UseRenameProjectOptions {
@@ -110,7 +110,7 @@ export const useRenameProject = ({
     // If we're using the default blank title, don't show an update toast
     const noToast = finalTitle === defaultBlankTitle;
     
-    handleUpdateProject(project.id, finalTitle, project.data.pks || [], undefined, undefined, noToast);
+    handleUpdateProject(project.id, finalTitle, project.data.pks || [], { noToast });
     onRename?.(project);
     setIsRenaming(false);
   }, [localTitle, defaultBlankTitle, project, handleUpdateProject, onRename]);

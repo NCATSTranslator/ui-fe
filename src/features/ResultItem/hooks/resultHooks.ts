@@ -1,9 +1,8 @@
-import { createContext, Dispatch, SetStateAction, useContext, useMemo } from "react";
-import { SupportPathDepthContext, ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
-import { ExpandedPredicateContext } from "@/features/ResultItem/components/PathContainer/PathContainer";
-import { SupportPathKeyContext } from "@/features/ResultItem/components/SupportPathGroup/SupportPathGroup";
+import { createContext, Dispatch, SetStateAction, useCallback, useContext } from "react";
+import { ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { selectSeenEdgeSetByPk } from "@/redux/seenStatusSelectors";
 import { AppDispatch, RootState } from "@/redux/store";
 
 export type LastViewedPathIDContextType = {
@@ -21,14 +20,6 @@ export const useLastViewedPath = (): LastViewedPathIDContextType => {
 };
 
 /**
- * Custom hook to get the current depth level in the path hierarchy.
- * @returns {number} The current depth level.
- */
-export const useSupportPathDepth = (): number => {
-  return useContext(SupportPathDepthContext);
-};
-
-/**
  * Custom hook to get the id of the result that the current PathView belongs to.
  * Falls back to undefined when rendered outside of a PathView.
  * @returns {string | undefined} The result id, if available.
@@ -38,47 +29,26 @@ export const useResultItemId = (): string | undefined => {
 };
 
 /**
- * Custom hook to get the current key of a support path in the path hierarchy.
- * @returns {string} The key expressed as a string (1, 1.a, 1.a.i, etc.)
- */
-export const useSupportPathKey = (): string => {
-  return useContext(SupportPathKeyContext);
-};
-
-/**
- * Custom hook to manage which predicate is expanded within a path.
- * Ensures only one predicate can be expanded at a time within each path.
- * @returns {Object} Object containing expandedPredicateId and setExpandedPredicateId function
- */
-export const useExpandedPredicate = () => {
-  const context = useContext(ExpandedPredicateContext);
-  if (!context) {
-    console.warn("useExpandedPredicate must be used within an ExpandedPredicateContext.Provider");
-    return { expandedPredicateId: null, setExpandedPredicateId: () => {} };
-  }
-  return context;
-};
-
-/**
  * Custom hook to handle seen/unseen status on edges and paths
  */
 export const useSeenStatus = (pk: string) => {
   const dispatch: AppDispatch = useDispatch();
 
-  const seenStatus = useSelector((state: RootState) =>
-    state.seenStatus[pk] || { seenEdges: [], seenPaths: [] }
-  );
+  // A path list calls this hook once per row, so it subscribes to the shared Set
+  // rather than the id list, which would add a store subscription per row for a
+  // value no caller reads.
+  const seenEdgeSet = useSelector((state: RootState) => selectSeenEdgeSetByPk(state, pk));
 
-  const isEdgeSeen = (edgeId: string): boolean => seenStatus.seenEdges.includes(edgeId);
-  const seenEdges = useSelector((state: RootState) => state.seenStatus[pk]?.seenEdges || []);
-  const seenEdgeSet = useMemo(() => new Set(seenEdges), [seenEdges]);
-  const isPathSeen = (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id));
-  const handleMarkEdgeSeen = (edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId }));
-  const handleMarkEdgeUnseen = (edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId }));
-  const resetStatus = () => dispatch(resetSeenStatus({ pk }));
+  const isEdgeSeen = useCallback((edgeId: string): boolean => seenEdgeSet.has(edgeId), [seenEdgeSet]);
+  const isPathSeen = useCallback(
+    (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id)),
+    [seenEdgeSet]
+  );
+  const handleMarkEdgeSeen = useCallback((edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId })), [dispatch, pk]);
+  const handleMarkEdgeUnseen = useCallback((edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId })), [dispatch, pk]);
+  const resetStatus = useCallback(() => dispatch(resetSeenStatus({ pk })), [dispatch, pk]);
 
   return {
-    seenEdges: seenStatus.seenEdges,
     isEdgeSeen,
     isPathSeen,
     markEdgeSeen: handleMarkEdgeSeen,

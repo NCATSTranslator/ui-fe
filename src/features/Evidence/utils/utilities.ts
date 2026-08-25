@@ -14,7 +14,6 @@ interface EvidenceAccumulator {
   cts: Set<string>;
   sources: Set<string>;
   misc: Set<string>;
-  visitedPathIds: Set<string>;
 }
 
 const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
@@ -41,39 +40,16 @@ const addEdgeTrials = (edge: ResultEdge, acc: EvidenceAccumulator) => {
 };
 
 const addEdgeSources = (edge: ResultEdge, acc: EvidenceAccumulator) => {
-  if (edge.provenance && !edge.inferred) {
+  if (edge.provenance) {
     for (const source of edge.provenance) {
       acc.sources.add(source.infores);
     }
   }
 };
 
-const collectSupportPathEvidence = (resultSet: ResultSet, supportPath: Path, pathId: string, acc: EvidenceAccumulator) => {
-  if (pathId && acc.visitedPathIds.has(pathId)) return;
-  if (pathId) acc.visitedPathIds.add(pathId);
-  try {
-    for (let j = 1; j < supportPath.subgraph.length; j += 2) {
-      collectEvidenceFromEdge(resultSet, supportPath.subgraph[j], true, acc);
-    }
-  } finally {
-    if (pathId) acc.visitedPathIds.delete(pathId);
-  }
-};
-
-const collectSupportEvidence = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
-  if (!edge.inferred || !edge.support) return;
-  for (const sp of edge.support) {
-    const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp) : sp;
-    if (!supportPath) continue;
-    const pathId = supportPath.id ?? (typeof sp === "string" ? sp : "");
-    collectSupportPathEvidence(resultSet, supportPath, pathId, acc);
-  }
-};
-
 const collectEvidenceFromEdge = (
   resultSet: ResultSet,
   edge: ResultEdge | string,
-  includeSupport: boolean,
   acc: EvidenceAccumulator
 ) => {
   const resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
@@ -82,29 +58,23 @@ const collectEvidenceFromEdge = (
   addEdgePublications(resultSet, resultEdge, acc);
   addEdgeTrials(resultEdge, acc);
   addEdgeSources(resultEdge, acc);
-
-  if (includeSupport) {
-    collectSupportEvidence(resultSet, resultEdge, acc);
-  }
 };
 
 /**
- * Generates evidence ids for a provided edge, optionally including support edges
+ * Generates evidence ids for a provided edge
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
  * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
- * @param {boolean} includeSupport - Whether to include evidence from support edges (default: false).
  * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
  */
 export const getEvidenceFromEdge = (
   resultSet: ResultSet,
-  edge: ResultEdge | string,
-  includeSupport: boolean = false
+  edge: ResultEdge | string
 ) => {
   const acc: EvidenceAccumulator = {
-    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(), visitedPathIds: new Set(),
+    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(),
   };
-  collectEvidenceFromEdge(resultSet, edge, includeSupport, acc);
+  collectEvidenceFromEdge(resultSet, edge, acc);
   const { pubs, cts, sources, misc } = acc;
   return { pubs, cts, sources, misc };
 };
@@ -124,7 +94,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
 
   const processPathEdges = (path: Path) => {
     for(let i = 1; i < path.subgraph.length; i += 2) {
-      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i], true);
+      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i]);
       if(edgeEvidence.pubs.size > 0)
         allPubs = allPubs.union(edgeEvidence.pubs);
       if(edgeEvidence.cts.size > 0)
@@ -253,6 +223,16 @@ export const getUrlByType = (publicationID: string, type: string): string => {
  * @returns {string} - A label containing the subject node name, predicate, and object node name
  * separated by pipe characters. 
  */
+export const getEvidenceCountsFromCanvasEdge = (
+  edge: { publications?: Record<string, unknown[]>; trials?: unknown[] },
+): { pubCount: number; ctCount: number } => {
+  let pubCount = 0;
+  for (const entries of Object.values(edge.publications ?? {})) {
+    pubCount += entries.length;
+  }
+  return { pubCount, ctCount: edge.trials?.length ?? 0 };
+};
+
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
@@ -261,6 +241,26 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
 
   return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
 }
+
+export const getFormattedEdgeLabelWithNames = (
+  edge: ResultEdge,
+  nodeNames: Record<string, string>,
+): string => {
+  const subjectNodeName = nodeNames[edge.subject] ?? edge.subject;
+  const objectNodeName = nodeNames[edge.object] ?? edge.object;
+  return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
+};
+
+export const formatEvidenceEdgeLabel = (
+  edge: ResultEdge,
+  resultSet: ResultSet | null,
+  nodeNameLookup: Record<string, string> = {},
+): string => {
+  const raw = resultSet
+    ? getFormattedEdgeLabel(resultSet, edge)
+    : getFormattedEdgeLabelWithNames(edge, nodeNameLookup);
+  return raw.replaceAll('|', ' ');
+};
 
 /**
  * Finds the publication entry (with its support data) matching a given publication ID on an edge.
@@ -435,6 +435,40 @@ export const generatePubmedURL = (id: string): string => {
   return "";
 }
 
+const buildTrialUrl = (id: string): string => {
+  const nctMatch = id.match(/NCT\d+/i);
+  if (nctMatch) {
+    return `https://clinicaltrials.gov/study/${nctMatch[0].toUpperCase()}`;
+  }
+  return getUrlByType(id, getTypeFromPub(id));
+};
+
+const publicationObjectFromRef = (
+  pubEntry: { id: string; support: PublicationSupport | null; infores: string },
+  knowledgeLevel: string,
+  edge?: ResultEdge,
+): PublicationObject => {
+  const type = getTypeFromPub(pubEntry.id);
+  return {
+    knowledgeLevel,
+    id: pubEntry.id,
+    source: getPublicationSource(null, pubEntry.infores, edge),
+    support: pubEntry.support || null,
+    type,
+    url: getUrlByType(pubEntry.id, type),
+  };
+};
+
+const trialObjectFromRef = (id: string): TrialObject => ({
+  child: false,
+  id,
+  phase: 0,
+  size: 0,
+  start_date: '',
+  status: 'UNKNOWN',
+  url: buildTrialUrl(id),
+});
+
 /**
  * Retrieves and flattens publication objects from a structured publication list.
  *
@@ -448,14 +482,12 @@ export const generatePubmedURL = (id: string): string => {
  */
 export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList, edge?: ResultEdge): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
-  if(!resultSet)
-    return pubArray;
 
   for (const kl in pubs) {
     const pubEntries = pubs[kl];
     for (const pubEntry of pubEntries) {
-      const pub = getPubById(resultSet, pubEntry.id);
-      if (!!pub) {
+      const pub = resultSet ? getPubById(resultSet, pubEntry.id) : undefined;
+      if (pub) {
         pubArray.push({
           knowledgeLevel: kl,
           id: pubEntry.id,
@@ -464,6 +496,8 @@ export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawP
           type: pub.type,
           url: pub.url
         });
+      } else {
+        pubArray.push(publicationObjectFromRef(pubEntry, kl, edge));
       }
     }
   }
@@ -486,9 +520,8 @@ export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string
   if(!trialIDs)
     return trialArray;
   for (const id of trialIDs) {
-    const trial = getTrialById(resultSet, id);
-    if(!!trial) 
-      trialArray.push(trial);
+    const trial = resultSet ? getTrialById(resultSet, id) : undefined;
+    trialArray.push(trial ?? trialObjectFromRef(id));
   }
 
   return trialArray;

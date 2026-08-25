@@ -1,19 +1,17 @@
-import { useState, useCallback, useRef, FC, useMemo } from 'react';
+import { useState, useCallback, useRef, FC } from 'react';
 import styles from './QueryLookup.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
-import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
+import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Core/components/Select/Select';
-import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint } from '@/features/Query/hooks/customQueryHooks';
+import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, useStateSyncedTo, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { noop } from '@/features/Core/utils/constants';
 import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
-import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
-import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { User } from '@/features/UserAuth/types/user';
-import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
+import { BIOLINK_CATEGORIES, getDefaultLookupObjectCategory } from '@/features/Query/utils/biolinkCategories';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import DividerVert from '@/features/Core/components/DividerVert/DividerVert';
 
@@ -23,14 +21,20 @@ type QueryLookupProps = {
   shouldNavigate?: boolean;
   submissionCallback?: () => void;
   user?: User | null;
+  initNodeIdParam?: string | null;
+  initNodeLabelParam?: string | null;
+  initNodeCategoryParam?: string | null;
 }
 
 const QueryLookup: FC<QueryLookupProps> = ({
   isResults = false,
   selectedProject = null,
   shouldNavigate = true,
-  submissionCallback = () => {},
-  user = null
+  submissionCallback = noop,
+  user = null,
+  initNodeIdParam = null,
+  initNodeLabelParam = null,
+  initNodeCategoryParam = null,
 }) => {
   const disabled = user === null;
   const nameResolverEndpoint = useNameResolverEndpoint();
@@ -38,30 +42,16 @@ const QueryLookup: FC<QueryLookupProps> = ({
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
-  const [inputText, setInputText] = useState("");
-  const [queryItem, setQueryItem] = useState<AutocompleteItem | null>(null);
-  const [objectCategory, setObjectCategory] = useState<string>("biolink:ChemicalEntity");
-
-  const autocompleteConfig = useMemo<AutocompleteConfig>(() => ({
-    functions: {
-      filter: defaultQueryFilterFactory,
-      annotate: queryTypeAnnotator,
-      format: combinedQueryFormatter
-    },
-    limitTypes: [
-      "Drug",
-      "ChemicalEntity",
-      "Disease",
-      "Gene",
-      "SmallMolecule",
-      "PhenotypicFeature",
-      "BiologicalProcess",
-      "AnatomicalEntity",
-      "CellLine"
-    ],
-    limitPrefixes: [],
-    excludePrefixes: ["UMLS"],
-  }), []);
+  const { queryItem, setQueryItem, inputText, setInputText } = useSyncedAutocompleteFromNodeParams(
+    initNodeIdParam,
+    initNodeLabelParam,
+    initNodeCategoryParam,
+  );
+  const lookupSubjectKey = `${initNodeIdParam ?? ''}|${initNodeCategoryParam ?? ''}`;
+  const [objectCategory, setObjectCategory] = useStateSyncedTo(
+    getDefaultLookupObjectCategory(initNodeCategoryParam),
+    lookupSubjectKey,
+  );
 
   const {
     autocompleteItems,
@@ -69,7 +59,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
     delayedQuery,
     autocompleteVisibility,
     setAutocompleteVisibility,
-  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
+  } = useAutocomplete(HOME_QUERY_AUTOCOMPLETE_CONFIG, nameResolverEndpoint);
 
   const { isLoading, submitLookupQuery } = useQuerySubmission('lookup', shouldNavigate, submissionCallback);
 
@@ -77,7 +67,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
     setQueryItem(null);
     setInputText(e);
     delayedQuery(e);
-  }, [delayedQuery]);
+  }, [delayedQuery, setQueryItem, setInputText]);
 
   const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
@@ -85,7 +75,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
     setInputText(labeledItem.label);
     setQueryItem(labeledItem);
     setAutocompleteVisibility(false);
-  }, [setAutocompleteVisibility]);
+  }, [setAutocompleteVisibility, setInputText, setQueryItem]);
 
   const handleSubmission = useCallback(() => {
     if (!queryItem || queryItem.id === "") {
@@ -99,7 +89,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
   const clearItem = useCallback(() => {
     setQueryItem(null);
     setInputText("");
-  }, []);
+  }, [setQueryItem, setInputText]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAutocompleteSelect = useCallback((_cxt: AutocompleteContext) => {

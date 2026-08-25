@@ -1,10 +1,6 @@
 import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getRawEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
-
-export const hasSupport = (item: ResultEdge | null | undefined): boolean => {
-  return !!item && Array.isArray(item.support) && item.support.length > 0;
-};
 
 const DEFAULT_EDGE_METADATA = {
   edge_bindings: [],
@@ -15,7 +11,6 @@ const DEFAULT_EDGE_METADATA = {
 const EMPTY_EDGE: ResultEdge = {
   aras: [],
   id: "",
-  inferred: false,
   is_root: false,
   compressed_edges: [],
   knowledge_level: "unknown",
@@ -26,11 +21,57 @@ const EMPTY_EDGE: ResultEdge = {
   description: "",
   provenance: [],
   publications: {},
+  signature: "",
+  source_time: "",
   subject: "",
-  support: [],
   trials: [],
   tags: {},
-  type: "",
+};
+
+const EMPTY_ANNOTATIONS: ResultNode['annotations'] = {
+  chemical: {
+    approval: null,
+    clinical_trials: null,
+    descriptions: null,
+    indications: null,
+    otc_status: null,
+    roles: null,
+    synonyms: null,
+  },
+  disease: {
+    clinical_trials: null,
+    curies: null,
+    descriptions: null,
+    synonyms: null,
+  },
+  gene: {
+    descriptions: null,
+    name: null,
+    species: null,
+    tdl: null,
+  },
+};
+
+const cloneEmptyAnnotations = (): ResultNode['annotations'] => ({
+  chemical: { ...EMPTY_ANNOTATIONS.chemical },
+  disease: { ...EMPTY_ANNOTATIONS.disease },
+  gene: { ...EMPTY_ANNOTATIONS.gene },
+});
+
+const EMPTY_NODE: ResultNode = {
+  annotations: EMPTY_ANNOTATIONS,
+  aras: [],
+  curies: [],
+  descriptions: [],
+  id: "",
+  names: [],
+  other_names: {},
+  provenance: [],
+  signature: "",
+  source_time: "",
+  synonyms: [],
+  tags: {},
+  types: [],
 };
 
 export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => {
@@ -38,19 +79,36 @@ export const getDefaultEdge = (edge: ResultEdge | undefined): ResultEdge => {
   return { ...EMPTY_EDGE, ...edge };
 };
 
-export const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
-  return subgraph.map((item, i) => {
-    if(isNodeIndex(i))
-      return item;
-    const edge = getEdgeById(resultSet, item);
-    return (edge?.inferred ?? false) ? "indirect" : "direct";
-  });
+export const getDefaultNode = (node: ResultNode | undefined): ResultNode => {
+  if (!node) {
+    return {
+      ...EMPTY_NODE,
+      annotations: cloneEmptyAnnotations(),
+      other_names: {},
+      tags: {},
+    };
+  }
+  return {
+    ...EMPTY_NODE,
+    ...node,
+    annotations: node.annotations ?? cloneEmptyAnnotations(),
+    other_names: node.other_names ?? {},
+    tags: node.tags ?? {},
+  };
+};
+
+/**
+ * Reduces a subgraph to its node sequence. Paths sharing a node sequence are
+ * interchangeable for display and get compressed into a single group.
+ */
+export const extractPathSequence = (subgraph: string[]): string[] => {
+  return subgraph.filter((_, i) => isNodeIndex(i));
 };
 
 export const getPathSequenceKey = (resultSet: ResultSet, path: string | Path): string | null => {
   const resolved = (typeof path === "string") ? getPathById(resultSet, path) : path;
   if (!resolved) return null;
-  return JSON.stringify(extractPathSequence(resultSet, resolved.subgraph));
+  return JSON.stringify(extractPathSequence(resolved.subgraph));
 };
 
 export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): number => {
@@ -64,18 +122,7 @@ export const getPathCount = (resultSet: ResultSet, paths: (string | Path)[]): nu
   return sequences.size;
 };
 
-export const isPathIndirectEdge = (resultSet: ResultSet, path: Path): boolean => {
-  if (!(path.subgraph && path.subgraph.length === 3)) return false;
-  const edge = getEdgeById(resultSet, path.subgraph[1]);
-  return edge?.inferred ?? false;
-};
-
 const mergeArrays = <T,>(arr1: T[], arr2: T[]): T[] => Array.from(new Set([...arr1, ...arr2]));
-
-const mergeSupport = (baseEdge: ResultEdge, edge: ResultEdge) => {
-  if (Array.isArray(baseEdge.support) && Array.isArray(edge.support))
-    baseEdge.support = mergeArrays(baseEdge.support as string[], edge.support as string[]);
-};
 
 const mergePublications = (target: ResultEdge, source: ResultEdge) => {
   for (const [key, value] of Object.entries(source.publications)) {
@@ -97,7 +144,6 @@ const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void 
   if (currentEdge.predicate === baseEdge.predicate) {
     baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
     baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
-    mergeSupport(baseEdge, currentEdge);
     mergePublications(baseEdge, currentEdge);
     return;
   }
@@ -105,12 +151,9 @@ const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void 
   if (compressedEdge) {
     compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
     compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-    mergeSupport(compressedEdge, currentEdge);
     mergePublications(compressedEdge, currentEdge);
   } else {
-    if (currentEdge.support.length > 0 && baseEdge.support.length > 0)
-      mergeSupport(baseEdge, currentEdge);
-    baseEdge.compressed_edges?.push({ ...currentEdge, inferred: hasSupport(currentEdge), compressed_edges: [] });
+    baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: [] });
   }
 };
 
@@ -129,9 +172,28 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
     mergeEdgeIntoBase(baseEdge, getDefaultEdge(edge));
   }
 
-  baseEdge.inferred = hasSupport(baseEdge);
   return baseEdge;
 };
+
+/**
+ * One representative edge per distinct raw predicate within a compressed group.
+ * Uses raw predicates so display rewrites (e.g. treat → impact) do not collapse distinct edges.
+ */
+export const getDistinctResultEdges = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge[] => {
+  const seenPredicates = new Set<string>();
+  const edges: ResultEdge[] = [];
+  for (const edgeID of edgeIDs) {
+    const edge = getRawEdgeById(resultSet, edgeID);
+    if (!edge || seenPredicates.has(edge.predicate)) continue;
+    seenPredicates.add(edge.predicate);
+    edges.push(edge);
+  }
+  return edges;
+};
+
+/** One representative edge ID per distinct raw predicate within a compressed group. */
+export const getDistinctPredicateEdgeIDs = (resultSet: ResultSet, edgeIDs: string[]): string[] =>
+  getDistinctResultEdges(resultSet, edgeIDs).map(edge => edge.id);
 
 export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
   const compressedEdges: ResultEdge[] = [];
@@ -140,10 +202,7 @@ export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): R
   for(let i = 0; i < edges.length; i++) {
     let edge = edges[i];
     let nextEdge: undefined | ResultEdge = edges[i+1];
-    if(!!nextEdge
-      && nextEdge.predicate === edge.predicate
-      && nextEdge.inferred === edge.inferred
-    ) {
+    if(!!nextEdge && nextEdge.predicate === edge.predicate) {
       if(!edgeIDsToCompress.has(edge.id))
         edgeIDsToCompress.add(edge.id);
       edgeIDsToCompress.add(nextEdge.id);

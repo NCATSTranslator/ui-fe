@@ -38,10 +38,8 @@ export interface ExportedEdge {
   provenance: Provenance[];
   publications: { [key: string]: { id: string; support: PublicationSupport }[] };
   trials: string[];
-  support: string[];
   aras: string[];
   description?: string | null;
-  type: string;
 }
 
 export interface ExportedResult {
@@ -72,7 +70,7 @@ export interface ExportedTrial {
   phase: number;
   size: number;
   start_date: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  status: string;
   type?: 'enrolled' | 'anticipated';
 }
 
@@ -162,12 +160,6 @@ export interface DenormalizedCSVRow {
   trial_sizes: string;
   trial_start_dates: string;
   trial_statuses: string;
-
-  // Support path hierarchy
-  support_level: number;           // 0 = top-level path, 1+ = nested support depth
-  parent_path_id: string;          // Path ID of parent (empty for top-level)
-  parent_edge_id: string;          // Edge ID this support path supports (empty for top-level)
-  edge_support_path_ids: string;   // Semicolon-separated support path IDs for this edge
 }
 
 /**

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import ViewSkeleton from '@/features/Navigation/components/ViewSkeleton/ViewSkeleton';
-import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import NodeInformationViewStyles from '@/features/NodeInformationView/components/NodeInformationView/NodeInformationView.module.scss';
 
 const NodeViewSkeleton: FC = () => {
@@ -8,7 +8,7 @@ const NodeViewSkeleton: FC = () => {
 
   return (
     <div className={NodeInformationViewStyles.nodeInformationView}>
-      <ResultListTopBar/>
+      <ViewTopBar/>
       <ViewSkeleton statusMessage={statusMessage} />
     </div>
   );

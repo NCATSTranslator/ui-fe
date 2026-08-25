@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./ProjectList.module.scss";
 import { useSelector } from "react-redux";
@@ -14,15 +14,69 @@ import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tab from "@/features/Core/components/Tabs/Tab";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import ProjectsTableHeader from "../TableHeader/ProjectsTableHeader/ProjectsTableHeader";
-import CardList from "@/features/Projects/components/CardList/CardList";
+import CardList from "@/features/Core/components/CardList/CardList";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
+import type { Project, UserQueryObject } from "@/features/Projects/types/projects";
+
+type ProjectCardsArgs = {
+  projects: Project[];
+  searchTerm: string;
+  activeQueries: UserQueryObject[];
+  queriesLoading: boolean;
+  newProjectId: number | null;
+  onRename: () => void;
+  onCreateNew: () => void;
+  onToggleQueries: () => void;
+};
+
+const renderProjectCards = ({
+  projects,
+  searchTerm,
+  activeQueries,
+  queriesLoading,
+  newProjectId,
+  onRename,
+  onCreateNew,
+  onToggleQueries,
+}: ProjectCardsArgs): ReactNode => {
+  if (projects.length === 0 && searchTerm) {
+    return (
+      <EmptyArea>
+        <p>No projects found matching your search.</p>
+      </EmptyArea>
+    );
+  }
+  if (projects.length === 0) {
+    return (
+      <EmptyArea heading="No Projects">
+        <p>
+          <Button handleClick={onCreateNew} title="Create New Project" variant="textOnly" inline>Create New Project</Button>
+          {' '}to start organizing your queries.<br/>
+          You can also add queries to a new project from the{' '}
+          <Button handleClick={onToggleQueries} title="Queries" variant="textOnly" inline>Queries</Button> tab.
+        </p>
+      </EmptyArea>
+    );
+  }
+  return projects.map((project) => (
+    <ProjectCard
+      key={project.id}
+      activeQueries={activeQueries}
+      queriesLoading={queriesLoading}
+      project={project}
+      allProjects={projects}
+      searchTerm={searchTerm}
+      startRenaming={newProjectId === project.id}
+      onRename={onRename}
+    />
+  ));
+};
 
 const ProjectList = () => {
   const location = useLocation();
   const user = useSelector(currentUser);
-  // Sort/Search state management
   const sortSearchState = useSortSearchState();
   const data = useProjectListData(sortSearchState);
   const projects = useMemo(() => data.formatted.active, [data.formatted.active]);
@@ -32,42 +86,25 @@ const ProjectList = () => {
   const [newProjectId, setNewProjectId] = useState<number | null>(null);
   const { togglePanel, activePanelId, closePanel } = useSidebar();
   const activeQueries = useMemo(() => data.filtered.active.queries || [], [data.filtered.active.queries]);
-
-  const shouldShowErrorState = useMemo(() => {
-    return !user?.id && !projectsLoading && projects.length === 0;
-  }, [user?.id, projectsLoading, projects]);
+  const shouldShowErrorState = !user?.id && !projectsLoading && projects.length === 0;
+  const projectsTabHeading = `${projects.length} Project${projects.length === 1 ? '' : 's'}`;
 
   const handleCreateNewProjectClick = () => {
-    const newProject = {
-      title: '',
-      pks: []
-    };
-
-    createProjectMutation.mutate(newProject, {
-      onSuccess: (data) => {
+    createProjectMutation.mutate({ title: '', pks: [] }, {
+      onSuccess: (created) => {
         projectCreatedToast();
-        setNewProjectId(data.id);
+        setNewProjectId(created.id);
       },
       onError: (error) => {
         console.error('Failed to create project:', error);
-      }
+      },
     });
   };
 
-  const handleRenameProject = () => {
-    setNewProjectId(null);
-  };
-
-  const projectsTabHeading = useMemo(() => {
-    const projectCount = projects.length;
-    return `${projectCount} Project${projectCount === 1 ? '' : 's'}`;
-  }, [projects]);
-
-  // on component mount, if the projects panel is open, close it
+  // Close the projects sidebar panel while viewing the full projects page.
   useEffect(() => {
-    if (activePanelId === 'projects')
-      closePanel();
-  }, []);
+    if (activePanelId === 'projects') closePanel();
+  }, [activePanelId, closePanel]);
 
   return (
     <div className={styles.projectsPanel}>
@@ -78,75 +115,50 @@ const ProjectList = () => {
         handleSearch={sortSearchState.handleSearch}
       />
       <div className={styles.list}>
-        {
-          shouldShowErrorState ? (
-            <EmptyArea>
-              <p>
-                <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.
-              </p>
-            </EmptyArea>
-          ) : (
-            <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectList}>
-              <Button 
-                iconLeft={<Plus />}
-                handleClick={handleCreateNewProjectClick}
-                title="Create New Project"
-                className={styles.createNewProjectButton}
-                variant="textOnly"
-              >
-                Create New Project
-              </Button>
-              <Tabs
-                handleTabSelection={() => {}}
-                defaultActiveTab={projectsTabHeading}
-                className={styles.projectTabs}
-                activeTab={projectsTabHeading}
-                controlled
-              >
-                {[
-                  <Tab key="projects" heading={projectsTabHeading} className={styles.projectTabContent}>
-                    <CardList>
-                      <ProjectsTableHeader
-                        sortSearchState={sortSearchState}
-                      />
-                      {
-                        projects.length === 0 && sortSearchState.searchTerm
-                        ? (
-                          <EmptyArea>
-                            <p>No projects found matching your search.</p>
-                          </EmptyArea>
-                        ) 
-                        : projects.length === 0
-                          ? 
-                            (
-                              <EmptyArea heading="No Projects">
-                                <p>
-                                  <Button handleClick={handleCreateNewProjectClick} title="Create New Project" variant="textOnly" inline>Create New Project</Button> to start organizing your queries.<br/>
-                                  You can also add queries to a new project from the <Button handleClick={() => togglePanel('queries')} title="Queries" variant="textOnly" inline>Queries</Button> tab.
-                                </p>
-                              </EmptyArea>
-                            )
-                          : 
-                            projects.map((project) => (
-                              <ProjectCard
-                                key={project.id}
-                                activeQueries={activeQueries}
-                                queriesLoading={queriesLoading}
-                                project={project}
-                                allProjects={projects}
-                                searchTerm={sortSearchState.searchTerm}
-                                startRenaming={newProjectId === project.id}
-                                onRename={handleRenameProject}
-                              />
-                            ))
-                      }
-                    </CardList>
-                  </Tab>
-                ]}
-              </Tabs>
-            </LoadingWrapper>
-          )
-        }
+        {shouldShowErrorState ? (
+          <EmptyArea>
+            <p>
+              <a href={getFormattedLoginURL(location)} className={styles.link}>Log in</a> to view your saved projects.
+            </p>
+          </EmptyArea>
+        ) : (
+          <LoadingWrapper loading={projectsLoading} contentClassName={styles.projectList}>
+            <Button
+              iconLeft={<Plus />}
+              handleClick={handleCreateNewProjectClick}
+              title="Create New Project"
+              className={styles.createNewProjectButton}
+              variant="textOnly"
+            >
+              Create New Project
+            </Button>
+            <Tabs
+              handleTabSelection={() => {}}
+              defaultActiveTab={projectsTabHeading}
+              className={styles.projectTabs}
+              activeTab={projectsTabHeading}
+              controlled
+            >
+              {[
+                <Tab key="projects" heading={projectsTabHeading} className={styles.projectTabContent}>
+                  <CardList>
+                    <ProjectsTableHeader sortSearchState={sortSearchState} />
+                    {renderProjectCards({
+                      projects,
+                      searchTerm: sortSearchState.searchTerm,
+                      activeQueries,
+                      queriesLoading,
+                      newProjectId,
+                      onRename: () => setNewProjectId(null),
+                      onCreateNew: handleCreateNewProjectClick,
+                      onToggleQueries: () => togglePanel('queries'),
+                    })}
+                  </CardList>
+                </Tab>,
+              ]}
+            </Tabs>
+          </LoadingWrapper>
+        )}
       </div>
     </div>
   );
