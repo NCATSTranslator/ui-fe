@@ -3,6 +3,7 @@
 .evidenceViewWrapper {
   padding: 0 $l $m;
   height: 100%;
+  width: calc(100% - #{$l * 2});
   max-width: $maxWidth;
   margin: 0 auto;
   display: flex;

@@ -3,7 +3,7 @@
 .container {
   padding: 0 $l $m;
   height: 100%;
-  width: 100%;
+  width: calc(100% - #{$l * 2});
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   gap: $xs;
