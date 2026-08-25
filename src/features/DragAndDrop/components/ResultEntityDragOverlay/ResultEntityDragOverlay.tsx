@@ -20,9 +20,23 @@ interface ResultEntityDragOverlayProps {
   dragData: ResultEntityDragOverlayData;
 }
 
+type OverlayContent = {
+  kind: ResultEntityDragOverlayData['type'];
+  label: string;
+  icon: ReactNode;
+};
+
 const formatNodeLabel = (node: ResultNode | null | undefined, fallback: string): string => {
   if (!node) return fallback;
   return nodeToTooltipProps(node).nameString;
+};
+
+const formatNamedResultLabel = (
+  drugName: string,
+  subjectNode: ResultNode | null | undefined,
+): string => {
+  const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
+  return formatBiolinkNode(drugName, typeString, subjectNode ? getNodeSpecies(subjectNode) : null);
 };
 
 const resultContainsPath = (result: Result, pathId: string): boolean => {
@@ -38,80 +52,90 @@ const formatResultName = (
   const result = (resultId && getResultById(resultSet, resultId))
     || (path?.id ? resultSet.data.results.find(item => resultContainsPath(item, path.id as string)) : undefined);
   if (!result?.drug_name) return null;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
-  return formatBiolinkNode(result.drug_name, typeString, subjectNode ? getNodeSpecies(subjectNode) : null);
+  return formatNamedResultLabel(result.drug_name, getNodeById(resultSet, result.subject));
+};
+
+const overlayForNode = (
+  resultSet: ResultSet,
+  id: string,
+): OverlayContent => {
+  const node = getNodeById(resultSet, id);
+  return {
+    kind: 'node',
+    label: formatNodeLabel(node, id),
+    icon: getNodeIcon(node?.types[0] ?? ''),
+  };
+};
+
+const overlayForEdge = (
+  resultSet: ResultSet,
+  id: string,
+  edgeIds: string[],
+): OverlayContent => {
+  const edge = resultSet.data.edges[id];
+  if (!edge) {
+    return { kind: 'edge', label: id, icon: null };
+  }
+  const subjectLabel = formatNodeLabel(getNodeById(resultSet, edge.subject), edge.subject);
+  const objectLabel = formatNodeLabel(getNodeById(resultSet, edge.object), edge.object);
+  const formattedEdge = edgeIds.length > 1 ? getCompressedEdge(resultSet, edgeIds) : edge;
+  const extraCount = formattedEdge.compressed_edges?.length ?? 0;
+  const suffix = extraCount > 0 ? ` +${extraCount}` : '';
+  return {
+    kind: 'edge',
+    label: `${subjectLabel} ${formattedEdge.predicate} ${objectLabel}${suffix}`,
+    icon: null,
+  };
+};
+
+const overlayForResult = (
+  resultSet: ResultSet,
+  id: string,
+): OverlayContent => {
+  const result = getResultById(resultSet, id);
+  const resultNode = result ? getNodeById(resultSet, result.subject) : undefined;
+  const label = result?.drug_name
+    ? formatNamedResultLabel(result.drug_name, resultNode)
+    : id;
+  return {
+    kind: 'result',
+    label,
+    icon: getNodeIcon(resultNode?.types[0] ?? ''),
+  };
+};
+
+const overlayForPath = (
+  resultSet: ResultSet,
+  data: Extract<ResultEntityDragOverlayData, { type: 'path' }>['data'],
+): OverlayContent => {
+  const resultName = formatResultName(resultSet, data.resultId, data.path);
+  const pathLabel = typeof data.pathNumber === 'number' ? `Path ${data.pathNumber}` : 'Path';
+  return {
+    kind: 'path',
+    label: resultName ? `${resultName} ${pathLabel}` : pathLabel,
+    icon: null,
+  };
+};
+
+const getOverlayContent = (
+  dragData: ResultEntityDragOverlayData,
+  resultSet: ResultSet | null | undefined,
+): OverlayContent => {
+  if (!resultSet) {
+    return { kind: dragData.type, label: dragData.data.id, icon: null };
+  }
+  if (dragData.type === 'node') return overlayForNode(resultSet, dragData.data.id);
+  if (dragData.type === 'edge') return overlayForEdge(resultSet, dragData.data.id, dragData.data.edgeIds);
+  if (dragData.type === 'result') return overlayForResult(resultSet, dragData.data.id);
+  return overlayForPath(resultSet, dragData.data);
 };
 
 const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData }) => {
   const resultSet = useSelector(getResultSetById(dragData.data.pk));
-
-  const content = useMemo(() => {
-    if (!resultSet) {
-      return { kind: dragData.type, label: dragData.data.id, icon: null as ReactNode };
-    }
-
-    if (dragData.type === 'node') {
-      const node = getNodeById(resultSet, dragData.data.id);
-      return {
-        kind: 'node' as const,
-        label: formatNodeLabel(node, dragData.data.id),
-        icon: getNodeIcon(node?.types[0] ?? ''),
-      };
-    }
-
-    if (dragData.type === 'edge') {
-      const edge = resultSet.data.edges[dragData.data.id];
-      if (!edge) {
-        return { kind: 'edge' as const, label: dragData.data.id, icon: null as ReactNode };
-      }
-      const subject = getNodeById(resultSet, edge.subject);
-      const object = getNodeById(resultSet, edge.object);
-      const subjectLabel = formatNodeLabel(subject, edge.subject);
-      const objectLabel = formatNodeLabel(object, edge.object);
-      const edgeIds = dragData.data.edgeIds;
-      const formattedEdge = edgeIds.length > 1
-        ? getCompressedEdge(resultSet, edgeIds)
-        : edge;
-      const extraCount = formattedEdge.compressed_edges?.length ?? 0;
-      const suffix = extraCount > 0 ? ` +${extraCount}` : '';
-      return {
-        kind: 'edge' as const,
-        label: `${subjectLabel} ${formattedEdge.predicate} ${objectLabel}${suffix}`,
-        icon: null as ReactNode,
-      };
-    }
-
-    if (dragData.type === 'result') {
-      const result = getResultById(resultSet, dragData.data.id);
-      const resultNode = result ? getNodeById(resultSet, result.subject) : undefined;
-      const label = result?.drug_name
-        ? formatBiolinkNode(
-          result.drug_name,
-          resultNode?.types[0] ? formatBiolinkEntity(resultNode.types[0]) : '',
-          resultNode ? getNodeSpecies(resultNode) : null,
-        )
-        : dragData.data.id;
-      return {
-        kind: 'result' as const,
-        label,
-        icon: getNodeIcon(resultNode?.types[0] ?? ''),
-      };
-    }
-
-    const resultName = formatResultName(resultSet, dragData.data.resultId, dragData.data.path);
-    const pathNumber = dragData.data.pathNumber;
-    const pathLabel = typeof pathNumber === 'number'
-      ? `Path ${pathNumber}`
-      : 'Path';
-    const label = resultName ? `${resultName} ${pathLabel}` : pathLabel;
-
-    return {
-      kind: 'path' as const,
-      label,
-      icon: null as ReactNode
-    };
-  }, [dragData, resultSet]);
+  const content = useMemo(
+    () => getOverlayContent(dragData, resultSet),
+    [dragData, resultSet],
+  );
 
   return (
     <div className={styles.overlay} data-kind={content.kind}>
