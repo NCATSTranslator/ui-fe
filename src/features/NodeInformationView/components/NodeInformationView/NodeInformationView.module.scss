@@ -58,6 +58,27 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
       }
     }
   }
+  .sourceLinks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: $s;
+    row-gap: $xxs;
+  }
+  .sourceLink {
+    display: inline-flex;
+    align-items: center;
+    gap: $xxs;
+    font-size: $bodyTwoSize;
+    svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      path {
+        fill: $purpleOne;
+      }
+    }
+  }
   .sectionTitle {
     font-size: $subOneSize;
     font-weight: 800;
@@ -66,6 +87,15 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
       color: $darkGray;
       font-weight: 400;
     }
+  }
+  .nodeTitleWithFullName {
+    margin-bottom: $xxs;
+  }
+  .nodeFullName {
+    font-size: 14px;
+    line-height: 1.25;
+    color: $darkGray;
+    margin-bottom: $s;
   }
   .nodeTypeIcon {
     display: flex;

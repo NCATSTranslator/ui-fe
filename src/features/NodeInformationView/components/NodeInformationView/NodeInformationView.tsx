@@ -17,7 +17,9 @@ import ViewNotFound from "@/features/Navigation/components/ViewNotFound/ViewNotF
 import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import ResultListTopBar from "@/features/ResultList/components/ResultListTopBar/ResultListTopBar";
-import { ChebiRole, Indication } from "@/features/ResultList/types/results";
+import { AnnotationSource, ChebiRole, Indication, ResultNode } from "@/features/ResultList/types/results";
+import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -27,10 +29,6 @@ interface AnnotationOverrideProps {
 
 const ClinicalTrials: FC<AnnotationOverrideProps> = ({ value, nodeName, nodeType }) => (
   <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
-);
-
-const GeneName: FC<AnnotationOverrideProps> = ({ value }) => (
-  <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
 );
 
 const SynonymList: FC<AnnotationOverrideProps> = ({ value }) => (
@@ -64,6 +62,22 @@ const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   </>
 );
 
+// Annotations rendered outside the section list: descriptions at the top of the tab,
+// the gene's full name directly under the node title.
+const EXCLUDED_ANNOTATIONS = new Set(["descriptions", "gene.name"]);
+
+const isExcludedAnnotation = (categoryKey: string, key: string): boolean =>
+  EXCLUDED_ANNOTATIONS.has(key) || EXCLUDED_ANNOTATIONS.has(`${categoryKey}.${key}`);
+
+/**
+ * The gene's full name, which is displayed under the node title rather than as a section.
+ */
+const getGeneFullName = (node: ResultNode | null): string | null => {
+  const fullName = node?.annotations?.gene?.name?.value;
+  if(typeof fullName !== "string" || fullName.length === 0) return null;
+  return capitalizeAllWords(fullName);
+};
+
 const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideProps>>> = {
   chemical: {
     clinical_trials: ClinicalTrials,
@@ -75,9 +89,35 @@ const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideP
     clinical_trials: ClinicalTrials,
     synonyms: SynonymList,
   },
-  gene: {
-    name: GeneName,
-  },
+};
+
+/**
+ * Renders the linkouts for an annotation section's sources. Duplicate and
+ * url-less sources are dropped, and nothing is rendered when none remain.
+ */
+const SourceLinks: FC<{ sources: AnnotationSource[] | undefined }> = ({ sources }) => {
+  const links = useMemo(() => {
+    const seen = new Set<string>();
+    return (sources ?? []).filter(source => {
+      if(!source?.url || seen.has(source.url)) return false;
+      seen.add(source.url);
+      return true;
+    });
+  }, [sources]);
+
+  if(links.length === 0) return null;
+
+  return (
+    <div className={styles.sourceLinks}>
+      {
+        links.map(({ name, url }) => (
+          <a key={url} href={url} target="_blank" rel="noreferrer" className={styles.sourceLink}>
+            {name || url}<ExternalLink/>
+          </a>
+        ))
+      }
+    </div>
+  );
 };
 
 const NodeInformationView: FC = () => {
@@ -94,35 +134,39 @@ const NodeInformationView: FC = () => {
   
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
 
-  const annotationFields = useMemo<{label: string; content: ReactNode}[]>(() => {
+  const geneFullName = useMemo(() => getGeneFullName(node), [node]);
+
+  const annotationFields = useMemo<{label: string; content: ReactNode; sources: AnnotationSource[]}[]>(() => {
     if(!node || !node.annotations) return [];
-    const fields: {label: string; content: ReactNode}[] = [];
+    const fields: {label: string; content: ReactNode; sources: AnnotationSource[]}[] = [];
     for(const [categoryKey, category] of Object.entries(node.annotations)) {
       for(const [key, section] of Object.entries(category)) {
-        if(key === "descriptions" || section === null || section === undefined) continue;
+        if(isExcludedAnnotation(categoryKey, key) || section === null || section === undefined) continue;
         const value = section.value;
+        const sources = section.metadata?.sources ?? [];
         const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
         if(Override) {
-          fields.push({ label: formatLabel(key), content: <Override value={value} nodeName={nodeName ?? ""} nodeType={nodeType ?? ""} /> });
+          fields.push({ label: formatLabel(key), content: <Override value={value} nodeName={nodeName ?? ""} nodeType={nodeType ?? ""} />, sources });
           continue;
         }
         const content = renderValue(value);
-        if(content !== null) fields.push({ label: formatLabel(key), content });
+        if(content !== null) fields.push({ label: formatLabel(key), content, sources });
       }
     }
     return fields;
   }, [node, nodeName, nodeType]);
 
-  const description = useMemo(() => {
+  const description = useMemo<{text: string; sources: AnnotationSource[]} | null>(() => {
     if(!node || !node.annotations) return null;
     for(const key in node.annotations) {
       const annotation = node.annotations[key as keyof typeof node.annotations];
-      const descriptions = annotation.descriptions?.value;
+      const section = annotation.descriptions;
+      const descriptions = section?.value;
       if(descriptions && descriptions.length > 0)
-        return descriptions[0];
+        return { text: descriptions[0], sources: section?.metadata?.sources ?? [] };
     }
     if(node.descriptions.length > 0)
-      return node.descriptions[0];
+      return { text: node.descriptions[0], sources: [] };
 
     return null;
   }, [node]);
@@ -147,7 +191,8 @@ const NodeInformationView: FC = () => {
       <div className={styles.top}>
         <div className={styles.nodeName}>
           <span className={styles.nodeTypeIcon}>{getNodeIcon(nodeType || "")} {formatBiolinkEntity(nodeType || "")}</span>
-          <h5 className={styles.nodeTitle}>{nodeName}</h5>
+          <h5 className={joinClasses(styles.nodeTitle, !!geneFullName && styles.nodeTitleWithFullName)}>{nodeName}</h5>
+          {geneFullName && <p className={styles.nodeFullName}>{geneFullName}</p>}
         </div>
       </div>
       <Tabs
@@ -166,11 +211,12 @@ const NodeInformationView: FC = () => {
                     <p className={styles.sectionTitle}>Description</p>
                     <p className={styles.description}>
                       <SafeHtmlHighlighter
-                        htmlString={description || ""}
+                        htmlString={description.text}
                         searchWords={[]}
                         highlightClassName="highlight"
                       />
                     </p>
+                    <SourceLinks sources={description.sources} />
                   </div>
                 }
                 {
@@ -178,14 +224,19 @@ const NodeInformationView: FC = () => {
                   <div className={styles.section}>
                     <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
                     <p className={styles.description}>{nodeTypeDefinition}</p>
-                    <a href={nodeBiolinkLink} target="_blank" rel="noreferrer">Learn More About the Biolink Model</a>
+                    <div className={styles.sourceLinks}>
+                      <a href={nodeBiolinkLink} target="_blank" rel="noreferrer" className={styles.sourceLink}>
+                        Learn More About the Biolink Model<ExternalLink/>
+                      </a>
+                    </div>
                   </div>
                 }
                 {
-                  annotationFields.map(({ label, content }) => (
+                  annotationFields.map(({ label, content, sources }) => (
                     <div key={label} className={styles.section}>
                       <p className={styles.sectionTitle}>{label}</p>
                       <p className={styles.sectionContent}>{content}</p>
+                      <SourceLinks sources={sources} />
                     </div>
                   ))
                 }
