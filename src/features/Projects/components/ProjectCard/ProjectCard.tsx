@@ -6,7 +6,7 @@ import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers } from "@/features/Projects/hooks/useEditProjectHandlers";
 import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { DroppableArea } from "@/features/DragAndDrop/components/DroppableArea/DroppableArea";
