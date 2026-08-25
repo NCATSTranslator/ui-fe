@@ -105,8 +105,8 @@ export const queryStatusResultsCompleteToast = () => {
 export const canvasEntityAddedToast = (entityName: string, canvasTitle: string) => {
   return toast(AppToast, { data: { topText: entityName, bottomText: `Added to ${canvasTitle}` } });
 };
-export const canvasEntitiesAddedToast = (count: number, canvasTitle: string) => {
-  return toast(AppToast, { data: { topText: `${count} objects added`, bottomText: `Added to ${canvasTitle}` } });
+export const canvasEntitiesAddedToast = (count: number, canvasTitle: string, noun = 'objects') => {
+  return toast(AppToast, { data: { topText: `${count} ${noun} added`, bottomText: `Added to ${canvasTitle}` } });
 };
 export const canvasEntityAlreadyAddedToast = (entityName: string) => {
   return toast(AppToast, { data: { topText: entityName, bottomText: 'Already on this canvas' } });

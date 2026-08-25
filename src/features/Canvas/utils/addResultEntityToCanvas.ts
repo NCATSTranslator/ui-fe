@@ -9,6 +9,7 @@ import {
 } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { mergeCanvasGraph } from '@/features/Canvas/utils/canvasApi';
 import { canvasEntityAddedToast, canvasEntitiesAddedToast, canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
+import { getDistinctResultEdges } from '@/features/Core/utils/resultHelpers';
 import { getResultById } from '@/features/ResultList/slices/resultsSlice';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import type { ResultEntityDragType } from '@/features/DragAndDrop/types/types';
@@ -19,6 +20,7 @@ export type ResultEntityTarget = {
   id: string;
   pk: string;
   path?: Path;
+  edgeIds?: string[];
 };
 
 export const resolveResultEntityTarget = (
@@ -47,9 +49,20 @@ export const resolveResultEntityTarget = (
     if (!node) return null;
     return { nodeIds: [target.id], edgeIds: [], entityName: node.names[0] || target.id };
   }
-  const edge = resultSet.data.edges[target.id];
-  if (!edge) return null;
-  return { nodeIds: [edge.subject, edge.object], edgeIds: [target.id], entityName: edge.predicate };
+
+  const edges = getDistinctResultEdges(resultSet, target.edgeIds ?? [target.id]);
+  if (edges.length === 0) return null;
+
+  const nodeIdSet = new Set<string>();
+  for (const edge of edges) {
+    nodeIdSet.add(edge.subject);
+    nodeIdSet.add(edge.object);
+  }
+  return {
+    nodeIds: Array.from(nodeIdSet),
+    edgeIds: edges.map(edge => edge.id),
+    entityName: edges[0].predicate,
+  };
 };
 
 type AddResultEntityParams = {
@@ -92,6 +105,8 @@ export const addResultEntityToCanvas = async ({
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
     if (target.type === 'path' || target.type === 'result') {
       canvasEntitiesAddedToast(nodeIds.length, canvas.label);
+    } else if (target.type === 'edge' && edgeIds.length > 1) {
+      canvasEntitiesAddedToast(edgeIds.length, canvas.label, 'relationships');
     } else {
       canvasEntityAddedToast(entityName, canvas.label);
     }
