@@ -23,36 +23,56 @@ export type ResultEntityTarget = {
   edgeIds?: string[];
 };
 
-export const resolveResultEntityTarget = (
+type ResolvedTarget = {
+  nodeIds: string[];
+  edgeIds: string[];
+  entityName: string;
+};
+
+const resolveResultTarget = (
   resultSet: ResultSet,
   target: ResultEntityTarget,
-): { nodeIds: string[]; edgeIds: string[]; entityName: string } | null => {
-  if (target.type === 'result') {
-    const result = getResultById(resultSet, target.id);
-    if (!result) return null;
-    const { nodes, edges } = extractNodesAndEdgesFromResult(resultSet, result);
-    if (nodes.length === 0) return null;
-    return {
-      nodeIds: nodes.map(n => n.id),
-      edgeIds: edges.map(e => e.id),
-      entityName: result.drug_name || target.id,
-    };
-  }
-  if (target.type === 'path') {
-    if (!target.path) return null;
-    const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, target.path);
-    if (nodes.length === 0) return null;
-    return { nodeIds: nodes.map(n => n.id), edgeIds: edges.map(e => e.id), entityName: target.id };
-  }
-  if (target.type === 'node') {
-    const node = extractNodeFromResultSet(resultSet, target.id);
-    if (!node) return null;
-    return { nodeIds: [target.id], edgeIds: [], entityName: node.names[0] || target.id };
-  }
+): ResolvedTarget | null => {
+  const result = getResultById(resultSet, target.id);
+  if (!result) return null;
+  const { nodes, edges } = extractNodesAndEdgesFromResult(resultSet, result);
+  if (nodes.length === 0) return null;
+  return {
+    nodeIds: nodes.map(n => n.id),
+    edgeIds: edges.map(e => e.id),
+    entityName: result.drug_name || target.id,
+  };
+};
 
+const resolvePathTarget = (
+  resultSet: ResultSet,
+  target: ResultEntityTarget,
+): ResolvedTarget | null => {
+  if (!target.path) return null;
+  const { nodes, edges } = extractNodesAndEdgesFromPath(resultSet, target.path);
+  if (nodes.length === 0) return null;
+  return {
+    nodeIds: nodes.map(n => n.id),
+    edgeIds: edges.map(e => e.id),
+    entityName: target.id,
+  };
+};
+
+const resolveNodeTarget = (
+  resultSet: ResultSet,
+  target: ResultEntityTarget,
+): ResolvedTarget | null => {
+  const node = extractNodeFromResultSet(resultSet, target.id);
+  if (!node) return null;
+  return { nodeIds: [target.id], edgeIds: [], entityName: node.names[0] || target.id };
+};
+
+const resolveEdgeTarget = (
+  resultSet: ResultSet,
+  target: ResultEntityTarget,
+): ResolvedTarget | null => {
   const edges = getDistinctResultEdges(resultSet, target.edgeIds ?? [target.id]);
   if (edges.length === 0) return null;
-
   const nodeIdSet = new Set<string>();
   for (const edge of edges) {
     nodeIdSet.add(edge.subject);
@@ -65,12 +85,38 @@ export const resolveResultEntityTarget = (
   };
 };
 
+export const resolveResultEntityTarget = (
+  resultSet: ResultSet,
+  target: ResultEntityTarget,
+): ResolvedTarget | null => {
+  if (target.type === 'result') return resolveResultTarget(resultSet, target);
+  if (target.type === 'path') return resolvePathTarget(resultSet, target);
+  if (target.type === 'node') return resolveNodeTarget(resultSet, target);
+  return resolveEdgeTarget(resultSet, target);
+};
+
 type AddResultEntityParams = {
   resultSet: ResultSet;
   target: ResultEntityTarget;
   canvas: Canvas;
   dispatch: AppDispatch;
   queryClient: QueryClient;
+};
+
+const notifyEntityAdded = (
+  target: ResultEntityTarget,
+  resolved: ResolvedTarget,
+  canvasLabel: string,
+) => {
+  if (target.type === 'path' || target.type === 'result') {
+    canvasEntitiesAddedToast(resolved.nodeIds.length, canvasLabel);
+    return;
+  }
+  if (target.type === 'edge' && resolved.edgeIds.length > 1) {
+    canvasEntitiesAddedToast(resolved.edgeIds.length, canvasLabel, 'relationships');
+    return;
+  }
+  canvasEntityAddedToast(resolved.entityName, canvasLabel);
 };
 
 /**
@@ -87,7 +133,7 @@ export const addResultEntityToCanvas = async ({
   const resolved = resolveResultEntityTarget(resultSet, target);
   if (!resolved) return false;
 
-  const { nodeIds, edgeIds, entityName } = resolved;
+  const { nodeIds, edgeIds } = resolved;
   const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds, undefined, {
     layout: canvas.layout,
     existingNodes: canvas.nodes,
@@ -103,13 +149,7 @@ export const addResultEntityToCanvas = async ({
       timeUpdated: new Date().toISOString(),
     }));
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
-    if (target.type === 'path' || target.type === 'result') {
-      canvasEntitiesAddedToast(nodeIds.length, canvas.label);
-    } else if (target.type === 'edge' && edgeIds.length > 1) {
-      canvasEntitiesAddedToast(edgeIds.length, canvas.label, 'relationships');
-    } else {
-      canvasEntityAddedToast(entityName, canvas.label);
-    }
+    notifyEntityAdded(target, resolved, canvas.label);
     return true;
   } catch {
     canvasSaveErrorToast();
