@@ -3,6 +3,8 @@ import type { Canvas, CanvasNode, CanvasEdge, GraphSelection } from '@/features/
 import type { ResultSet, Path, Result, ResultNode, ResultEdge } from '@/features/ResultList/types/results.d';
 import { getNodeById, getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { isPath } from '@/features/ResultList/types/checkers';
+import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getDistinctResultEdges } from '@/features/Core/utils/resultHelpers';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
 /** Build a trash/restore selection for a node and its connected edges. */
@@ -126,25 +128,69 @@ export const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
   hidden: false,
 });
 
+const addDistinctEdgesForHop = (
+  resultSet: ResultSet,
+  edgeIds: string[],
+  edgeById: Map<string, CanvasEdge>,
+) => {
+  for (const rawEdge of getDistinctResultEdges(resultSet, edgeIds)) {
+    if (edgeById.has(rawEdge.id)) continue;
+    // Prefer display-mapped edge (e.g. treat → impact) when converting for the canvas.
+    const edge = getEdgeById(resultSet, rawEdge.id) ?? rawEdge;
+    edgeById.set(rawEdge.id, resultEdgeToCanvasEdge(edge));
+  }
+};
+
 export const extractNodesAndEdgesFromPath = (
   resultSet: ResultSet,
   path: Path,
 ): { nodes: CanvasNode[]; edges: CanvasEdge[] } => {
-  const nodes: CanvasNode[] = [];
-  const edges: CanvasEdge[] = [];
+  const nodeById = new Map<string, CanvasNode>();
+  const edgeById = new Map<string, CanvasEdge>();
+  const subgraph = path.compressedSubgraph ?? path.subgraph;
 
-  for (let i = 0; i < path.subgraph.length; i++) {
-    const id = path.subgraph[i] as string;
-    if (i % 2 === 0) {
-      const node = getNodeById(resultSet, id);
-      if (node) nodes.push(resultNodeToCanvasNode(node));
-    } else {
-      const edge = getEdgeById(resultSet, id);
-      if (edge) edges.push(resultEdgeToCanvasEdge(edge));
+  for (let i = 0; i < subgraph.length; i++) {
+    const slot = subgraph[i];
+    if (isNodeIndex(i)) {
+      if (typeof slot !== 'string') continue;
+      if (nodeById.has(slot)) continue;
+      const node = getNodeById(resultSet, slot);
+      if (node) nodeById.set(slot, resultNodeToCanvasNode(node));
+      continue;
     }
+
+    const edgeIds = Array.isArray(slot) ? slot : [slot];
+    addDistinctEdgesForHop(resultSet, edgeIds, edgeById);
   }
 
-  return { nodes, edges };
+  return {
+    nodes: Array.from(nodeById.values()),
+    edges: Array.from(edgeById.values()),
+  };
+};
+
+/** One representative edge ID per distinct predicate for each subject/object pair. */
+const dedupeEdgesByNodePairAndPredicate = (
+  resultSet: ResultSet,
+  edges: CanvasEdge[],
+): CanvasEdge[] => {
+  const byPair = new Map<string, string[]>();
+  for (const edge of edges) {
+    const key = `${edge.subject}|${edge.object}`;
+    const existing = byPair.get(key);
+    if (existing) existing.push(edge.id);
+    else byPair.set(key, [edge.id]);
+  }
+
+  const edgeById = new Map(edges.map(edge => [edge.id, edge]));
+  const deduped: CanvasEdge[] = [];
+  for (const edgeIds of byPair.values()) {
+    for (const edge of getDistinctResultEdges(resultSet, edgeIds)) {
+      const canvasEdge = edgeById.get(edge.id);
+      if (canvasEdge) deduped.push(canvasEdge);
+    }
+  }
+  return deduped;
 };
 
 /** Union nodes and edges from every path in a result. */
@@ -165,7 +211,7 @@ export const extractNodesAndEdgesFromResult = (
 
   return {
     nodes: Array.from(nodeById.values()),
-    edges: Array.from(edgeById.values()),
+    edges: dedupeEdgesByNodePairAndPredicate(resultSet, Array.from(edgeById.values())),
   };
 };
 
