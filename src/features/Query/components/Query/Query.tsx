@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries, useNameResolverEndpoint } from "@/features/Query/hooks/customQueryHooks";
+import { noop } from "@/features/Core/utils/constants";
 import { withGeneMatchLabel } from "@/features/Query/utils/autocompleteFunctions";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import styles from './Query.module.scss';
@@ -17,6 +18,7 @@ interface QueryProps {
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
+  initNodeCategoryParam?: string | null;
   selectedProject?: ProjectRaw | null;
   combinedStyles?: { [key: string]: string };
   shouldNavigate?: boolean;
@@ -29,10 +31,11 @@ const Query: FC<QueryProps> = ({
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
+  initNodeCategoryParam = null,
   selectedProject = null,
   combinedStyles,
   shouldNavigate = true,
-  submissionCallback = () => {}
+  submissionCallback = noop
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
@@ -46,7 +49,7 @@ const Query: FC<QueryProps> = ({
     clear: clearQueryItem,
     inputText,
     setInputText,
-  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam, initNodeCategoryParam);
 
   const autocompleteConfig = useAutocompleteConfig(queryItem.type);
 

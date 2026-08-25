@@ -2,7 +2,6 @@ import { FC, useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
-import { getQueryStatusById } from '@/features/ResultList/slices/queryStatusSlice';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
 import { getPathCount } from '@/features/Core/utils/resultHelpers';
@@ -24,8 +23,11 @@ import ResultItemInteractables from '@/features/ResultItem/components/ResultItem
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
-import ResultListTopBar from '@/features/ResultList/components/ResultListTopBar/ResultListTopBar';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -34,7 +36,6 @@ const ResultDetailView: FC = () => {
   const decodedParams = useDecodedParams();
   const queryId = getDataFromQueryVar("q", decodedParams);
   const resultSet = useSelector(getResultSetById(queryId));
-  const queryStatus = useSelector(getQueryStatusById(queryId));
 
   const result = useMemo(() => resultId ? getResultById(resultSet, resultId) : undefined, [resultSet, resultId]);
   const subjectNode = useMemo(() => result ? getNodeById(resultSet, result.subject) : undefined, [resultSet, result]);
@@ -56,6 +57,7 @@ const ResultDetailView: FC = () => {
     queryNodeID,
     queryNodeLabel,
     queryType,
+    resultsLoading,
     setShowHiddenPaths,
     showHiddenPaths,
     shouldUpdateResultsAfterBookmark,
@@ -114,6 +116,15 @@ const ResultDetailView: FC = () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
+  const {
+    setNodeRef: setResultDragRef,
+    attributes: resultDragAttributes,
+    listeners: resultDragListeners,
+    isDragging: isResultDragging,
+    canDrag: canDragResult,
+    onContextMenu: handleResultContextMenu,
+  } = useResultCanvasDrag(result?.id, pk);
+
   const graph = useMemo(() => {
     if (!graphActive || !resultSet?.data || !result) return { nodes: {}, edges: {} };
       return resultToGraphData(result, resultSet.data);
@@ -123,8 +134,9 @@ const ResultDetailView: FC = () => {
     return <ViewNotFound entity="query" id="missing" />;
   }
 
-  // Loading state
-  if (!resultSet && (!queryStatus || queryStatus.isLoading)) {
+  // The result set can be cached in Redux while the list refetches, so this reads
+  // the list's own loading state to stay in sync with `visibleResultIds` below.
+  if (resultsLoading) {
     return <ResultDetailViewSkeleton />;
   }
 
@@ -137,7 +149,7 @@ const ResultDetailView: FC = () => {
 
   return (
     <div className={styles.resultDetailView}>
-      <ResultListTopBar/>
+      <ViewTopBar/>
       <FilteredOutWrapper
         isFilteredOut={isFilteredOut}
         message="This result has been filtered out."
@@ -152,7 +164,17 @@ const ResultDetailView: FC = () => {
         <div className={styles.header}>
           <div className={styles.top}>
             <div className={styles.infoContainer}>
-              <div className={styles.nameContainer}>
+              <div
+                ref={setResultDragRef}
+                className={joinClasses(
+                  styles.nameContainer,
+                  canDragResult && dragStyles.draggable,
+                  isResultDragging && dragStyles.dragging,
+                )}
+                onContextMenu={handleResultContextMenu}
+                {...resultDragListeners}
+                {...resultDragAttributes}
+              >
                 <ResultItemName
                   isPathfinder={isPathfinder}
                   subjectNode={subjectNode}
@@ -231,6 +253,7 @@ const ResultDetailView: FC = () => {
               pathArray={result.paths}
               pathFilterState={pathFilterState ?? {}}
               pk={pk ?? ''}
+              resultId={result.id}
               setShowHiddenPaths={setShowHiddenPaths}
               showHiddenPaths={showHiddenPaths}
             />

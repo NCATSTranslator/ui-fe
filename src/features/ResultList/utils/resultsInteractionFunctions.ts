@@ -401,9 +401,9 @@ export const injectDynamicFilters = (
   for (const tagEntry of tagsAdded) {
     const tag = tagEntry.tag;
     const ridx = tagEntry.index;
-    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
-    modifiedFormattedResults[ridx].tags[tag.id] = null;
-    modifiedOriginalResults[ridx].tags[tag.id] = null;
+    modifiedSummary.data.tags[tag.id] = tag.description;
+    modifiedFormattedResults[ridx].tags[tag.id] = tag;
+    modifiedOriginalResults[ridx].tags[tag.id] = tag;
   }
   return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }

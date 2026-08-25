@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
 import { PublicationObject, Provenance, SourceObject, TrialObject } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
@@ -54,12 +54,19 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
 export const getNodeSpecies = (node: ResultNode): Species => {
   return node.annotations?.gene?.species?.value ?? null;
 }
-export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
-  let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
+export const getRawEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
+  const edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
   if(!edge) {
     console.warn(`Unable to find edge with id: ${id} within result set.`);
     return undefined;
   }
+  return edge;
+};
+
+export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
+  const edge = getRawEdgeById(resultSet, id);
+  if(!edge)
+    return undefined;
 
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
@@ -89,16 +96,16 @@ export const getPubById = (resultSet: ResultSet | null, id:string): PublicationO
  * over generic provenance information.
  */
 export const getEdgeProvenance = (resultSet: ResultSet | null, edge: ResultEdge | undefined): Provenance[] => {
-  if (!resultSet || !edge?.provenance) return [];
+  if (!edge?.provenance) return [];
   return edge.provenance.map((source): Provenance => {
-    const provenance = resultSet.data.provenance?.[source.infores];
-    const sourceRecord = (source.records && source.records.length > 0) ? source.records[0] : null;
+    const catalogEntry = resultSet?.data.provenance?.[source.infores];
+    const sourceRecord = source.records?.length > 0 ? source.records[0] : null;
     return {
       infores: source.infores,
-      knowledge_level: provenance?.knowledge_level ?? "",
-      name: provenance?.name ?? null,
-      url: (null !== sourceRecord) ? sourceRecord : provenance?.url ?? null,
-      wiki: provenance?.wiki ?? null,
+      knowledge_level: catalogEntry?.knowledge_level ?? "",
+      name: catalogEntry?.name ?? source.infores,
+      url: sourceRecord ?? catalogEntry?.url ?? null,
+      wiki: catalogEntry?.wiki ?? null,
     };
   });
 }
@@ -107,10 +114,17 @@ export const getEdgeProvenance = (resultSet: ResultSet | null, edge: ResultEdge 
  * Resolves the display source for a publication from an infores id.
  */
 export const getPublicationSource = (resultSet: ResultSet | null, infores: string | undefined, edge?: ResultEdge): SourceObject | undefined => {
-  if (!resultSet || !infores) return undefined;
+  if (!infores) return undefined;
+  const recordUrl = edge?.provenance.find(source => source.infores === infores)?.records?.[0];
+  if (!resultSet) {
+    return {
+      knowledge_level: "",
+      name: infores,
+      url: recordUrl ?? "",
+    };
+  }
   const provenance = resultSet.data.provenance?.[infores];
   if (!provenance) return undefined;
-  const recordUrl = edge?.provenance.find(source => source.infores === infores)?.records[0];
   return {
     knowledge_level: provenance.knowledge_level,
     name: provenance.name ?? "",
@@ -136,5 +150,11 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
   }
   return state.resultSets[id];
 }
+
+export const selectResultSets = (state: { resultSets: ResultState }) => state.resultSets;
+export const selectResultSetKeys = createSelector(
+  selectResultSets,
+  (resultSets) => Object.keys(resultSets),
+);
 
 export default resultSetsSlice.reducer;

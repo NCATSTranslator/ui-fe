@@ -1,11 +1,11 @@
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
 import './App.scss';
 import { useGoogleAnalytics } from '@/features/Core/hooks/useGoogleAnalytics';
 import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
 import { useWindowSize } from '@/features/Core/hooks/useWindowSize';
 import { useScrollToHash } from '@/features/Core/hooks/useScrollToHash';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
+import { MAIN_CONTENT_ELEMENT_ID, MAIN_SCROLL_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
 import { commonQueryClientOptions } from '@/features/Core/utils/queryClientConfig';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
@@ -21,7 +21,17 @@ import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
+import ResultEntityDragOverlay, { ResultEntityDragOverlayData } from '@/features/DragAndDrop/components/ResultEntityDragOverlay/ResultEntityDragOverlay';
+import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
+import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
+import useCanvasEnabled from '@/features/Canvas/hooks/useCanvasEnabled';
+import { useDispatch } from 'react-redux';
+import { closePane } from '@/features/Canvas/slices/canvasSlice';
+
+// Lazy so translator-graph-view stays out of the entry chunk.
+const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -31,6 +41,14 @@ const App = ({children}: {children?: ReactNode}) => {
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
   const isSmallScreen = width && width < minScreenWidth;
+  const [canvasEnabled] = useCanvasEnabled();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!canvasEnabled) {
+      dispatch(closePane());
+    }
+  }, [canvasEnabled, dispatch]);
 
   const [gaID, setGaID] = useState<string | null>(null);
   useGoogleAnalytics(gaID ?? undefined);
@@ -39,13 +57,13 @@ const App = ({children}: {children?: ReactNode}) => {
 
   const { pathnameClass, additionalClasses } = getPathnameClasses(location.pathname);
 
-
   const [sessionStatus] = useGetSessionStatus();
   useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
   useScrollToHash();
 
   // Drag and drop state
   const [activeQuery, setActiveQuery] = useState<UserQueryObject | null>(null);
+  const [activeResultEntity, setActiveResultEntity] = useState<ResultEntityDragOverlayData | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }, // Require 8px movement before drag starts
@@ -53,14 +71,22 @@ const App = ({children}: {children?: ReactNode}) => {
   );
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    if (active.data.current?.type === 'query') {
-      const query = active.data.current?.data as UserQueryObject;
-      setActiveQuery(query);
+    const dragType = active.data.current?.type;
+    if (dragType === 'query') {
+      setActiveQuery(active.data.current?.data as UserQueryObject);
+      setActiveResultEntity(null);
+    } else if (isResultEntityDragType(dragType)) {
+      setActiveResultEntity(active.data.current as ResultEntityDragOverlayData);
+      setActiveQuery(null);
+    } else {
+      setActiveQuery(null);
+      setActiveResultEntity(null);
     }
   }
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveQuery(null);
+    setActiveResultEntity(null);
     
     if (over?.data.current?.onDrop) {
       try {
@@ -76,45 +102,63 @@ const App = ({children}: {children?: ReactNode}) => {
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
-          <div className={joinClasses('app', pathnameClass, additionalClasses)}>
-            <AppToastContainer />
-            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="layout">
-                <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
-                <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
-                  <Header />
-                  {children}
-                  {
-                    isSmallScreen && <SmallScreenOverlay /> 
-                  }
-                  <Outlet />
-                  <Footer>
-                    <nav>
-                      <a
-                        href="https://ncats.nih.gov/translator/about"
-                        rel="noreferrer"
-                        target="_blank"
-                      >About Translator</a>
-                      <NavLink to={`/terms-of-use`}
-                        className={({isActive}) => joinClasses(isActive && 'active')}
-                      >Terms of Use</NavLink>
-                      <a
-                        href="https://ncats.nih.gov/privacy"
-                        rel="noreferrer"
-                        target="_blank"
-                      >Privacy Policy</a>
-                    </nav>
-                  </Footer>
-                </main>
+          <CanvasDeleteConfirmationProvider>
+            <CanvasContextMenuProvider>
+              <div className={joinClasses('app', pathnameClass, additionalClasses)}>
+                <AppToastContainer />
+                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <div className="layout">
+                    <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
+                    <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>
+                      <div id={MAIN_SCROLL_ELEMENT_ID} className='contentScroll scrollable'>
+                        <Header />
+                        {children}
+                        {
+                          isSmallScreen && <SmallScreenOverlay /> 
+                        }
+                        <Outlet />
+                        <Footer>
+                          <nav>
+                            <a
+                              href="https://ncats.nih.gov/translator/about"
+                              rel="noreferrer"
+                              target="_blank"
+                            >About Translator</a>
+                            <NavLink to={`/terms-of-use`}
+                              className={({isActive}) => joinClasses(isActive && 'active')}
+                            >Terms of Use</NavLink>
+                            <a
+                              href="https://ncats.nih.gov/privacy"
+                              rel="noreferrer"
+                              target="_blank"
+                            >Privacy Policy</a>
+                          </nav>
+                        </Footer>
+                      </div>
+                      <Suspense fallback={null}>
+                        {canvasEnabled && <CanvasPane />}
+                      </Suspense>
+                    </main>
+                  </div>
+                  {createPortal(
+                    <DragOverlay
+                      className={joinClasses('dragOverlayBase', activeResultEntity && 'dragOverlay')}
+                    >
+                      {activeQuery && (
+                        <DraggableQueryCardWrapper>
+                          <SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" />
+                        </DraggableQueryCardWrapper>
+                      )}
+                      {activeResultEntity && (
+                        <ResultEntityDragOverlay dragData={activeResultEntity} />
+                      )}
+                    </DragOverlay>,
+                    document.body,
+                  )}
+                </DndContext>
               </div>
-              {createPortal(
-                <DragOverlay>
-                  {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
-                </DragOverlay>,
-                document.body,
-              )}
-            </DndContext>
-          </div>
+            </CanvasContextMenuProvider>
+          </CanvasDeleteConfirmationProvider>
         </ProjectModalsProvider>
       </QueryClientProvider>
     </SidebarProvider>

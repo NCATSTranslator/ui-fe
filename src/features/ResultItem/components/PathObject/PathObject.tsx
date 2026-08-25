@@ -1,21 +1,16 @@
 import styles from './PathObject.module.scss';
-import { FC, RefObject, useCallback, useContext, useId } from 'react';
-import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import NodeTooltipContent from '@/features/Core/components/Tooltips/NodeTooltipContent';
-import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipMappers';
+import { FC, RefObject, memo, useCallback, useEffect, useId, useMemo } from 'react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { getDefaultEdge, getDefaultNode } from '@/features/Core/utils/resultHelpers';
-import { getNodeIcon } from '@/features/Core/utils/entityLinks';
-import Highlighter from 'react-highlight-words';
+import PathNode from '@/features/ResultItem/components/PathNode/PathNode';
 import Predicate from '@/features/ResultItem/components/Predicate/Predicate';
 import { Path, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { isResultNode, isResultEdge } from '@/features/ResultList/types/checkers';
+import { warnOnceOnEntityTypeMismatch } from '@/features/ResultList/utils/entityTypeWarnings';
 import { useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useResultItemId, useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
-import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
-import { HoverContext } from '@/features/ResultItem/components/PathView/PathView';
+import { useHoverHandlers, useIsEntityHovered } from '@/features/ResultItem/hooks/hoverHooks';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 
@@ -58,45 +53,38 @@ const PathObject: FC<PathObjectProps> = ({
   // ID of the main element (in the case of a compressed edge)
   const itemID = (Array.isArray(id)) ? id[0] : id;
   const isNodeSlot = isNodeIndex(index);
-  const pathObject = isNodeSlot ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID);
+  // Memoized because getEdgeById deep clones "treats" edges, and because the
+  // derived node/edge below are the props that let PathNode/Predicate stay memoized.
+  const pathObject = useMemo(
+    () => isNodeSlot ? getNodeById(resultSet, itemID) : getEdgeById(resultSet, itemID),
+    [resultSet, isNodeSlot, itemID]
+  );
 
-  const node = (pathObject && isNodeSlot) ? getDefaultNode(pathObject as ResultNode) : null;
-  let edge: ResultEdge | null = null;
-  if (pathObject && !isNodeSlot) {
-    edge = getDefaultEdge(pathObject as ResultEdge);
-    if (!edge.predicate) edge.predicate = 'Unknown relationship';
-  }
+  const node = useMemo(
+    () => (pathObject && isNodeSlot) ? getDefaultNode(pathObject as ResultNode) : null,
+    [pathObject, isNodeSlot]
+  );
+  const edge = useMemo<ResultEdge | null>(() => {
+    if (!pathObject || isNodeSlot) return null;
+    const defaultedEdge = getDefaultEdge(pathObject as ResultEdge);
+    if (!defaultedEdge.predicate) defaultedEdge.predicate = 'Unknown relationship';
+    return defaultedEdge;
+  }, [pathObject, isNodeSlot]);
 
-  if (pathObject && isNodeSlot && !isResultNode(pathObject, true)) {
-    console.warn(`PathObject node "${itemID}" rendering with defaults after strict check failure.`);
-  }
-  if (pathObject && !isNodeSlot && !isResultEdge(pathObject, true)) {
-    console.warn(`PathObject edge "${itemID}" rendering with defaults after strict check failure.`);
-  }
+  // Deliberately an effect rather than inline: the strict checkers are expensive and
+  // log heavily, so they must stay off the render path that hover interactions hit.
+  useEffect(() => {
+    warnOnceOnEntityTypeMismatch(isNodeSlot ? 'node' : 'edge', itemID, pathObject);
+  }, [pathObject, isNodeSlot, itemID]);
 
   const { isEdgeSeen } = useSeenStatus(pk);
   const isSeen = !!edge && isEdgeSeen(edge.id);
   const uid = useId();
-  const nodeTooltipProps = node ? nodeToTooltipProps(node) : null;
-  const nodeNameString = nodeTooltipProps?.nameString || node?.id || 'Unknown';
-  const hoverContext = useContext(HoverContext);
-  if (!hoverContext) {
-    throw new Error("PathObject must be rendered inside PathView's HoverContext provider");
-  }
-  const { hoveredItem, setHoveredItem } = hoverContext;
-  const isHighlighted = hoveredItem?.id === itemID;
-  const { getHoverHandlers } = useHoverPathObject(setHoveredItem);
-  const hoverHandlers = edge ? getHoverHandlers(true, itemID, index) : getHoverHandlers(false, itemID, index);
-
-  const nodeClass = joinClasses(
-    styles.nameContainer,
-    styles.pathObject,
-    className,
-    pathViewStyles && pathViewStyles.nameContainer,
-    inModal && styles.inModal,
-    isEven && styles.isEven,
-    isHighlighted && styles.highlighted
-  );
+  // Subscribing to just this entity's highlight keeps a hover from re-rendering
+  // every other path object on the page.
+  const isHighlighted = useIsEntityHovered(itemID);
+  const hoverHandlers = useHoverHandlers(!isNodeSlot, itemID);
+  const edgeIds = useMemo(() => (Array.isArray(id) ? id : [id]), [id]);
 
   const handleNodeClick = useCallback((targetNode: ResultNode) => {
     if (effectiveResultId) {
@@ -109,7 +97,6 @@ const PathObject: FC<PathObjectProps> = ({
   }, [effectiveResultId, resultsNavigate]);
 
   if (!pathObject) {
-    console.warn(`Could not generate PathObject, missing ${isNodeSlot ? 'node' : 'edge'} with id: ${itemID}`);
     const placeholderClass = joinClasses(
       isNodeSlot ? styles.nameContainer : styles.predicateContainer,
       styles.pathObject,
@@ -134,32 +121,20 @@ const PathObject: FC<PathObjectProps> = ({
 
   if (node) {
     return (
-      <span
-        className={nodeClass}
-        data-tooltip-id={`${uid}`}
-        data-node-id={node.id}
-        onClick={(e)=> {e.stopPropagation(); handleNodeClick(node);}}
-        {...hoverHandlers}
-        >
-        <div className={`${styles.nameShape} ${pathViewStyles && pathViewStyles.nameShape}`}>
-          <div className={`${styles.background} ${pathViewStyles && pathViewStyles.background}`}></div>
-        </div>
-        <span className={`${!!pathViewStyles && pathViewStyles.nameInterior} ${styles.name}`} >
-          {getNodeIcon(node.types[0])}
-          <span className={styles.text}>
-            <Highlighter
-              highlightClassName="highlight"
-              searchWords={activeEntityFilters}
-              autoEscape={true}
-              textToHighlight={nodeNameString}
-            />
-          </span>
-        </span>
-        <PathArrow className={`${!!pathViewStyles && pathViewStyles.icon} ${styles.icon}`}/>
-        <Tooltip id={`${uid}`}>
-          {nodeTooltipProps && <NodeTooltipContent {...nodeTooltipProps} nameString={nodeNameString} />}
-        </Tooltip>
-      </span>
+      <PathNode
+        activeEntityFilters={activeEntityFilters}
+        className={className}
+        hoverHandlers={hoverHandlers}
+        inModal={inModal}
+        isEven={isEven}
+        isHighlighted={isHighlighted}
+        node={node}
+        onNodeClick={handleNodeClick}
+        parentStyles={styles}
+        pathViewStyles={pathViewStyles}
+        pk={pk}
+        uid={uid}
+      />
     );
   }
 
@@ -169,7 +144,7 @@ const PathObject: FC<PathObjectProps> = ({
         path={path}
         parentPathKey={parentPathKey}
         edge={edge}
-        edgeIds={(Array.isArray(id)) ? id : [id]}
+        edgeIds={edgeIds}
         selected={selected}
         activeEntityFilters={activeEntityFilters}
         uid={uid}
@@ -192,4 +167,4 @@ const PathObject: FC<PathObjectProps> = ({
   return null;
 }
 
-export default PathObject;
+export default memo(PathObject);

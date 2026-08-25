@@ -1,0 +1,13 @@
+@use "@/assets/styles/variables" as *;
+
+.draggable {
+  cursor: grab !important;
+
+  &:active {
+    cursor: grabbing !important;
+  }
+}
+
+.dragging {
+  opacity: 0.5;
+}

@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useMemo, RefObject } from 'react';
+import { FC, MouseEvent, memo, useCallback, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
@@ -19,6 +19,9 @@ import { isAcceptedOntologyEdge } from '@/features/ResultItem/utils/utilities';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
+import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 interface PredicateProps {
   activeEntityFilters: string[];
@@ -67,24 +70,51 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
-  const formattedEdge = (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge;
+  const { openMenu } = useCanvasContextMenu();
+  const formattedEdge = useMemo(
+    () => (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge,
+    [resultSet, edgeIds, edge]
+  );
   const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
+
+  const {
+    attributes: edgeDragAttributes,
+    listeners: edgeDragListeners,
+    setNodeRef: setEdgeDragRef,
+    isDragging: isEdgeDragging,
+    canDrag: canDragEdge,
+  } = useResultEntityDraggable({
+    type: 'edge',
+    data: { id: edgeIds[0], pk, edgeIds },
+  });
+
+  const setEdgeRef = useCallback((node: HTMLSpanElement | null) => {
+    setEdgeDragRef(node);
+    if (selected && selectedEdgeRef) {
+      selectedEdgeRef.current = node;
+    }
+  }, [setEdgeDragRef, selected, selectedEdgeRef]);
 
   const { navigateToEvidenceView } = useResultListContext();
   const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
 
-  const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0) ? [...formattedEdge.compressed_edges, formattedEdge] : [formattedEdge];
-  const hasPubs = checkEdgesForPubs(edgeArrayToCheck);
-  const hasCTs = checkEdgesForClinicalTrials(edgeArrayToCheck);
-  const isAcceptedOntology = isAcceptedOntologyEdge(formattedEdge);
-
-  const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
-  ? [...formattedEdge.compressed_edges, formattedEdge]
-  : [formattedEdge];
+  const { hasPubs, hasCTs, isAcceptedOntology } = useMemo(() => {
+    const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0)
+      ? [...formattedEdge.compressed_edges, formattedEdge]
+      : [formattedEdge];
+    return {
+      hasPubs: checkEdgesForPubs(edgeArrayToCheck),
+      hasCTs: checkEdgesForClinicalTrials(edgeArrayToCheck),
+      isAcceptedOntology: isAcceptedOntologyEdge(formattedEdge),
+    };
+  }, [formattedEdge]);
 
   const tooltipEdgeEntries = useMemo(() => {
     if (!resultSet) return [];
+    const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
+      ? [...formattedEdge.compressed_edges, formattedEdge]
+      : [formattedEdge];
     return edgesToTooltipEntries(resultSet, edgesToDisplay.filter(Boolean) as ResultEdge[]);
   }, [resultSet, formattedEdge]);
 
@@ -99,7 +129,9 @@ const Predicate: FC<PredicateProps> = ({
     (selected && parentStyles) && `${parentStyles.selected} ${styles.selected}`,
     (inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`,
     (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`,
-    (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`
+    (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`,
+    canDragEdge && dragStyles.draggable,
+    isEdgeDragging && dragStyles.dragging,
   )
 
   const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string, options?: PredicateClickOptions) => {
@@ -122,13 +154,16 @@ const Predicate: FC<PredicateProps> = ({
 
   return (
     <span
+      ref={setEdgeRef}
       className={edgeClass}
       data-tooltip-id={`${formattedEdge.predicate}${uid}`}
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
       onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, parentPathKey)}
-      ref={selected ? selectedEdgeRef : null}
+      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }}
       {...hoverHandlers}
+      {...edgeDragListeners}
+      {...edgeDragAttributes}
       >
       <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
         <div className={`${parentStyles && parentStyles.background} ${styles.background}`}></div>
@@ -182,4 +217,4 @@ const Predicate: FC<PredicateProps> = ({
   )
 }
 
-export default Predicate;
+export default memo(Predicate);

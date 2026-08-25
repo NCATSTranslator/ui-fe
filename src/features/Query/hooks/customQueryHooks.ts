@@ -1,28 +1,43 @@
-import { useMemo, useState, useCallback, useRef } from 'react';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
+import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
+import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
+import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { getResultsShareURLPath, getPathfinderResultsShareURLPath, getLookupResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
-import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { buildInitialQueryItemState } from '@/features/Query/utils/queryInitState';
+import { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+import { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { errorToast } from '@/features/Core/utils/toastMessages';
+import { errorToast, unsupportedSmartQueryCategoryToast } from '@/features/Core/utils/toastMessages';
+import { noop } from '@/features/Core/utils/constants';
 
-/**
- * Custom hook that filters and sorts cached queries into categorized example queries.
- * Memoizes the result to prevent unnecessary recalculations on re-renders.
- *
- * @param {Example[] | undefined} cachedQueries - Array of cached query objects to filter and sort
- * @returns Object containing categorized example queries:
- *   - exampleDiseases: Drug-related queries
- *   - exampleChemsUp: Gene queries with 'increased' direction
- *   - exampleChemsDown: Gene queries with 'decreased' direction
- *   - exampleGenesUp: Chemical queries with 'increased' direction
- *   - exampleGenesDown: Chemical queries with 'decreased' direction
- */
 export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
+
+export const HOME_QUERY_AUTOCOMPLETE_CONFIG: AutocompleteConfig = {
+  functions: {
+    filter: defaultQueryFilterFactory,
+    annotate: queryTypeAnnotator,
+    format: combinedQueryFormatter,
+  },
+  limitTypes: [
+    "Drug",
+    "ChemicalEntity",
+    "Disease",
+    "Gene",
+    "SmallMolecule",
+    "PhenotypicFeature",
+    "BiologicalProcess",
+    "AnatomicalEntity",
+    "CellLine",
+  ],
+  limitPrefixes: [],
+  excludePrefixes: ["UMLS"],
+};
 
 /**
  * Custom hook that resolves the name resolver lookup endpoint from config,
@@ -41,6 +56,18 @@ export const useNameResolverEndpoint = (): string => {
   );
 };
 
+/**
+ * Custom hook that filters and sorts cached queries into categorized example queries.
+ * Memoizes the result to prevent unnecessary recalculations on re-renders.
+ *
+ * @param {Example[] | undefined} cachedQueries - Array of cached query objects to filter and sort
+ * @returns Object containing categorized example queries:
+ *   - exampleDiseases: Drug-related queries
+ *   - exampleChemsUp: Gene queries with 'increased' direction
+ *   - exampleChemsDown: Gene queries with 'decreased' direction
+ *   - exampleGenesUp: Chemical queries with 'increased' direction
+ *   - exampleGenesDown: Chemical queries with 'decreased' direction
+ */
 export const useExampleQueries = (cachedQueries: Example[] | undefined): ExampleQueries  => {
   return useMemo(() => {
     if (!cachedQueries) return {
@@ -74,7 +101,7 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
  *   - submitQuery: Async function to submit a query item to the API
  *   - submitPathfinderQuery: Async function to submit a pathfinder query with two items
  */
-export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
+export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = noop) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const config = useSelector(currentConfig);
@@ -142,7 +169,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
     itemTwo: AutocompleteItem,
     middleType?: string,
     projectId?: string,
-    shouldNavigate: boolean = true,
   ) => {
     setIsLoading(true);
 
@@ -175,8 +201,11 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
         shouldHash: config?.include_hashed_parameters,
       });
       submissionCallback();
-      if(shouldNavigate)
-        navigate(`/${newQueryPath}`);
+      if (!shouldNavigate) {
+        setIsLoading(false);
+        return;
+      }
+      navigate(`/${newQueryPath}`);
 
     } catch (error) {
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
@@ -184,7 +213,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       console.log(error);
       throw error;
     }
-  }, [navigate, config]);
+  }, [navigate, config, shouldNavigate, submissionCallback]);
 
   const submitLookupQuery = useCallback(async (
     item: AutocompleteItem,
@@ -232,7 +261,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       console.error(error);
       throw error;
     }
-  }, [navigate, config, shouldNavigate]);
+  }, [navigate, config, shouldNavigate, submissionCallback]);
 
   return {
     isLoading,
@@ -341,43 +370,59 @@ export const useAutocompleteConfig = (queryType: QueryType): AutocompleteConfig 
  *   - setInputText: Function to update input text
  *   - clear: Function to reset state to initial values
  */
+export { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+export { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
+
+export const useSyncedAutocompleteFromNodeParams = (
+  initNodeIdParam: string | null | undefined,
+  initNodeLabelParam: string | null | undefined,
+  initNodeCategoryParam?: string | null,
+) => {
+  const initItem = useMemo(
+    () => autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam),
+    [initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
+  );
+  const initInputText = initNodeLabelParam || initNodeIdParam || '';
+  const [queryItem, setQueryItem] = useStateSyncedTo(initItem);
+  const [inputText, setInputText] = useStateSyncedTo(initInputText);
+
+  return { queryItem, setQueryItem, inputText, setInputText };
+};
+
 export const useQueryItem = (
   initPresetTypeObject: QueryType | null,
   initNodeLabelParam: string | null,
-  initNodeIdParam: string | null
+  initNodeIdParam: string | null,
+  initNodeCategoryParam?: string | null,
 ) => {
-  // Compute derived initial query item
-  const initQueryItem = useMemo((): QueryItem => {
-    const initPresetType = initPresetTypeObject || queryTypes[0];
-    const initSelectedNode = initNodeIdParam && initNodeLabelParam
-      ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", isExact: false, score: Infinity, types: [] }
-      : null;
+  const initState = useMemo(
+    () => buildInitialQueryItemState(
+      initPresetTypeObject,
+      initNodeLabelParam,
+      initNodeIdParam,
+      initNodeCategoryParam,
+    ),
+    [initPresetTypeObject, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
+  );
+  const toastKeyRef = useRef<string | null>(null);
 
-    return {
-      type: initPresetType,
-      node: initSelectedNode
-    };
-  }, [initPresetTypeObject, initNodeIdParam, initNodeLabelParam]);
+  useEffect(() => {
+    if (!initState.categoryUnsupported) return;
+    const toastKey = initNodeCategoryParam ?? '';
+    if (toastKeyRef.current === toastKey) return;
+    toastKeyRef.current = toastKey;
+    unsupportedSmartQueryCategoryToast();
+  }, [initState.categoryUnsupported, initNodeCategoryParam]);
 
-  // State
-  const [queryItem, setQueryItem] = useState<QueryItem>(initQueryItem);
-  const [inputText, setInputText] = useState<string>(initNodeLabelParam || "");
-
-  // Track previous initQueryItem to detect prop changes (React 19 recommended pattern)
-  const [prevInitQueryItem, setPrevInitQueryItem] = useState<QueryItem>(initQueryItem);
-
-  // Adjust state during render when props change (avoids extra useEffect render cycle)
-  if (prevInitQueryItem !== initQueryItem) {
-    setPrevInitQueryItem(initQueryItem);
-    setQueryItem(initQueryItem);
-    setInputText(initNodeLabelParam || "");
-  }
+  const { queryItem: initQueryItem, inputText: initInputText } = initState;
+  const [queryItem, setQueryItem] = useStateSyncedTo(initQueryItem);
+  const [inputText, setInputText] = useStateSyncedTo(initInputText);
 
   // Clear function to reset state
   const clear = useCallback(() => {
     setQueryItem(initQueryItem);
-    setInputText(initNodeLabelParam || "");
-  }, [initQueryItem, initNodeLabelParam]);
+    setInputText(initInputText);
+  }, [initQueryItem, initInputText, setQueryItem, setInputText]);
 
   return {
     queryItem,

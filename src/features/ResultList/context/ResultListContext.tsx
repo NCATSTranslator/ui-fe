@@ -29,6 +29,8 @@ export interface ResultListContextValue {
   queryNodeDescription: string | null;
   queryType: QueryType | null;
   resultsComplete: boolean;
+  /** True until the list has produced its first batch of results, which is when `visibleResultIds` becomes meaningful. */
+  resultsLoading: boolean;
   scoreWeights: ScoreWeights;
   setExpandSharedResult: (state: boolean) => void;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
@@ -47,8 +49,11 @@ export interface ResultListContextValue {
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
 
+export const useOptionalResultListContext = (): ResultListContextValue | null =>
+  useContext(ResultListContext);
+
 export const useResultListContext = (): ResultListContextValue => {
-  const ctx = useContext(ResultListContext);
+  const ctx = useOptionalResultListContext();
   if (!ctx) throw new Error('useResultListContext must be used within a ResultListProvider');
   return ctx;
 };

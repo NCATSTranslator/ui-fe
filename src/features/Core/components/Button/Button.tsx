@@ -1,9 +1,21 @@
-import { CSSProperties, FC, MouseEvent, ReactNode, RefObject } from "react";
+import {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  FC,
+  MouseEvent,
+  ReactNode,
+  RefObject,
+} from "react";
 import styles from './Button.module.scss';
 import { Link } from "react-router-dom";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 
-interface ButtonProps {
+type NativeButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'children' | 'className' | 'disabled' | 'style' | 'title' | 'type' | 'onClick'
+>;
+
+interface ButtonProps extends NativeButtonProps {
   ariaLabel?: string;
   variant?: "secondary" | "textOnly";
   inline?: boolean;
@@ -28,7 +40,10 @@ interface ButtonProps {
   style?: CSSProperties;
 }
 
-const getButtonClasses = (props: ButtonProps): string =>
+const getButtonClasses = (props: Pick<
+  ButtonProps,
+  'variant' | 'inline' | 'iconOnly' | 'small' | 'iconLeft' | 'iconRight' | 'smallFont' | 'className'
+>): string =>
   joinClasses(
     'button',
     styles.button,
@@ -53,6 +68,29 @@ const ButtonContent: FC<Pick<ButtonProps, 'iconOnly' | 'iconLeft' | 'iconRight' 
   </>
 );
 
+const resolveAriaLabel = (ariaLabel?: string, ariaLabelAttr?: unknown) => {
+  if (ariaLabel) return ariaLabel;
+  if (typeof ariaLabelAttr === 'string') return ariaLabelAttr;
+  return undefined;
+};
+
+interface LinkedButtonProps {
+  href: string;
+  link: boolean;
+  blank: boolean;
+  rel: string;
+  commonProps: Record<string, unknown>;
+  content: ReactNode;
+}
+
+const LinkedButton: FC<LinkedButtonProps> = ({ href, link, blank, rel, commonProps, content }) => {
+  const linkProps = blank
+    ? { ...commonProps, target: '_blank', rel: 'noopener noreferrer' }
+    : { ...commonProps, rel };
+  if (link) return <Link {...linkProps} to={href}>{content}</Link>;
+  return <a {...linkProps} href={href}>{content}</a>;
+};
+
 const Button: FC<ButtonProps> = ({
   title,
   ariaLabel,
@@ -75,34 +113,41 @@ const Button: FC<ButtonProps> = ({
   className = "",
   dataTooltipId = "",
   ref,
-  style
+  style,
+  ...rest
 }) => {
   const buttonStyle = getButtonClasses({ variant, inline, iconOnly, small, iconLeft, iconRight, smallFont, className });
   const content = <ButtonContent iconOnly={iconOnly} iconLeft={iconLeft} iconRight={iconRight}>{children}</ButtonContent>;
-
+  const {
+    'aria-label': ariaLabelAttr,
+    ...domProps
+  } = rest;
   const commonProps = {
     title: title,
     className: buttonStyle,
     onClick: handleClick,
     'data-testid': testId,
     'data-tooltip-id': dataTooltipId,
-    style: style
+    style: style,
+    'aria-label': resolveAriaLabel(ariaLabel, ariaLabelAttr),
   };
 
   if (href) {
-    const linkProps = {
-      ...commonProps,
-      rel: rel,
-      'aria-label': ariaLabel || '',
-      ..._blank && { target: '_blank', rel: 'noopener noreferrer' }
-    };
-    return link
-    ? <Link {...linkProps} to={href}>{content}</Link>
-    : <a {...linkProps} href={href}>{content}</a>;
+    return (
+      <LinkedButton
+        href={href}
+        link={link}
+        blank={_blank}
+        rel={rel}
+        commonProps={commonProps}
+        content={content}
+      />
+    );
   }
 
   return (
     <button
+      {...domProps}
       {...commonProps}
       ref={ref}
       type={type}

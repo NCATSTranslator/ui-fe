@@ -12,7 +12,7 @@ export type ResultSet = {
     provenance: {[infores: string]: ProvenanceCatalogEntry},
     publications: {[key: string]: PublicationObject},
     results: Result[],
-    tags: Tags,
+    tags: ResultSetTags,
     trials: {[key: string]: TrialObject}
   }
 }
@@ -30,7 +30,7 @@ export interface Result {
   scores: Score[];
   // node ID
   subject: string;
-  tags: Tags;
+  tags: EntityTags;
 }
 
 export type SharedItem = {
@@ -91,9 +91,11 @@ export interface ResultEdge {
   description?: string | null;
   provenance: EdgeProvenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
+  signature: string;
+  source_time: string;
   // nodeID
   subject: string;
-  tags: Tags;
+  tags: EntityTags;
   trials: string[];
 }
 
@@ -163,8 +165,10 @@ export type ResultNode = {
   other_names: {[key: string]: string[]};
   // link to relevant info about node
   provenance: string[];
+  signature: string;
+  source_time: string;
   synonyms: string[];
-  tags: Tags;
+  tags: EntityTags;
   // array of biolink types
   types: string[];
 }
@@ -195,8 +199,22 @@ export type ResultGraph = {
   }[];
 }
 
-export type Tags = {
-  [key:string]: {name: string, value: string} | null;
+export type TagDescription = {
+  name: string;
+  description: string;
+};
+
+export type TagObject = {
+  id: string;
+  description: TagDescription;
+};
+
+export type ResultSetTags = {
+  [key:string]: TagDescription
+}
+
+export type EntityTags = {
+  [key:string]: TagObject
 }
 
 export type PathFilterState = {

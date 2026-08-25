@@ -1,5 +1,5 @@
 import { Path, ResultSet, ResultEdge, ResultNode } from '@/features/ResultList/types/results.d';
-import { getEdgeById, getEdgesByIds, getNodeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { getEdgeById, getEdgesByIds, getNodeById, getPathById, getRawEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 
 const DEFAULT_EDGE_METADATA = {
@@ -21,6 +21,8 @@ const EMPTY_EDGE: ResultEdge = {
   description: "",
   provenance: [],
   publications: {},
+  signature: "",
+  source_time: "",
   subject: "",
   trials: [],
   tags: {},
@@ -65,6 +67,8 @@ const EMPTY_NODE: ResultNode = {
   names: [],
   other_names: {},
   provenance: [],
+  signature: "",
+  source_time: "",
   synonyms: [],
   tags: {},
   types: [],
@@ -170,6 +174,26 @@ export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): Resu
 
   return baseEdge;
 };
+
+/**
+ * One representative edge per distinct raw predicate within a compressed group.
+ * Uses raw predicates so display rewrites (e.g. treat → impact) do not collapse distinct edges.
+ */
+export const getDistinctResultEdges = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge[] => {
+  const seenPredicates = new Set<string>();
+  const edges: ResultEdge[] = [];
+  for (const edgeID of edgeIDs) {
+    const edge = getRawEdgeById(resultSet, edgeID);
+    if (!edge || seenPredicates.has(edge.predicate)) continue;
+    seenPredicates.add(edge.predicate);
+    edges.push(edge);
+  }
+  return edges;
+};
+
+/** One representative edge ID per distinct raw predicate within a compressed group. */
+export const getDistinctPredicateEdgeIDs = (resultSet: ResultSet, edgeIDs: string[]): string[] =>
+  getDistinctResultEdges(resultSet, edgeIDs).map(edge => edge.id);
 
 export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
   const compressedEdges: ResultEdge[] = [];

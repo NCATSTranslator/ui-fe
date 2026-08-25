@@ -14,7 +14,8 @@ import {
   ExportedTrial,
   ExportFormat,
 } from "@/features/ResultDownload/types/download.d";
-import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
+import { exportToCSV } from "@/features/Core/utils/csvUtils";
+import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
 
@@ -324,39 +325,6 @@ export const cleanResultSet = (
  */
 export const exportToJSON = (exportedResultSet: ExportedResultSet): string => {
   return JSON.stringify(exportedResultSet, null, 2);
-};
-
-/**
- * Triggers a browser file download
- */
-export const triggerDownload = (content: string, filename: string, mimeType: string): void => {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
-/**
- * Sanitizes a string for use in a filename
- * - Removes or replaces special characters
- * - Limits length
- * - Converts spaces to underscores
- */
-export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
-  if (!str) return '';
-
-  return str
-    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
-    .replace(/\s+/g, '-')            // Replace spaces with dashes
-    .replace(/-+/g, '-')             // Collapse multiple hyphens
-    .replace(/_+/g, '_')             // Collapse multiple underscores
-    .slice(0, maxLength)             // Limit length
-    .replace(/[_-]+$/, '');          // Remove trailing underscores/hyphens
 };
 
 /**
