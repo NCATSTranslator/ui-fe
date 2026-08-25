@@ -108,12 +108,41 @@ const toAutocompleteItem = (id: string, label?: string | null): AutocompleteItem
   score: 0,
 });
 
+const getPathfinderSharePath = (
+  queryData: UserQueryObject['data']['query'],
+  qid: string,
+  resultID: string,
+  shouldHash: boolean,
+): string | null => {
+  if (!queryData.subject?.id || !queryData.object?.id) return null;
+  return getPathfinderResultsShareURLPath({
+    itemOne: toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+    itemTwo: toAutocompleteItem(queryData.object.id, queryData.node_two_label),
+    resultID,
+    constraint: queryData.constraint || undefined,
+    pk: qid,
+    shouldHash,
+  });
+};
+
+const getLookupSharePath = (
+  queryData: UserQueryObject['data']['query'],
+  qid: string,
+  resultID: string,
+  shouldHash: boolean,
+): string | null => {
+  if (!queryData.subject?.id) return null;
+  return getLookupResultsShareURLPath(
+    toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+    queryData.object?.category || '',
+    resultID,
+    qid,
+    shouldHash,
+  );
+};
+
 /**
  * Get the share URL path for a query using the appropriate builder for its type.
- * @param {UserQueryObject} query - The query to get the path for
- * @param {string} resultID - The result ID (pass '0' for list-only links)
- * @param {boolean} shouldHash - Whether to hash the URL parameters
- * @returns {string | null} The share URL path, or null if required data is missing
  */
 export const getQueryShareURLPath = (
   query: UserQueryObject,
@@ -123,26 +152,11 @@ export const getQueryShareURLPath = (
   const { qid, query: queryData } = query.data;
 
   if (queryData.type === 'pathfinder' && queryData.subject && queryData.object) {
-    if (!queryData.subject.id || !queryData.object.id) return null;
-    return getPathfinderResultsShareURLPath({
-      itemOne: toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
-      itemTwo: toAutocompleteItem(queryData.object.id, queryData.node_two_label),
-      resultID,
-      constraint: queryData.constraint || undefined,
-      pk: qid,
-      shouldHash,
-    });
+    return getPathfinderSharePath(queryData, qid, resultID, shouldHash);
   }
 
   if (queryData.type === 'lookup' && queryData.subject) {
-    if (!queryData.subject.id) return null;
-    return getLookupResultsShareURLPath(
-      toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
-      queryData.object?.category || '',
-      resultID,
-      qid,
-      shouldHash,
-    );
+    return getLookupSharePath(queryData, qid, resultID, shouldHash);
   }
 
   const curie = queryData.curie || '';
@@ -214,45 +228,57 @@ export const getBlankProjectTitle = (projects: Project[]) => {
   return `New Project ${highestNumber + 1}`;
 }
 
-export const getQueryStatusIndicatorStatus = (
-  arsStatus: ARAStatusResponse | null,
-  isFetchingARAStatus: boolean,
-  hasFreshResults: boolean,
-  isFetchingResults: boolean,
-  resultStatus: "error" | "running" | "success" | "unknown",
-  resultCount: number
-): { 
+export type QueryStatusIndicatorInput = {
+  arsStatus: ARAStatusResponse | null;
+  isFetchingARAStatus: boolean;
+  hasFreshResults: boolean;
+  isFetchingResults: boolean;
+  resultStatus: "error" | "running" | "success" | "unknown";
+  resultCount: number;
+};
+
+export type QueryStatusIndicatorResult = {
   label: 'Error' | 'New Results Available' | 'All Results Shown' | 'No Results' | 'Unknown' | '';
   status: 'complete' | 'running' | 'error' | 'unknown';
-} => {
-  // Error states take highest priority
-  if(arsStatus?.status === 'error' || resultStatus === 'error' || (!isFetchingARAStatus && !isFetchingResults && arsStatus === null)) {
-    return { label: 'Error', status: 'error' };
+};
+
+const isQueryStatusError = ({
+  arsStatus,
+  isFetchingARAStatus,
+  isFetchingResults,
+  resultStatus,
+}: Pick<QueryStatusIndicatorInput, 'arsStatus' | 'isFetchingARAStatus' | 'isFetchingResults' | 'resultStatus'>) =>
+  arsStatus?.status === 'error'
+  || resultStatus === 'error'
+  || (!isFetchingARAStatus && !isFetchingResults && arsStatus === null);
+
+const isQueryStatusLoading = ({
+  arsStatus,
+  isFetchingARAStatus,
+  isFetchingResults,
+}: Pick<QueryStatusIndicatorInput, 'arsStatus' | 'isFetchingARAStatus' | 'isFetchingResults'>) =>
+  isFetchingARAStatus
+  || arsStatus?.status === 'running'
+  || arsStatus === null
+  || isFetchingResults;
+
+export const getQueryStatusIndicatorStatus = (
+  input: QueryStatusIndicatorInput,
+): QueryStatusIndicatorResult => {
+  if (isQueryStatusError(input)) return { label: 'Error', status: 'error' };
+
+  if (input.hasFreshResults) {
+    const status = input.arsStatus?.status === 'complete' ? 'complete' : 'running';
+    return { label: 'New Results Available', status };
   }
-  
-  // Check for fresh results
-  if(hasFreshResults) {
-    if(arsStatus?.status === 'complete') {
-      return { label: 'New Results Available', status: 'complete' };
-    } else {
-      return { label: 'New Results Available', status: 'running' };
-    }
+
+  if (input.arsStatus?.status === 'complete' && !input.isFetchingResults) {
+    return input.resultCount === 0
+      ? { label: 'No Results', status: 'unknown' }
+      : { label: 'All Results Shown', status: 'complete' };
   }
-  
-  // Check if complete and all loaded
-  if(arsStatus?.status === 'complete' && !isFetchingResults) {
-    if(resultCount === 0) {
-      return { label: 'No Results', status: 'unknown' };
-    } else {
-      return { label: 'All Results Shown', status: 'complete' };
-    }
-  }
-  
-  // Loading states
-  if(isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
-    return { label: '', status: 'running' };
-  }
-  
-  // Default fallback
-  return { label: '', status: 'unknown' };
-}
+
+  if (isQueryStatusLoading(input)) return { label: '', status: 'running' };
+
+  return { label: 'Unknown', status: 'unknown' };
+};

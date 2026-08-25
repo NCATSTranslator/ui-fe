@@ -38,7 +38,7 @@ export const useUserQueries = () => {
   const shouldFetch = user !== null;
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
-  const query = useQuery({
+  return useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
     enabled: shouldFetch,
@@ -47,30 +47,17 @@ export const useUserQueries = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retry: false,
+    select: (data) => data.map(queryItem => {
+      if (queryItem.data.title !== null) return queryItem;
+      return {
+        ...queryItem,
+        data: {
+          ...queryItem.data,
+          title: generateQueryTitleFromQueryObject(queryItem),
+        },
+      };
+    }),
   });
-
-  // Process queries to replace null titles with generated titles
-  const processedData = useMemo(() => {
-    if (!query.data) return query.data;
-    
-    return query.data.map(queryItem => {
-      if (queryItem.data.title === null) {
-        return {
-          ...queryItem,
-          data: {
-            ...queryItem.data,
-            title: generateQueryTitleFromQueryObject(queryItem)
-          }
-        };
-      }
-      return queryItem;
-    });
-  }, [query.data]);
-
-  return {
-    ...query,
-    data: processedData
-  };
 };
 
 /**
