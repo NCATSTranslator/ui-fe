@@ -59,7 +59,7 @@ const PathContainer: FC<PathContainerProps> = ({
     if (!path.id) return;
     e.preventDefault();
     e.stopPropagation();
-    openMenu('path', path.id, pk, { x: e.clientX, y: e.clientY }, path);
+    openMenu({ type: 'path', id: path.id, pk, position: { x: e.clientX, y: e.clientY }, path });
   }, [path, pk, openMenu]);
 
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);

@@ -25,7 +25,7 @@ export const useResultCanvasDrag = (
     if (!resultId || !pk) return;
     e.preventDefault();
     e.stopPropagation();
-    openMenu('result', resultId, pk, { x: e.clientX, y: e.clientY });
+    openMenu({ type: 'result', id: resultId, pk, position: { x: e.clientX, y: e.clientY } });
   }, [openMenu, pk, resultId]);
 
   return {

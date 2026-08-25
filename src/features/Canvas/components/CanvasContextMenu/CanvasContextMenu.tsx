@@ -1,28 +1,23 @@
-import { FC, createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import { FC, createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { addResultEntityToCanvas } from '@/features/Canvas/utils/addResultEntityToCanvas';
+import { addResultEntityToCanvas, type ResultEntityTarget } from '@/features/Canvas/utils/addResultEntityToCanvas';
+import { getDistinctPredicateEdgeIDs } from '@/features/Core/utils/resultHelpers';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas } from '@/features/Canvas/types/canvas';
-import type { Path } from '@/features/ResultList/types/results';
-import type { ResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import styles from './CanvasContextMenu.module.scss';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 
-type MenuTarget = {
-  type: ResultEntityDragType;
-  id: string;
-  pk: string;
+type MenuTarget = ResultEntityTarget & {
   position: { x: number; y: number };
-  path?: Path;
 };
 
 type CanvasContextMenuContextValue = {
-  openMenu: (type: ResultEntityDragType, id: string, pk: string, position: { x: number; y: number }, path?: Path) => void;
+  openMenu: (target: MenuTarget) => void;
 };
 
 const CanvasContextMenuContext = createContext<CanvasContextMenuContextValue | null>(null);
@@ -34,8 +29,7 @@ const ENTITY_NOUNS: Record<MenuTarget['type'], string> = {
   result: 'result',
 };
 
-const getButtonLabel = (type: MenuTarget['type'], hasCanvas: boolean): string => {
-  const noun = ENTITY_NOUNS[type];
+const getButtonLabel = (hasCanvas: boolean, noun: string): string => {
   return hasCanvas ? `Add ${noun} to canvas` : `New canvas + add ${noun}`;
 };
 
@@ -55,6 +49,14 @@ const ContextMenuPopup: FC<{
   const resultSet = useSelector(getResultSetById(target.pk));
   const menuRef = useRef<HTMLDivElement>(null);
   const { handleCreateCanvas } = useCreateCanvas();
+
+  const entityNoun = useMemo(() => {
+    if (target.type !== 'edge' || !resultSet || !target.edgeIds) {
+      return ENTITY_NOUNS[target.type];
+    }
+    const distinctCount = getDistinctPredicateEdgeIDs(resultSet, target.edgeIds).length;
+    return distinctCount > 1 ? 'relationships' : ENTITY_NOUNS.edge;
+  }, [target.type, target.edgeIds, resultSet]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -86,7 +88,7 @@ const ContextMenuPopup: FC<{
 
     await addResultEntityToCanvas({
       resultSet,
-      target: { type: target.type, id: target.id, pk: target.pk, path: target.path },
+      target,
       canvas,
       dispatch,
       queryClient,
@@ -104,7 +106,7 @@ const ContextMenuPopup: FC<{
       style={{ left: `${target.position.x}px`, top: `${target.position.y}px` }}
     >
       <button type="button" onClick={handleAdd}>
-        {getButtonLabel(target.type, hasCanvas)}
+        {getButtonLabel(hasCanvas, entityNoun)}
       </button>
     </div>,
     document.body,
@@ -114,8 +116,8 @@ const ContextMenuPopup: FC<{
 export const CanvasContextMenuProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [target, setTarget] = useState<MenuTarget | null>(null);
 
-  const openMenu = useCallback((type: ResultEntityDragType, id: string, pk: string, position: { x: number; y: number }, path?: Path) => {
-    setTarget({ type, id, pk, position, path });
+  const openMenu = useCallback((nextTarget: MenuTarget) => {
+    setTarget(nextTarget);
   }, []);
 
   const closeMenu = useCallback(() => setTarget(null), []);
