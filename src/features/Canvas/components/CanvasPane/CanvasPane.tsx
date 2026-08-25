@@ -1,17 +1,8 @@
-import { FC, useEffect, useRef, useCallback, useMemo } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import styles from './CanvasPane.module.scss';
 import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
-import useCanvas from '@/features/Canvas/hooks/useCanvas';
-import useCanvasPersistence from '@/features/Canvas/hooks/useCanvasPersistence';
-import useCanvasFilters from '@/features/Canvas/hooks/useCanvasFilters';
-import useCanvasHoverState from '@/features/Canvas/hooks/useCanvasHoverState';
-import useCanvasGraphHover from '@/features/Canvas/hooks/useCanvasGraphHover';
-import useCanvasEntityNavigation from '@/features/Canvas/hooks/useCanvasEntityNavigation';
-import useCanvasNodeActions from '@/features/Canvas/hooks/useCanvasNodeActions';
-import useCanvasPaneHandlers from '@/features/Canvas/hooks/useCanvasPaneHandlers';
-import useCanvasNodeMenu from '@/features/Canvas/hooks/useCanvasNodeMenu';
-import useCanvasAnnotations from '@/features/Canvas/hooks/useCanvasAnnotations';
-import useCanvasFocus from '@/features/Canvas/hooks/useCanvasFocus';
+import { useCanvasPaneGraphModel } from '@/features/Canvas/hooks/useCanvasPaneGraphModel';
+import { useCanvasPaneMenusModel } from '@/features/Canvas/hooks/useCanvasPaneMenusModel';
 import { useCanvasEntityDrop } from '@/features/Canvas/hooks/useCanvasEntityDrop';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
@@ -20,17 +11,10 @@ import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/Canv
 import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
 import { CanvasNodeChromeActionsContext } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
-import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
 import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
-import { useNavigate } from 'react-router-dom';
-import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
-import { getQueryActionsForNodeCategory, homeQueryTabOptionsFromConfig } from '@/features/Query/utils/homeQueryParams';
-import { getCanvasNodePrimaryCategory } from '@/features/Canvas/utils/canvasFunctions';
-import type { Canvas, CanvasAnnotation } from '@/features/Canvas/types/canvas';
-import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { useSelector } from 'react-redux';
+import type { Canvas } from '@/features/Canvas/types/canvas';
 
 type User = ReturnType<typeof useUser>[0];
 
@@ -52,56 +36,18 @@ interface CanvasPaneContentProps {
   paneClass: string;
 }
 
-type CanvasPaneGraphModel = {
-  visibleNodes: ReturnType<typeof useCanvasFilters>['visibleNodes'];
-  visibleEdges: ReturnType<typeof useCanvasFilters>['visibleEdges'];
-  positions: ReturnType<typeof useCanvasNodePositions>;
-  paneHandlers: ReturnType<typeof useCanvasPaneHandlers>;
-  graphHover: ReturnType<typeof useCanvasGraphHover>;
-  saveStatus: ReturnType<typeof useCanvasPersistence>['saveStatus'];
-  graphAnnotations: ReturnType<typeof useCanvasAnnotations>['graphAnnotations'];
-  handleAnnotationsChange: ReturnType<typeof useCanvasAnnotations>['handleAnnotationsChange'];
-  handleAddAnnotation: () => void;
-};
-
-type CanvasPaneHoverModel = {
-  hoveredNodeId: ReturnType<typeof useCanvasHoverState>['hoveredNodeId'];
-  hoveredEdgeId: ReturnType<typeof useCanvasHoverState>['hoveredEdgeId'];
-  hoveredAnnotationId: ReturnType<typeof useCanvasHoverState>['hoveredAnnotationId'];
-  selectedNodeIds: ReturnType<typeof useCanvasFocus>['selectedNodeIds'];
-  focusRequest: ReturnType<typeof useCanvasFocus>['focusRequest'];
-  setHoveredNodeId: ReturnType<typeof useCanvasHoverState>['setHoveredNodeId'];
-  setHoveredAnnotationId: ReturnType<typeof useCanvasHoverState>['setHoveredAnnotationId'];
-  findNodeOnCanvas: ReturnType<typeof useCanvasFocus>['findNodeOnCanvas'];
-  findAnnotationOnCanvas: ReturnType<typeof useCanvasFocus>['findAnnotationOnCanvas'];
-};
-
-type CanvasPaneMenuModel = {
-  queryActions: ReturnType<typeof getQueryActionsForNodeCategory>;
-  chromeActions: {
-    onQueryMenu: ReturnType<typeof useCanvasNodeMenu>['handleQueryMenu'];
-    isQueryMenuAvailable: (nodeId: string) => boolean;
-  };
-  nodeMenu: ReturnType<typeof useCanvasNodeMenu>;
-  handleAnnotationListAction: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
-};
-
-type CanvasPaneHistoryModel = {
-  rename: ReturnType<typeof useCanvas>['rename'];
-  undo: ReturnType<typeof useCanvas>['undo'];
-  redo: ReturnType<typeof useCanvas>['redo'];
-  canUndo: boolean;
-  canRedo: boolean;
-};
+type GraphModel = ReturnType<typeof useCanvasPaneGraphModel>;
+type MenusModel = ReturnType<typeof useCanvasPaneMenusModel>;
 
 interface CanvasPaneOpenContentProps {
   activeCanvas: Canvas;
   paneOpen: boolean;
   paneMaximized: boolean;
-  graph: CanvasPaneGraphModel;
-  hover: CanvasPaneHoverModel;
-  menus: CanvasPaneMenuModel;
-  history: CanvasPaneHistoryModel;
+  graph: GraphModel['graph'];
+  hover: GraphModel['hover'];
+  menus: MenusModel;
+  history: GraphModel['history'];
+  onAnnotationAction: GraphModel['handleAnnotationListAction'];
 }
 
 const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
@@ -112,6 +58,7 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
   hover,
   menus,
   history,
+  onAnnotationAction,
 }) => (
   <CanvasNodeChromeActionsContext.Provider value={menus.chromeActions}>
     <div className={styles.contentArea}>
@@ -161,7 +108,7 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
               onHoverAnnotation={hover.setHoveredAnnotationId}
               onFindNode={hover.findNodeOnCanvas}
               onFindAnnotation={hover.findAnnotationOnCanvas}
-              onAnnotationAction={menus.handleAnnotationListAction}
+              onAnnotationAction={onAnnotationAction}
               onNodeMenu={menus.nodeMenu.handleObjectListNodeMenu}
               onCloseNodeMenus={menus.nodeMenu.closeAllMenus}
               onAddAnnotation={graph.handleAddAnnotation}
@@ -205,124 +152,14 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
   togglePane,
   paneClass,
 }) => {
-  const navigate = useNavigate();
-  const config = useSelector(currentConfig);
-  const persistence = useCanvasPersistence();
-  const {
-    rename, undo, redo, canUndo, canRedo, removeNode, pushUndo,
-  } = useCanvas(persistence);
-  const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
-  const {
-    hoveredNodeId,
-    hoveredEdgeId,
-    hoveredAnnotationId,
-    setHoveredNodeId,
-    setHoveredAnnotationId,
-    clearHover,
-    handleNodeHover,
-    handleEdgeHover,
-    handleAnnotationHover,
-  } = useCanvasHoverState();
-  const { navigateToNode, navigateToEdge } = useCanvasEntityNavigation();
-  const {
-    selectedNodeIds,
-    setSelectedNodeIds,
-    focusRequest,
-    findNodeOnCanvas,
-    findAnnotationOnCanvas,
-  } = useCanvasFocus(setHoveredNodeId, setHoveredAnnotationId);
-
-  const {
-    graphAnnotations,
-    handleAnnotationsChange,
-    addAnnotation,
-    removeAnnotation,
-  } = useCanvasAnnotations({
+  const graphModel = useCanvasPaneGraphModel(activeCanvas);
+  const menus = useCanvasPaneMenusModel({
     activeCanvas,
-    pushUndo,
-    saveCreateAnnotation: persistence.saveCreateAnnotation,
-    saveUpdateAnnotationText: persistence.saveUpdateAnnotationText,
-    saveGeometry: persistence.saveGeometry,
-    saveTrashElements: persistence.saveTrashElements,
-  });
-
-  const handleAddAnnotation = useCallback(async () => {
-    const annotationId = await addAnnotation();
-    if (annotationId) findAnnotationOnCanvas(annotationId);
-  }, [addAnnotation, findAnnotationOnCanvas]);
-
-  const handleAnnotationListAction = useCallback((
-    action: CanvasAnnotationAction,
-    annotation: CanvasAnnotation,
-  ) => {
-    if (action === 'find') findAnnotationOnCanvas(annotation.id);
-    if (action === 'remove') removeAnnotation(annotation.id);
-  }, [findAnnotationOnCanvas, removeAnnotation]);
-
-  const nodeActions = useCanvasNodeActions({
-    activeCanvas,
-    navigateToNode,
-    navigate,
-    setSelectedNodeIds,
-    clearHover,
-    removeNode,
-  });
-  const graphHover = useCanvasGraphHover({ canvas: activeCanvas, navigateToEdge });
-  const paneHandlers = useCanvasPaneHandlers({
-    activeCanvas,
-    navigateToEdge,
-    handleNodeHover,
-    handleEdgeHover,
-    handleAnnotationHover,
-    handleGraphNodeHover: graphHover.handleGraphNodeHover,
-    handleGraphEdgeHover: graphHover.handleGraphEdgeHover,
-    nodeActions,
-  });
-  const nodeMenu = useCanvasNodeMenu({
-    activeCanvas,
-    nodeActions,
-    setSelectedNodeIds,
-    findNodeOnCanvas,
-  });
-  const homeQueryOptions = useMemo(
-    () => homeQueryTabOptionsFromConfig(config),
-    [config],
-  );
-  const getQueryActionsForNodeId = useCallback(
-    (nodeId: string | undefined) => {
-      const nodeCategory = nodeId
-        ? getCanvasNodePrimaryCategory(activeCanvas.nodes[nodeId])
-        : undefined;
-      return getQueryActionsForNodeCategory(homeQueryOptions, nodeCategory);
-    },
-    [activeCanvas.nodes, homeQueryOptions],
-  );
-  const queryActions = useMemo(
-    () => getQueryActionsForNodeId(nodeMenu.nodeQueryMenu?.nodeId),
-    [getQueryActionsForNodeId, nodeMenu.nodeQueryMenu?.nodeId],
-  );
-  const isQueryMenuAvailable = useCallback(
-    (nodeId: string) => getQueryActionsForNodeId(nodeId).length > 0,
-    [getQueryActionsForNodeId],
-  );
-  const handleQueryMenu = useCallback(
-    (nodeId: string, position: { x: number; y: number }) => {
-      if (!isQueryMenuAvailable(nodeId)) return;
-      nodeMenu.handleQueryMenu(nodeId, position);
-    },
-    [isQueryMenuAvailable, nodeMenu.handleQueryMenu],
-  );
-  const positions = useCanvasNodePositions({
-    canvas: activeCanvas,
-    pushUndo,
-    saveGeometry: persistence.saveGeometry,
-    saveLayout: persistence.saveLayout,
+    nodeActions: graphModel.nodeActions,
+    setSelectedNodeIds: graphModel.setSelectedNodeIds,
+    findNodeOnCanvas: graphModel.findNodeOnCanvas,
   });
   const handleEntityDrop = useCanvasEntityDrop(activeCanvas);
-  const chromeActions = useMemo(
-    () => ({ onQueryMenu: handleQueryMenu, isQueryMenuAvailable }),
-    [handleQueryMenu, isQueryMenuAvailable],
-  );
 
   return (
     <DroppableArea
@@ -353,35 +190,11 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
           activeCanvas={activeCanvas}
           paneOpen={paneOpen}
           paneMaximized={paneMaximized}
-          graph={{
-            visibleNodes,
-            visibleEdges,
-            positions,
-            paneHandlers,
-            graphHover,
-            saveStatus: persistence.saveStatus,
-            graphAnnotations,
-            handleAnnotationsChange,
-            handleAddAnnotation,
-          }}
-          hover={{
-            hoveredNodeId,
-            hoveredEdgeId,
-            hoveredAnnotationId,
-            selectedNodeIds,
-            focusRequest,
-            setHoveredNodeId,
-            setHoveredAnnotationId,
-            findNodeOnCanvas,
-            findAnnotationOnCanvas,
-          }}
-          menus={{
-            queryActions,
-            chromeActions,
-            nodeMenu,
-            handleAnnotationListAction,
-          }}
-          history={{ rename, undo, redo, canUndo, canRedo }}
+          graph={graphModel.graph}
+          hover={graphModel.hover}
+          menus={menus}
+          history={graphModel.history}
+          onAnnotationAction={graphModel.handleAnnotationListAction}
         />
       )}
     </DroppableArea>
