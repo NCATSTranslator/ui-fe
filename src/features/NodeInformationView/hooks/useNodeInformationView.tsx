@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
 import { capitalizeAllWords, getFormattedNodeDisplayName } from "@/features/Core/utils/stringFormatters";
-import { formatLabel, getNodeBiolinkLink, renderValue } from "@/features/NodeInformationView/utils/utilities";
+import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, joinNodes, renderValue } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
@@ -24,34 +24,40 @@ const GeneName: FC<AnnotationOverrideProps> = ({ value }) => (
   <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
 );
 
+// Annotation payloads come from external sources that can omit fields the types
+// promise, so entries without a usable name are dropped rather than rendered.
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== "";
+
+const capitalizedList = (names: unknown[]): string =>
+  names.filter(isNonEmptyString).map(name => capitalizeAllWords(name)).join(", ");
+
 const SynonymList: FC<AnnotationOverrideProps> = ({ value }) => (
-  <>{(value as string[]).map(synonym => capitalizeAllWords(synonym)).join(", ")}</>
+  <>{capitalizedList(value as string[])}</>
 );
 
 const ChemicalSynonymList: FC<AnnotationOverrideProps> = ({ value }) => {
-  const { commercial = [], generic = [] } = (value ?? {}) as { commercial?: string[]; generic?: string[] };
-  const names = [...commercial, ...generic];
-  if (names.length === 0) return null;
-  return <>{names.map(name => capitalizeAllWords(name)).join(", ")}</>;
+  const { commercial = [], generic = [] } = value as { commercial?: string[]; generic?: string[] };
+  return <>{capitalizedList([...commercial, ...generic])}</>;
 };
 
-const ChemicalRoleList: FC<AnnotationOverrideProps> = ({ value }) => {
-  const roles = (value ?? []) as ChebiRole[];
-  if (roles.length === 0) return null;
-  return <>{roles.map(role => capitalizeAllWords(role.name)).join(", ")}</>;
-};
+const ChemicalRoleList: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>{capitalizedList((value as ChebiRole[]).map(role => role?.name))}</>
+);
 
 const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   <>
-    {(value as Indication[])
-      .map((indication, i) => {
-        const url = indication.urls[0];
-        const name = capitalizeAllWords(indication.name);
-        return url
-          ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
-          : <span key={i}>{name}</span>;
-      })
-      .flatMap((el, i) => (i === 0 ? [el] : [", ", el]))}
+    {joinNodes(
+      (value as Indication[])
+        .filter(indication => isNonEmptyString(indication?.name))
+        .map((indication, i) => {
+          const url = indication.urls?.[0];
+          const name = capitalizeAllWords(indication.name);
+          return url
+            ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
+            : <span key={i}>{name}</span>;
+        })
+    )}
   </>
 );
 
@@ -102,27 +108,40 @@ const getNodeInformationViewState = (params: {
   return { kind: 'ready' };
 };
 
+interface AnnotationField {
+  label: string;
+  content: ReactNode;
+}
+
+const buildAnnotationField = (
+  categoryKey: string,
+  key: string,
+  value: unknown,
+  nodeName: string,
+  nodeType: string | null,
+): AnnotationField | null => {
+  const label = formatLabel(key);
+  const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
+  if (Override) {
+    return { label, content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} /> };
+  }
+  const content = renderValue(value);
+  return content === null ? null : { label, content };
+};
+
 const buildAnnotationFields = (
   node: ResultNode | null,
   nodeName: string,
   nodeType: string | null,
-): { label: string; content: ReactNode }[] => {
+): AnnotationField[] => {
   if (!node?.annotations) return [];
-  const fields: { label: string; content: ReactNode }[] = [];
+  const fields: AnnotationField[] = [];
   for (const [categoryKey, category] of Object.entries(node.annotations)) {
     for (const [key, section] of Object.entries(category)) {
       if (key === "descriptions" || section === null || section === undefined) continue;
-      const value = section.value;
-      const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
-      if (Override) {
-        fields.push({
-          label: formatLabel(key),
-          content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} />,
-        });
-        continue;
-      }
-      const content = renderValue(value);
-      if (content !== null) fields.push({ label: formatLabel(key), content });
+      if (isEmptyAnnotationValue(section.value)) continue;
+      const field = buildAnnotationField(categoryKey, key, section.value, nodeName, nodeType);
+      if (field) fields.push(field);
     }
   }
   return fields;

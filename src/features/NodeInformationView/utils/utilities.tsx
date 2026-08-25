@@ -4,6 +4,25 @@ import { ResultNode } from "@/features/ResultList/types/results";
 export const formatLabel = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
+/**
+ * Interleaves a separator between rendered nodes, keeping React keys intact.
+ */
+export const joinNodes = (nodes: ReactNode[], separator = ", "): ReactNode[] =>
+  nodes.flatMap((node, i) => (i === 0 ? [node] : [separator, node]));
+
+/**
+ * Determines whether an annotation value has nothing worth displaying, so the
+ * caller can skip the section entirely rather than render an empty label.
+ * Numbers are never empty, so falsy-but-meaningful values like 0 are preserved.
+ */
+export const isEmptyAnnotationValue = (value: unknown): boolean => {
+  if (value === null || value === undefined) return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "string") return value.trim() === "";
+  if (typeof value === "object") return Object.values(value).flat().length === 0;
+  return false;
+};
+
 const renderArrayValue = (value: unknown[]): ReactNode => {
   if (value.length === 0) return null;
   if (typeof value[0] === "string") return value.join(", ");
@@ -16,7 +35,7 @@ const renderArrayValue = (value: unknown[]): ReactNode => {
     if ("name" in item) return item.name;
     return JSON.stringify(item);
   });
-  return nodes.flatMap((el, i) => (i === 0 ? [el] : [", ", el]));
+  return joinNodes(nodes);
 };
 
 export const renderValue = (value: unknown): ReactNode => {
