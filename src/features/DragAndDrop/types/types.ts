@@ -22,7 +22,7 @@ export type DraggableData =
   | { type: 'query'; data: UserQueryObject }
   | { type: 'project'; data: Project }
   | { type: 'node'; data: ResultEntityDragData }
-  | { type: 'edge'; data: ResultEntityDragData }
+  | { type: 'edge'; data: ResultEntityDragData & { edgeIds: string[] } }
   | { type: 'path'; data: ResultEntityDragData & { path: Path } }
   | { type: 'result'; data: ResultEntityDragData };
 

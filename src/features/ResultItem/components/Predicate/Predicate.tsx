@@ -85,7 +85,7 @@ const Predicate: FC<PredicateProps> = ({
     canDrag: canDragEdge,
   } = useResultEntityDraggable({
     type: 'edge',
-    data: { id: edgeIds[0], pk },
+    data: { id: edgeIds[0], pk, edgeIds },
   });
 
   const setEdgeRef = useCallback((node: HTMLSpanElement | null) => {
@@ -160,7 +160,7 @@ const Predicate: FC<PredicateProps> = ({
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
       onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, parentPathKey)}
-      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu('edge', edgeIds[0], pk, { x: e.clientX, y: e.clientY }); }}
+      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }}
       {...hoverHandlers}
       {...edgeDragListeners}
       {...edgeDragAttributes}

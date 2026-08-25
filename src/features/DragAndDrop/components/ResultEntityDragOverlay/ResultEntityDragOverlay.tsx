@@ -8,7 +8,7 @@ import {
 } from '@/features/ResultList/slices/resultsSlice';
 import { nodeToTooltipProps } from '@/features/Core/components/Tooltips/tooltipMappers';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
-import { isStringArray } from '@/features/Core/utils/resultHelpers';
+import { getCompressedEdge, isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
 import type { ResultEntityDraggableData } from '@/features/DragAndDrop/types/types';
 import type { Path, Result, ResultNode, ResultSet } from '@/features/ResultList/types/results';
@@ -69,9 +69,15 @@ const ResultEntityDragOverlay: FC<ResultEntityDragOverlayProps> = ({ dragData })
       const object = getNodeById(resultSet, edge.object);
       const subjectLabel = formatNodeLabel(subject, edge.subject);
       const objectLabel = formatNodeLabel(object, edge.object);
+      const edgeIds = dragData.data.edgeIds;
+      const formattedEdge = edgeIds.length > 1
+        ? getCompressedEdge(resultSet, edgeIds)
+        : edge;
+      const extraCount = formattedEdge.compressed_edges?.length ?? 0;
+      const suffix = extraCount > 0 ? ` +${extraCount}` : '';
       return {
         kind: 'edge' as const,
-        label: `${subjectLabel} ${edge.predicate} ${objectLabel}`,
+        label: `${subjectLabel} ${formattedEdge.predicate} ${objectLabel}${suffix}`,
         icon: null as ReactNode,
       };
     }

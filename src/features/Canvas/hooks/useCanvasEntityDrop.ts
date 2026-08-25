@@ -23,12 +23,13 @@ export const useCanvasEntityDrop = (canvas: Canvas) => {
 
     const { id, pk } = draggedData.data;
     const path = draggedData.type === 'path' ? draggedData.data.path : undefined;
+    const edgeIds = draggedData.type === 'edge' ? draggedData.data.edgeIds : undefined;
     const resultSet = getResultSetById(pk)(store.getState());
     if (!resultSet) return;
 
     void addResultEntityToCanvas({
       resultSet,
-      target: { type: draggedData.type, id, pk, path },
+      target: { type: draggedData.type, id, pk, path, edgeIds },
       canvas,
       dispatch,
       queryClient,
