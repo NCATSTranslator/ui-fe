@@ -53,6 +53,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     setQueryItem: setQueryItemOne,
     inputText: inputOneText,
     setInputText: setInputOneText,
+    clear: clearSyncedItemOne,
   } = useSyncedAutocompleteFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam);
   const [inputTwoText, setInputTwoText] = useState("");
   const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
@@ -143,10 +144,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   }
 
   const clearItem = (item: number) => {
-    if(item === 1) {
-      setQueryItemOne(null);
-      setInputOneText("");
-    } else if(item === 2) {
+    if (item === 1) {
+      // First input is the one prefilled from canvas/node URL params.
+      clearSyncedItemOne();
+    } else if (item === 2) {
       setQueryItemTwo(null);
       setInputTwoText("");
     }

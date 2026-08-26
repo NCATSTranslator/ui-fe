@@ -29,5 +29,6 @@ export const { setCurrentUser, setCurrentPrefs, setCurrentConfig } = userSlice.a
 export const currentUser = (state: { user: UserState }) => state.user.currentUser;
 export const currentPrefs = (state: { user: UserState }) => state.user.currentPrefs;
 export const currentConfig = (state: { user: UserState }) => state.user.currentConfig;
+export const selectCanvasEnabled = (state: { user: UserState }) => !!state.user.currentConfig?.include_canvas;
 
 export default userSlice.reducer;

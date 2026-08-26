@@ -217,18 +217,20 @@ const CanvasPane: FC = () => {
 
   if (!activeCanvas) {
     return (
-      <div className={paneClass}>
-        <div className={styles.collapsedTitle}>
-          <button
-            type="button"
-            className={styles.titleLeft}
-            onClick={createCanvas}
-            aria-label="Create new canvas"
-          >
-            <span className={styles.canvasTitle}>Create New Canvas</span>
-          </button>
+      user ? (
+        <div className={paneClass}>
+            <div className={styles.collapsedTitle}>
+              <button
+                type="button"
+                className={styles.titleLeft}
+                onClick={createCanvas}
+                aria-label="Create new canvas"
+              >
+                <span className={styles.canvasTitle}>Create New Canvas</span>
+              </button>
+            </div>
         </div>
-      </div>
+      ) : null
     );
   }
 

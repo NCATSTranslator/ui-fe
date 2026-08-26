@@ -690,6 +690,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
 
         const configWithBuildInfo = {
           ...config,
+          include_canvas: config.include_canvas ?? false,
           buildInfo: import.meta.env.VITE_BUILD_INFO
         };
 
@@ -700,6 +701,7 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         const defaultConfig: Config = {
           cached_queries: [],
           gaID: '',
+          include_canvas: false,
           include_hashed_parameters: false,
           include_lookup: false,
           include_pathfinder: false,
