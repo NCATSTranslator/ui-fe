@@ -11,7 +11,6 @@ import type { AppDispatch } from '@/redux/store';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import styles from './CanvasContextMenu.module.scss';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
-import useCanvasEnabled from '@/features/Canvas/hooks/useCanvasEnabled';
 
 type MenuTarget = ResultEntityTarget & {
   position: { x: number; y: number };
@@ -116,18 +115,12 @@ const ContextMenuPopup: FC<{
 
 export const CanvasContextMenuProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [target, setTarget] = useState<MenuTarget | null>(null);
-  const [canvasEnabled] = useCanvasEnabled();
 
   const openMenu = useCallback((nextTarget: MenuTarget) => {
-    if (!canvasEnabled) return;
     setTarget(nextTarget);
-  }, [canvasEnabled]);
+  }, []);
 
   const closeMenu = useCallback(() => setTarget(null), []);
-
-  useEffect(() => {
-    if (!canvasEnabled) setTarget(null);
-  }, [canvasEnabled]);
 
   return (
     <CanvasContextMenuContext.Provider value={{ openMenu }}>

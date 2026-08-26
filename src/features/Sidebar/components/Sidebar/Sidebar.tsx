@@ -5,16 +5,10 @@ import { topItems, bottomItems } from "@/features/Sidebar/utils/sidebarItems";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import SidebarLinkList from "@/features/Sidebar/components/SidebarLinkList/SidebarLinkList";
 import ContextPanel from "@/features/Sidebar/components/ContextPanel/ContextPanel";
-import useCanvasEnabled from "@/features/Canvas/hooks/useCanvasEnabled";
 
 const Sidebar: FC<{ className?: string }> = ({ className = '' }) => {
   const { collapsed, activePanelId, dynamicSidebarItems, getContextPanel, getButtonComponent, closePanel } = useSidebar();
-  const [canvasEnabled] = useCanvasEnabled();
-  const visibleTopItems = useMemo(
-    () => topItems.filter(item => item.id !== 'canvases' || canvasEnabled),
-    [canvasEnabled]
-  );
-  const allSidebarItems = useMemo(() => [...visibleTopItems, ...dynamicSidebarItems, ...bottomItems], [visibleTopItems, dynamicSidebarItems]);
+  const allSidebarItems = useMemo(() => [...topItems, ...dynamicSidebarItems, ...bottomItems], [dynamicSidebarItems]);
   const activeSidebarItem = useMemo(() => allSidebarItems.find(item => item.id === activePanelId), [allSidebarItems, activePanelId]);
   
   const activeTitle = useMemo(() => {
@@ -33,7 +27,7 @@ const Sidebar: FC<{ className?: string }> = ({ className = '' }) => {
     <aside className={joinClasses(styles.sidebar, collapsed && styles.collapsed, className)} aria-label="Sidebar">
       <div className={styles.linkList}>
         <nav className={styles.top} aria-label="Global navigation">
-          <SidebarLinkList items={visibleTopItems} />
+          <SidebarLinkList items={topItems} />
           <div className={styles.middle} aria-label="Page-specific links">
             {
               dynamicSidebarItems && dynamicSidebarItems.length > 0 && 

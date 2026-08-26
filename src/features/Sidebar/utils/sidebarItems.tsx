@@ -15,7 +15,7 @@ import HelpPanel from "@/features/Sidebar/components/Panels/HelpPanel/HelpPanel"
 import FeedbackPanel from "@/features/Sidebar/components/Panels/FeedbackPanel/FeedbackPanel";
 import HelpButton from "@/features/Sidebar/components/HelpButton/HelpButton";
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
-import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
+import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 
 const CanvasPanel = lazy(() => import('@/features/Sidebar/components/Panels/CanvasPanel/CanvasPanel'));
 
@@ -35,7 +35,7 @@ export const topItems: SidebarItem[] = [
   { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <CirclePlusIcon />, tooltipText: 'New Query' },
   { id: 'projects', title: <Link to="/projects">Projects</Link>, type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
   { id: 'queries', title: <Link to="/query-history">Query History</Link>, type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
-  { id: 'canvases', title: <Link to="/canvases">Canvases</Link>, type: 'panel', icon: <WorkspaceIcon />, tooltipText: 'Canvases', noUserTooltipText: 'Log In to Access Canvases', panelComponent: <Suspense fallback={null}><CanvasPanel /></Suspense>, buttonComponent: <ViewCanvasesButton /> },
+  { id: 'canvases', title: <Link to="/canvases">Canvases</Link>, type: 'panel', icon: <CanvasIcon />, tooltipText: 'Canvases', noUserTooltipText: 'Log In to Access Canvases', panelComponent: <Suspense fallback={null}><CanvasPanel /></Suspense>, buttonComponent: <ViewCanvasesButton /> },
 ];
 
 export const bottomItems: SidebarItem[] = [

@@ -38,14 +38,14 @@ const AddMenu: FC<AddMenuProps> = ({ onAddObject, onAddAnnotation }) => {
       />
       {open && (
         <div ref={menuRef} className={styles.addMenu} {...menuA11yProps}>
-          <button
+          {/* <button
             type="button"
             role="menuitem"
             className={styles.addMenuItem}
             onClick={handleAddObject}
           >
             Object
-          </button>
+          </button> */}
           <button
             type="button"
             role="menuitem"

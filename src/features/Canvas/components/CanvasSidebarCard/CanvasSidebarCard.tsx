@@ -4,7 +4,7 @@ import SidebarCard from '@/features/Sidebar/components/SidebarCard/SidebarCard';
 import Button from '@/features/Core/components/Button/Button';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
-import WorkspaceIcon from '@/assets/icons/navigation/Workspace.svg?react';
+import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { getCanvasObjectCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
@@ -55,7 +55,7 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
     >
       <SidebarCard
         className={isActive ? styles.activeCanvas : ''}
-        leftIcon={<WorkspaceIcon />}
+        leftIcon={<CanvasIcon />}
         title={isRenaming ? renameValue : canvas.label}
         searchTerm={searchTerm}
         onClick={() => onSelect(canvas)}
