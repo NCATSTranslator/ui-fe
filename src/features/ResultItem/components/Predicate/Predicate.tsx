@@ -70,7 +70,7 @@ const Predicate: FC<PredicateProps> = ({
   uid }) => {
 
   const resultSet = useSelector(getResultSetById(pk));
-  const { openMenu } = useCanvasContextMenu();
+  const { openMenu, canvasEnabled } = useCanvasContextMenu();
   const formattedEdge = useMemo(
     () => (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge,
     [resultSet, edgeIds, edge]
@@ -160,7 +160,9 @@ const Predicate: FC<PredicateProps> = ({
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
       onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, parentPathKey)}
-      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }}
+      onContextMenu={canvasEnabled
+        ? (e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }
+        : undefined}
       {...hoverHandlers}
       {...edgeDragListeners}
       {...edgeDragAttributes}

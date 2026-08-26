@@ -52,7 +52,7 @@ const PathContainer: FC<PathContainerProps> = ({
 }) => {
   const { lastViewedPathID, setLastViewedPathID } = useLastViewedPath();
   const { navigateToEvidenceView } = useResultListContext();
-  const { openMenu } = useCanvasContextMenu();
+  const { openMenu, canvasEnabled } = useCanvasContextMenu();
   const itemResultId = useResultItemId();
 
   const handlePathContextMenu = useCallback((e: MouseEvent) => {
@@ -131,7 +131,7 @@ const PathContainer: FC<PathContainerProps> = ({
               }
             }
           }}
-          onContextMenu={path.id ? handlePathContextMenu : undefined}
+          onContextMenu={path.id && canvasEnabled ? handlePathContextMenu : undefined}
           className={joinClasses(
             styles.pathEvidenceButton,
             canDragPath && dragStyles.draggable,
