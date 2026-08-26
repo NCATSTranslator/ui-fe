@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   getHomeQueryPath,
   getQueryActionsForNodeCategory,
+  hasHomeQueryNodeParams,
+  stripHomeQueryNodeParams,
   HOME_QUERY_TAB_PARAM,
   HOME_QUERY_NODE_ID_PARAM,
   HOME_QUERY_NODE_LABEL_PARAM,
@@ -35,6 +37,33 @@ describe('getHomeQueryPath', () => {
     const path = getHomeQueryPath('smart', 'MONDO:0001', 'Diabetes', undefined);
     const params = new URLSearchParams(path.slice(2));
     expect(params.has(HOME_QUERY_NODE_CATEGORY_PARAM)).toBe(false);
+  });
+});
+
+describe('hasHomeQueryNodeParams / stripHomeQueryNodeParams', () => {
+  it('detects and strips node prefills while keeping tab', () => {
+    const params = new URLSearchParams({
+      [HOME_QUERY_TAB_PARAM]: 'smart',
+      [HOME_QUERY_NODE_ID_PARAM]: 'NCBIGene:7157',
+      [HOME_QUERY_NODE_LABEL_PARAM]: 'TP53',
+      [HOME_QUERY_NODE_CATEGORY_PARAM]: 'biolink:Gene',
+    });
+
+    expect(hasHomeQueryNodeParams(params)).toBe(true);
+
+    const stripped = stripHomeQueryNodeParams(params);
+    expect(stripped.get(HOME_QUERY_TAB_PARAM)).toBe('smart');
+    expect(stripped.has(HOME_QUERY_NODE_ID_PARAM)).toBe(false);
+    expect(stripped.has(HOME_QUERY_NODE_LABEL_PARAM)).toBe(false);
+    expect(stripped.has(HOME_QUERY_NODE_CATEGORY_PARAM)).toBe(false);
+    // Original unchanged
+    expect(params.has(HOME_QUERY_NODE_ID_PARAM)).toBe(true);
+  });
+
+  it('returns false and is a no-op when node params are absent', () => {
+    const params = new URLSearchParams({ [HOME_QUERY_TAB_PARAM]: 'lookup' });
+    expect(hasHomeQueryNodeParams(params)).toBe(false);
+    expect(stripHomeQueryNodeParams(params).toString()).toBe(params.toString());
   });
 });
 
