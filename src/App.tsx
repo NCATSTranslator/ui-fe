@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
+import { useState, ReactNode, lazy, Suspense } from 'react';
 import './App.scss';
 import { useGoogleAnalytics } from '@/features/Core/hooks/useGoogleAnalytics';
 import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
@@ -26,9 +26,6 @@ import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
 import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
-import useCanvasEnabled from '@/features/Canvas/hooks/useCanvasEnabled';
-import { useDispatch } from 'react-redux';
-import { closePane } from '@/features/Canvas/slices/canvasSlice';
 
 // Lazy so translator-graph-view stays out of the entry chunk.
 const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
@@ -41,14 +38,6 @@ const App = ({children}: {children?: ReactNode}) => {
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
   const isSmallScreen = width && width < minScreenWidth;
-  const [canvasEnabled] = useCanvasEnabled();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (!canvasEnabled) {
-      dispatch(closePane());
-    }
-  }, [canvasEnabled, dispatch]);
 
   const [gaID, setGaID] = useState<string | null>(null);
   useGoogleAnalytics(gaID ?? undefined);
@@ -136,7 +125,7 @@ const App = ({children}: {children?: ReactNode}) => {
                         </Footer>
                       </div>
                       <Suspense fallback={null}>
-                        {canvasEnabled && <CanvasPane />}
+                        <CanvasPane />
                       </Suspense>
                     </main>
                   </div>

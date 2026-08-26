@@ -18,8 +18,6 @@ import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
-import Toggle from '@/features/Core/components/Toggle/Toggle';
-import useCanvasEnabled from '@/features/Canvas/hooks/useCanvasEnabled';
 import ConfidenceTooltip from './ConfidenceTooltip';
 
 const isConfidenceSort = (value: string | number): boolean =>
@@ -39,7 +37,6 @@ const SettingsPanel = () => {
 
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
-  const [canvasEnabled, setCanvasEnabled] = useCanvasEnabled();
   const dispatch = useDispatch();
 
   const config = useSelector(currentConfig);
@@ -168,18 +165,6 @@ const SettingsPanel = () => {
                 handleClick={() => setActivePrefTypeId("graphs")}
                 label="Graphs"
               />
-              <div className={styles.featureToggle}>
-                <div className={styles.featureToggleText}>
-                  <h6 className={styles.prefLabel}>Canvas</h6>
-                  <p className={styles.helpText}>Show canvases in the sidebar and enable the canvas workspace.</p>
-                </div>
-                <Toggle
-                  className={styles.canvasToggle}
-                  active={canvasEnabled}
-                  setActive={setCanvasEnabled}
-                  ariaLabel="Canvas"
-                />
-              </div>
             </div>
             {
               activePrefTypeId && 
