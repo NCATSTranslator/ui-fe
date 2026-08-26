@@ -12,6 +12,7 @@ import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { buildInitialQueryItemState } from '@/features/Query/utils/queryInitState';
 import { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
 import { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
+import { useClearHomeQueryNodeParams } from '@/features/Query/hooks/useClearHomeQueryNodeParams';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { errorToast, unsupportedSmartQueryCategoryToast } from '@/features/Core/utils/toastMessages';
 import { noop } from '@/features/Core/utils/constants';
@@ -378,6 +379,7 @@ export const useSyncedAutocompleteFromNodeParams = (
   initNodeLabelParam: string | null | undefined,
   initNodeCategoryParam?: string | null,
 ) => {
+  const clearHomeQueryNodeParams = useClearHomeQueryNodeParams();
   const initItem = useMemo(
     () => autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam),
     [initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
@@ -386,7 +388,13 @@ export const useSyncedAutocompleteFromNodeParams = (
   const [queryItem, setQueryItem] = useStateSyncedTo(initItem);
   const [inputText, setInputText] = useStateSyncedTo(initInputText);
 
-  return { queryItem, setQueryItem, inputText, setInputText };
+  const clear = useCallback(() => {
+    setQueryItem(null);
+    setInputText('');
+    clearHomeQueryNodeParams();
+  }, [setQueryItem, setInputText, clearHomeQueryNodeParams]);
+
+  return { queryItem, setQueryItem, inputText, setInputText, clear };
 };
 
 export const useQueryItem = (
@@ -415,14 +423,29 @@ export const useQueryItem = (
   }, [initState.categoryUnsupported, initNodeCategoryParam]);
 
   const { queryItem: initQueryItem, inputText: initInputText } = initState;
-  const [queryItem, setQueryItem] = useStateSyncedTo(initQueryItem);
-  const [inputText, setInputText] = useStateSyncedTo(initInputText);
+  const nodeParamsKey = `${initNodeIdParam ?? ''}|${initNodeLabelParam ?? ''}|${initNodeCategoryParam ?? ''}`;
+  const hasNodeParams = !!(initNodeIdParam || initNodeLabelParam || initNodeCategoryParam);
 
-  // Clear function to reset state
-  const clear = useCallback(() => {
+  // Sync queryItem from URL prefills when they appear/change, but not when they are
+  // cleared — clearing must keep the current query type (init falls back to queryTypes[0]).
+  const [queryItem, setQueryItem] = useState(initQueryItem);
+  useEffect(() => {
+    if (!hasNodeParams) return;
     setQueryItem(initQueryItem);
-    setInputText(initInputText);
-  }, [initQueryItem, initInputText, setQueryItem, setInputText]);
+  }, [hasNodeParams, nodeParamsKey, initQueryItem]);
+
+  const [inputText, setInputText] = useStateSyncedTo(initInputText, nodeParamsKey);
+  const clearHomeQueryNodeParams = useClearHomeQueryNodeParams();
+
+  // Clear the selected entity while keeping the current query type.
+  // Do not reset to initQueryItem — when landing from canvas/node URL params,
+  // that would re-apply the prefilled node instead of clearing.
+  // Also strip those URL params so a remount/refresh cannot re-prefill.
+  const clear = useCallback(() => {
+    setQueryItem((prev) => ({ type: prev.type, node: null }));
+    setInputText('');
+    clearHomeQueryNodeParams();
+  }, [setQueryItem, setInputText, clearHomeQueryNodeParams]);
 
   return {
     queryItem,
