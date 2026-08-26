@@ -42,7 +42,13 @@ const QueryLookup: FC<QueryLookupProps> = ({
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
-  const { queryItem, setQueryItem, inputText, setInputText } = useSyncedAutocompleteFromNodeParams(
+  const {
+    queryItem,
+    setQueryItem,
+    inputText,
+    setInputText,
+    clear: clearSyncedItem,
+  } = useSyncedAutocompleteFromNodeParams(
     initNodeIdParam,
     initNodeLabelParam,
     initNodeCategoryParam,
@@ -86,11 +92,6 @@ const QueryLookup: FC<QueryLookupProps> = ({
     submitLookupQuery!(queryItem, objectCategory, selectedProject?.id?.toString() || undefined);
   }, [queryItem, objectCategory, selectedProject, submitLookupQuery]);
 
-  const clearItem = useCallback(() => {
-    setQueryItem(null);
-    setInputText("");
-  }, [setQueryItem, setInputText]);
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAutocompleteSelect = useCallback((_cxt: AutocompleteContext) => {
     submitRef.current?.focus();
@@ -131,7 +132,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
                 autocompleteItems={autocompleteItems}
                 loadingAutocomplete={loadingAutocomplete}
                 selectedItem={queryItem}
-                onClear={clearItem}
+                onClear={clearSyncedItem}
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
                 autocompleteVisibility={autocompleteVisibility}

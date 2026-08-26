@@ -47,7 +47,7 @@ const PathNode: FC<PathNodeProps> = ({
   pk,
   uid,
 }) => {
-  const { openMenu } = useCanvasContextMenu();
+  const { openMenu, canvasEnabled } = useCanvasContextMenu();
 
   const {
     attributes: nodeDragAttributes,
@@ -79,7 +79,9 @@ const PathNode: FC<PathNodeProps> = ({
       data-tooltip-id={`${uid}`}
       data-node-id={node.id}
       onClick={(e)=> {e.stopPropagation(); onNodeClick(node);}}
-      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'node', id: node.id, pk, position: { x: e.clientX, y: e.clientY } }); }}
+      onContextMenu={canvasEnabled
+        ? (e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'node', id: node.id, pk, position: { x: e.clientX, y: e.clientY } }); }
+        : undefined}
       {...hoverHandlers}
       {...nodeDragListeners}
       {...nodeDragAttributes}

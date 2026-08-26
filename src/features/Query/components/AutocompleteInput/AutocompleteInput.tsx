@@ -193,7 +193,18 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         iconLeft={IconLeft}
         iconLeftClassName={styles.iconLeft}
         iconRight={!!selectedItem && onClear ?
-          <button className={styles.close} onClick={onClear}><CloseIcon/></button> :
+          <button
+            type="button"
+            className={styles.close}
+            aria-label="Clear search term"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClear();
+            }}
+          >
+            <CloseIcon/>
+          </button> :
           false
         }
         disabled={disabled}

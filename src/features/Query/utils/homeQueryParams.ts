@@ -5,6 +5,25 @@ export const HOME_QUERY_NODE_ID_PARAM = 'i';
 export const HOME_QUERY_NODE_LABEL_PARAM = 'l';
 export const HOME_QUERY_NODE_CATEGORY_PARAM = 'nc';
 
+export const HOME_QUERY_NODE_PARAMS = [
+  HOME_QUERY_NODE_ID_PARAM,
+  HOME_QUERY_NODE_LABEL_PARAM,
+  HOME_QUERY_NODE_CATEGORY_PARAM,
+] as const;
+
+/** True when the URL includes any canvas/node prefills (`i`, `l`, and/or `nc`). */
+export const hasHomeQueryNodeParams = (params: URLSearchParams): boolean =>
+  HOME_QUERY_NODE_PARAMS.some((key) => params.has(key));
+
+/** Returns a copy of `params` with canvas/node prefills removed (`tab` and others kept). */
+export const stripHomeQueryNodeParams = (params: URLSearchParams): URLSearchParams => {
+  const next = new URLSearchParams(params);
+  for (const key of HOME_QUERY_NODE_PARAMS) {
+    next.delete(key);
+  }
+  return next;
+};
+
 export type HomeQueryTab = 'smart' | 'pathfinder' | 'lookup';
 
 export type HomeQueryTabOptions = {

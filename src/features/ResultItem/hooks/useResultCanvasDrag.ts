@@ -9,7 +9,7 @@ export const useResultCanvasDrag = (
   resultId: string | undefined,
   pk: string | null | undefined,
 ) => {
-  const { openMenu } = useCanvasContextMenu();
+  const { openMenu, canvasEnabled } = useCanvasContextMenu();
   const resultDragData = resultId && pk
     ? { type: 'result' as const, data: { id: resultId, pk } }
     : null;
@@ -34,6 +34,6 @@ export const useResultCanvasDrag = (
     listeners,
     isDragging,
     canDrag,
-    onContextMenu,
+    onContextMenu: canvasEnabled ? onContextMenu : undefined,
   };
 };
