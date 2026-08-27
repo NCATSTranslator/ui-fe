@@ -7,7 +7,6 @@ import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import NodeTooltipContent from "@/features/Core/components/Tooltips/NodeTooltipContent";
 
 interface GraphHoverTooltipsProps {
-  cursor: { x: number; y: number } | null;
   resultSet?: ResultSet;
   target: GraphHoverTarget;
   onTooltipEnter?: () => void;
@@ -72,7 +71,6 @@ const useSlotPair = (target: GraphHoverTarget, kind: 'node' | 'edge'): SlotPair 
 };
 
 const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
-  cursor,
   resultSet,
   target,
   onPredicateClick,
@@ -84,7 +82,7 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
 
   const renderNodeSlot = (slot: Slot, id: string) => {
     const props = slot.target?.kind === 'node' ? nodeToTooltipProps(slot.target.node) : null;
-    const position = slot.target?.anchor ?? cursor ?? undefined;
+    const position = slot.target?.anchor;
     return (
       <Tooltip
         key={id}
@@ -105,7 +103,7 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
     const entries = slot.target?.kind === 'edge'
       ? [edgeToTooltipEntry(resultSet ?? null, slot.target.edge)]
       : [];
-    const position = slot.target?.anchor ?? cursor ?? undefined;
+    const position = slot.target?.anchor;
     return (
       <Tooltip
         key={id}

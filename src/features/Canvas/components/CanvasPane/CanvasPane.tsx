@@ -62,10 +62,7 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
 }) => (
   <CanvasNodeChromeActionsContext.Provider value={menus.chromeActions}>
     <div className={styles.contentArea}>
-      <div
-        className={styles.graphHoverContainer}
-        onMouseMove={graph.graphHover.onContainerMouseMove}
-      >
+      <div className={styles.graphHoverContainer}>
         <CanvasGraph
           canvas={activeCanvas}
           visibleNodes={graph.visibleNodes}
@@ -118,7 +115,6 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
           <GraphHoverTooltips
             onPredicateClick={graph.graphHover.onPredicateClick}
             target={graph.graphHover.visible}
-            cursor={graph.graphHover.cursor}
             resultSet={graph.graphHover.resultSet ?? undefined}
             onTooltipEnter={graph.graphHover.onTooltipEnter}
             onTooltipLeave={graph.graphHover.onTooltipLeave}

@@ -20,13 +20,15 @@ const useCanvasLayoutState = (canvas: Canvas | null) => {
   const graphLayoutRef = useRef(graphLayout);
   graphLayoutRef.current = graphLayout;
 
+  const canvasLayout = canvas?.layout;
+  const canvasNodes = canvas?.nodes;
   const customPositionsKey = useMemo(() => {
-    if (!canvas || !isCustomCanvasLayout(canvas.layout)) return '';
-    return Object.entries(canvas.nodes)
+    if (!canvasNodes || !canvasLayout || !isCustomCanvasLayout(canvasLayout)) return '';
+    return Object.entries(canvasNodes)
       .map(([id, node]) => `${id}:${node.x}:${node.y}`)
       .sort()
       .join('|');
-  }, [canvas]);
+  }, [canvasNodes, canvasLayout]);
 
   useLayoutEffect(() => {
     if (!canvas) return;
@@ -62,13 +64,14 @@ const useCanvasLayoutState = (canvas: Canvas | null) => {
     return layoutSaveGenerationRef.current;
   }, []);
 
+  const graphLoaded = canvas?.graphLoaded;
   const isCustomLayoutReady = useMemo(() => {
     if (graphLayout !== 'custom') return true;
-    if (!canvas?.graphLoaded) return false;
-    if (Object.keys(canvas.nodes).length === 0) return true;
+    if (!graphLoaded) return false;
+    if (!canvasNodes || Object.keys(canvasNodes).length === 0) return true;
     if (!frozenNodePositions || Object.keys(frozenNodePositions).length === 0) return false;
     return !nodePositionsAreAllOrigin(frozenNodePositions);
-  }, [graphLayout, canvas, frozenNodePositions]);
+  }, [graphLayout, graphLoaded, canvasNodes, frozenNodePositions]);
 
   return {
     graphLayout,

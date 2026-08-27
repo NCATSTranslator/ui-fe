@@ -1,4 +1,4 @@
-import { createContext, useContext, type FC, type MouseEvent, type ReactNode } from 'react';
+import { createContext, memo, useCallback, useContext, type FC, type MouseEvent, type ReactNode } from 'react';
 import type { GraphNodeChrome } from 'translator-graph-view';
 import HorizontalDotMenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
@@ -61,6 +61,8 @@ export const NodeQueryChromeButton: FC<{ nodeId: string }> = ({ nodeId }) => {
   );
 };
 
+const stopPropagation = (event: MouseEvent) => event.stopPropagation();
+
 export const NodeChromeSlot: FC<{
   position: 'topLeft' | 'bottomRight';
   children: ReactNode;
@@ -70,8 +72,8 @@ export const NodeChromeSlot: FC<{
       styles.chrome,
       position === 'topLeft' ? styles.chromeTopLeft : styles.chromeBottomRight,
     )}
-    onClick={(event) => event.stopPropagation()}
-    onMouseDown={(event) => event.stopPropagation()}
+    onClick={stopPropagation}
+    onMouseDown={stopPropagation}
   >
     {children}
   </div>
@@ -89,7 +91,7 @@ interface CanvasNodeChipProps {
   onMenu: (event?: MouseEvent) => void;
 }
 
-export const CanvasNodeChip: FC<CanvasNodeChipProps> = ({
+export const CanvasNodeChip = memo<CanvasNodeChipProps>(({
   nodeId,
   type,
   displayName,
@@ -99,37 +101,42 @@ export const CanvasNodeChip: FC<CanvasNodeChipProps> = ({
   onClick,
   onHover,
   onMenu,
-}) => (
-  <div
-    className={styles.canvasNode}
-    onMouseEnter={() => onHover(nodeId)}
-    onMouseLeave={() => onHover(null)}
-  >
-    <button
-      type="button"
-      className={styles.canvasNodeBody}
-      onClick={onClick}
-      title={title}
+}) => {
+  const handleMouseEnter = useCallback(() => onHover(nodeId), [onHover, nodeId]);
+  const handleMouseLeave = useCallback(() => onHover(null), [onHover]);
+
+  return (
+    <div
+      className={styles.canvasNode}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <span className={styles.canvasNodeIcon}>
-        {getNodeIcon(type)}
-      </span>
-      <span className={styles.canvasNodeLabel}>
-        <ObjectListSearchName
-          displayName={displayName}
-          searchTerm={searchTerm}
-          externalSearchMatches={externalSearchMatches}
-        />
-      </span>
-    </button>
-    <NodeChromeSlot position="topLeft">
-      <NodeMenuChromeButton onMenu={onMenu} />
-    </NodeChromeSlot>
-    <NodeChromeSlot position="bottomRight">
-      <NodeQueryChromeButton nodeId={nodeId} />
-    </NodeChromeSlot>
-  </div>
-);
+      <button
+        type="button"
+        className={styles.canvasNodeBody}
+        onClick={onClick}
+        title={title}
+      >
+        <span className={styles.canvasNodeIcon}>
+          {getNodeIcon(type)}
+        </span>
+        <span className={styles.canvasNodeLabel}>
+          <ObjectListSearchName
+            displayName={displayName}
+            searchTerm={searchTerm}
+            externalSearchMatches={externalSearchMatches}
+          />
+        </span>
+      </button>
+      <NodeChromeSlot position="topLeft">
+        <NodeMenuChromeButton onMenu={onMenu} />
+      </NodeChromeSlot>
+      <NodeChromeSlot position="bottomRight">
+        <NodeQueryChromeButton nodeId={nodeId} />
+      </NodeChromeSlot>
+    </div>
+  );
+});
 
 export const canvasNodeChrome: GraphNodeChrome = {
   topLeft: ({ onMenu }) => (

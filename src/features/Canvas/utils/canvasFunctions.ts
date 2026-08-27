@@ -1,4 +1,4 @@
-import type { Canvas, CanvasNode, CanvasAnnotation } from '@/features/Canvas/types/canvas';
+import type { Canvas, CanvasNode, CanvasEdge, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import type { ResultSet } from '@/features/ResultList/types/results.d';
 
 export type CanvasSortMode = 'date' | 'name';
@@ -134,23 +134,29 @@ export const getCanvasObjectCountDisplay = (
   return `${count} ${count === 1 ? labels.singular : labels.plural}`;
 };
 
-export const getNodeEdgeCount = (canvas: Canvas, nodeId: string): number => {
-  let count = 0;
-  for (const edge of Object.values(canvas.edges)) {
-    if (edge.subject === nodeId || edge.object === nodeId) count++;
+const countEdgesPerNode = (edges: Record<string, CanvasEdge>): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const edge of Object.values(edges)) {
+    counts.set(edge.subject, (counts.get(edge.subject) ?? 0) + 1);
+    // A self-loop is a single incident edge, not two.
+    if (edge.object === edge.subject) continue;
+    counts.set(edge.object, (counts.get(edge.object) ?? 0) + 1);
   }
-  return count;
+  return counts;
 };
 
 export const sortCanvasNodes = (
   nodes: CanvasNode[],
   mode: ObjectSortMode,
-  canvas: Canvas,
-): CanvasNode[] =>
-  [...nodes].sort((a, b) => {
+  edges: Record<string, CanvasEdge>,
+): CanvasNode[] => {
+  if (mode === 'relationships') {
+    const counts = countEdgesPerNode(edges);
+    return [...nodes].sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0));
+  }
+
+  return [...nodes].sort((a, b) => {
     switch (mode) {
-      case 'relationships':
-        return getNodeEdgeCount(canvas, b.id) - getNodeEdgeCount(canvas, a.id);
       case 'alphabetical':
         return getCanvasNodeDisplayName(a).localeCompare(getCanvasNodeDisplayName(b));
       case 'type':
@@ -159,6 +165,7 @@ export const sortCanvasNodes = (
         return 0;
     }
   });
+};
 
 export const filterCanvasNodes = (nodes: CanvasNode[], search: string): CanvasNode[] => {
   if (!search) return nodes;

@@ -1,4 +1,4 @@
-import { MouseEvent, ReactNode } from 'react';
+import { useCallback, type MouseEvent, type ReactNode } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import type { CanvasSearchMatch } from '@/features/Canvas/utils/canvasFunctions';
@@ -39,11 +39,18 @@ const ObjectListItem = <TAction extends string>({
 }: ObjectListItemProps<TAction>) => {
   const isMenuOpen = menuId === itemId;
 
+  const handleMouseEnter = useCallback(() => onHover(itemId), [onHover, itemId]);
+  const handleMouseLeave = useCallback(() => onHover(null), [onHover]);
+  const handleMenuToggle = useCallback(
+    (event: MouseEvent) => onMenuToggle(itemId, event),
+    [onMenuToggle, itemId],
+  );
+
   return (
     <div
       className={styles.nodeItem}
-      onMouseEnter={() => onHover(itemId)}
-      onMouseLeave={() => onHover(null)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
         type="button"
@@ -63,7 +70,7 @@ const ObjectListItem = <TAction extends string>({
         <button
           type="button"
           className={joinClasses(styles.nodeMenuButton, isMenuOpen && styles.active)}
-          onClick={e => onMenuToggle(itemId, e)}
+          onClick={handleMenuToggle}
           aria-label={ariaLabel}
         >
           <CogIcon />

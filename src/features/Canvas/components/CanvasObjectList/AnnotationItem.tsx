@@ -1,4 +1,4 @@
-import { FC, MouseEvent } from 'react';
+import { memo, useCallback, useMemo, type FC, type MouseEvent } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import { getAnnotationDisplayName, getCanvasAnnotationSearchMatchesOutsideDisplayName } from '@/features/Canvas/utils/canvasFunctions';
@@ -12,11 +12,13 @@ export interface AnnotationItemProps {
   annotation: CanvasAnnotation;
   searchTerm?: string;
   menuId: string | null;
-  onAnnotationClick: (annotation: CanvasAnnotation) => void;
+  onAnnotationClick: (annotationId: string) => void;
   onHoverAnnotation: (annotationId: string | null) => void;
   onMenuToggle: (annotationId: string, e: MouseEvent) => void;
   onMenuAction: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
 }
+
+const ANNOTATION_META = <span className={styles.typeChip}>Annotation</span>;
 
 const AnnotationItem: FC<AnnotationItemProps> = ({
   annotation,
@@ -28,9 +30,21 @@ const AnnotationItem: FC<AnnotationItemProps> = ({
   onMenuAction,
 }) => {
   const displayName = getAnnotationDisplayName(annotation);
-  const externalSearchMatches = searchTerm
-    ? getCanvasAnnotationSearchMatchesOutsideDisplayName(annotation, searchTerm)
-    : [];
+  const externalSearchMatches = useMemo(
+    () => (searchTerm
+      ? getCanvasAnnotationSearchMatchesOutsideDisplayName(annotation, searchTerm)
+      : []),
+    [annotation, searchTerm],
+  );
+
+  const handleItemClick = useCallback(
+    () => onAnnotationClick(annotation.id),
+    [onAnnotationClick, annotation.id],
+  );
+  const handleMenuAction = useCallback(
+    (action: CanvasAnnotationAction) => onMenuAction(action, annotation),
+    [onMenuAction, annotation],
+  );
 
   return (
     <ObjectListItem<CanvasAnnotationAction>
@@ -39,16 +53,16 @@ const AnnotationItem: FC<AnnotationItemProps> = ({
       searchTerm={searchTerm}
       externalSearchMatches={externalSearchMatches}
       isEmptyName={!annotation.text.trim()}
-      meta={<span className={styles.typeChip}>Annotation</span>}
+      meta={ANNOTATION_META}
       menuId={menuId}
       ariaLabel={`Actions for ${displayName}`}
       actions={OBJECT_LIST_ANNOTATION_ACTIONS}
-      onItemClick={() => onAnnotationClick(annotation)}
+      onItemClick={handleItemClick}
       onHover={onHoverAnnotation}
       onMenuToggle={onMenuToggle}
-      onMenuAction={action => onMenuAction(action, annotation)}
+      onMenuAction={handleMenuAction}
     />
   );
 };
 
-export default AnnotationItem;
+export default memo(AnnotationItem);
