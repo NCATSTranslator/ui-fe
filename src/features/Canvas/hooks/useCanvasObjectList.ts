@@ -72,8 +72,8 @@ const useCanvasObjectListItems = (
     [searchTerm],
   );
   const sortedNodes = useMemo(
-    () => sortCanvasNodes(filterCanvasNodes(allNodes, activeSearchTerm), sortMode, canvas),
-    [allNodes, activeSearchTerm, sortMode, canvas],
+    () => sortCanvasNodes(filterCanvasNodes(allNodes, activeSearchTerm), sortMode, canvas.edges),
+    [allNodes, activeSearchTerm, sortMode, canvas.edges],
   );
   const sortedAnnotations = useMemo(
     () => sortCanvasAnnotations(

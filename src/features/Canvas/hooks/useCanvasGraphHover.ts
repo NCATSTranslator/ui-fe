@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, MouseEvent } from 'react';
+import { useState, useMemo, useCallback, useRef, MouseEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { GraphNodeType, GraphEdgeType, HoverGeometry } from 'translator-graph-view';
 import type { Canvas } from '@/features/Canvas/types/canvas';
@@ -64,7 +64,14 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
   const [hoveredNode, setHoveredNode] = useState<HoveredEntity | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<HoveredEntity | null>(null);
   const [tooltipHovered, setTooltipHovered] = useState(false);
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  /**
+   * The graph re-measures hover geometry and re-fires these callbacks on every
+   * animation frame that the viewport moves, so a pan that starts over a node
+   * would otherwise rebuild this state ~60 times a second. The tooltip anchor is
+   * captured when the tooltip opens and does not track the node afterwards, so
+   * repeat events for the entity already hovered carry nothing we can use.
+   */
+  const hoverKeyRef = useRef<string | null>(null);
 
   const nodeDetailQuery = useCanvasNodeDetail(canvas?.id, hoveredNode?.dataId, !!hoveredNode && !!canvas);
   const edgeDetailQuery = useCanvasEdgeDetail(canvas?.id, hoveredEdge?.dataId, !!hoveredEdge && !!canvas);
@@ -77,9 +84,14 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
 
   const handleGraphNodeHover = useCallback((node: GraphNodeType | null, geometry: HoverGeometry | null) => {
     if (!node || !geometry || !canvas) {
+      hoverKeyRef.current = null;
       setHoveredNode(null);
       return;
     }
+    const hoverKey = `node:${node.id}`;
+    if (hoverKeyRef.current === hoverKey) return;
+    hoverKeyRef.current = hoverKey;
+
     const canvasNode = canvas.nodes[node.id];
     if (!canvasNode?.dataId) {
       setHoveredNode(null);
@@ -92,9 +104,14 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
 
   const handleGraphEdgeHover = useCallback((edge: GraphEdgeType | null, geometry: HoverGeometry | null) => {
     if (!edge || !geometry || !canvas) {
+      hoverKeyRef.current = null;
       setHoveredEdge(null);
       return;
     }
+    const hoverKey = `edge:${edge.id}`;
+    if (hoverKeyRef.current === hoverKey) return;
+    hoverKeyRef.current = hoverKey;
+
     const canvasEdge = canvas.edges[edge.id];
     if (!canvasEdge?.dataId) {
       setHoveredEdge(null);
@@ -104,10 +121,6 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
     prefetchCanvasEdgeDetail(queryClient, canvas.id, canvasEdge.dataId);
     setHoveredEdge({ id: edge.id, dataId: canvasEdge.dataId, geometry });
   }, [canvas, queryClient]);
-
-  const onContainerMouseMove = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    setCursor({ x: event.clientX, y: event.clientY });
-  }, []);
 
   const onPredicateClick = useCallback((
     event: MouseEvent<HTMLSpanElement>,
@@ -125,9 +138,7 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
 
   return {
     visible,
-    cursor,
     resultSet,
-    onContainerMouseMove,
     onPredicateClick,
     handleGraphNodeHover,
     handleGraphEdgeHover,
