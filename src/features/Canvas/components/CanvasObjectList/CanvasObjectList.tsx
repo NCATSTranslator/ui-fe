@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { memo, type FC } from 'react';
 import styles from './CanvasObjectList.module.scss';
 import type { Canvas, CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canvas';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
@@ -120,7 +120,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           key={node.id}
                           node={node}
                           searchTerm={searchTerm}
-                          onNodeClick={node => handleNodeClick(node.id)}
+                          onNodeClick={handleNodeClick}
                           onHoverNode={onHoverNode}
                           onMenu={handleNodeMenu}
                         />
@@ -148,7 +148,7 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
                           annotation={annotation}
                           searchTerm={searchTerm}
                           menuId={annotationMenuId}
-                          onAnnotationClick={item => handleAnnotationClick(item.id)}
+                          onAnnotationClick={handleAnnotationClick}
                           onHoverAnnotation={onHoverAnnotation}
                           onMenuToggle={handleMenuToggle}
                           onMenuAction={handleAnnotationMenuAction}
@@ -173,4 +173,4 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
   );
 };
 
-export default CanvasObjectList;
+export default memo(CanvasObjectList);
