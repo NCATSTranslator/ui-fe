@@ -138,6 +138,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           showEdgeLabels={false}
           showMiniMap={false}
           showHandles={false}
+          clearHoverOnViewportChange
           nodeChrome={canvasNodeChrome}
           getNodeIcon={getNodeIcon}
           onNodeMenu={onNodeContextMenu}
