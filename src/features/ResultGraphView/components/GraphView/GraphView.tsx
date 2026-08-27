@@ -1,4 +1,4 @@
-import { useMemo, useState, MouseEvent } from 'react';
+import { useMemo, useRef, useState, MouseEvent } from 'react';
 import styles from './GraphView.module.scss';
 import { GraphView as TranslatorGraphView, LayoutType, GraphData, GraphNodeType, GraphEdgeType, HoverGeometry } from 'translator-graph-view';
 import 'translator-graph-view/styles.css';
@@ -31,7 +31,18 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   const [pending, setPending] = useState<GraphHoverTarget>(null);
   const [tooltipHovered, setTooltipHovered] = useState(false);
   const visible = useDelayedHoverTarget(pending, { hold: tooltipHovered });
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  /**
+   * The graph re-measures hover geometry and re-fires the hover callbacks on
+   * every animation frame that the viewport moves. Repeat events for the entity
+   * already hovered carry nothing the tooltip uses, so dropping them keeps a pan
+   * that starts over a node from re-rendering the graph once per frame.
+   */
+  const hoverKeyRef = useRef<string | null>(null);
+  const isRepeatHover = (hoverKey: string | null) => {
+    if (hoverKey !== null && hoverKeyRef.current === hoverKey) return true;
+    hoverKeyRef.current = hoverKey;
+    return false;
+  };
 
   const hasData = useMemo(
     () => Object.keys(graph.nodes).length > 0,
@@ -56,15 +67,13 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   };
 
   const onNodeHover = (node: GraphNodeType | null, geometry: HoverGeometry | null) => {
+    if (isRepeatHover(node ? `node:${node.id}` : null)) return;
     setPending(resolveNodeTarget(node, geometry, resultSet));
   };
 
   const onEdgeHover = (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => {
+    if (isRepeatHover(edge ? `edge:${edge.id}` : null)) return;
     setPending(resolveEdgeTarget(edge, geometry, resultSet));
-  };
-
-  const onContainerMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    setCursor({ x: e.clientX, y: e.clientY });
   };
 
   if (!active || !hasData) return null;
@@ -72,10 +81,7 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   return (
     <div>
       <GraphLayoutButtons currentLayout={layout} setCurrentLayout={setLayout} />
-      <div
-        className={styles.graphContainer}
-        onMouseMove={onContainerMouseMove}
-      >
+      <div className={styles.graphContainer}>
         <TranslatorGraphView
           data={graph}
           layout={layout}
@@ -91,7 +97,6 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
         <GraphHoverTooltips
           onPredicateClick={onPredicateClick}
           target={visible}
-          cursor={cursor}
           resultSet={resultSet}
           onTooltipEnter={() => setTooltipHovered(true)}
           onTooltipLeave={() => setTooltipHovered(false)}
