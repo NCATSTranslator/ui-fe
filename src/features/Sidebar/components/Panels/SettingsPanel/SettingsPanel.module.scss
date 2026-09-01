@@ -54,6 +54,10 @@
     padding: $s;
     margin: 0 (-$s) $s;
   }
+  .apiSection {
+    padding: 0 $s;
+    margin-top: $l;
+  }
   .helpText, .helpText a {
     font-size: $captionSize;
     color: $darkGray;
