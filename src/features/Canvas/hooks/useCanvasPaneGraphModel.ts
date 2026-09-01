@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectSyncDeferredCanvasIds } from '@/features/Canvas/slices/canvasSlice';
 import useCanvas from '@/features/Canvas/hooks/useCanvas';
 import useCanvasPersistence from '@/features/Canvas/hooks/useCanvasPersistence';
 import useCanvasFilters from '@/features/Canvas/hooks/useCanvasFilters';
@@ -16,6 +18,7 @@ import type { Canvas } from '@/features/Canvas/types/canvas';
 export const useCanvasPaneGraphModel = (activeCanvas: Canvas) => {
   const navigate = useNavigate();
   const persistence = useCanvasPersistence();
+  const syncDeferredCanvasIds = useSelector(selectSyncDeferredCanvasIds);
   const canvas = useCanvas(persistence);
   const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
   const hoverState = useCanvasHoverState();
@@ -61,6 +64,8 @@ export const useCanvasPaneGraphModel = (activeCanvas: Canvas) => {
       paneHandlers,
       graphHover,
       saveStatus: persistence.saveStatus,
+      /* A remote change to this canvas is waiting on the user's own writes to finish saving. */
+      syncDeferred: syncDeferredCanvasIds.includes(activeCanvas.id),
       graphAnnotations: annotations.graphAnnotations,
       handleAnnotationsChange: annotations.handleAnnotationsChange,
       handleAddAnnotation: annotations.handleAddAnnotation,

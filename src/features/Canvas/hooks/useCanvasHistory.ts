@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/redux/store';
 import { replaceCanvas } from '@/features/Canvas/slices/canvasSlice';
@@ -17,12 +17,39 @@ const useCanvasHistory = (
   const dispatch = useDispatch<AppDispatch>();
   const undoStacksRef = useRef<Record<string, Canvas[]>>({});
   const redoStacksRef = useRef<Record<string, Canvas[]>>({});
+  /* The canvas's syncGeneration when its stacks were last written, so a sync that replaced the
+   * canvas underneath them can be detected. */
+  const stackGenerationsRef = useRef<Record<string, number>>({});
   const persistenceRef = useRef(persistence);
   persistenceRef.current = persistence;
   const [, forceUpdate] = useState(0);
 
+  /*
+   * Snapshots taken before a sync describe a graph the server has since replaced. Replaying one
+   * would resurrect elements another tab deleted, so the stacks are dropped when the canvas's
+   * syncGeneration moves. Checked lazily as well as in the effect below, because the effect only
+   * watches the active canvas while the stacks are kept for every canvas the user has touched.
+   */
+  const dropStacksIfSynced = useCallback((canvas: Canvas) => {
+    const key = String(canvas.id);
+    const generation = canvas.syncGeneration ?? 0;
+    const recorded = stackGenerationsRef.current[key];
+    stackGenerationsRef.current[key] = generation;
+    if (recorded === undefined || recorded === generation) return false;
+    const hadHistory = !!undoStacksRef.current[key]?.length || !!redoStacksRef.current[key]?.length;
+    delete undoStacksRef.current[key];
+    delete redoStacksRef.current[key];
+    return hadHistory;
+  }, []);
+
+  useEffect(() => {
+    if (!activeCanvas) return;
+    if (dropStacksIfSynced(activeCanvas)) forceUpdate(r => r + 1);
+  }, [activeCanvas, dropStacksIfSynced]);
+
   const pushUndo = useCallback(() => {
     if (!activeCanvas) return;
+    dropStacksIfSynced(activeCanvas);
     const key = String(activeCanvas.id);
     const snapshot = structuredClone(activeCanvas);
     const stack = undoStacksRef.current[key] ?? [];
@@ -31,10 +58,11 @@ const useCanvasHistory = (
       redoStacksRef.current[key] = [];
     }
     forceUpdate(r => r + 1);
-  }, [activeCanvas]);
+  }, [activeCanvas, dropStacksIfSynced]);
 
   const undo = useCallback(() => {
     if (!activeCanvas) return;
+    dropStacksIfSynced(activeCanvas);
     const key = String(activeCanvas.id);
     const stack = undoStacksRef.current[key];
     if (!stack || stack.length === 0) return;
@@ -50,10 +78,11 @@ const useCanvasHistory = (
     persistence.clearPendingGeometry?.();
     persistence.clearPendingAnnotationText?.();
     void persistCanvasHistoryTransition(current, snapshot, persistence);
-  }, [activeCanvas, dispatch]);
+  }, [activeCanvas, dispatch, dropStacksIfSynced]);
 
   const redo = useCallback(() => {
     if (!activeCanvas) return;
+    dropStacksIfSynced(activeCanvas);
     const key = String(activeCanvas.id);
     const stack = redoStacksRef.current[key];
     if (!stack || stack.length === 0) return;
@@ -69,8 +98,13 @@ const useCanvasHistory = (
     persistence.clearPendingGeometry?.();
     persistence.clearPendingAnnotationText?.();
     void persistCanvasHistoryTransition(current, snapshot, persistence);
-  }, [activeCanvas, dispatch]);
+  }, [activeCanvas, dispatch, dropStacksIfSynced]);
 
+  /*
+   * Read stack refs during render rather than mirroring their lengths in state. That is safe here
+   * because every path that mutates a stack also calls forceUpdate; if a future change adds a stack
+   * mutation without that call, canUndo/canRedo could drift until the next render trigger.
+   */
   const canUndo = !!activeCanvas && (undoStacksRef.current[String(activeCanvas.id)]?.length ?? 0) > 0;
   const canRedo = !!activeCanvas && (redoStacksRef.current[String(activeCanvas.id)]?.length ?? 0) > 0;
 

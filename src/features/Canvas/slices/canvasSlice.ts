@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@/redux/store';
 import { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
+import { canvasGraphsEquivalent } from '@/features/Canvas/utils/canvasSyncUtils';
 
 export interface CanvasState {
   canvases: Canvas[];
   activeCanvasId: number | null;
   paneOpen: boolean;
   paneMaximized: boolean;
+  /** Canvases changed on the server that sync is holding back until local writes settle. */
+  syncDeferredCanvasIds: number[];
 }
 
 const initialState: CanvasState = {
@@ -14,6 +17,7 @@ const initialState: CanvasState = {
   activeCanvasId: null,
   paneOpen: false,
   paneMaximized: false,
+  syncDeferredCanvasIds: [],
 };
 
 const resetPaneState = (state: CanvasState) => {
@@ -146,6 +150,53 @@ export const canvasSlice = createSlice({
         canvas.timeUpdated = new Date().toISOString();
       }
     },
+    /**
+     * Replaces a canvas with server state pulled by sync, rather than by a local edit. Bumping
+     * syncGeneration tells consumers holding state derived from the previous graph (undo stacks,
+     * cached entity detail) to drop it: those snapshots reference nodes this canvas may no longer
+     * have, so replaying them would resurrect elements deleted in another tab.
+     */
+    syncCanvasFromServer: (state, action: PayloadAction<Canvas>) => {
+      const index = state.canvases.findIndex(c => c.id === action.payload.id);
+      if (index === -1) return;
+      const current = state.canvases[index];
+      const incoming = action.payload;
+
+      /* The graph came back identical — this is the echo of a write made here, not someone else's
+       * change. Take the metadata and the timestamp, but leave the graph and syncGeneration alone
+       * so undo history survives and memoized consumers keep their object identities. */
+      if (canvasGraphsEquivalent(current, incoming)) {
+        current.label = incoming.label;
+        current.layout = incoming.layout;
+        current.serverTimeUpdated = incoming.serverTimeUpdated;
+        return;
+      }
+
+      state.canvases[index] = {
+        ...incoming,
+        syncGeneration: (current.syncGeneration ?? 0) + 1,
+      };
+    },
+    /**
+     * Records a server timestamp for a canvas whose graph is already up to date — the timestamp
+     * this tab's own write produced. Takes the token without touching the graph, so a local save
+     * does not read as a remote change on the next poll.
+     */
+    adoptCanvasServerTime: (
+      state,
+      action: PayloadAction<{ canvasId: number; serverTimeUpdated: string }>,
+    ) => {
+      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
+      if (canvas) canvas.serverTimeUpdated = action.payload.serverTimeUpdated;
+    },
+    /* Skips the write when the set is unchanged, so a poll finding nothing new does not hand
+     * subscribers a fresh array identity every interval. */
+    setSyncDeferredCanvasIds: (state, action: PayloadAction<number[]>) => {
+      const next = action.payload;
+      const current = state.syncDeferredCanvasIds;
+      if (current.length === next.length && current.every((id, i) => id === next[i])) return;
+      state.syncDeferredCanvasIds = next;
+    },
     restoreCanvas: (state, action: PayloadAction<Canvas>) => {
       if (!state.canvases.some(c => c.id === action.payload.id)) {
         state.canvases.push(action.payload);
@@ -160,27 +211,37 @@ export const canvasSlice = createSlice({
           existing &&
           (existing.graphLoaded || Object.keys(existing.nodes).length > 0)
         ) {
+          // The retained graph is the one serverTimeUpdated describes, so the incoming meta's
+          // timestamp must not be adopted here — keeping the old value is exactly what marks this
+          // canvas stale so the sync reconcile knows to refetch its graph.
           return {
             ...canvas,
             nodes: existing.nodes,
             edges: existing.edges,
             tags: existing.tags,
             annotations: existing.annotations,
+            serverTimeUpdated: existing.serverTimeUpdated,
+            syncGeneration: existing.syncGeneration,
             graphLoaded: true,
           };
         }
         return canvas;
       });
+      /*
+       * A canvas missing from the server's list is either one created here that the server has not
+       * listed yet — this response simply predates the create — or one deleted in another tab or on
+       * another machine. serverKnown is what separates the two: keep the former, drop the latter.
+       */
       for (const existing of state.canvases) {
         if (incomingIds.has(existing.id)) continue;
-        if (existing.id === state.activeCanvasId || existing.graphLoaded) {
-          canvases.push(existing);
-        }
+        if (!existing.serverKnown) canvases.push(existing);
       }
       state.canvases = canvases;
+      /* The open canvas was deleted elsewhere. Close the pane rather than silently swapping in an
+       * unrelated canvas, which reads as the graph having been replaced under the user. */
       if (state.activeCanvasId && !canvases.some(c => c.id === state.activeCanvasId)) {
-        state.activeCanvasId = canvases.length > 0 ? canvases[0].id : null;
-        if (!state.activeCanvasId) resetPaneState(state);
+        state.activeCanvasId = null;
+        resetPaneState(state);
       }
     },
   },
@@ -200,6 +261,9 @@ export const {
   removeCanvasNode,
   removeCanvasEdge,
   replaceCanvas,
+  syncCanvasFromServer,
+  adoptCanvasServerTime,
+  setSyncDeferredCanvasIds,
   restoreCanvas,
   setCanvases,
   setCanvasAnnotations,
@@ -213,6 +277,7 @@ export { getNextCanvasLabel };
 export const selectCanvases = (state: RootState) => state.canvas.canvases;
 export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCanvasId;
 export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
+export const selectSyncDeferredCanvasIds = (state: RootState) => state.canvas.syncDeferredCanvasIds;
 export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
 export const selectActiveCanvas = (state: RootState) =>
   state.canvas.canvases.find(c => c.id === state.canvas.activeCanvasId) ?? null;

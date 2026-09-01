@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Canvas, CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canvas';
 import { diffCanvasForHistory } from '@/features/Canvas/utils/canvasHistoryUtils';
+import { makeCanvas } from '@/features/Canvas/utils/canvasTestFixtures';
 
 const makeNode = (overrides: Partial<CanvasNode> & Pick<CanvasNode, 'id' | 'dataId'>): CanvasNode => ({
   ref: overrides.id,
@@ -22,22 +23,6 @@ const makeAnnotation = (
   width: 160,
   height: 80,
   timeCreated: '2026-01-01T00:00:00.000Z',
-  ...overrides,
-});
-
-const makeCanvas = (overrides: Partial<Canvas> = {}): Canvas => ({
-  id: 1,
-  label: 'Canvas',
-  layout: 'horizontal',
-  nodes: {},
-  edges: {},
-  tags: null,
-  queryRef: null,
-  resultRef: null,
-  annotations: [],
-  timeCreated: '2026-01-01T00:00:00.000Z',
-  timeUpdated: '2026-01-01T00:00:00.000Z',
-  graphLoaded: true,
   ...overrides,
 });
 

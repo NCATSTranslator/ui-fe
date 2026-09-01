@@ -283,7 +283,7 @@ export const useSortSearchState = () => {
  * @returns {Record<string, string>, boolean} Object with curie->name mapping and loading state
  */
 export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean = true) => {
-  const queries = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['curieNames', curies],
     queryFn: async () => {
       const results: Record<string, string> = {};
@@ -306,8 +306,8 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
   });
 
   return {
-    data: queries.data || {},
-    isLoading: queries.isLoading,
+    data: data || {},
+    isLoading,
   };
 };
 

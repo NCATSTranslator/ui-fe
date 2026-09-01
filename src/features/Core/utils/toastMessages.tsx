@@ -52,6 +52,17 @@ export const queryUpdatedToast = () => {
   return toast(AppToast, { data: { topText: 'Query updated' } });
 };
 
+// API keys
+export const apiKeyCreatedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key created' } });
+};
+export const apiKeyCopiedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key copied to clipboard' } });
+};
+export const apiKeyRevokedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key revoked' } });
+};
+
 // Shared
 export const errorToast = (message: string) => {
   return toast.error(AppToast, { data: { topText: message } });
