@@ -1,0 +1,20 @@
+@use "@/assets/styles/variables" as *;
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: $lightGray;
+  border-bottom: 1px solid $midGray;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: $yellow;
+}
