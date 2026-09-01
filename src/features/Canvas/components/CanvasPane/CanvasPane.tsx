@@ -9,6 +9,7 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
+import CanvasSyncBanner from '@/features/Canvas/components/CanvasSync/CanvasSyncBanner';
 import { CanvasNodeChromeActionsContext } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
@@ -63,6 +64,7 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
   <CanvasNodeChromeActionsContext.Provider value={menus.chromeActions}>
     <div className={styles.contentArea}>
       <div className={styles.graphHoverContainer}>
+        {graph.syncDeferred && <CanvasSyncBanner />}
         <CanvasGraph
           canvas={activeCanvas}
           visibleNodes={graph.visibleNodes}
