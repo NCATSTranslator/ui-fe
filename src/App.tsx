@@ -32,6 +32,8 @@ import { closePane } from '@/features/Canvas/slices/canvasSlice';
 
 // Lazy so translator-graph-view stays out of the entry chunk.
 const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
+// Renders nothing; owns the canvas sync poll so it runs regardless of which route is open.
+const CanvasSync = lazy(() => import('@/features/Canvas/components/CanvasSync/CanvasSync'));
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -106,6 +108,9 @@ const App = ({children}: {children?: ReactNode}) => {
             <CanvasContextMenuProvider>
               <div className={joinClasses('app', pathnameClass, additionalClasses)}>
                 <AppToastContainer />
+                <Suspense fallback={null}>
+                  {canvasEnabled && <CanvasSync />}
+                </Suspense>
                 <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                   <div className="layout">
                     <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />

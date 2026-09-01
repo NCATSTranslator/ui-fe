@@ -12,7 +12,7 @@ import type { Canvas } from '@/features/Canvas/types/canvas';
 import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
 import { filterCanvasesBySearch, sortCanvases, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 import { updateCanvasMetadata } from '@/features/Canvas/utils/canvasApi';
-import { useCanvasSync } from '@/features/Canvas/hooks/useCanvasPersistence';
+import { trackCanvasWrite } from '@/features/Canvas/utils/canvasSyncUtils';
 import { useCanvasDeleteConfirmation } from '@/features/Canvas/hooks/useCanvasDeleteConfirmation';
 
 interface UseCanvasListOptions {
@@ -20,7 +20,6 @@ interface UseCanvasListOptions {
 }
 
 const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
-  useCanvasSync();
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const canvases = useSelector(selectCanvases);
@@ -55,7 +54,9 @@ const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
     const currentLabel = canvases.find(c => c.id === renamingId)?.label;
     if (trimmed && trimmed !== currentLabel) {
       dispatch(renameCanvas({ id: renamingId, label: trimmed }));
-      updateCanvasMetadata(renamingId, { label: trimmed }).then(() => {
+      trackCanvasWrite([renamingId], () =>
+        updateCanvasMetadata(renamingId, { label: trimmed }),
+      ).then(() => {
         queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
       });
     }

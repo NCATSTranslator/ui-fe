@@ -106,6 +106,8 @@ export const useResultsStatusQuery = (
   arsStatus: ARAStatusResponse | null,
   setArsStatus: (value: ARAStatusResponse) => void
 ) => {
+  // Polling side-effect query: refs/setters are intentionally excluded from queryKey
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   return useQuery({
     queryKey: ['resultsStatus', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -270,6 +272,8 @@ export const useResultsDataQuery = (
       copyQueryMutate(currentQueryID);
   };
 
+  // Polling side-effect query: refs/setters/callbacks are intentionally excluded from queryKey
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   return useQuery({
     queryKey: ['resultsData', currentQueryID],
     queryFn: async (): Promise<void> => {
