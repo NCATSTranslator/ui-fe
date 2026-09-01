@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useRef, type MutableRefObject, type RefObject } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { GraphGeometry, SaveGeometryOptions } from '@/features/Canvas/types/canvas';
 import { updateCanvasGeometry } from '@/features/Canvas/utils/canvasApi';
+import {
+  CANVAS_WRITE_DEBOUNCE_MS,
+  createBufferedWriteTracker,
+} from '@/features/Canvas/utils/canvasBufferedWriteUtils';
+import { trackCanvasWrite } from '@/features/Canvas/utils/canvasSyncUtils';
 
-const GEOMETRY_DEBOUNCE_MS = 500;
+const GEOMETRY_WRITE_SOURCE = 'geometry';
 
 type PendingGeometry = {
   canvasId: number;
@@ -33,7 +38,7 @@ const mergeGeometryIntoPending = (
   return pending;
 };
 
-const clearTimer = (timerRef: RefObject<ReturnType<typeof setTimeout> | null>) => {
+const clearTimer = (timerRef: { current: ReturnType<typeof setTimeout> | null }) => {
   if (timerRef.current) {
     clearTimeout(timerRef.current);
     timerRef.current = null;
@@ -43,14 +48,14 @@ const clearTimer = (timerRef: RefObject<ReturnType<typeof setTimeout> | null>) =
 const writeGeometryNow = async (
   canvasId: number,
   geometry: GraphGeometry,
-  generationRef: MutableRefObject<number>,
+  generationRef: { current: number },
   wrap: WrapFn,
 ) => {
   if (!geometry.nodes?.length && !geometry.annotations?.length) return;
   const generation = generationRef.current;
   await wrap(async () => {
     if (generation !== generationRef.current) return;
-    await updateCanvasGeometry(canvasId, geometry);
+    await trackCanvasWrite([canvasId], () => updateCanvasGeometry(canvasId, geometry));
   });
 };
 
@@ -60,21 +65,28 @@ const useCanvasGeometryWrites = (wrap: WrapFn) => {
   const geometryWriteGenerationRef = useRef(0);
   const pendingGeometryRef = useRef<PendingGeometry | null>(null);
   const geometryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bufferedTrackerRef = useRef(createBufferedWriteTracker(GEOMETRY_WRITE_SOURCE));
+
+  /* Debounced geometry is a real unsaved edit before any request exists, so sync has to see it. */
+  const setPendingGeometry = useCallback((next: PendingGeometry | null) => {
+    pendingGeometryRef.current = next;
+    bufferedTrackerRef.current.syncSingle(next?.canvasId ?? null);
+  }, []);
 
   const clearPendingGeometry = useCallback(() => {
     geometryWriteGenerationRef.current += 1;
     clearTimer(geometryDebounceRef);
-    pendingGeometryRef.current = null;
-  }, []);
+    setPendingGeometry(null);
+  }, [setPendingGeometry]);
 
   const flushPendingGeometry = useCallback(async () => {
     clearTimer(geometryDebounceRef);
     const pending = pendingGeometryRef.current;
-    pendingGeometryRef.current = null;
+    setPendingGeometry(null);
     if (!pending) return;
     const payload = buildGeometryPayload(pending);
     if (payload) await writeGeometryNow(pending.canvasId, payload, geometryWriteGenerationRef, wrapRef.current);
-  }, []);
+  }, [setPendingGeometry]);
 
   useEffect(() => () => {
     clearTimer(geometryDebounceRef);
@@ -92,7 +104,7 @@ const useCanvasGeometryWrites = (wrap: WrapFn) => {
     const pending = pendingGeometryRef.current?.canvasId === canvasId
       ? pendingGeometryRef.current
       : { canvasId, nodes: new Map(), annotations: new Map() };
-    pendingGeometryRef.current = mergeGeometryIntoPending(pending, geometry);
+    setPendingGeometry(mergeGeometryIntoPending(pending, geometry));
 
     if (options?.immediate) {
       clearTimer(geometryDebounceRef);
@@ -104,8 +116,8 @@ const useCanvasGeometryWrites = (wrap: WrapFn) => {
     geometryDebounceRef.current = setTimeout(() => {
       geometryDebounceRef.current = null;
       void flushPendingGeometry();
-    }, GEOMETRY_DEBOUNCE_MS);
-  }, [flushPendingGeometry]);
+    }, CANVAS_WRITE_DEBOUNCE_MS);
+  }, [flushPendingGeometry, setPendingGeometry]);
 
   const saveGeometry = useCallback(async (
     canvasId: number,
@@ -121,7 +133,7 @@ const useCanvasGeometryWrites = (wrap: WrapFn) => {
     clearTimer(geometryDebounceRef);
 
     if (pending && pending.canvasId !== canvasId) {
-      pendingGeometryRef.current = null;
+      setPendingGeometry(null);
       const stalePayload = buildGeometryPayload(pending);
       if (stalePayload) {
         await writeGeometryNow(pending.canvasId, stalePayload, geometryWriteGenerationRef, wrap);
@@ -131,10 +143,10 @@ const useCanvasGeometryWrites = (wrap: WrapFn) => {
     let merged = geometry;
     if (pending?.canvasId === canvasId) {
       merged = buildGeometryPayload(mergeGeometryIntoPending({ ...pending }, geometry)) ?? geometry;
-      pendingGeometryRef.current = null;
+      setPendingGeometry(null);
     }
     await writeGeometryNow(canvasId, merged, geometryWriteGenerationRef, wrap);
-  }, [queueGeometrySave, wrap]);
+  }, [queueGeometrySave, setPendingGeometry, wrap]);
 
   return { saveGeometry, clearPendingGeometry };
 };
