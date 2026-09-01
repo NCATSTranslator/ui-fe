@@ -30,7 +30,9 @@ const useCreateCanvas = () => {
         annotations: [],
         timeCreated: meta.time_created,
         timeUpdated: meta.time_updated,
+        serverTimeUpdated: meta.time_updated,
         graphLoaded: true,
+        serverKnown: false,
       };
       dispatch(addCanvas(canvas));
       queryClient.setQueryData<BackendUserCanvas[]>(['userCanvases'], (current) => {
