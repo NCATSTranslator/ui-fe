@@ -3,7 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Core/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config } from '@/features/UserAuth/types/user';
+import { ApiKey, CreateApiKeyResponse, Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config } from '@/features/UserAuth/types/user';
 import { isConfig } from '@/features/UserAuth/types/checkers';
 import { setCurrentUser, setCurrentConfig, setCurrentPrefs, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -261,6 +261,65 @@ export const getUserPreferences = async (
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ): Promise<PreferencesContainer> => {
     return getUserData(`${userApiPath}/preferences`, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Fetches the current user's API keys.
+ *
+ * @param {boolean} [doIncludeRevoked=false] - Whether to include revoked keys in the result.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<ApiKey[]>} A promise that resolves to the user's API keys.
+ */
+export const getUserApiKeys = async (
+    doIncludeRevoked: boolean = false,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<ApiKey[]> => {
+    const qp = doIncludeRevoked ? '?include_revoked=true' : '';
+    return getUserData(`${userApiPath}/api-keys${qp}`, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Creates a new API key for the current user. The response carries the key itself, which the
+ * server cannot return again -- surface it to the user immediately or it is lost.
+ *
+ * @param {string} name - A label used to identify the key later.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<CreateApiKeyResponse>} A promise resolving to the new key and its metadata.
+ */
+export const createUserApiKey = async (
+    name: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<CreateApiKeyResponse> => {
+    const response = await fetchUserData<CreateApiKeyResponse>(
+      async () => await post(`${userApiPath}/api-keys`, { name: name }),
+      httpErrorHandler,
+      fetchErrorHandler
+    );
+
+    if(response === undefined || response === null)
+      throw new Error('Failed to create API key.');
+
+    return response;
+}
+
+/**
+ * Revokes one of the current user's API keys. The key stops working immediately.
+ *
+ * @param {string} keyId - The ID of the key to revoke.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<boolean>} Indicates success or failure of the revocation.
+ */
+export const revokeUserApiKey = async (
+    keyId: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<boolean> => {
+    return deleteUserData(`${userApiPath}/api-keys/${keyId}`, httpErrorHandler, fetchErrorHandler);
 }
 
 /**
