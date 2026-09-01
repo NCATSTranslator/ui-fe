@@ -19,6 +19,7 @@ import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMe
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 import ConfidenceTooltip from './ConfidenceTooltip';
+import ApiKeysSection from './ApiKeysSection';
 
 const isConfidenceSort = (value: string | number): boolean =>
   value === 'scoreHighLow' || value === 'scoreLowHigh';
@@ -166,6 +167,7 @@ const SettingsPanel = () => {
                 label="Graphs"
               />
             </div>
+            <ApiKeysSection />
             {
               activePrefTypeId && 
               <InteriorPanelContainer
