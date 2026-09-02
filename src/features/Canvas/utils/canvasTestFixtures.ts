@@ -1,4 +1,4 @@
-import type { BackendUserCanvas, Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
+import type { BackendUserCanvas, Canvas, CanvasEdge, CanvasNode } from '@/features/Canvas/types/canvas';
 
 export const makeCanvas = (overrides: Partial<Canvas> = {}): Canvas => ({
   id: 1,
@@ -38,6 +38,25 @@ export const makeCanvasNode = (id: string, overrides: Partial<CanvasNode> = {}):
   curies: [id],
   x: 0,
   y: 0,
+  hidden: false,
+  tags: {},
+  ...overrides,
+});
+
+export const makeCanvasEdge = (
+  id: string,
+  subject: string,
+  object: string,
+  overrides: Partial<CanvasEdge> = {},
+): CanvasEdge => ({
+  id,
+  dataId: 1,
+  ref: id,
+  subject,
+  object,
+  subjectDataId: 0,
+  objectDataId: 0,
+  predicate: 'biolink:related_to',
   hidden: false,
   tags: {},
   ...overrides,
