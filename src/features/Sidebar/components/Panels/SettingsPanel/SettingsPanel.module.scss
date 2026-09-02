@@ -54,6 +54,24 @@
     padding: $s;
     margin: 0 (-$s) $s;
   }
+  .displaySection {
+    padding: 0 $s;
+  }
+  .displayPref {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $s;
+    .displayPrefLabel {
+      min-width: 0;
+      p {
+        margin: 0;
+      }
+    }
+    .prefLabel {
+      margin-bottom: $xxxs;
+    }
+  }
   .apiSection {
     padding: 0 $s;
     margin-top: $l;
