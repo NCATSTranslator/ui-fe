@@ -3,6 +3,15 @@ import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/file
 import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import { escapeCSVValue, joinArrayForCSV } from '@/features/Core/utils/csvUtils';
 
+export const buildCanvasExportFilename = (
+  label: string,
+  extension: string,
+  date: Date = new Date(),
+): string => {
+  const datePart = date.toISOString().split('T')[0];
+  return `${sanitizeForFilename(label)}_canvas_${datePart}.${extension}`;
+};
+
 type CanvasCSVRow = {
   record_type: 'edge' | 'node' | 'annotation';
   canvas_label: string;
@@ -119,9 +128,7 @@ export const buildCanvasCSV = (canvas: Canvas): string => {
   return lines.join('\n');
 };
 
-export const exportCanvasToFile = (canvas: Canvas): void => {
+export const exportCanvasToCSVFile = (canvas: Canvas): void => {
   const content = buildCanvasCSV(canvas);
-  const date = new Date().toISOString().split('T')[0];
-  const filename = `${sanitizeForFilename(canvas.label)}_canvas_${date}.csv`;
-  triggerDownload(content, filename, 'text/csv');
+  triggerDownload(content, buildCanvasExportFilename(canvas.label, 'csv'), 'text/csv');
 };

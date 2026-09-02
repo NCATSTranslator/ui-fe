@@ -124,6 +124,12 @@ export const sortCanvasAnnotations = (
 
 export const getCanvasNodeCount = (canvas: Canvas): number => Object.keys(canvas.nodes).length;
 
+/** True when the canvas has nodes or annotations that can appear on the graph. */
+export const canvasHasExportableGraph = (canvas: {
+  nodes: Record<string, unknown>;
+  annotations: readonly unknown[];
+}): boolean => Object.keys(canvas.nodes).length > 0 || canvas.annotations.length > 0;
+
 export const getCanvasObjectCountDisplay = (
   canvas: Canvas,
   labels?: { singular: string; plural: string },
