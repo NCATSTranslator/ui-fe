@@ -8,6 +8,7 @@ import {
   HoverGeometry,
   type GraphFocusRequest,
   type GraphAnnotation,
+  type DeleteSelection,
   type NodePositionMap,
   type FitViewPadding,
 } from 'translator-graph-view';
@@ -56,6 +57,8 @@ interface CanvasGraphProps {
   onEdgeHover?: (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => void;
   onAnnotationHover?: (annotationId: string | null) => void;
   onNodeContextMenu?: (nodeId: string, position: { x: number; y: number }) => void;
+  /** Delete/Backspace pressed with a graph selection; the graph itself removes nothing. */
+  onSelectionDelete?: (selection: DeleteSelection) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   annotations?: GraphAnnotation[];
@@ -95,6 +98,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onEdgeHover,
   onAnnotationHover,
   onNodeContextMenu,
+  onSelectionDelete,
   onAddObject,
   onAddAnnotation,
   annotations = [],
@@ -147,6 +151,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           getNodeIcon={getNodeIcon}
           getNodeColor={getNodeColor}
           onNodeMenu={onNodeContextMenu}
+          onSelectionDelete={onSelectionDelete}
           nodeHoverAnchor="topCenter"
           edgeHoverAnchor="midpoint"
           onNodeClick={onNodeClick}
