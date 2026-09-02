@@ -20,6 +20,7 @@ import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelC
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
 import ConfidenceTooltip from './ConfidenceTooltip';
 import ApiKeysSection from './ApiKeysSection';
+import DisplaySection from './DisplaySection';
 
 const isConfidenceSort = (value: string | number): boolean =>
   value === 'scoreHighLow' || value === 'scoreLowHigh';
@@ -150,6 +151,7 @@ const SettingsPanel = () => {
               )
             }
         </div>
+        <DisplaySection />
         {
           !!user &&
           <>

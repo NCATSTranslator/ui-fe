@@ -14,6 +14,7 @@ import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHover
 import { resolveNodeTarget, resolveEdgeTarget, getInitialLayout } from '@/features/ResultGraphView/utils/graphFunctions';
 import { useDelayedHoverTarget } from '@/features/ResultGraphView/hooks/useDelayedHoverTarget';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
+import { useGraphNodeColor } from '@/features/Core/hooks/useNodeColors';
 
 interface GraphViewProps {
   graph: GraphData;
@@ -23,6 +24,7 @@ interface GraphViewProps {
 
 const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   const prefs = useSelector(currentPrefs);
+  const getNodeColor = useGraphNodeColor();
   const [layout, setLayout] = useState<LayoutType>(() => getInitialLayout(prefs));
   const resultsNavigate = useResultsNavigate();
   const { resultId } = useParams();
@@ -87,6 +89,7 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
           layout={layout}
           elkWorkerUrl="/elk-worker.min.js"
           showEdgeLabels={false}
+          getNodeColor={getNodeColor}
           nodeHoverAnchor="topCenter"
           edgeHoverAnchor="midpoint"
           onNodeClick={onNodeClick}
