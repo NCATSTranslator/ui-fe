@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import canvasReducer, {
+  removeCanvasElements,
   syncCanvasFromServer,
   adoptCanvasServerTime,
   setCanvases,
   setSyncDeferredCanvasIds,
 } from '@/features/Canvas/slices/canvasSlice';
 import type { Canvas } from '@/features/Canvas/types/canvas';
-import { makeCanvas as makeCanvasBase, makeCanvasNode } from '@/features/Canvas/utils/canvasTestFixtures';
+import {
+  makeCanvas as makeCanvasBase,
+  makeCanvasEdge,
+  makeCanvasNode,
+} from '@/features/Canvas/utils/canvasTestFixtures';
 
 const makeCanvas = (overrides: Partial<Canvas> = {}): Canvas =>
   makeCanvasBase({ nodes: { a: makeCanvasNode('a') }, ...overrides });
@@ -166,5 +171,48 @@ describe('setSyncDeferredCanvasIds', () => {
     const state = stateWith(makeCanvas());
     const next = canvasReducer(state, setSyncDeferredCanvasIds([3]));
     expect(next.syncDeferredCanvasIds).toEqual([3]);
+  });
+});
+
+describe('removeCanvasElements', () => {
+  const populated = () => makeCanvas({
+    nodes: {
+      a: makeCanvasNode('a'),
+      b: makeCanvasNode('b'),
+      c: makeCanvasNode('c'),
+    },
+    edges: {
+      ab: makeCanvasEdge('ab', 'a', 'b'),
+      bc: makeCanvasEdge('bc', 'b', 'c'),
+    },
+  });
+
+  it('removes several nodes and the edges connected to them in one step', () => {
+    const next = canvasReducer(
+      stateWith(populated()),
+      removeCanvasElements({ canvasId: 1, nodeIds: ['a', 'b'], edgeIds: [] }),
+    );
+
+    expect(Object.keys(next.canvases[0].nodes)).toEqual(['c']);
+    expect(Object.keys(next.canvases[0].edges)).toEqual([]);
+  });
+
+  it('removes an edge without touching the nodes it connects', () => {
+    const next = canvasReducer(
+      stateWith(populated()),
+      removeCanvasElements({ canvasId: 1, nodeIds: [], edgeIds: ['ab'] }),
+    );
+
+    expect(Object.keys(next.canvases[0].nodes)).toEqual(['a', 'b', 'c']);
+    expect(Object.keys(next.canvases[0].edges)).toEqual(['bc']);
+  });
+
+  it('leaves other canvases alone', () => {
+    const next = canvasReducer(
+      stateWith(populated()),
+      removeCanvasElements({ canvasId: 99, nodeIds: ['a'], edgeIds: [] }),
+    );
+
+    expect(Object.keys(next.canvases[0].nodes)).toEqual(['a', 'b', 'c']);
   });
 });

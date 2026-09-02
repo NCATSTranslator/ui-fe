@@ -5,13 +5,12 @@ import {
   selectActiveCanvas,
   addCanvasNode,
   addCanvasEdge,
-  removeCanvasNode,
-  removeCanvasEdge,
+  removeCanvasElements,
   renameCanvas,
   replaceCanvas,
 } from '@/features/Canvas/slices/canvasSlice';
 import type { CanvasNode, CanvasEdge, GraphSubmission } from '@/features/Canvas/types/canvas';
-import { mergeEntityIntoCanvas, selectionForRemovedNode } from '@/features/Canvas/utils/canvasGraphFunctions';
+import { mergeEntityIntoCanvas, selectionForRemovedElements } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { canvasNodesToGraphSubmission } from '@/features/Canvas/utils/canvasMappers';
 import { estimatePlacementNearNodes } from '@/features/Canvas/utils/canvasAnnotationUtils';
 import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
@@ -64,21 +63,22 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
     saveMerge?.(activeCanvas.id, canvasNodesToGraphSubmission([], [edge]));
   }, [activeCanvas, dispatch, pushUndo, saveMerge]);
 
-  const removeNode = useCallback((nodeId: string) => {
+  /*
+   * One undo entry and one trash request per gesture, however many elements it covers,
+   * so a mass delete stays a single step for both undo and the server.
+   */
+  const removeElements = useCallback((nodeIds: string[], edgeIds: string[] = []) => {
     if (!activeCanvas) return;
-    const selection = selectionForRemovedNode(activeCanvas, nodeId);
+    if (nodeIds.length === 0 && edgeIds.length === 0) return;
+    const selection = selectionForRemovedElements(activeCanvas, nodeIds, edgeIds);
     pushUndo();
-    dispatch(removeCanvasNode({ canvasId: activeCanvas.id, nodeId }));
+    dispatch(removeCanvasElements({ canvasId: activeCanvas.id, nodeIds, edgeIds }));
     if (selection) saveTrashElements?.(activeCanvas.id, selection);
   }, [activeCanvas, dispatch, pushUndo, saveTrashElements]);
 
-  const removeEdge = useCallback((edgeId: string) => {
-    if (!activeCanvas) return;
-    const edge = activeCanvas.edges[edgeId];
-    pushUndo();
-    dispatch(removeCanvasEdge({ canvasId: activeCanvas.id, edgeId }));
-    if (edge?.dataId) saveTrashElements?.(activeCanvas.id, { edges: [edge.dataId] });
-  }, [activeCanvas, dispatch, pushUndo, saveTrashElements]);
+  const removeNode = useCallback((nodeId: string) => {
+    removeElements([nodeId]);
+  }, [removeElements]);
 
   const mergeEntities = useCallback((
     nodes: CanvasNode[],
@@ -111,7 +111,7 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
   }, [activeCanvas, mergeEntities]);
 
   return {
-    activeCanvas, addNode, addEdge, removeNode, removeEdge,
+    activeCanvas, addNode, addEdge, removeNode, removeElements,
     mergeEntities, rename, undo, redo, canUndo, canRedo, addObject, pushUndo,
   };
 };

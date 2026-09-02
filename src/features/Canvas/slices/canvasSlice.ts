@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@/redux/store';
 import { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
+import { getIncidentEdgeIds } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { canvasGraphsEquivalent } from '@/features/Canvas/utils/canvasSyncUtils';
 
 export interface CanvasState {
@@ -96,24 +97,21 @@ export const canvasSlice = createSlice({
         }
       }
     },
-    removeCanvasNode: (state, action: PayloadAction<{ canvasId: number; nodeId: string }>) => {
-      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
-      if (canvas) {
-        delete canvas.nodes[action.payload.nodeId];
-        for (const [edgeId, edge] of Object.entries(canvas.edges)) {
-          if (edge.subject === action.payload.nodeId || edge.object === action.payload.nodeId) {
-            delete canvas.edges[edgeId];
-          }
-        }
-        canvas.timeUpdated = new Date().toISOString();
-      }
-    },
-    removeCanvasEdge: (state, action: PayloadAction<{ canvasId: number; edgeId: string }>) => {
-      const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
-      if (canvas) {
-        delete canvas.edges[action.payload.edgeId];
-        canvas.timeUpdated = new Date().toISOString();
-      }
+    /** Removal of any mix of nodes and edges; removed nodes take their connected edges with them. */
+    removeCanvasElements: (
+      state,
+      action: PayloadAction<{ canvasId: number; nodeIds: string[]; edgeIds: string[] }>,
+    ) => {
+      const { canvasId, nodeIds, edgeIds } = action.payload;
+      const canvas = state.canvases.find(c => c.id === canvasId);
+      if (!canvas) return;
+      for (const nodeId of nodeIds) delete canvas.nodes[nodeId];
+      const edgesToRemove = new Set([
+        ...edgeIds,
+        ...getIncidentEdgeIds(canvas.edges, nodeIds),
+      ]);
+      for (const edgeId of edgesToRemove) delete canvas.edges[edgeId];
+      canvas.timeUpdated = new Date().toISOString();
     },
     replaceCanvas: (state, action: PayloadAction<Canvas>) => {
       const index = state.canvases.findIndex(c => c.id === action.payload.id);
@@ -258,8 +256,7 @@ export const {
   toggleMaximizePane,
   addCanvasNode,
   addCanvasEdge,
-  removeCanvasNode,
-  removeCanvasEdge,
+  removeCanvasElements,
   replaceCanvas,
   syncCanvasFromServer,
   adoptCanvasServerTime,
