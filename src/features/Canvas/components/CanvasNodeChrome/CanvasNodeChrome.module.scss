@@ -54,14 +54,17 @@
   max-width: 100%;
   min-width: 0;
   padding: 4px 8px;
-  background-color: #DCDCE6;
+  // --canvas-node-bg / --canvas-node-bg-hover are set inline by CanvasNodeChip
+  // only while color mode is on; otherwise chips keep this default background.
+  background-color: var(--canvas-node-bg, #{$palePurple});
   color: $black;
   border-radius: 4px;
   box-shadow: none;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
 
   &:hover,
   &:focus-within {
+    background-color: var(--canvas-node-bg-hover, var(--canvas-node-bg, #{$palePurple}));
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
     .chrome {
