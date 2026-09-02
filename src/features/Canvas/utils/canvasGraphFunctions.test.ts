@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { extractNodesAndEdgesFromPath } from '@/features/Canvas/utils/canvasGraphFunctions';
+import {
+  extractNodesAndEdgesFromPath,
+  getIncidentEdgeIds,
+  selectionForRemovedElements,
+} from '@/features/Canvas/utils/canvasGraphFunctions';
+import { makeCanvas, makeCanvasEdge, makeCanvasNode } from '@/features/Canvas/utils/canvasTestFixtures';
 import {
   makeTestEdge,
   makeTestNode,
@@ -64,5 +69,73 @@ describe('extractNodesAndEdgesFromPath', () => {
     const { edges } = extractNodesAndEdgesFromPath(rs, path);
 
     expect(edges.map(e => e.id)).toEqual(['e1']);
+  });
+});
+
+describe('getIncidentEdgeIds', () => {
+  const edges = {
+    ab: makeCanvasEdge('ab', 'a', 'b'),
+    bc: makeCanvasEdge('bc', 'b', 'c'),
+    cd: makeCanvasEdge('cd', 'c', 'd'),
+  };
+
+  it('returns every edge connected to the given nodes', () => {
+    expect(getIncidentEdgeIds(edges, ['a', 'b']).sort()).toEqual(['ab', 'bc']);
+  });
+
+  it('returns nothing when no nodes are given', () => {
+    expect(getIncidentEdgeIds(edges, [])).toEqual([]);
+  });
+});
+
+describe('selectionForRemovedElements', () => {
+  const canvas = makeCanvas({
+    nodes: {
+      a: makeCanvasNode('a', { dataId: 10 }),
+      b: makeCanvasNode('b', { dataId: 11 }),
+      c: makeCanvasNode('c', { dataId: 12 }),
+    },
+    edges: {
+      ab: makeCanvasEdge('ab', 'a', 'b', { dataId: 20 }),
+      bc: makeCanvasEdge('bc', 'b', 'c', { dataId: 21 }),
+    },
+  });
+
+  it('collects the removed nodes and every edge connected to them', () => {
+    expect(selectionForRemovedElements(canvas, ['a'])).toEqual({
+      nodes: [10],
+      edges: [20],
+    });
+  });
+
+  it('takes several nodes and their edges in one selection', () => {
+    const selection = selectionForRemovedElements(canvas, ['a', 'b']);
+
+    expect(selection?.nodes).toEqual([10, 11]);
+    expect(selection?.edges?.sort()).toEqual([20, 21]);
+  });
+
+  it('takes edges on their own', () => {
+    expect(selectionForRemovedElements(canvas, [], ['bc'])).toEqual({ edges: [21] });
+  });
+
+  it('does not repeat an edge named directly and reached through its node', () => {
+    expect(selectionForRemovedElements(canvas, ['a'], ['ab'])).toEqual({
+      nodes: [10],
+      edges: [20],
+    });
+  });
+
+  it('drops elements the server has never seen', () => {
+    const local = makeCanvas({
+      nodes: { a: makeCanvasNode('a', { dataId: 0 }) },
+      edges: { ab: makeCanvasEdge('ab', 'a', 'b', { dataId: 0 }) },
+    });
+
+    expect(selectionForRemovedElements(local, ['a'])).toBeNull();
+  });
+
+  it('ignores ids the canvas does not hold', () => {
+    expect(selectionForRemovedElements(canvas, ['missing'], ['gone'])).toBeNull();
   });
 });
