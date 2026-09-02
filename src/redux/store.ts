@@ -4,6 +4,7 @@ import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
 import queryStatusReducer from '@/features/ResultList/slices/queryStatusSlice';
 import userReducer from '@/features/UserAuth/slices/userSlice';
 import canvasReducer from '@/features/Canvas/slices/canvasSlice';
+import colorModeReducer from '@/features/Core/slices/colorModeSlice';
 import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
 export type RootState = {
@@ -12,6 +13,7 @@ export type RootState = {
   queryStatus: ReturnType<typeof queryStatusReducer>;
   user: ReturnType<typeof userReducer>;
   canvas: ReturnType<typeof canvasReducer>;
+  colorMode: ReturnType<typeof colorModeReducer>;
 }
 export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
 
@@ -23,6 +25,7 @@ export const store = configureStore({
     queryStatus: queryStatusReducer,
     user: userReducer,
     canvas: canvasReducer,
+    colorMode: colorModeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),

@@ -20,6 +20,7 @@ import CanvasLayoutWarningModal from '@/features/Canvas/components/CanvasLayoutW
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 import { canvasNodeChrome } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import { getNodeIcon as getCategoryIcon } from '@/features/Core/utils/entityLinks';
+import { useGraphNodeColor } from '@/features/Core/hooks/useNodeColors';
 
 /** Extra top inset keeps nodes below the overlay toolbar when fitView runs. */
 const CANVAS_FIT_VIEW_PADDING: FitViewPadding = {
@@ -113,6 +114,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
     [canvas.nodes, canvas.edges, visibleNodes, visibleEdges],
   );
   const getNodeIcon = useCallback((type: string) => getCategoryIcon(type, null), []);
+  const getNodeColor = useGraphNodeColor();
   const hasNodes = Object.keys(canvas.nodes).length > 0;
   const hasGraphContent = hasNodes || annotations.length > 0;
   const isLayoutLoading = hasGraphContent && !isCustomLayoutReady;
@@ -141,6 +143,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           clearHoverOnViewportChange
           nodeChrome={canvasNodeChrome}
           getNodeIcon={getNodeIcon}
+          getNodeColor={getNodeColor}
           onNodeMenu={onNodeContextMenu}
           nodeHoverAnchor="topCenter"
           edgeHoverAnchor="midpoint"
