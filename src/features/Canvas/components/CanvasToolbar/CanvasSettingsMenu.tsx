@@ -22,17 +22,28 @@ interface CanvasSettingsMenuProps {
 
 const CanvasSettingsMenu: FC<CanvasSettingsMenuProps> = ({ layout, onLayoutChange }) => {
   const { open, close, toggle, triggerRef, menuRef, triggerA11yProps, menuA11yProps } = useDropdownMenuA11y();
-  const { exportCanvas, requestDeleteActiveCanvas, hasActiveCanvas } = useCanvasSettingsActions();
+  const {
+    exportCanvasCSV,
+    exportCanvasImage,
+    canExportImage,
+    requestDeleteActiveCanvas,
+    hasActiveCanvas,
+  } = useCanvasSettingsActions();
 
   const handleLayoutChange = useCallback((nextLayout: LayoutType) => {
     close();
     onLayoutChange(nextLayout);
   }, [close, onLayoutChange]);
 
-  const handleExport = useCallback(() => {
+  const handleExportCSV = useCallback(() => {
     close();
-    exportCanvas();
-  }, [close, exportCanvas]);
+    exportCanvasCSV();
+  }, [close, exportCanvasCSV]);
+
+  const handleExportImage = useCallback(() => {
+    close();
+    void exportCanvasImage();
+  }, [close, exportCanvasImage]);
 
   const handleDelete = useCallback(() => {
     close();
@@ -74,15 +85,28 @@ const CanvasSettingsMenu: FC<CanvasSettingsMenuProps> = ({ layout, onLayoutChang
             );
           })}
           <div className={styles.settingsMenuDivider} role="separator" />
+          <div className={styles.settingsMenuLabel} role="presentation">
+            Export
+          </div>
           <button
             type="button"
             role="menuitem"
             className={styles.settingsMenuItem}
-            onClick={handleExport}
+            onClick={handleExportCSV}
             disabled={!hasActiveCanvas}
           >
-            Export Canvas
+            CSV
           </button>
+          <button
+            type="button"
+            role="menuitem"
+            className={styles.settingsMenuItem}
+            onClick={handleExportImage}
+            disabled={!canExportImage}
+          >
+            PNG Image
+          </button>
+          <div className={styles.settingsMenuDivider} role="separator" />
           <button
             type="button"
             role="menuitem"
