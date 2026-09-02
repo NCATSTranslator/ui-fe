@@ -7,21 +7,47 @@ import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunct
 import { getDistinctResultEdges } from '@/features/Core/utils/resultHelpers';
 import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
-/** Build a trash/restore selection for a node and its connected edges. */
-export const selectionForRemovedNode = (
+/** Edge ids whose subject or object is in `nodeIds`. */
+export const getIncidentEdgeIds = (
+  edges: Record<string, CanvasEdge>,
+  nodeIds: Iterable<string>,
+): string[] => {
+  const removedNodeIds = nodeIds instanceof Set ? nodeIds : new Set(nodeIds);
+  if (removedNodeIds.size === 0) return [];
+  const incident: string[] = [];
+  for (const [edgeId, edge] of Object.entries(edges)) {
+    if (removedNodeIds.has(edge.subject) || removedNodeIds.has(edge.object)) {
+      incident.push(edgeId);
+    }
+  }
+  return incident;
+};
+
+/**
+ * Build a trash/restore selection for the given nodes and edges, plus every edge
+ * connected to a removed node. Ids the server has never seen (`dataId` 0) are dropped.
+ */
+export const selectionForRemovedElements = (
   canvas: Canvas,
-  nodeId: string,
+  nodeIds: string[],
+  edgeIds: string[] = [],
 ): GraphSelection | null => {
-  const node = canvas.nodes[nodeId];
-  const nodes = node?.dataId ? [node.dataId] : [];
-  const edges = Object.values(canvas.edges)
-    .filter(edge => edge.subject === nodeId || edge.object === nodeId)
-    .map(edge => edge.dataId)
-    .filter(id => id > 0);
+  const nodes = nodeIds
+    .map(nodeId => canvas.nodes[nodeId]?.dataId ?? 0)
+    .filter(dataId => dataId > 0);
+
+  const removedEdgeIds = new Set([
+    ...edgeIds,
+    ...getIncidentEdgeIds(canvas.edges, nodeIds),
+  ]);
+  const edges = [...removedEdgeIds]
+    .map(edgeId => canvas.edges[edgeId]?.dataId ?? 0)
+    .filter(dataId => dataId > 0);
+
   if (nodes.length === 0 && edges.length === 0) return null;
   return {
-    ...(nodes.length > 0 && { nodes }),
-    ...(edges.length > 0 && { edges }),
+    ...(nodes.length > 0 && { nodes: [...new Set(nodes)] }),
+    ...(edges.length > 0 && { edges: [...new Set(edges)] }),
   };
 };
 

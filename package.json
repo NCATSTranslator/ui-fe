@@ -16,6 +16,7 @@
     "fastest-levenshtein": "^1.0.16",
     "fraction.js": "5.2.2",
     "html-react-parser": "^5.2.17",
+    "html-to-image": "^1.11.13",
     "lexical": "^0.33.0",
     "lodash": "^4.17.21",
     "mathjs": "^15.2.0",
@@ -36,7 +37,7 @@
     "redux": "^5.0.1",
     "sass": "^1.89.2",
     "source-map-explorer": "^2.5.3",
-    "translator-graph-view": "^0.8.0"
+    "translator-graph-view": "^0.9.0"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
