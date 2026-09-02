@@ -4,6 +4,7 @@ import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
 import { useCanvasPaneGraphModel } from '@/features/Canvas/hooks/useCanvasPaneGraphModel';
 import { useCanvasPaneMenusModel } from '@/features/Canvas/hooks/useCanvasPaneMenusModel';
 import { useCanvasEntityDrop } from '@/features/Canvas/hooks/useCanvasEntityDrop';
+import useCanvasKeyboardShortcuts from '@/features/Canvas/hooks/useCanvasKeyboardShortcuts';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
@@ -60,88 +61,98 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
   menus,
   history,
   onAnnotationAction,
-}) => (
-  <CanvasNodeChromeActionsContext.Provider value={menus.chromeActions}>
-    <div className={styles.contentArea}>
-      <div className={styles.graphHoverContainer}>
-        {graph.syncDeferred && <CanvasSyncBanner />}
-        <CanvasGraph
-          canvas={activeCanvas}
-          visibleNodes={graph.visibleNodes}
-          visibleEdges={graph.visibleEdges}
-          graphLayout={graph.positions.graphLayout}
-          nodePositions={graph.positions.nodePositions}
-          isCustomLayoutReady={graph.positions.isCustomLayoutReady}
-          viewportSyncKey={`${activeCanvas.id}:${paneOpen}:${paneMaximized}:${graph.positions.isCustomLayoutReady}`}
-          layoutWarningOpen={graph.positions.layoutWarningOpen}
-          onLayoutChange={graph.positions.requestLayoutChange}
-          onGraphNodeDragStop={graph.positions.handleGraphNodeDragStop}
-          onLayoutComplete={graph.positions.handleLayoutComplete}
-          onConfirmLayoutChange={graph.positions.confirmLayoutChange}
-          onCancelLayoutChange={graph.positions.cancelLayoutChange}
-          onRename={history.rename}
-          onUndo={history.undo}
-          onRedo={history.redo}
-          canUndo={history.canUndo}
-          canRedo={history.canRedo}
-          onNodeClick={graph.paneHandlers.handleNodeClick}
-          onEdgeClick={graph.paneHandlers.handleEdgeClick}
-          onNodeHover={graph.paneHandlers.handleCombinedNodeHover}
-          onEdgeHover={graph.paneHandlers.handleCombinedEdgeHover}
-          onAnnotationHover={graph.paneHandlers.handleCombinedAnnotationHover}
-          onNodeContextMenu={menus.nodeMenu.handleNodeContextMenu}
-          saveStatus={graph.saveStatus}
-          hoveredNodeId={hover.hoveredNodeId}
-          hoveredEdgeId={hover.hoveredEdgeId}
-          hoveredAnnotationId={hover.hoveredAnnotationId}
-          selectedIds={hover.selectedNodeIds}
-          focusRequest={hover.focusRequest}
-          annotations={graph.graphAnnotations}
-          onAnnotationsChange={graph.handleAnnotationsChange}
-          onAddAnnotation={graph.handleAddAnnotation}
-          toolbarRight={(
-            <CanvasObjectList
-              canvas={activeCanvas}
-              visibleNodes={graph.visibleNodes}
-              onHoverNode={hover.setHoveredNodeId}
-              onHoverAnnotation={hover.setHoveredAnnotationId}
-              onFindNode={hover.findNodeOnCanvas}
-              onFindAnnotation={hover.findAnnotationOnCanvas}
-              onAnnotationAction={onAnnotationAction}
-              onNodeMenu={menus.nodeMenu.handleObjectListNodeMenu}
-              onCloseNodeMenus={menus.nodeMenu.closeAllMenus}
-              onAddAnnotation={graph.handleAddAnnotation}
+}) => {
+  useCanvasKeyboardShortcuts({
+    undo: history.undo,
+    redo: history.redo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
+  });
+
+  return (
+    <CanvasNodeChromeActionsContext.Provider value={menus.chromeActions}>
+      <div className={styles.contentArea}>
+        <div className={styles.graphHoverContainer}>
+          {graph.syncDeferred && <CanvasSyncBanner />}
+          <CanvasGraph
+            canvas={activeCanvas}
+            visibleNodes={graph.visibleNodes}
+            visibleEdges={graph.visibleEdges}
+            graphLayout={graph.positions.graphLayout}
+            nodePositions={graph.positions.nodePositions}
+            isCustomLayoutReady={graph.positions.isCustomLayoutReady}
+            viewportSyncKey={`${activeCanvas.id}:${paneOpen}:${paneMaximized}:${graph.positions.isCustomLayoutReady}`}
+            layoutWarningOpen={graph.positions.layoutWarningOpen}
+            onLayoutChange={graph.positions.requestLayoutChange}
+            onGraphNodeDragStop={graph.positions.handleGraphNodeDragStop}
+            onLayoutComplete={graph.positions.handleLayoutComplete}
+            onConfirmLayoutChange={graph.positions.confirmLayoutChange}
+            onCancelLayoutChange={graph.positions.cancelLayoutChange}
+            onRename={history.rename}
+            onUndo={history.undo}
+            onRedo={history.redo}
+            canUndo={history.canUndo}
+            canRedo={history.canRedo}
+            onNodeClick={graph.paneHandlers.handleNodeClick}
+            onEdgeClick={graph.paneHandlers.handleEdgeClick}
+            onNodeHover={graph.paneHandlers.handleCombinedNodeHover}
+            onEdgeHover={graph.paneHandlers.handleCombinedEdgeHover}
+            onAnnotationHover={graph.paneHandlers.handleCombinedAnnotationHover}
+            onNodeContextMenu={menus.nodeMenu.handleNodeContextMenu}
+            onSelectionDelete={graph.handleSelectionDelete}
+            saveStatus={graph.saveStatus}
+            hoveredNodeId={hover.hoveredNodeId}
+            hoveredEdgeId={hover.hoveredEdgeId}
+            hoveredAnnotationId={hover.hoveredAnnotationId}
+            selectedIds={hover.selectedNodeIds}
+            focusRequest={hover.focusRequest}
+            annotations={graph.graphAnnotations}
+            onAnnotationsChange={graph.handleAnnotationsChange}
+            onAddAnnotation={graph.handleAddAnnotation}
+            toolbarRight={(
+              <CanvasObjectList
+                canvas={activeCanvas}
+                visibleNodes={graph.visibleNodes}
+                onHoverNode={hover.setHoveredNodeId}
+                onHoverAnnotation={hover.setHoveredAnnotationId}
+                onFindNode={hover.findNodeOnCanvas}
+                onFindAnnotation={hover.findAnnotationOnCanvas}
+                onAnnotationAction={onAnnotationAction}
+                onNodeMenu={menus.nodeMenu.handleObjectListNodeMenu}
+                onCloseNodeMenus={menus.nodeMenu.closeAllMenus}
+                onAddAnnotation={graph.handleAddAnnotation}
+              />
+            )}
+          >
+            <GraphHoverTooltips
+              onPredicateClick={graph.graphHover.onPredicateClick}
+              target={graph.graphHover.visible}
+              resultSet={graph.graphHover.resultSet ?? undefined}
+              onTooltipEnter={graph.graphHover.onTooltipEnter}
+              onTooltipLeave={graph.graphHover.onTooltipLeave}
             />
-          )}
-        >
-          <GraphHoverTooltips
-            onPredicateClick={graph.graphHover.onPredicateClick}
-            target={graph.graphHover.visible}
-            resultSet={graph.graphHover.resultSet ?? undefined}
-            onTooltipEnter={graph.graphHover.onTooltipEnter}
-            onTooltipLeave={graph.graphHover.onTooltipLeave}
+          </CanvasGraph>
+        </div>
+        {menus.nodeMenu.nodeContextMenu && (
+          <CanvasNodeContextMenu
+            target={menus.nodeMenu.nodeContextMenu}
+            actions={menus.nodeMenu.nodeContextMenuActions}
+            onClose={menus.nodeMenu.closeNodeContextMenu}
+            onAction={menus.nodeMenu.handleNodeAction}
           />
-        </CanvasGraph>
+        )}
+        {menus.nodeMenu.nodeQueryMenu && menus.queryActions.length > 0 && (
+          <CanvasNodeContextMenu
+            target={menus.nodeMenu.nodeQueryMenu}
+            actions={menus.queryActions}
+            onClose={menus.nodeMenu.closeQueryMenu}
+            onAction={menus.nodeMenu.handleQueryAction}
+          />
+        )}
       </div>
-      {menus.nodeMenu.nodeContextMenu && (
-        <CanvasNodeContextMenu
-          target={menus.nodeMenu.nodeContextMenu}
-          actions={menus.nodeMenu.nodeContextMenuActions}
-          onClose={menus.nodeMenu.closeNodeContextMenu}
-          onAction={menus.nodeMenu.handleNodeAction}
-        />
-      )}
-      {menus.nodeMenu.nodeQueryMenu && menus.queryActions.length > 0 && (
-        <CanvasNodeContextMenu
-          target={menus.nodeMenu.nodeQueryMenu}
-          actions={menus.queryActions}
-          onClose={menus.nodeMenu.closeQueryMenu}
-          onAction={menus.nodeMenu.handleQueryAction}
-        />
-      )}
-    </div>
-  </CanvasNodeChromeActionsContext.Provider>
-);
+    </CanvasNodeChromeActionsContext.Provider>
+  );
+};
 
 const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
   activeCanvas,
