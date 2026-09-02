@@ -131,6 +131,9 @@ export const canvasSaveErrorToast = () => {
 export const canvasDeletedToast = () => {
   return toast(AppToast, { data: { topText: 'Canvas deleted' } });
 };
+export const canvasImageExportErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas image export failed', bottomText: 'Please try again' } });
+};
 export const canvasDeleteErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'Canvas delete failed', bottomText: 'The canvas may not have been removed' } });
 };
