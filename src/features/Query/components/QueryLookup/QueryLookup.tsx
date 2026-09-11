@@ -26,6 +26,9 @@ type QueryLookupProps = {
   initNodeCategoryParam?: string | null;
 }
 
+const getLookupSubjectKey = (nodeId: string | null, nodeCategory: string | null) =>
+  `${nodeId ?? ''}|${nodeCategory ?? ''}`;
+
 const QueryLookup: FC<QueryLookupProps> = ({
   isResults = false,
   selectedProject = null,
@@ -53,7 +56,7 @@ const QueryLookup: FC<QueryLookupProps> = ({
     initNodeLabelParam,
     initNodeCategoryParam,
   );
-  const lookupSubjectKey = `${initNodeIdParam ?? ''}|${initNodeCategoryParam ?? ''}`;
+  const lookupSubjectKey = getLookupSubjectKey(initNodeIdParam, initNodeCategoryParam);
   const [objectCategory, setObjectCategory] = useStateSyncedTo(
     getDefaultLookupObjectCategory(initNodeCategoryParam),
     lookupSubjectKey,
@@ -89,10 +92,9 @@ const QueryLookup: FC<QueryLookupProps> = ({
       setErrorText("No search term selected, please select a valid term.");
       return;
     }
-    submitLookupQuery!(queryItem, objectCategory, selectedProject?.id?.toString() || undefined);
+    submitLookupQuery?.(queryItem, objectCategory, selectedProject?.id?.toString() || undefined);
   }, [queryItem, objectCategory, selectedProject, submitLookupQuery]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAutocompleteSelect = useCallback((_cxt: AutocompleteContext) => {
     submitRef.current?.focus();
   }, []);

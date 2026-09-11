@@ -42,6 +42,17 @@ interface CombinedQueryInterfaceProps {
   submissionCallback?: () => void;
 }
 
+const getHomeQueryNodeParams = (
+  searchParams: URLSearchParams,
+  initNodeIdParam: string | null,
+  initNodeLabelParam: string | null,
+  initNodeCategoryParam: string | null,
+) => ({
+  nodeId: searchParams.get(HOME_QUERY_NODE_ID_PARAM) ?? initNodeIdParam,
+  nodeLabel: searchParams.get(HOME_QUERY_NODE_LABEL_PARAM) ?? initNodeLabelParam,
+  nodeCategory: searchParams.get(HOME_QUERY_NODE_CATEGORY_PARAM) ?? initNodeCategoryParam,
+});
+
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   className = '',
   defaultProject = null,
@@ -70,9 +81,9 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   const isLookupEnabled = isHomeQueryTabEnabled('lookup', homeQueryTabOptionsFromConfig(config));
   const showAddToProject = !!user && config?.include_projects;
   const [searchParams] = useSearchParams();
-  const nodeId = searchParams.get(HOME_QUERY_NODE_ID_PARAM) ?? initNodeIdParam;
-  const nodeLabel = searchParams.get(HOME_QUERY_NODE_LABEL_PARAM) ?? initNodeLabelParam;
-  const nodeCategory = searchParams.get(HOME_QUERY_NODE_CATEGORY_PARAM) ?? initNodeCategoryParam;
+  const { nodeId, nodeLabel, nodeCategory } = getHomeQueryNodeParams(
+    searchParams, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam,
+  );
   const tabFromUrl = getHomeQueryTabHeading(searchParams.get(HOME_QUERY_TAB_PARAM), homeQueryTabOptionsFromConfig(config));
   const fallbackTab = isLookupEnabled ? HOME_QUERY_TAB_HEADING.lookup : HOME_QUERY_TAB_HEADING.smart;
   const [activeTab, setActiveTab] = useState(tabFromUrl ?? fallbackTab);
@@ -107,7 +118,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
       setSelectedProject(defaultProject);
     else
       clearSelectedProject();
-  }, [location.pathname, defaultProject?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on defaultProject's id; the object's identity can change every render
+  }, [location.pathname, defaultProject?.id, setSelectedProject, clearSelectedProject]);
 
   return (
     <div className={classNames}>
