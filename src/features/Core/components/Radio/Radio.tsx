@@ -6,7 +6,7 @@ type RadioProps = {
   className?: string;
   labelClassName?: string;
   name?: string;
-  value?: string | number | undefined;
+  value?: string | number;
   checked?: boolean;
   children?: ReactNode;
   handleClick?: () => void;

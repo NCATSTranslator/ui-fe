@@ -16,7 +16,7 @@ export interface CheckboxProps {
   subtitle?: string;
   name?: string;
   title?: string; 
-  value?: string | number | undefined;
+  value?: string | number;
   disabled?: boolean;
   id?: string;
   'aria-describedby'?: string;
