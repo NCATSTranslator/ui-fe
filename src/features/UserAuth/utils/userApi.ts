@@ -747,6 +747,12 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         if(config?.gaID)
           setGaID(config.gaID);
 
+        // GTM is the transport for product events. The build-time value wins so a
+        // deploy can point at a different container without a backend change.
+        const gtmID = import.meta.env.VITE_GTM_ID || config?.gtmID;
+        if(gtmID)
+          setGtmID(gtmID);
+
         const configWithBuildInfo = {
           ...config,
           include_canvas: config.include_canvas ?? false,

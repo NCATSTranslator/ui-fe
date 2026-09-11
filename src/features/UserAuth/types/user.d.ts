@@ -77,6 +77,7 @@ export type SessionStatus = {
 export type Config = {
   cached_queries: Example[];
   gaID: string;
+  gtmID?: string;
   include_canvas?: boolean;
   include_hashed_parameters: boolean;
   include_lookup: boolean;
