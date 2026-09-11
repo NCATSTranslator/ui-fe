@@ -11,6 +11,7 @@ import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -59,12 +60,19 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                           el.direction.toLowerCase() === item.direction.toLowerCase() &&
                           el.targetType.toLowerCase() === item.type.toLowerCase()
                       );
+                const shareURL = getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters });
                 return (
                   <Button
                     className={`${styles.button} example-query`}
-                    handleClick={() => setPresetURL(getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters }))}
+                    handleClick={() => {
+                      trackEvent('example_query_selected', {
+                        query_template_id: String(typeID),
+                        query_template_label: queryTypes[typeID]?.label,
+                      });
+                      setPresetURL(shareURL);
+                    }}
                     data-testid={item.name}
-                    data-url={getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters })}
+                    data-url={shareURL}
                     key={item.id}
                     iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
                     smallFont
