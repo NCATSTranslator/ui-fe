@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Canvas, CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canvas';
+import type { CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canvas';
 import { diffCanvasForHistory } from '@/features/Canvas/utils/canvasHistoryUtils';
 import { makeCanvas } from '@/features/Canvas/utils/canvasTestFixtures';
 

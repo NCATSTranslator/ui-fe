@@ -1,6 +1,7 @@
 import { toBlob } from 'html-to-image';
 import { triggerBlobDownload } from '@/features/Core/utils/fileDownloadUtils';
 import { buildCanvasExportFilename } from '@/features/Canvas/utils/canvasExportUtils';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /** Graph-space padding added around the content bounds in the exported image. */
 const EXPORT_PADDING = 40;
@@ -201,4 +202,5 @@ export const exportCanvasToPNGFile = async (graphArea: HTMLElement, label: strin
   if (!blob) throw new Error('Canvas image export produced no data');
 
   triggerBlobDownload(blob, buildCanvasExportFilename(label, 'png'));
+  trackEvent('canvas_exported', { export_format: 'png' });
 };

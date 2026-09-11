@@ -3,6 +3,7 @@ import useCanvasAnnotations from '@/features/Canvas/hooks/useCanvasAnnotations';
 import type { CanvasAnnotationAction } from '@/features/Canvas/constants/canvasAnnotationActions';
 import type { Canvas, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import type useCanvasPersistence from '@/features/Canvas/hooks/useCanvasPersistence';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 type Persistence = ReturnType<typeof useCanvasPersistence>;
 
@@ -36,7 +37,10 @@ export const useCanvasPaneAnnotationHandlers = ({
 
   const handleAddAnnotation = useCallback(async () => {
     const annotationId = await addAnnotation();
-    if (annotationId) findAnnotationOnCanvas(annotationId);
+    if (annotationId) {
+      trackEvent('canvas_annotation_edited', { annotation_type: 'added' });
+      findAnnotationOnCanvas(annotationId);
+    }
   }, [addAnnotation, findAnnotationOnCanvas]);
 
   const handleAnnotationListAction = useCallback((
@@ -44,7 +48,10 @@ export const useCanvasPaneAnnotationHandlers = ({
     annotation: CanvasAnnotation,
   ) => {
     if (action === 'find') findAnnotationOnCanvas(annotation.id);
-    if (action === 'remove') removeAnnotation(annotation.id);
+    if (action === 'remove') {
+      trackEvent('canvas_annotation_edited', { annotation_type: 'removed' });
+      removeAnnotation(annotation.id);
+    }
   }, [findAnnotationOnCanvas, removeAnnotation]);
 
   return {

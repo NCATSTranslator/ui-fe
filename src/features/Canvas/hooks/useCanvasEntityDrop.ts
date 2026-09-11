@@ -33,6 +33,7 @@ export const useCanvasEntityDrop = (canvas: Canvas) => {
       canvas,
       dispatch,
       queryClient,
+      addMethod: 'drag',
     });
   }, [canvas, dispatch, queryClient, store]);
 };

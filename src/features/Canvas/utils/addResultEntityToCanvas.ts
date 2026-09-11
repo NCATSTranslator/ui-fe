@@ -14,6 +14,8 @@ import { getResultById } from '@/features/ResultList/slices/resultsSlice';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import type { ResultEntityDragType } from '@/features/DragAndDrop/types/types';
 import type { Path, ResultSet } from '@/features/ResultList/types/results';
+import type { AddMethod } from '@/features/Analytics/types/analytics';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export type ResultEntityTarget = {
   type: ResultEntityDragType;
@@ -101,6 +103,8 @@ type AddResultEntityParams = {
   canvas: Canvas;
   dispatch: AppDispatch;
   queryClient: QueryClient;
+  /** How the user got here. Both entry points funnel through this function. */
+  addMethod?: AddMethod;
 };
 
 const notifyEntityAdded = (
@@ -129,6 +133,7 @@ export const addResultEntityToCanvas = async ({
   canvas,
   dispatch,
   queryClient,
+  addMethod = 'menu',
 }: AddResultEntityParams): Promise<boolean> => {
   const resolved = resolveResultEntityTarget(resultSet, target);
   if (!resolved) return false;
@@ -150,6 +155,13 @@ export const addResultEntityToCanvas = async ({
     }));
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
     notifyEntityAdded(target, resolved, canvas.label);
+    // Tracked after the merge resolves so a failed save is not counted as an add.
+    trackEvent('canvas_node_added', {
+      add_method: addMethod,
+      entity_type: target.type,
+      element_count: nodeIds.length,
+    });
+    if (edgeIds.length > 0) trackEvent('canvas_edge_added', { add_method: addMethod });
     return true;
   } catch {
     canvasSaveErrorToast();
