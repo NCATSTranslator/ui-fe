@@ -6,13 +6,6 @@ import type { useAllDeletePrompts } from '@/features/Projects/hooks/useDeletePro
 type ModalsApi = ReturnType<typeof useModals>;
 type DeletePrompts = ReturnType<typeof useAllDeletePrompts>;
 
-type SoftDeleteHandlers = {
-  handleDeleteSelectedProjects: () => void;
-  handleDeleteSelectedQueries: () => void;
-  handleDeleteProject: () => void;
-  handleCancelDeleteProject: () => void;
-};
-
 interface PermanentDeleteState {
   modals: ModalsApi;
   deletePrompts: DeletePrompts;
@@ -86,6 +79,61 @@ const usePermanentDeleteInternals = ({
   };
 };
 
+const usePermanentDeleteModalOpeners = ({
+  openModal,
+  deletePrompts,
+  setSelectedProjects,
+  setSelectedQueries,
+  handlePermanentDeleteProjectInternal,
+  handlePermanentDeleteQueryInternal,
+  handlePermanentDeleteSelectedInternal,
+}: {
+  openModal: ModalsApi['openModal'];
+  deletePrompts: DeletePrompts;
+  setSelectedProjects: PermanentDeleteState['setSelectedProjects'];
+  setSelectedQueries: PermanentDeleteState['setSelectedQueries'];
+  handlePermanentDeleteProjectInternal: (project: Project) => void;
+  handlePermanentDeleteQueryInternal: (query: UserQueryObject) => void;
+  handlePermanentDeleteSelectedInternal: (projects: Project[], queries: UserQueryObject[]) => void;
+}) => {
+  const openPermanentDeleteProjectModal = useCallback((project: Project) => {
+    setSelectedProjects([project]);
+    if (deletePrompts.permanentDeleteProject.shouldShow) openModal('permanentDeleteProject');
+    else handlePermanentDeleteProjectInternal(project);
+  }, [
+    deletePrompts.permanentDeleteProject.shouldShow,
+    handlePermanentDeleteProjectInternal,
+    openModal,
+    setSelectedProjects,
+  ]);
+
+  const openPermanentDeleteQueryModal = useCallback((query: UserQueryObject) => {
+    setSelectedQueries([query]);
+    if (deletePrompts.permanentDeleteQuery.shouldShow) openModal('permanentDeleteQuery');
+    else handlePermanentDeleteQueryInternal(query);
+  }, [
+    deletePrompts.permanentDeleteQuery.shouldShow,
+    handlePermanentDeleteQueryInternal,
+    openModal,
+    setSelectedQueries,
+  ]);
+
+  const openPermanentDeleteSelectedModal = useCallback((projects: Project[], queries: UserQueryObject[]) => {
+    setSelectedProjects(projects);
+    setSelectedQueries(queries);
+    if (deletePrompts.permanentDeleteSelected.shouldShow) openModal('permanentDeleteSelected');
+    else handlePermanentDeleteSelectedInternal(projects, queries);
+  }, [
+    deletePrompts.permanentDeleteSelected.shouldShow,
+    handlePermanentDeleteSelectedInternal,
+    openModal,
+    setSelectedProjects,
+    setSelectedQueries,
+  ]);
+
+  return { openPermanentDeleteProjectModal, openPermanentDeleteQueryModal, openPermanentDeleteSelectedModal };
+};
+
 export const usePermanentDeleteHandlers = ({
   modals,
   deletePrompts,
@@ -94,16 +142,26 @@ export const usePermanentDeleteHandlers = ({
   selectedQueries,
   setSelectedQueries,
 }: PermanentDeleteState) => {
-  const emptyTrash = useEmptyTrashHandlers(modals.openModal, modals.closeModal, deletePrompts);
+  const { openModal, closeModal } = modals;
+  const emptyTrash = useEmptyTrashHandlers(openModal, closeModal, deletePrompts);
   const {
     closeAndClearProjects,
     handlePermanentDeleteProjectInternal,
     handlePermanentDeleteQueryInternal,
     handlePermanentDeleteSelectedInternal,
   } = usePermanentDeleteInternals({
-    closeModal: modals.closeModal,
+    closeModal,
     setSelectedProjects,
     setSelectedQueries,
+  });
+  const modalOpeners = usePermanentDeleteModalOpeners({
+    openModal,
+    deletePrompts,
+    setSelectedProjects,
+    setSelectedQueries,
+    handlePermanentDeleteProjectInternal,
+    handlePermanentDeleteQueryInternal,
+    handlePermanentDeleteSelectedInternal,
   });
 
   const handlePermanentDeleteProject = useCallback(() => {
@@ -120,49 +178,14 @@ export const usePermanentDeleteHandlers = ({
     }
   }, [handlePermanentDeleteSelectedInternal, selectedProjects, selectedQueries]);
 
-  const openPermanentDeleteProjectModal = useCallback((project: Project) => {
-    setSelectedProjects([project]);
-    if (deletePrompts.permanentDeleteProject.shouldShow) modals.openModal('permanentDeleteProject');
-    else handlePermanentDeleteProjectInternal(project);
-  }, [
-    deletePrompts.permanentDeleteProject.shouldShow,
-    handlePermanentDeleteProjectInternal,
-    modals.openModal,
-    setSelectedProjects,
-  ]);
-
-  const openPermanentDeleteQueryModal = useCallback((query: UserQueryObject) => {
-    setSelectedQueries([query]);
-    if (deletePrompts.permanentDeleteQuery.shouldShow) modals.openModal('permanentDeleteQuery');
-    else handlePermanentDeleteQueryInternal(query);
-  }, [
-    deletePrompts.permanentDeleteQuery.shouldShow,
-    handlePermanentDeleteQueryInternal,
-    modals.openModal,
-    setSelectedQueries,
-  ]);
-
-  const openPermanentDeleteSelectedModal = useCallback((projects: Project[], queries: UserQueryObject[]) => {
-    setSelectedProjects(projects);
-    setSelectedQueries(queries);
-    if (deletePrompts.permanentDeleteSelected.shouldShow) modals.openModal('permanentDeleteSelected');
-    else handlePermanentDeleteSelectedInternal(projects, queries);
-  }, [
-    deletePrompts.permanentDeleteSelected.shouldShow,
-    handlePermanentDeleteSelectedInternal,
-    modals.openModal,
-    setSelectedProjects,
-    setSelectedQueries,
-  ]);
-
   const handleCancelClosePermanentDeleteProject = useCallback(() => {
     closeAndClearProjects('permanentDeleteProject');
   }, [closeAndClearProjects]);
 
   const handleCancelClosePermanentDeleteQuery = useCallback(() => {
-    modals.closeModal('permanentDeleteQuery');
+    closeModal('permanentDeleteQuery');
     setSelectedQueries([]);
-  }, [modals.closeModal, setSelectedQueries]);
+  }, [closeModal, setSelectedQueries]);
 
   const handleCancelClosePermanentDeleteSelected = useCallback(() => {
     closeAndClearProjects('permanentDeleteSelected');
@@ -176,26 +199,6 @@ export const usePermanentDeleteHandlers = ({
     handleCancelClosePermanentDeleteProject,
     handleCancelClosePermanentDeleteQuery,
     handleCancelClosePermanentDeleteSelected,
-    openPermanentDeleteProjectModal,
-    openPermanentDeleteQueryModal,
-    openPermanentDeleteSelectedModal,
+    ...modalOpeners,
   };
 };
-
-export const buildProjectModalDeletionBundle = (
-  soft: SoftDeleteHandlers,
-  permanent: ReturnType<typeof usePermanentDeleteHandlers>,
-) => ({
-  handleDeleteSelectedProjects: soft.handleDeleteSelectedProjects,
-  handleDeleteSelectedQueries: soft.handleDeleteSelectedQueries,
-  handlePermanentDeleteProject: permanent.handlePermanentDeleteProject,
-  handlePermanentDeleteQuery: permanent.handlePermanentDeleteQuery,
-  handlePermanentDeleteSelected: permanent.handlePermanentDeleteSelected,
-  handleEmptyTrash: permanent.handleEmptyTrash,
-  handleCancelClosePermanentDeleteProject: permanent.handleCancelClosePermanentDeleteProject,
-  handleCancelClosePermanentDeleteQuery: permanent.handleCancelClosePermanentDeleteQuery,
-  handleCancelClosePermanentDeleteSelected: permanent.handleCancelClosePermanentDeleteSelected,
-  handleCancelCloseEmptyTrash: permanent.handleCancelCloseEmptyTrash,
-  handleDeleteProject: soft.handleDeleteProject,
-  handleCancelDeleteProject: soft.handleCancelDeleteProject,
-});
