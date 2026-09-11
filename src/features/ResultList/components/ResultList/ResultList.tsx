@@ -180,6 +180,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     displayedResults,
     pageCount,
     handlePageClick,
+    handlePageChange,
     handlePageReset,
     calculateItemsPerPage,
   } = useResultPagination({ formattedResults, initialItemsPerPage });
@@ -490,7 +491,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       <ResultListModals
         shareResultID={shareResultID.current ? shareResultID.current : ""}
         presetTypeID={presetTypeID ? presetTypeID : ""}
-        handlePageClick={handlePageClick}
+        handlePageChange={handlePageChange}
         shareModalOpen={shareModalOpen}
         setShareModalOpen={setShareModalOpen}
         notesModalOpen={notesModalOpen}
@@ -556,6 +557,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                                 result={result}
                                 isEven={i % 2 !== 0}
                                 bookmarkItem={bookmarkItem}
+                                // Rank across the whole list, not the page, so
+                                // analytics can tell "first result" from
+                                // "first result on page 4".
+                                resultRank={itemOffset + i + 1}
                               />
                             )
                           })

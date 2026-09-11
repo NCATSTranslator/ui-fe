@@ -8,6 +8,7 @@ import { getPathCount } from "@/features/Core/utils/resultHelpers";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
+import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
@@ -96,6 +97,11 @@ const useResultsData = ({
   const prevRawResults = useRef<ResultSet | null>(initialResultSet);
   const numberOfStatusChecks = useRef(0);
   const firstLoad = useRef(true);
+  // results_loaded is a once-per-query event. The ARS streams partial result
+  // sets, so handleNewResults runs repeatedly for a single query; this tracks
+  // which query ID has already reported and when its wait started.
+  const resultsLoadedTrackedFor = useRef<string | null>(null);
+  const resultsWaitStartedAt = useRef<number>(Date.now());
 
   // Fetching state (lifted from refs so updates trigger re-renders for sidebar/status)
   const [isFetchingARAStatus, setIsFetchingARAStatus] = useState<boolean | null>(presetIsLoading ? true : null);
@@ -109,11 +115,31 @@ const useResultsData = ({
   const isPathfinderRef = useRef(isPathfinder);
   isPathfinderRef.current = isPathfinder;
 
+  // Restart the results_loaded clock whenever a different query is opened, so
+  // load_ms measures this query's wait rather than time since the tab opened.
+  useEffect(() => {
+    resultsWaitStartedAt.current = Date.now();
+  }, [currentQueryID]);
+
   // Derived
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
   const resultsComplete = !isError && freshRawResults === null && !isFetchingARAStatus && !isFetchingResults;
 
   // --- Callbacks ---
+
+  // results_loaded fires once per query, on the first result set that either has
+  // results or arrives after the ARS has finished.
+  const reportResultsLoaded = useCallback((resultSet: ResultSet, resultCount: number) => {
+    const settled = resultCount > 0 || !isFetchingARAStatusRef.current;
+    if (!settled || resultsLoadedTrackedFor.current === currentQueryID) return;
+    resultsLoadedTrackedFor.current = currentQueryID;
+    trackEvent('results_loaded', {
+      query_type: isPathfinderRef.current ? 'pathfinder' : 'single',
+      query_status: resultSet.status,
+      result_count: resultCount,
+      load_ms: Date.now() - resultsWaitStartedAt.current,
+    });
+  }, [currentQueryID]);
 
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
@@ -165,7 +191,9 @@ const useResultsData = ({
     // If the result set has no results and the ARA status is finished, set the loading state to false
     if (newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatusRef.current)
       setIsLoading(false);
-  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef]);
+
+    reportResultsLoaded(newResultSet, newFormattedResults.length);
+  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef, reportResultsLoaded]);
 
   const recalculateScores = useCallback((newWeights: ScoreWeights) => {
     if (!rawResults.current || !rawResults.current.data?.results?.length) return;

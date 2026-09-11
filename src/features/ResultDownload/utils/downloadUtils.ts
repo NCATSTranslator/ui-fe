@@ -18,6 +18,7 @@ import { exportToCSV } from "@/features/Core/utils/csvUtils";
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Returns results based on the specified scope
@@ -364,6 +365,14 @@ export const downloadResults = (
 
   // Generate filename
   const filename = generateFilename(options.scope, options.format, queryTitle);
+
+  // Tracked after the empty-scope bail-out, so this counts files that are
+  // actually produced rather than clicks on the download button.
+  trackEvent('results_downloaded', {
+    export_format: options.format,
+    download_scope: options.scope,
+    result_count: scopedResults.length,
+  });
 
   if (options.format === 'json') {
     const jsonContent = exportToJSON(cleanedResultSet);

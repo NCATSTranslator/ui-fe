@@ -8,6 +8,7 @@ import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";
+import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 
 type ShareContext = 'list' | 'result' | 'evidence' | 'node';
 
@@ -109,8 +110,9 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
   }, [shareContext, isPathfinder, decodedParams, queryResultID, qid, config?.include_hashed_parameters, queryLabel, queryItemID, queryTypeID]);
 
   const handleCopyLink = useCallback(() => {
+    trackEvent('share_link_copied', { share_scope: shareContext });
     navigator.clipboard.writeText(shareURL);
-  }, [shareURL]);
+  }, [shareURL, shareContext]);
 
   const { heading, body } = SHARE_CONTENT[shareContext];
 

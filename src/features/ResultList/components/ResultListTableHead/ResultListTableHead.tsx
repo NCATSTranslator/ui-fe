@@ -2,6 +2,7 @@ import { FC, RefObject } from "react";
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Alert from '@/assets/icons/status/Alerts/Info.svg?react';
 import ArrowUp from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface ResultListTableHeadProps {
   parentStyles: {[key: string]: string};
@@ -25,7 +26,23 @@ const getNextSortString = (
   return defaultSortString;
 };
 
-const ResultListTableHead: FC<ResultListTableHeadProps> = ({ 
+/**
+ * Split a sort string like 'evidenceHighLow' into the field and direction that
+ * GA4 reports on. Tracking happens here rather than in useSortState because
+ * getSortedResults also runs on filter changes and re-renders, which are not
+ * user-initiated sorts.
+ */
+const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = { LowHigh: 'asc', HighLow: 'desc' };
+
+const trackSort = (sortString: string): void => {
+  const match = /^(.*?)(LowHigh|HighLow)$/.exec(sortString);
+  trackEvent('results_sorted', {
+    sort_field: match ? match[1] : sortString,
+    sort_direction: match ? SORT_DIRECTIONS[match[2]] : 'default',
+  });
+};
+
+const ResultListTableHead: FC<ResultListTableHeadProps> = ({
   currentSortString,
   defaultSortString,
   handleUpdateResults,
@@ -34,15 +51,18 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
   isSortedByPaths,
   parentStyles }) => {
 
+  const handleSort = (isSorted: boolean | null, firstDir: boolean, lowHighString: string, highLowString: string) => {
+    const sortString = getNextSortString(isSorted, firstDir, lowHighString, highLowString, defaultSortString);
+    currentSortString.current = sortString;
+    trackSort(sortString);
+    handleUpdateResults();
+  };
+
   return(
     <div className={`${parentStyles.tableHead}`}>
       <div
         className={`${parentStyles.head} ${parentStyles.nameHead} ${isSortedByName ? parentStyles.true : (isSortedByName === null) ? '' : parentStyles.false}`}
-        onClick={()=>{
-          const sortString = getNextSortString(isSortedByName, true, 'nameLowHigh', 'nameHighLow', defaultSortString);
-          currentSortString.current = sortString;
-          handleUpdateResults();
-        }}
+        onClick={() => handleSort(isSortedByName, true, 'nameLowHigh', 'nameHighLow')}
       >
         Name
         <ArrowUp className={parentStyles.chev}/>
@@ -50,22 +70,14 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
       <div></div>
       <div
         className={`${parentStyles.head} ${parentStyles.evidenceHead} ${isSortedByEvidence ? parentStyles.true : (isSortedByEvidence === null) ? '': parentStyles.false}`}
-        onClick={()=>{
-          const sortString = getNextSortString(isSortedByEvidence, false, 'evidenceHighLow', 'evidenceLowHigh', defaultSortString);
-          currentSortString.current = sortString;
-          handleUpdateResults();
-        }}
+        onClick={() => handleSort(isSortedByEvidence, false, 'evidenceHighLow', 'evidenceLowHigh')}
       >
         Evidence
         <ArrowUp className={parentStyles.chev}/>
       </div>
       <div
         className={`${parentStyles.head} ${parentStyles.pathsHead} ${isSortedByPaths ? parentStyles.true : (isSortedByPaths === null) ? '': parentStyles.false}`}
-        onClick={()=>{
-          const sortString = getNextSortString(isSortedByPaths, false, 'pathsHighLow', 'pathsLowHigh', defaultSortString);
-          currentSortString.current = sortString;
-          handleUpdateResults();
-        }}
+        onClick={() => handleSort(isSortedByPaths, false, 'pathsHighLow', 'pathsLowHigh')}
         data-tooltip-id="paths-tooltip"
       >
         Paths
