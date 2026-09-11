@@ -2,6 +2,7 @@ import { Dispatch, FC, SetStateAction } from 'react';
 import styles from './GraphLayoutButtons.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import { LayoutType } from 'translator-graph-view';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 const layouts: { key: LayoutType; label: string }[] = [
   { key: 'hierarchicalLR', label: 'Horizontal' },
@@ -24,7 +25,10 @@ const GraphLayoutButtons: FC<GraphLayoutButtonsProps> = ({setCurrentLayout, curr
         layouts.map(({ key, label }) => (
           <Button
             className={`${styles.layoutButton} ${currentLayout === key ? styles.active : ''}`}
-            handleClick={() => setCurrentLayout(key)}
+            handleClick={() => {
+              trackEvent('graph_layout_changed', { layout_name: key });
+              setCurrentLayout(key);
+            }}
             key={key}
             variant="secondary"
           >

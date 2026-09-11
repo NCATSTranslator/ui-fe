@@ -13,8 +13,11 @@ import { GraphHoverTarget } from '@/features/ResultGraphView/types/graphTypes';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
 import { resolveNodeTarget, resolveEdgeTarget, getInitialLayout } from '@/features/ResultGraphView/utils/graphFunctions';
 import { useDelayedHoverTarget } from '@/features/ResultGraphView/hooks/useDelayedHoverTarget';
+import { useGraphViewOpenedTracking } from '@/features/ResultGraphView/hooks/useGraphViewOpenedTracking';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
 import { useGraphNodeColor } from '@/features/Core/hooks/useNodeColors';
+import { getNodeById } from '@/features/ResultList/slices/resultsSlice';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface GraphViewProps {
   graph: GraphData;
@@ -51,7 +54,14 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
     [graph]
   );
 
+  useGraphViewOpenedTracking(graph, active, hasData);
+
   const onNodeClick = (node: GraphNodeType) => {
+    const resultNode = getNodeById(resultSet ?? null, node.id);
+    trackEvent('graph_node_selected', {
+      node_curie: resultNode?.curies?.[0],
+      node_category: resultNode?.types?.[0],
+    });
     if (resultId) {
       resultsNavigate(`/results/${resultId}/node/${node.id}`);
     } else {
@@ -60,11 +70,13 @@ const GraphView = ({ graph, active, resultSet }: GraphViewProps) => {
   };
 
   const onEdgeClick = (edge: GraphEdgeType) => {
+    trackEvent('evidence_opened', { evidence_source: 'graph_edge' });
     navigateToEvidenceView({ edgeId: edge.id });
   };
 
   const onPredicateClick = (e: MouseEvent<HTMLSpanElement>, edgeId: string, options?: PredicateClickOptions) => {
     e.stopPropagation();
+    trackEvent('evidence_opened', { evidence_source: 'graph_predicate' });
     navigateToEvidenceView({ edgeId, tab: options?.tab });
   };
 
