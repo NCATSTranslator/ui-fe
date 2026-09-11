@@ -134,17 +134,17 @@ const Predicate: FC<PredicateProps> = ({
     isEdgeDragging && dragStyles.dragging,
   )
 
-  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], targetPath: Path, targetFullPathKey: string, options?: PredicateClickOptions) => {
+  const handlePredicateClick = (e: MouseEvent<HTMLSpanElement>, selectedEdgeId: string, compressedEdgeIds: string[], options?: PredicateClickOptions) => {
     e.stopPropagation();
-    handleEdgeClick?.([selectedEdgeId, ...compressedEdgeIds], targetPath);
-    setLastViewedPathID(targetPath?.id || null);
+    handleEdgeClick?.([selectedEdgeId, ...compressedEdgeIds], path);
+    setLastViewedPathID(path?.id || null);
     if(!inModal) {
-      let allSets = extractCompressedEdgeSets(targetPath);
+      let allSets = extractCompressedEdgeSets(path);
       if (allSets.length === 0 && edgeIds.length > 1) allSets = [edgeIds];
       navigateToEvidenceView({
         edgeId: selectedEdgeId,
-        path: targetPath,
-        pathKey: targetFullPathKey,
+        path,
+        pathKey: parentPathKey,
         compressedEdgeSets: allSets,
         tab: options?.tab,
         resultId: itemResultId,
@@ -159,7 +159,7 @@ const Predicate: FC<PredicateProps> = ({
       data-tooltip-id={`${formattedEdge.predicate}${uid}`}
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
-      onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1), path, parentPathKey)}
+      onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1))}
       onContextMenu={canvasEnabled
         ? (e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }
         : undefined}
@@ -181,7 +181,7 @@ const Predicate: FC<PredicateProps> = ({
             activeEntityFilters={activeEntityFilters}
             isAcceptedOntology={isAcceptedOntology}
             inModal={!!inModal}
-            onPredicateClick={(e, edgeId, options) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), path, parentPathKey, options)}
+            onPredicateClick={(e, edgeId, options) => handlePredicateClick(e, edgeId, edgeIds.filter(id => id !== edgeId), options)}
           />
         }
       </Tooltip>

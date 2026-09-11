@@ -289,21 +289,18 @@ export const generatePathD = (
  * @returns {boolean} - Whether the notes are empty.
  */
 export const isNotesEmpty = (notes?: string | null) => {
-  const notesObj = JSON.parse(notes || "{}");
+  const children = JSON.parse(notes || "{}")?.root?.children;
+  if (!Array.isArray(children)) return true;
+  if (children.length > 1) return false;
+  return !children.some(hasNoteContent);
+}
 
-  if(Array.isArray(notesObj?.root?.children)) {
-    if(notesObj?.root?.children.length > 1)
-      return false;
+type NoteNode = { children?: { text?: string }[] } | null | undefined;
 
-    for(const child of notesObj.root.children) {
-      if(Array.isArray(child?.children)) {
-        if(child.children.length > 1 || (child.children[0]?.text && child.children[0]?.text.length > 0))
-          return false;
-      }
-    }
-  }
-
-  return true;
+const hasNoteContent = (child: NoteNode): boolean => {
+  const grandchildren = child?.children;
+  if (!Array.isArray(grandchildren)) return false;
+  return grandchildren.length > 1 || !!grandchildren[0]?.text;
 }
 
 
@@ -374,12 +371,7 @@ export const getNodeDescription = (node: ResultNode) => {
  * @returns {boolean} - Whether the edge is an accepted ontology edge.
  */
 export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
-  if(
-    edge.predicate === "subclass of" ||
-    edge.predicate === "superclass of"
-  )
-    return true;
-  return false;
+  return edge.predicate === "subclass of" || edge.predicate === "superclass of";
 }
 
 /**

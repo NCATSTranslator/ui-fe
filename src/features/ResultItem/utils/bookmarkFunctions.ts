@@ -8,7 +8,7 @@ import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 
 export interface BookmarkFunctionParams {
   result: Result | ResultBookmark;
-  resultSet: ResultSet;
+  resultSet: ResultSet | null;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
   queryNodeDescription: string | null;

@@ -83,7 +83,7 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
     if (!result) return null;
     return {
     result,
-    resultSet: resultSet!,
+    resultSet,
     queryNodeID,
     queryNodeLabel,
     queryNodeDescription,
