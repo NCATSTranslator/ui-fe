@@ -21,6 +21,7 @@ import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransi
 import ConfidenceTooltip from './ConfidenceTooltip';
 import ApiKeysSection from './ApiKeysSection';
 import DisplaySection from './DisplaySection';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 const isConfidenceSort = (value: string | number): boolean =>
   value === 'scoreHighLow' || value === 'scoreLowHigh';
@@ -57,6 +58,7 @@ const SettingsPanel = () => {
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
 
   const handleLogout = () => {
+    trackEvent('auth_logout', { auth_provider: idpLogoutProvider ? 'idp' : 'local' });
     if (idpLogoutProvider && idpLogoutFormRef.current) {
       idpLogoutFormRef.current.submit();
     } else {
