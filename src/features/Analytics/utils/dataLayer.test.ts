@@ -20,11 +20,6 @@ const gtagCalls = () =>
     .filter(entry => typeof entry === 'object' && entry !== null && entry[0] === 'event')
     .map(entry => [entry[0], entry[1], entry[2]]);
 
-// One top-level describe per module, with nested describes grouping the cases. It
-// runs long because every case shares the beforeEach/afterEach reset of the
-// dataLayer, gtag shim, and transport; splitting it only to meet the line limit
-// would duplicate that setup across blocks.
-// eslint-disable-next-line max-lines-per-function
 describe('analytics dataLayer', () => {
   beforeEach(() => {
     window.dataLayer = [];

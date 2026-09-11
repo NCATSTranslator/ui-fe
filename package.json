@@ -41,6 +41,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "lint": "eslint src",
     "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
