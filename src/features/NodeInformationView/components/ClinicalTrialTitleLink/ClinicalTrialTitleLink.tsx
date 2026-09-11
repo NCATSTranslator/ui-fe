@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
+import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
 
 interface ClinicalTrialTitleLinkProps {
   url: string;
@@ -38,7 +39,13 @@ const ClinicalTrialTitleLink: FC<ClinicalTrialTitleLinkProps> = ({
   if (!url) return null;
 
   const link = (
-    <a href={url} target="_blank" rel="noreferrer" className={className}>
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className={className}
+      {...getEvidenceLinkTrackingProps('clinical_trial', url)}
+    >
       {displayTitle}
       {showExternalIcon && <> <ExternalLink /></>}
     </a>

@@ -6,6 +6,7 @@ import styles from "@/features/Evidence/components/PublicationsTable/Publication
 import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWord";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { findPublicationOnEdge } from "@/features/Evidence/utils/utilities";
+import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
 
 const buildSupportSnippet = (
   resultSet: ResultSet | null,
@@ -50,7 +51,7 @@ const PublicationRow: FC<{
       <td className={joinClasses('table-cell', styles.tableCell, styles.title, 'title')}>
         {
           pub.url && (
-            <a href={pub.url} target="_blank" rel="noreferrer">
+            <a href={pub.url} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('publication', pub.url)}>
               {pub.title ?? 'No Title Available'}
             </a>
           )
@@ -65,14 +66,14 @@ const PublicationRow: FC<{
       <td className={joinClasses('table-cell', styles.tableCell, styles.snippet, 'snippet')}>
         <span>{getSupportTextOrSnippet()}</span>
         {pub.url && (
-          <a href={pub.url} className={joinClasses('url', styles.url)} target="_blank" rel="noreferrer">
+          <a href={pub.url} className={joinClasses('url', styles.url)} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('publication', pub.url)}>
             Read More
           </a>
         )}
       </td>
       <td className={joinClasses('table-cell', styles.tableCell, styles.knowledgeLevel, 'knowledgeLevel')}>
         {pub.source?.url ? (
-          <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'>
+          <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer' {...getEvidenceLinkTrackingProps('source', pub.source.url)}>
             <span>{pub.source.name}</span>
           </a>
         ) : (
