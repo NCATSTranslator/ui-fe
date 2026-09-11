@@ -57,7 +57,7 @@ export interface Path {
   score?: number;
   // Original subgraph
   subgraph: string[];
-  tags: Tags;
+  tags: EntityTags;
 }
 
 export type PathRank = {

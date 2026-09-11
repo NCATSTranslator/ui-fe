@@ -26,13 +26,12 @@ export const generateScore = (
   return maxSugenoScore(scoreComponents, confidenceWeight, noveltyWeight, clinicalWeight);
 };
 
+const resolvePath = (resultSet: ResultSet | null, path: string | Path): Path | null =>
+  (typeof path === 'string') ? getPathById(resultSet, path) : path;
+
 export const generatePathfinderScore = (resultSet: ResultSet | null, result: Result): ScorePair => {
-  const pathObjOne: Path | null = (typeof result.paths[0] === 'string')
-    ? getPathById(resultSet, result.paths[0])
-    : result.paths[0];
-  const pathObjTwo: Path | null = (result.paths.length > 1)
-    ? (typeof result.paths[1] === 'string') ? getPathById(resultSet, result.paths[1]) : result.paths[1]
-    : null;
+  const pathObjOne: Path | null = resolvePath(resultSet, result.paths[0]);
+  const pathObjTwo: Path | null = (result.paths.length > 1) ? resolvePath(resultSet, result.paths[1]) : null;
   const score: ScorePair = {
     main: (pathObjOne) ? getPathfinderMetapathScore(pathObjOne) : 0,
     secondary: (pathObjTwo) ? getPathfinderMetapathScore(pathObjTwo) : 0
@@ -75,15 +74,11 @@ const maxSugenoScore = (
   noveltyWeight: number,
   clinicalWeight: number
 ): ScorePair => {
-  const sugenoPairs: ScorePair[] = scoreComponents.map((s) => {
-    const scaledSugenoScore = 5 * computeSugeno(s.confidence, s.novelty, s.clinical_evidence,
-      confidenceWeight, noveltyWeight, clinicalWeight);
-    return {
-      main: scaledSugenoScore,
-      secondary: computeWeightedMean(s.confidence, s.novelty, s.clinical_evidence,
-        confidenceWeight, noveltyWeight, clinicalWeight)
-    };
-  });
+  const weights: SugenoWeights = { confidenceWeight, noveltyWeight, clinicalWeight };
+  const sugenoPairs: ScorePair[] = scoreComponents.map((s) => ({
+    main: 5 * computeSugeno(s, weights),
+    secondary: computeWeightedMean(s, weights),
+  }));
 
   return maxScorePair(sugenoPairs);
 };
@@ -102,45 +97,35 @@ const maxScorePair = (scorePairs: ScorePair[]): ScorePair => {
   return maxScore;
 };
 
-const computeSugeno = (
-  confidence: number,
-  novelty: number,
-  clinical: number,
-  confidenceWeight: number,
-  noveltyWeight: number,
-  clinicalWeight: number
-): number => {
-  const a = confidenceWeight;
-  const b = noveltyWeight;
-  const c = clinicalWeight;
+type SugenoWeights = Pick<ScoreWeights, 'confidenceWeight' | 'noveltyWeight' | 'clinicalWeight'>;
+
+const solveSugenoLambda = (a: number, b: number, c: number): number => {
   // When fewer than 2 weights are non-zero, the polynomial coefficients are all zero
   // and polynomialRoot cannot solve. Lambda = 0 is the correct degenerate case
   // (additive fuzzy measure), so skip the root-finding.
   const c0 = a + b + c - 1;
   const c1 = a * b + a * c + b * c;
   const c2 = a * b * c;
-  let lambda: number = 0;
-  if (c0 !== 0 || c1 !== 0 || c2 !== 0) {
-    const solutions = polynomialRoot(c0, c1, c2);
-    solutions.forEach((s) => {
-      let val: number;
-      if (isComplex(s)) {
-        val = (s as Complex).re;
-      } else {
-        val = s as number;
-      }
+  if (c0 === 0 && c1 === 0 && c2 === 0) return 0;
 
-      if (val !== 0 && val >= -1) {
-        lambda = val;
-      }
-    });
-  }
+  let lambda = 0;
+  polynomialRoot(c0, c1, c2).forEach((s) => {
+    const val = isComplex(s) ? (s as Complex).re : s as number;
+    if (val !== 0 && val >= -1) {
+      lambda = val;
+    }
+  });
+  return lambda;
+};
 
+const computeSugeno = (s: Score, weights: SugenoWeights): number => {
+  const { confidenceWeight: a, noveltyWeight: b, clinicalWeight: c } = weights;
+  const lambda = solveSugenoLambda(a, b, c);
   const weightSets = computeWeightSets(lambda, a, b, c, 3);
   const allScores: { id: string; score: number }[] = [
-    {id: 'co', score: confidence},
-    {id: 'no', score: novelty},
-    {id: 'cl', score: clinical}
+    {id: 'co', score: s.confidence},
+    {id: 'no', score: s.novelty},
+    {id: 'cl', score: s.clinical_evidence}
   ];
 
   allScores.sort((a, b) => {
@@ -256,6 +241,7 @@ const permute = (array: string[]): string[][] => {
 
       permutations.push([...arr]);
       c[i] += 1;
+      // eslint-disable-next-line sonarjs/no-redundant-assignments -- false positive: i can exceed 1 here; Heap's algorithm resets it
       i = 1;
     } else {
       c[i] = 0;
@@ -272,15 +258,8 @@ const swap = (array: string[], i: number, j: number): void => {
   array[j] = temp;
 };
 
-const computeWeightedMean = (
-  confidence: number,
-  novelty: number,
-  clinical: number,
-  confidenceWeight: number,
-  noveltyWeight: number,
-  clinicalWeight: number
-): number => {
-  return (confidence * confidenceWeight) + (novelty * noveltyWeight) + (clinical * clinicalWeight);
+const computeWeightedMean = (s: Score, weights: SugenoWeights): number => {
+  return (s.confidence * weights.confidenceWeight) + (s.novelty * weights.noveltyWeight) + (s.clinical_evidence * weights.clinicalWeight);
 };
 
 export const recalculateResultSetScores = (

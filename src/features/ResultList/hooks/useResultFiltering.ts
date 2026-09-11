@@ -72,7 +72,7 @@ const useResultFiltering = ({
     setActiveFilters(filtersToActivate);
     let newFormattedResults = handleUpdateResultsRef.current(filtersToActivate, entityFilters, rawResultsVal, originalResultsVal, false, sortString, isPathfinderVal, userSavesVal);
     handlePageReset(false, newFormattedResults.length);
-  }, [handlePageReset]);
+  }, [handlePageReset, handleUpdateResultsRef]);
 
   const handleFilter = useCallback((filter: Filter) => {
     // Try to find a filter with same {id, value, negated} — for toggle-off

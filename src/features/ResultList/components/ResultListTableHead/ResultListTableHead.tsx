@@ -58,10 +58,15 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
     handleUpdateResults();
   };
 
+  const getSortClass = (isSorted: boolean | null) => {
+    if (isSorted === null) return '';
+    return isSorted ? parentStyles.true : parentStyles.false;
+  };
+
   return(
     <div className={`${parentStyles.tableHead}`}>
       <div
-        className={`${parentStyles.head} ${parentStyles.nameHead} ${isSortedByName ? parentStyles.true : (isSortedByName === null) ? '' : parentStyles.false}`}
+        className={`${parentStyles.head} ${parentStyles.nameHead} ${getSortClass(isSortedByName)}`}
         onClick={() => handleSort(isSortedByName, true, 'nameLowHigh', 'nameHighLow')}
       >
         Name
@@ -69,14 +74,14 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
       </div>
       <div></div>
       <div
-        className={`${parentStyles.head} ${parentStyles.evidenceHead} ${isSortedByEvidence ? parentStyles.true : (isSortedByEvidence === null) ? '': parentStyles.false}`}
+        className={`${parentStyles.head} ${parentStyles.evidenceHead} ${getSortClass(isSortedByEvidence)}`}
         onClick={() => handleSort(isSortedByEvidence, false, 'evidenceHighLow', 'evidenceLowHigh')}
       >
         Evidence
         <ArrowUp className={parentStyles.chev}/>
       </div>
       <div
-        className={`${parentStyles.head} ${parentStyles.pathsHead} ${isSortedByPaths ? parentStyles.true : (isSortedByPaths === null) ? '': parentStyles.false}`}
+        className={`${parentStyles.head} ${parentStyles.pathsHead} ${getSortClass(isSortedByPaths)}`}
         onClick={() => handleSort(isSortedByPaths, false, 'pathsHighLow', 'pathsLowHigh')}
         data-tooltip-id="paths-tooltip"
       >

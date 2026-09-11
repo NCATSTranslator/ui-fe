@@ -205,22 +205,14 @@ describe('findStringMatch — shallow matches', () => {
     expect(run(rs, result, makeEntityFilter('ASPIRIN'))).toBe(true);
   });
 
-  it('matches on subject node description', () => {
+  it.each([
+    ['matches on subject node description', 'pain reliever', true],
+    ['tolerates surrounding whitespace in the search term', '  aspirin  ', true],
+    ['returns false when nothing matches', 'ibuprofen', false],
+  ])('%s', (_name, term, expected) => {
     const rs = baseRS();
     const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('pain reliever'))).toBe(true);
-  });
-
-  it('tolerates surrounding whitespace in the search term', () => {
-    const rs = baseRS();
-    const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('  aspirin  '))).toBe(true);
-  });
-
-  it('returns false when nothing matches', () => {
-    const rs = baseRS();
-    const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('ibuprofen'))).toBe(false);
+    expect(run(rs, result, makeEntityFilter(term))).toBe(expected);
   });
 
   it('matches the subject description sourced from annotations (not just descriptions[0])', () => {

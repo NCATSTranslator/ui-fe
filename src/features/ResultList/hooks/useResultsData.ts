@@ -66,6 +66,30 @@ interface UseResultsDataReturn {
   handleResultsRefresh: () => void;
 }
 
+/**
+ * Clones a raw result set, assigns ids to its edges and nodes, and precalculates
+ * evidence counts, path counts, and scores for each result.
+ */
+const prepareResultSet = (resultSet: ResultSet, scoreWeights: ScoreWeights, isPathfinder: boolean): ResultSet => {
+  const newResultSet = cloneDeep(resultSet);
+
+  for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
+    edge.id = id;
+  }
+  for (const [id, node] of Object.entries(newResultSet.data.nodes))
+    node.id = id;
+
+  for (const result of newResultSet.data.results) {
+    result.evidenceCount = getEvidenceCounts(newResultSet, result);
+    result.pathCount = getPathCount(newResultSet, result.paths);
+    result.score = (isPathfinder)
+      ? generatePathfinderScore(newResultSet, result)
+      : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+  }
+
+  return newResultSet;
+};
+
 const useResultsData = ({
   currentQueryID,
   currentQuerySid,
@@ -152,28 +176,9 @@ const useResultsData = ({
     if (resultSet.status === 'error' || resultSet.data.results === undefined)
       return;
 
-    let newResultSet = cloneDeep(resultSet);
-    prevRawResults.current = newResultSet;
-
-    const currentScoreWeights = scoreWeightsRef.current;
     const currentIsPathfinder = isPathfinderRef.current;
-
-    // Assign ids to edges
-    for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
-      edge.id = id;
-    }
-    // Assign ids to nodes
-    for (const [id, node] of Object.entries(newResultSet.data.nodes))
-      node.id = id;
-
-    // Precalculate evidence and path counts
-    for (const result of newResultSet.data.results) {
-      result.evidenceCount = getEvidenceCounts(newResultSet, result);
-      result.pathCount = getPathCount(newResultSet, result.paths);
-      result.score = (currentIsPathfinder)
-        ? generatePathfinderScore(newResultSet, result)
-        : generateScore(result.scores, currentScoreWeights.confidenceWeight, currentScoreWeights.noveltyWeight, currentScoreWeights.clinicalWeight);
-    }
+    const newResultSet = prepareResultSet(resultSet, scoreWeightsRef.current, currentIsPathfinder);
+    prevRawResults.current = newResultSet;
 
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 

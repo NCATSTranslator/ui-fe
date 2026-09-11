@@ -23,6 +23,11 @@ interface UseResultPaginationArgs {
   initialItemsPerPage: number;
 }
 
+export const parseItemsPerPage = (prefValue: string | number): number => {
+  if (!prefValue) return 10;
+  return typeof prefValue === "string" ? parseInt(prefValue) : prefValue;
+};
+
 /**
  * Custom hook to handle pagination of a list of results.
  *
@@ -47,7 +52,7 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
   );
 
   const calculateItemsPerPage = useCallback((prefValue: string | number): number => {
-    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
+    return parseItemsPerPage(prefValue);
   }, []);
 
   // Untracked page change, for anything other than a user paging through

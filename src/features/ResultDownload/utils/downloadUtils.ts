@@ -338,19 +338,23 @@ export const generateFilename = (scope: DownloadScope, format: ExportFormat, que
   return `${titlePart}_${scope}_results_${date}.${format}`;
 };
 
+export interface DownloadResultSources {
+  allResults: Result[];
+  filteredResults: Result[];
+  userSaves: SaveGroup | null;
+}
+
 /**
  * Main export function that orchestrates the entire download process
  */
 export const downloadResults = (
   resultSet: ResultSet,
-  allResults: Result[],
-  filteredResults: Result[],
-  userSaves: SaveGroup | null,
+  sources: DownloadResultSources,
   options: DownloadOptions,
   queryTitle?: string
 ): void => {
   // Get results based on scope
-  const scopedResults = getResultsByScope(options.scope, allResults, filteredResults, userSaves);
+  const scopedResults = getResultsByScope(options.scope, sources.allResults, sources.filteredResults, sources.userSaves);
 
   if (scopedResults.length === 0) {
     console.warn('No results to export for the selected scope');

@@ -11,6 +11,36 @@ import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/ut
 import { FILTERING_CONSTANTS, makeFilter, applyPredicateFilterDisplayNames } from "@/features/ResultFiltering/utils/filterFunctions";
 
 /**
+ * Checks a result's drug name and subject node description for the normalized search term.
+ */
+const matchesShallowProperties = (resultSet: ResultSet, result: Result, normalizedTerm: string): boolean => {
+  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const descriptionMatch = (subjectNode ? getNodeDescription(subjectNode) : null)
+    ?.toLowerCase().includes(normalizedTerm) ?? false;
+  return nameMatch || descriptionMatch;
+};
+
+/**
+ * Re-ranks a result's paths against the path filters, then re-sorts its path ranks.
+ */
+const updateResultPathRanks = (
+  resultSet: ResultSet,
+  result: Result,
+  pathRanks: Map<string, PathRank> | undefined,
+  pathFilters: Filter[]
+): void => {
+  for (const p of result.paths) {
+    const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+    const rank = path?.id && pathRanks?.get(path.id);
+    if (path && rank) {
+      updatePathRanks(resultSet, path, rank, pathFilters);
+    }
+  }
+  pathRankSort([...pathRanks?.values() || []]);
+};
+
+/**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
  *
  * This function checks the `Result` object for a match with the provided search term by:
@@ -36,11 +66,7 @@ export const findStringMatch = (
   const normalizedTerm = filtering.normalizeSearchTermForMatch(filter.value || '');
   const isExclusion = filtering.isExclusion(filter);
   // Shallow properties: drug name and subject node description
-  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = (subjectNode ? getNodeDescription(subjectNode) : null)
-    ?.toLowerCase().includes(normalizedTerm) ?? false;
-  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+  let matched = !normalizedTerm || matchesShallowProperties(resultSet, result, normalizedTerm);
   if (isExclusion && matched) return true;
   for (let i = 0; i < result.paths.length; i++) {
     const path = isPath(result.paths[i])
@@ -297,16 +323,7 @@ export const applyFilters = (
 
       if (!include) continue;
 
-      const pathRanks = resultPathRanks.get(result.id);
-      for (const p of result.paths) {
-        const path = typeof p === "string" ? getPathById(resultSet, p) : p;
-        const rank = path?.id && pathRanks?.get(path.id);
-        if (path && rank) {
-          updatePathRanks(resultSet, path, rank, pathFilters);
-        }
-      }
-
-      pathRankSort([...pathRanks?.values() || []]);
+      updateResultPathRanks(resultSet, result, resultPathRanks.get(result.id), pathFilters);
       results.push(result);
     }
 

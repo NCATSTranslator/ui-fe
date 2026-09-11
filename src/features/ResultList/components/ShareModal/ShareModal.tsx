@@ -107,7 +107,7 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
     }
 
     return encodeURI(`${window.location.origin}/${path}`);
-  }, [shareContext, isPathfinder, decodedParams, queryResultID, qid, config?.include_hashed_parameters, queryLabel, queryItemID, queryTypeID]);
+  }, [shareContext, isPathfinder, isLookup, decodedParams, queryResultID, qid, config?.include_hashed_parameters, queryLabel, queryItemID, queryTypeID]);
 
   const handleCopyLink = useCallback(() => {
     trackEvent('share_link_copied', { share_scope: shareContext });

@@ -45,7 +45,7 @@ describe('warnOnceOnEntityTypeMismatch', () => {
     for (let i = 0; i < 50; i++) {
       warnOnceOnEntityTypeMismatch('node', 'n-1', node);
     }
-    expect(warn.mock.calls.length).toBe(callsAfterFirstCheck);
+    expect(warn).toHaveBeenCalledTimes(callsAfterFirstCheck);
   });
 
   it('reports a missing entity without running the checkers', () => {
@@ -61,6 +61,6 @@ describe('warnOnceOnEntityTypeMismatch', () => {
     const callsAfterBudget = warn.mock.calls.length;
 
     warnOnceOnEntityTypeMismatch('node', 'n-fresh', makeNode('n-fresh', {}));
-    expect(warn.mock.calls.length).toBe(callsAfterBudget);
+    expect(warn).toHaveBeenCalledTimes(callsAfterBudget);
   });
 });
