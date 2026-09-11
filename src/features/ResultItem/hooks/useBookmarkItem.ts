@@ -10,6 +10,8 @@ import {
   handleNotesClick as handleNotesClickUtil,
   BookmarkFunctionParams,
 } from '@/features/ResultItem/utils/bookmarkFunctions';
+import { getNodeById } from '@/features/ResultList/slices/resultsSlice';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export interface UseBookmarkItemParams {
   bookmarkItem: Save | null;
@@ -103,15 +105,28 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
     shouldUpdateResultsAfterBookmark,
   ]);
 
+  // The CURIE, not the internal result ID, is what makes these events joinable
+  // with anything outside a single session.
+  const resultCurie = useMemo(
+    () => getNodeById(resultSet ?? null, result?.subject)?.curies?.[0],
+    [resultSet, result?.subject]
+  );
+
   const handleBookmarkClick = useCallback(async (): Promise<string | false> => {
     if (!bookmarkParams) return false;
-    return await handleBookmarkClickUtil(
+    const outcome = await handleBookmarkClickUtil(
       isBookmarked,
       bookmarkRemovalApproved,
       setConfirmModalOpen,
       bookmarkParams
     );
-  }, [isBookmarked, bookmarkParams]);
+    // Both branches resolve to the affected bookmark's ID only once the save or
+    // delete succeeded; a removal still awaiting confirmation resolves false.
+    if (outcome) {
+      trackEvent(isBookmarked ? 'result_unbookmarked' : 'result_bookmarked', { result_curie: resultCurie });
+    }
+    return outcome;
+  }, [isBookmarked, bookmarkParams, resultCurie]);
 
   // Notes click handler
   const handleNotesClick = useCallback(async (

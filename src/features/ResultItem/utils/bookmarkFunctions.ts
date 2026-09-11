@@ -146,7 +146,9 @@ export const handleBookmarkRemoval = async (params: BookmarkFunctionParams): Pro
   if (shouldUpdateResultsAfterBookmark)
     shouldUpdateResultsAfterBookmark.current = true;
   
-  return false; // Bookmark removal doesn't return an ID
+  // The removed bookmark's ID, so callers can tell a completed removal from one
+  // that failed or is still waiting on the confirmation modal.
+  return bookmarkId;
 };
 
 /**
