@@ -27,9 +27,9 @@ const QueriesPanel = () => {
   const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
   const { addToProjectQuery, isSelectedProjectMode, clearAddToProjectMode, setSelectedProjectMode }= useSidebar();
   const activeQueryId = useMemo(() => {
-    const currentQid = getDataFromQueryVar('q', window.location.search);
+    const currentQid = getDataFromQueryVar('q', location.search);
     return filteredQueries.find(query => query.data.qid === currentQid)?.data.qid;
-  }, [filteredQueries, window.location.search]);
+  }, [filteredQueries, location.search]);
 
   const handleCloseProjectList = () => {
     clearAddToProjectMode();
