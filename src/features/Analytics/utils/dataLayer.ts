@@ -5,6 +5,7 @@ import type {
   DataLayerPush,
   LinkType,
 } from '@/features/Analytics/types/analytics';
+import { createDebugToggle } from '@/features/Core/utils/debugToggle';
 
 /** GA4 truncates string parameter values beyond this length; do it here so reports match what we log. */
 const MAX_PARAM_VALUE_LENGTH = 100;
@@ -12,20 +13,13 @@ const MAX_PARAM_VALUE_LENGTH = 100;
 const MAX_PARAMS_PER_EVENT = 25;
 
 // Off under Vitest, which also runs with DEV set and would log every tracked
-// interaction into test output.
-let debugEnabled = import.meta.env.DEV && import.meta.env.MODE !== 'test';
+// interaction into test output. Exposed as window.__analyticsDebug.
+const analyticsDebug = createDebugToggle('__analyticsDebug', import.meta.env.DEV && import.meta.env.MODE !== 'test');
 
 /**
  * Turn dataLayer console logging on or off at runtime. Defaults to on in dev.
  */
-export const setAnalyticsDebug = (enabled: boolean): void => {
-  debugEnabled = enabled;
-};
-
-// Exposed so QA can turn logging on in a deployed build without a rebuild.
-if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).__analyticsDebug = setAnalyticsDebug;
-}
+export const setAnalyticsDebug = analyticsDebug.set;
 
 /**
  * Returns the GTM dataLayer, creating it if GTM has not loaded yet.
@@ -178,7 +172,7 @@ export const pushToDataLayer = (payload: DataLayerPush): void => {
 
   try {
     layer.push(payload);
-    if (debugEnabled) console.debug('[analytics]', payload.event, payload);
+    if (analyticsDebug.isEnabled()) console.debug('[analytics]', payload.event, payload);
   } catch (error) {
     console.warn('[analytics] dataLayer push failed', error);
   }
