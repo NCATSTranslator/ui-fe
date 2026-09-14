@@ -5,6 +5,7 @@ import { isResultEdge } from '@/features/ResultList/types/checkers';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useSeenStatus } from '@/features/ResultItem/hooks/resultHooks';
 import { useEvidenceData, useEdgeInitialization } from '@/features/Evidence/hooks/evidenceHooks';
+import useInforesCatalogLookup from '@/features/Evidence/hooks/useInforesCatalogLookup';
 import { resolveClickedEdge } from '@/features/Evidence/utils/utilities';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 import { buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
@@ -116,7 +117,30 @@ interface EdgeInteractionParams {
   pk: string;
   isCanvasOnlyMode?: boolean;
   nodeNameLookup?: Record<string, string>;
+  nodeNameLookupSettled?: boolean;
 }
+
+// Wraps evidence handling with the lookups a canvas-only view uses in place of a result set: node names
+// for the edge label, and infores catalog entries to name and link evidence sources.
+const useEvidenceDataWithLookups = (
+  handleEvidenceData: ReturnType<typeof useEvidenceData>['handleSelectedEdge'],
+  nodeNameLookup: Record<string, string>,
+  nodeNameLookupSettled: boolean,
+  resolvedEdge: ResultEdge | null,
+  isCanvasOnlyMode: boolean,
+) => {
+  const inforesCatalog = useInforesCatalogLookup(resolvedEdge, isCanvasOnlyMode);
+  const handleEvidenceDataWithLookup = useCallback((
+    rs: ResultSet | null,
+    edge: ResultEdge,
+  ) => {
+    handleEvidenceData(rs, edge, nodeNameLookup, inforesCatalog.catalog);
+  }, [handleEvidenceData, nodeNameLookup, inforesCatalog.catalog]);
+  return {
+    handleEvidenceDataWithLookup,
+    canvasLookupsSettled: nodeNameLookupSettled && inforesCatalog.isSettled,
+  };
+};
 
 const useEvidenceViewEdgeInteractions = ({
   edgeId,
@@ -130,6 +154,7 @@ const useEvidenceViewEdgeInteractions = ({
   pk,
   isCanvasOnlyMode = false,
   nodeNameLookup = {},
+  nodeNameLookupSettled = true,
 }: EdgeInteractionParams) => {
   const resultsNavigate = useResultsNavigate();
   const decodedParamsRef = useRef(decodedParams);
@@ -153,18 +178,16 @@ const useEvidenceViewEdgeInteractions = ({
     [path, resultSet, compressedEdgeSets],
   );
 
-  const handleEvidenceDataWithLookup = useCallback((
-    rs: ResultSet | null,
-    edge: ResultEdge,
-  ) => {
-    handleEvidenceData(rs, edge, nodeNameLookup);
-  }, [handleEvidenceData, nodeNameLookup]);
+  const { handleEvidenceDataWithLookup, canvasLookupsSettled } = useEvidenceDataWithLookups(
+    handleEvidenceData, nodeNameLookup, nodeNameLookupSettled, resolvedEdge, isCanvasOnlyMode,
+  );
 
   useEdgeInitialization({
     edgeId,
     resolvedEdge,
     resultSet,
     isCanvasOnlyMode,
+    canvasLookupsSettled,
     setSelectedEdge,
     handleEvidenceData: handleEvidenceDataWithLookup,
     markEdgeSeen,
