@@ -1,5 +1,5 @@
 import * as tc from "@/features/Core/types/checkers";
-import { EdgeProvenance, Provenance, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
+import { EdgeProvenance, Provenance, ProvenanceCatalogEntry, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
 import { EvidenceTabName } from "./navigation";
 
@@ -39,6 +39,26 @@ export const isEdgeProvenance = (obj: unknown, warn = false): obj is EdgeProvena
   return tc.checkProperties("isEdgeProvenance", obj, [
     ["infores", tc.isString(obj.infores), "string", obj.infores],
     ["records", tc.isStringArray(obj.records), "string[]", obj.records],
+  ], warn);
+}
+
+/**
+ * Type guard to check if an object is a ProvenanceCatalogEntry (a record from the infores catalog).
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a ProvenanceCatalogEntry.
+ * @returns {boolean} - True if the object is a ProvenanceCatalogEntry, otherwise false.
+ */
+export const isProvenanceCatalogEntry = (obj: unknown, warn = false): obj is ProvenanceCatalogEntry => {
+  if (!tc.isObject(obj)) {
+    if (warn) console.warn("[isProvenanceCatalogEntry] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  return tc.checkProperties("isProvenanceCatalogEntry", obj, [
+    ["knowledge_level", tc.isString(obj.knowledge_level), "string", obj.knowledge_level],
+    ["name", tc.nullable(obj.name, tc.isString), "string | null", obj.name],
+    ["url", tc.nullable(obj.url, tc.isString), "string | null", obj.url],
+    ["wiki", tc.nullable(obj.wiki, tc.isString), "string | null", obj.wiki],
   ], warn);
 }
 
