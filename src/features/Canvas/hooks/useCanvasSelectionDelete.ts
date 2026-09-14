@@ -3,6 +3,7 @@ import type { DeleteSelection } from 'translator-graph-view';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import { getIncidentEdgeIds } from '@/features/Canvas/utils/canvasGraphFunctions';
 import { finalizeCanvasElementRemoval } from '@/features/Canvas/utils/canvasRemovalUi';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface UseCanvasSelectionDeleteOptions {
   activeCanvas: Canvas;
@@ -10,6 +11,12 @@ interface UseCanvasSelectionDeleteOptions {
   clearHover: () => void;
   setSelectedNodeIds: (ids: string[]) => void;
 }
+
+/** Classifies a deletion by what the user picked: nodes, edges, or both. */
+const getPickedElementType = (nodeCount: number, pickedEdgeCount: number): string => {
+  if (nodeCount > 0 && pickedEdgeCount > 0) return 'mixed';
+  return nodeCount > 0 ? 'node' : 'edge';
+};
 
 /**
  * Handle the graph's Delete/Backspace gesture. The graph reports what the keypress
@@ -37,6 +44,12 @@ const useCanvasSelectionDelete = ({
     ? (activeCanvas.nodes[nodeIds[0]].names[0] || nodeIds[0])
     : undefined;
 
+  trackEvent('canvas_element_deleted', {
+    // What the user picked, not what cascaded: incident edges are removed
+    // automatically and would otherwise inflate every node deletion.
+    element_type: getPickedElementType(nodeIds.length, pickedEdgeCount),
+    element_count: pickedCount,
+  });
   removeElements(nodeIds, edgeIds);
   finalizeCanvasElementRemoval({
     clearHover,

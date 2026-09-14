@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { applyFilters, findStringMatch, genPathFilterState } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { applyFilters, findStringMatch, genPathFilterState, getItemStringMatchLocations, logStringMatch, setStringMatchLogging } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getExcludingFilter, makePathRank } from '@/features/Core/utils/sortingFunctions';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
@@ -172,6 +172,7 @@ const run = (rs: ResultSet, result: Result, filter: Filter) =>
 beforeEach(() => {
   // getNodeById/getEdgeById warn on missing lookups; keep test output clean.
   vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 // ---------------------------------------------------------------------------
@@ -191,6 +192,103 @@ describe('normalizeSearchTerm', () => {
 });
 
 // ---------------------------------------------------------------------------
+// getItemStringMatchLocations / logStringMatch
+// ---------------------------------------------------------------------------
+
+describe('getItemStringMatchLocations', () => {
+  it('reports a node name match', () => {
+    const node = makeNode('n1', { names: ['Cyclooxygenase'] });
+    expect(getItemStringMatchLocations(node, 'cyclo')).toEqual([
+      { field: 'node_name', value: 'Cyclooxygenase', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports a node description match', () => {
+    const node = makeNode('n1', { descriptions: ['Inhibits prostaglandin synthesis'] });
+    expect(getItemStringMatchLocations(node, 'prostaglandin')).toEqual([
+      { field: 'node_description', value: 'Inhibits prostaglandin synthesis', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports matching curies', () => {
+    const node = makeNode('n1', { curies: ['NCBIGene:5742', 'HGNC:9604'] });
+    expect(getItemStringMatchLocations(node, 'ncbigene')).toEqual([
+      { field: 'node_curie', value: 'NCBIGene:5742', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports an edge predicate match', () => {
+    const edge = makeEdge('e0', { predicate: 'biolink:interacts_with' });
+    expect(getItemStringMatchLocations(edge, 'interacts')).toEqual([
+      { field: 'edge_predicate', value: 'biolink:interacts_with', itemId: 'e0' },
+    ]);
+  });
+
+  it('reports every matching field on the same node', () => {
+    const node = makeNode('n1', {
+      names: ['COX-1'],
+      descriptions: ['A COX enzyme'],
+      curies: ['NCBIGene:cox'],
+    });
+    expect(getItemStringMatchLocations(node, 'cox')).toEqual([
+      { field: 'node_name', value: 'COX-1', itemId: 'n1' },
+      { field: 'node_description', value: 'A COX enzyme', itemId: 'n1' },
+      { field: 'node_curie', value: 'NCBIGene:cox', itemId: 'n1' },
+    ]);
+  });
+
+  it('returns no locations for an empty term', () => {
+    const node = makeNode('n1', { names: ['Cyclooxygenase'] });
+    expect(getItemStringMatchLocations(node, '')).toEqual([]);
+  });
+
+  it('stops at the first matching field when firstOnly is set', () => {
+    const node = makeNode('n1', {
+      names: ['COX-1'],
+      descriptions: ['A COX enzyme'],
+      curies: ['NCBIGene:cox'],
+    });
+    expect(getItemStringMatchLocations(node, 'cox', true)).toEqual([
+      { field: 'node_name', value: 'COX-1', itemId: 'n1' },
+    ]);
+  });
+
+  it('stops at the first matching curie when firstOnly is set', () => {
+    const node = makeNode('n1', { curies: ['NCBIGene:cox1', 'NCBIGene:cox2'] });
+    expect(getItemStringMatchLocations(node, 'cox', true)).toEqual([
+      { field: 'node_curie', value: 'NCBIGene:cox1', itemId: 'n1' },
+    ]);
+  });
+});
+
+describe('logStringMatch', () => {
+  afterEach(() => {
+    setStringMatchLogging(false);
+  });
+
+  it('does not log when logging is off', () => {
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1' });
+    logStringMatch('aspirin', result, { field: 'drug_name', value: 'Aspirin' });
+    expect(console.log).not.toHaveBeenCalled();
+  });
+
+  it('logs the match site to the console when enabled', () => {
+    setStringMatchLogging(true);
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1' });
+    logStringMatch('aspirin', result, { field: 'drug_name', value: 'Aspirin' });
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', {
+      term: 'aspirin',
+      field: 'drug_name',
+      value: 'Aspirin',
+      result: 'Aspirin',
+      resultId: 'result-1',
+      pathId: undefined,
+      itemId: undefined,
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // findStringMatch — shallow (drug_name / subject description)
 // ---------------------------------------------------------------------------
 
@@ -205,22 +303,14 @@ describe('findStringMatch — shallow matches', () => {
     expect(run(rs, result, makeEntityFilter('ASPIRIN'))).toBe(true);
   });
 
-  it('matches on subject node description', () => {
+  it.each([
+    ['matches on subject node description', 'pain reliever', true],
+    ['tolerates surrounding whitespace in the search term', '  aspirin  ', true],
+    ['returns false when nothing matches', 'ibuprofen', false],
+  ])('%s', (_name, term, expected) => {
     const rs = baseRS();
     const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('pain reliever'))).toBe(true);
-  });
-
-  it('tolerates surrounding whitespace in the search term', () => {
-    const rs = baseRS();
-    const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('  aspirin  '))).toBe(true);
-  });
-
-  it('returns false when nothing matches', () => {
-    const rs = baseRS();
-    const result = makeResult({ drug_name: 'Aspirin' });
-    expect(run(rs, result, makeEntityFilter('ibuprofen'))).toBe(false);
+    expect(run(rs, result, makeEntityFilter(term))).toBe(expected);
   });
 
   it('matches the subject description sourced from annotations (not just descriptions[0])', () => {
@@ -294,6 +384,67 @@ describe('findStringMatch — path content (include)', () => {
     expect(findStringMatch(rs, result, makeEntityFilter('cox'), ranks)).toBe(true);
     // three matches → three LIGHT decrements
     expect(ranks.get('P1')!.rank).toBe(-3 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — match logging
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — match logging', () => {
+  // result -> path P1: [subject-node, e0, target-node]; target matches "cox" on name and curie
+  const setup = () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        'target-node': makeNode('target-node', { names: ['COX-1'], curies: ['NCBIGene:cox'] }),
+      },
+      edges: { e0: makeEdge('e0') },
+      paths: { P1: makePath('P1', ['subject-node', 'e0', 'target-node']) },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1', paths: ['P1'] });
+    return { rs, result };
+  };
+
+  afterEach(() => {
+    setStringMatchLogging(false);
+  });
+
+  it('logs every matching field on a path with its path and item ids', () => {
+    setStringMatchLogging(true);
+    const { rs, result } = setup();
+    expect(run(rs, result, makeEntityFilter('cox'))).toBe(true);
+
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'node_name', value: 'COX-1', resultId: 'result-1', pathId: 'P1', itemId: 'target-node',
+    }));
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'node_curie', value: 'NCBIGene:cox', resultId: 'result-1', pathId: 'P1', itemId: 'target-node',
+    }));
+  });
+
+  it('logs a shallow drug_name match without a path id', () => {
+    setStringMatchLogging(true);
+    const { rs, result } = setup();
+    expect(run(rs, result, makeEntityFilter('aspirin'))).toBe(true);
+
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'drug_name', value: 'Aspirin', resultId: 'result-1', pathId: undefined,
+    }));
+  });
+
+  it('ranks paths the same whether logging is on or off', () => {
+    // Logging collects every matching field per item; rank must still drop once per item.
+    const { rs, result } = setup();
+    const quietRanks = buildPathRanks(rs, result);
+    findStringMatch(rs, result, makeEntityFilter('cox'), quietRanks);
+
+    setStringMatchLogging(true);
+    const loggedRanks = buildPathRanks(rs, result);
+    findStringMatch(rs, result, makeEntityFilter('cox'), loggedRanks);
+
+    expect(loggedRanks.get('P1')!.rank).toBe(-1 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+    expect(loggedRanks.get('P1')!.rank).toBe(quietRanks.get('P1')!.rank);
   });
 });
 

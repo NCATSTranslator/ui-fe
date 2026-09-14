@@ -41,6 +41,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "lint": "eslint src",
     "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
@@ -51,7 +52,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "analytics:gtm": "node scripts/generate-gtm-container.mjs",
+    "analytics:ga4": "node scripts/ga4-admin-setup.mjs"
   },
   "browserslist": {
     "production": [

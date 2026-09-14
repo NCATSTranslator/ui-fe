@@ -21,9 +21,32 @@ import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransi
 import ConfidenceTooltip from './ConfidenceTooltip';
 import ApiKeysSection from './ApiKeysSection';
 import DisplaySection from './DisplaySection';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 const isConfidenceSort = (value: string | number): boolean =>
   value === 'scoreHighLow' || value === 'scoreLowHigh';
+
+const getPrefsForType = (prefTypeId: PrefType | null, userPrefs: Preferences) => {
+  switch (prefTypeId) {
+    case "results":
+      return {
+        results_per_page: userPrefs.results_per_page ?? defaultPrefs.results_per_page,
+        path_show_count: userPrefs.path_show_count ?? defaultPrefs.path_show_count,
+        result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
+      };
+    case "evidence":
+      return {
+        evidence_sort: userPrefs.evidence_sort ?? defaultPrefs.evidence_sort,
+        evidence_per_page: userPrefs.evidence_per_page ?? defaultPrefs.evidence_per_page,
+      };
+    case "graphs":
+      return {
+        graph_layout: userPrefs.graph_layout ?? defaultPrefs.graph_layout,
+      };
+    default:
+      return undefined;
+  }
+};
 
 const SettingsPanel = () => {
   const location = useLocation();
@@ -57,6 +80,7 @@ const SettingsPanel = () => {
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
 
   const handleLogout = () => {
+    trackEvent('auth_logout', { auth_provider: idpLogoutProvider ? 'idp' : 'local' });
     if (idpLogoutProvider && idpLogoutFormRef.current) {
       idpLogoutFormRef.current.submit();
     } else {
@@ -64,33 +88,10 @@ const SettingsPanel = () => {
     }
   };
   
-  const resultPrefs = useMemo(()=> {
-    return {
-      results_per_page: userPrefs.results_per_page ?? defaultPrefs.results_per_page,
-      path_show_count: userPrefs.path_show_count ?? defaultPrefs.path_show_count,
-      result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
-    };
-  }, [userPrefs]);
-
-  const evidencePrefs = useMemo(()=> {
-    return {
-      evidence_sort: userPrefs.evidence_sort ?? defaultPrefs.evidence_sort,
-      evidence_per_page: userPrefs.evidence_per_page ?? defaultPrefs.evidence_per_page,
-    };
-  }, [userPrefs]);
-
-  const graphPrefs = useMemo(()=> {
-    return {
-      graph_layout: userPrefs.graph_layout ?? defaultPrefs.graph_layout,
-    };
-  }, [userPrefs]);
-
-  const prefsToDisplay = useMemo(()=> {
-    if(activePrefTypeId === "results") return resultPrefs;
-    if(activePrefTypeId === "evidence") return evidencePrefs;
-    if(activePrefTypeId === "graphs") return graphPrefs;
-    return undefined;
-  }, [activePrefTypeId, resultPrefs, evidencePrefs, graphPrefs]);
+  const prefsToDisplay = useMemo(
+    () => getPrefsForType(activePrefTypeId, userPrefs),
+    [activePrefTypeId, userPrefs]
+  );
 
   const handleSubmitUserPrefs = async (prefs: Preferences) => {
     try {

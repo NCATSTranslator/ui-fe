@@ -19,6 +19,39 @@ interface QuerySelectProps {
   iconClass?: string;
 }
 
+const getOptionDisplayName = (optionChildren: ReactNode): string | undefined => {
+  if (!isValidElement(optionChildren)) return undefined;
+
+  const childrenProps = optionChildren.props as { 'data-modified-name'?: string; children?: ReactNode };
+  if (childrenProps?.['data-modified-name']) {
+    return childrenProps['data-modified-name'];
+  }
+
+  const fallbackContent = childrenProps?.children;
+  if (typeof fallbackContent === 'string') {
+    return fallbackContent;
+  }
+  if (isValidElement(fallbackContent)) {
+    const elementProps = fallbackContent.props as { children?: ReactNode };
+    return typeof elementProps?.children === 'string' ? elementProps.children : undefined;
+  }
+  return undefined;
+};
+
+const getModifiedName = (children: ReactNode, selectedItem: number): string | undefined => {
+  if (!Array.isArray(children)) return undefined;
+
+  const option = children.find((child) => {
+    if (!isValidElement(child)) return false;
+    const childProps = child.props as { value?: number };
+    return childProps?.value === selectedItem;
+  });
+  if (!option || !isValidElement(option)) return undefined;
+
+  const optionProps = option.props as { children?: ReactNode };
+  return getOptionDisplayName(optionProps?.children);
+};
+
 export const QuerySelect: FC<QuerySelectProps> = ({
   label = "", 
   subtitle = "", 
@@ -108,38 +141,6 @@ export const QuerySelect: FC<QuerySelectProps> = ({
       clearTimeout(openSelectTimeout);
     };
   }, [startExpanded, handleToggle]);
-
-  const getModifiedName = (children: ReactNode, selectedItem: number): string | undefined => {
-    if (Array.isArray(children)) {
-      const option = children.find((child) => {
-        if (!isValidElement(child)) return false;
-        const childProps = child.props as { value?: number };
-        return childProps?.value === selectedItem;
-      });
-      
-      if (option && isValidElement(option)) {
-        const optionProps = option.props as { children?: ReactNode };
-        const optionChildren = optionProps?.children;
-        
-        if (isValidElement(optionChildren)) {
-          const childrenProps = optionChildren.props as { 'data-modified-name'?: string };
-          if (childrenProps?.['data-modified-name']) {
-            return childrenProps['data-modified-name'];
-          }
-          const childrenContentProps = optionChildren.props as { children?: ReactNode };
-          const fallbackContent = childrenContentProps?.children;
-          
-          if (typeof fallbackContent === 'string') {
-            return fallbackContent;
-          } else if (isValidElement(fallbackContent)) {
-            const elementProps = fallbackContent.props as { children?: ReactNode };
-            return typeof elementProps?.children === 'string' ? elementProps.children : undefined;
-          }
-        }
-      }
-    }
-    return undefined;
-  };
 
   return (
     <>

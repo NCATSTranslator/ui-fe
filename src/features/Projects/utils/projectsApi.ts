@@ -92,7 +92,7 @@ export const deleteProjects = async (
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -111,7 +111,7 @@ export const permanentDeleteProjects = async (
     () => remove(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -130,7 +130,7 @@ export const restoreProjects = async (
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -149,7 +149,7 @@ export const deleteQueries = async (
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -168,7 +168,7 @@ export const permanentDeleteQueries = async (
     () => remove(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -187,7 +187,7 @@ export const restoreQueries = async (
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -225,7 +225,7 @@ export const copyQuery = async (
     () => post(url, { pk }),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 

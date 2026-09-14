@@ -17,6 +17,7 @@ import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContext
 import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 import PathGroupConnectors from '@/features/ResultItem/components/PathContainer/PathGroupConnectors';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface PathContainerProps {
   path: Path;
@@ -122,6 +123,12 @@ const PathContainer: FC<PathContainerProps> = ({
             if (!!path?.id) {
               setLastViewedPathID(path.id);
               if (path.subgraph[1]) {
+                trackEvent('evidence_opened', {
+                  evidence_source: 'path',
+                  path_rank: pathNumber ?? undefined,
+                  // subgraph alternates node/edge, so its length encodes hops.
+                  path_length: path.subgraph.length,
+                });
                 navigateToEvidenceView({
                   edgeId: path.subgraph[1],
                   path,

@@ -14,6 +14,7 @@ interface AddMenuProps {
 const AddMenu: FC<AddMenuProps> = ({ onAddObject, onAddAnnotation }) => {
   const { open, close, toggle, triggerRef, menuRef, triggerA11yProps, menuA11yProps } = useDropdownMenuA11y();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store -- "Object" menu item is returning soon
   const handleAddObject = useCallback(() => {
     close();
     onAddObject?.();

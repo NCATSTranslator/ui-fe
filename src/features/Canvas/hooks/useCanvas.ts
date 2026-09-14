@@ -17,6 +17,7 @@ import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils'
 import useCanvasHistory from './useCanvasHistory';
 import { canvasEntityAddedToast, canvasEntityAlreadyAddedToast } from '@/features/Core/utils/toastMessages';
 import type { CanvasHistoryPersistence } from '@/features/Canvas/utils/canvasHistoryUtils';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 type UseCanvasOptions = CanvasHistoryPersistence & {
   saveMerge?: (canvasId: number, submission: GraphSubmission) => Promise<void>;
@@ -93,6 +94,7 @@ const useCanvas = (options: UseCanvasOptions = {}) => {
 
   const rename = useCallback((label: string) => {
     if (!activeCanvas) return;
+    trackEvent('canvas_renamed');
     dispatch(renameCanvas({ id: activeCanvas.id, label }));
     saveRename?.(activeCanvas.id, label);
   }, [activeCanvas, dispatch, saveRename]);

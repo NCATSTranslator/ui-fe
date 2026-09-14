@@ -2,6 +2,7 @@ import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import { escapeCSVValue, joinArrayForCSV } from '@/features/Core/utils/csvUtils';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export const buildCanvasExportFilename = (
   label: string,
@@ -131,4 +132,5 @@ export const buildCanvasCSV = (canvas: Canvas): string => {
 export const exportCanvasToCSVFile = (canvas: Canvas): void => {
   const content = buildCanvasCSV(canvas);
   triggerDownload(content, buildCanvasExportFilename(canvas.label, 'csv'), 'text/csv');
+  trackEvent('canvas_exported', { export_format: 'csv' });
 };

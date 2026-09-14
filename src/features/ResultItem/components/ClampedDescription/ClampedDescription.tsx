@@ -61,9 +61,7 @@ const ClampedDescription: FC<ClampedDescriptionProps> = ({
       setCssClampActive(true);
   }, [isOpen]);
 
-  const animateHeight: number | 'auto' = !isClamped
-    ? 'auto'
-    : isOpen ? 'auto' : clampedHeight;
+  const animateHeight: number | 'auto' = isClamped && !isOpen ? clampedHeight : 'auto';
 
   return (
     <div className={`${styles.clampedDescription} ${className}`}>
@@ -75,6 +73,7 @@ const ClampedDescription: FC<ClampedDescriptionProps> = ({
         <p
           ref={textRef}
           className={`${styles.text} ${cssClampActive && isClamped ? styles.clamped : ''}`}
+          // eslint-disable-next-line no-restricted-syntax -- line count is a runtime prop, passed to the stylesheet as a CSS variable
           style={{ '--clamp-lines': lines } as CSSProperties}
         >
           <SafeHtmlHighlighter

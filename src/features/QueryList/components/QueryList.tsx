@@ -109,34 +109,19 @@ const QueryList = () => {
                         sortDirection={sortSearchState.sortDirection}
                         onSort={sortSearchState.handleSort}
                       />
-                      {
-                        (searchTerm.length === 0 && filteredQueries.length === 0)
-                        ? (
-                          <EmptyArea heading="No Queries">
-                            {
-                              <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
-                            }
-                          </EmptyArea>
-                          ) 
-                        : 
-                          (
-                            filteredQueries.length === 0 ? (
-                              <EmptyArea>
-                                <p>No queries found matching your search.</p>
-                              </EmptyArea>
-                            ) : (
-                              <>
-                                {
-                                  filteredQueries.map((query) => {
-                                    return (
-                                      <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
-                                    )
-                                  })
-                                }
-                              </>
-                            )
-                          )
-                      }
+                      {searchTerm.length === 0 && filteredQueries.length === 0 && (
+                        <EmptyArea heading="No Queries">
+                          <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                        </EmptyArea>
+                      )}
+                      {searchTerm.length > 0 && filteredQueries.length === 0 && (
+                        <EmptyArea>
+                          <p>No queries found matching your search.</p>
+                        </EmptyArea>
+                      )}
+                      {filteredQueries.map((query) => (
+                        <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+                      ))}
                     </CardList>
                   </Tab>
                 ]}

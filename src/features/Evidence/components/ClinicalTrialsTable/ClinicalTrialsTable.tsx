@@ -201,6 +201,7 @@ const ClinicalTrialsTable: FC<ClinicalTrialsTableProps> = ({ clinicalTrials, pre
       </div>
       <TablePaginationControls
         label="Trials per Page"
+        tabName="Clinical Trials"
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         pageCount={pageCount}

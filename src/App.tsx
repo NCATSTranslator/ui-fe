@@ -1,7 +1,9 @@
 import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
 import './App.scss';
-import { useGoogleAnalytics } from '@/features/Core/hooks/useGoogleAnalytics';
-import { useGoogleTagManager } from '@/features/Core/hooks/useGoogleTagManager';
+import { useGoogleAnalytics, isValidGAID } from '@/features/Core/hooks/useGoogleAnalytics';
+import { useGoogleTagManager, isValidGTMID } from '@/features/Core/hooks/useGoogleTagManager';
+import { usePageViewTracking } from '@/features/Analytics/hooks/usePageViewTracking';
+import { useAnalyticsTransport } from '@/features/Analytics/hooks/useAnalyticsTransport';
 import { useWindowSize } from '@/features/Core/hooks/useWindowSize';
 import { useScrollToHash } from '@/features/Core/hooks/useScrollToHash';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
@@ -53,9 +55,16 @@ const App = ({children}: {children?: ReactNode}) => {
   }, [canvasEnabled, dispatch]);
 
   const [gaID, setGaID] = useState<string | null>(null);
-  useGoogleAnalytics(gaID ?? undefined);
   const [gtmID, setGtmID] = useState<string | null>(null);
-  useGoogleTagManager(gtmID ?? undefined);
+  // Validated once so every analytics hook agrees on the transport: an ID the
+  // loaders would reject must not suppress gtag.js or claim GTM owns delivery.
+  const validGaID = gaID && isValidGAID(gaID) ? gaID : undefined;
+  const validGtmID = gtmID && isValidGTMID(gtmID) ? gtmID : undefined;
+  // GTM, when configured, owns the GA4 tag; gtag.js only loads as a fallback.
+  useGoogleAnalytics(validGaID, !!validGtmID);
+  useGoogleTagManager(validGtmID);
+  useAnalyticsTransport(validGaID, validGtmID);
+  usePageViewTracking();
 
   const { pathnameClass, additionalClasses } = getPathnameClasses(location.pathname);
 

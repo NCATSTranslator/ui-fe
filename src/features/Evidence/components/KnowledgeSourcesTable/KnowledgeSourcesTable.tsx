@@ -6,6 +6,7 @@ import { Provenance } from '@/features/Evidence/types/evidence.d';
 import evidenceStyles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import styles from './KnowledgeSourcesTable.module.scss';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
 
 interface KnowledgeSourcesTableProps {
   sources: Provenance[];
@@ -60,7 +61,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
               {src.wiki ? (
                 <Tooltip id={tooltipId}>
                   <span className={evidenceStyles.tooltipSpan}>
-                    <a href={src.wiki} target="_blank" rel="noreferrer">
+                    <a href={src.wiki} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('source', src.wiki)}>
                       Why do we use this source?
                       <ExternalLink />
                     </a>
@@ -82,6 +83,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                         href={url}
                         target="_blank"
                         rel="noreferrer"
+                        {...getEvidenceLinkTrackingProps('source', url)}
                         className={joinClasses("url", evidenceStyles.edgeProvenanceLink)}
                       >
                         {url}

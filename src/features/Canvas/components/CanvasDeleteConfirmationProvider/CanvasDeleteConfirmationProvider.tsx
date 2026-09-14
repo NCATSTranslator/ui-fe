@@ -26,6 +26,7 @@ import type { BackendUserCanvas, Canvas } from '@/features/Canvas/types/canvas';
 import { trashCanvases } from '@/features/Canvas/utils/canvasApi';
 import { canvasDeleteErrorToast, canvasDeletedToast } from '@/features/Core/utils/toastMessages';
 import CanvasDeleteWarningModal from '@/features/Canvas/components/CanvasDeleteWarningModal/CanvasDeleteWarningModal';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 const USER_CANVASES_QUERY_KEY = ['userCanvases'] as const;
 
@@ -150,6 +151,7 @@ export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProvid
     dispatch(deleteCanvas(canvasId));
     trashCanvases([canvasId])
       .then(() => {
+        trackEvent('canvas_deleted');
         queryClient.invalidateQueries({ queryKey: USER_CANVASES_QUERY_KEY });
         canvasDeletedToast();
       })

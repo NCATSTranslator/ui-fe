@@ -7,6 +7,7 @@ import type { BackendUserCanvas, Canvas, CanvasLayout } from '@/features/Canvas/
 import { createCanvas as createCanvasApi } from '@/features/Canvas/utils/canvasApi';
 import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import { getNextCanvasLabel } from '@/features/Canvas/slices/canvasSlice';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 const useCreateCanvas = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,6 +35,7 @@ const useCreateCanvas = () => {
         graphLoaded: true,
         serverKnown: false,
       };
+      trackEvent('canvas_created');
       dispatch(addCanvas(canvas));
       queryClient.setQueryData<BackendUserCanvas[]>(['userCanvases'], (current) => {
         if (!current) return [meta];

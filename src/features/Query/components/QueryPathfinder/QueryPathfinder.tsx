@@ -135,7 +135,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
+    submitPathfinderQuery?.(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
   }
 
   // Event handler for form submission

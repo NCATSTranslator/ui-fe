@@ -8,6 +8,7 @@ import { getPathCount } from "@/features/Core/utils/resultHelpers";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
+import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
@@ -65,6 +66,30 @@ interface UseResultsDataReturn {
   handleResultsRefresh: () => void;
 }
 
+/**
+ * Clones a raw result set, assigns ids to its edges and nodes, and precalculates
+ * evidence counts, path counts, and scores for each result.
+ */
+const prepareResultSet = (resultSet: ResultSet, scoreWeights: ScoreWeights, isPathfinder: boolean): ResultSet => {
+  const newResultSet = cloneDeep(resultSet);
+
+  for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
+    edge.id = id;
+  }
+  for (const [id, node] of Object.entries(newResultSet.data.nodes))
+    node.id = id;
+
+  for (const result of newResultSet.data.results) {
+    result.evidenceCount = getEvidenceCounts(newResultSet, result);
+    result.pathCount = getPathCount(newResultSet, result.paths);
+    result.score = (isPathfinder)
+      ? generatePathfinderScore(newResultSet, result)
+      : generateScore(result.scores, scoreWeights.confidenceWeight, scoreWeights.noveltyWeight, scoreWeights.clinicalWeight);
+  }
+
+  return newResultSet;
+};
+
 const useResultsData = ({
   currentQueryID,
   currentQuerySid,
@@ -96,6 +121,11 @@ const useResultsData = ({
   const prevRawResults = useRef<ResultSet | null>(initialResultSet);
   const numberOfStatusChecks = useRef(0);
   const firstLoad = useRef(true);
+  // results_loaded is a once-per-query event. The ARS streams partial result
+  // sets, so handleNewResults runs repeatedly for a single query; this tracks
+  // which query ID has already reported and when its wait started.
+  const resultsLoadedTrackedFor = useRef<string | null>(null);
+  const resultsWaitStartedAt = useRef<number>(Date.now());
 
   // Fetching state (lifted from refs so updates trigger re-renders for sidebar/status)
   const [isFetchingARAStatus, setIsFetchingARAStatus] = useState<boolean | null>(presetIsLoading ? true : null);
@@ -109,11 +139,31 @@ const useResultsData = ({
   const isPathfinderRef = useRef(isPathfinder);
   isPathfinderRef.current = isPathfinder;
 
+  // Restart the results_loaded clock whenever a different query is opened, so
+  // load_ms measures this query's wait rather than time since the tab opened.
+  useEffect(() => {
+    resultsWaitStartedAt.current = Date.now();
+  }, [currentQueryID]);
+
   // Derived
   const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
   const resultsComplete = !isError && freshRawResults === null && !isFetchingARAStatus && !isFetchingResults;
 
   // --- Callbacks ---
+
+  // results_loaded fires once per query, on the first result set that either has
+  // results or arrives after the ARS has finished.
+  const reportResultsLoaded = useCallback((resultSet: ResultSet, resultCount: number) => {
+    const settled = resultCount > 0 || !isFetchingARAStatusRef.current;
+    if (!settled || resultsLoadedTrackedFor.current === currentQueryID) return;
+    resultsLoadedTrackedFor.current = currentQueryID;
+    trackEvent('results_loaded', {
+      query_type: isPathfinderRef.current ? 'pathfinder' : 'single',
+      query_status: resultSet.status,
+      result_count: resultCount,
+      load_ms: Date.now() - resultsWaitStartedAt.current,
+    });
+  }, [currentQueryID]);
 
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
@@ -126,28 +176,9 @@ const useResultsData = ({
     if (resultSet.status === 'error' || resultSet.data.results === undefined)
       return;
 
-    let newResultSet = cloneDeep(resultSet);
-    prevRawResults.current = newResultSet;
-
-    const currentScoreWeights = scoreWeightsRef.current;
     const currentIsPathfinder = isPathfinderRef.current;
-
-    // Assign ids to edges
-    for (const [id, edge] of Object.entries(newResultSet.data.edges)) {
-      edge.id = id;
-    }
-    // Assign ids to nodes
-    for (const [id, node] of Object.entries(newResultSet.data.nodes))
-      node.id = id;
-
-    // Precalculate evidence and path counts
-    for (const result of newResultSet.data.results) {
-      result.evidenceCount = getEvidenceCounts(newResultSet, result);
-      result.pathCount = getPathCount(newResultSet, result.paths);
-      result.score = (currentIsPathfinder)
-        ? generatePathfinderScore(newResultSet, result)
-        : generateScore(result.scores, currentScoreWeights.confidenceWeight, currentScoreWeights.noveltyWeight, currentScoreWeights.clinicalWeight);
-    }
+    const newResultSet = prepareResultSet(resultSet, scoreWeightsRef.current, currentIsPathfinder);
+    prevRawResults.current = newResultSet;
 
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 
@@ -165,7 +196,9 @@ const useResultsData = ({
     // If the result set has no results and the ARA status is finished, set the loading state to false
     if (newResultSet && newResultSet.data.results && newResultSet.data.results.length === 0 && !isFetchingARAStatusRef.current)
       setIsLoading(false);
-  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef]);
+
+    reportResultsLoaded(newResultSet, newFormattedResults.length);
+  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef, reportResultsLoaded]);
 
   const recalculateScores = useCallback((newWeights: ScoreWeights) => {
     if (!rawResults.current || !rawResults.current.data?.results?.length) return;
