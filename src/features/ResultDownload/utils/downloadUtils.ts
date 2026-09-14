@@ -18,6 +18,7 @@ import { exportToCSV } from "@/features/Core/utils/csvUtils";
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Returns results based on the specified scope
@@ -337,19 +338,23 @@ export const generateFilename = (scope: DownloadScope, format: ExportFormat, que
   return `${titlePart}_${scope}_results_${date}.${format}`;
 };
 
+export interface DownloadResultSources {
+  allResults: Result[];
+  filteredResults: Result[];
+  userSaves: SaveGroup | null;
+}
+
 /**
  * Main export function that orchestrates the entire download process
  */
 export const downloadResults = (
   resultSet: ResultSet,
-  allResults: Result[],
-  filteredResults: Result[],
-  userSaves: SaveGroup | null,
+  sources: DownloadResultSources,
   options: DownloadOptions,
   queryTitle?: string
 ): void => {
   // Get results based on scope
-  const scopedResults = getResultsByScope(options.scope, allResults, filteredResults, userSaves);
+  const scopedResults = getResultsByScope(options.scope, sources.allResults, sources.filteredResults, sources.userSaves);
 
   if (scopedResults.length === 0) {
     console.warn('No results to export for the selected scope');
@@ -364,6 +369,14 @@ export const downloadResults = (
 
   // Generate filename
   const filename = generateFilename(options.scope, options.format, queryTitle);
+
+  // Tracked after the empty-scope bail-out, so this counts files that are
+  // actually produced rather than clicks on the download button.
+  trackEvent('results_downloaded', {
+    export_format: options.format,
+    download_scope: options.scope,
+    result_count: scopedResults.length,
+  });
 
   if (options.format === 'json') {
     const jsonContent = exportToJSON(cleanedResultSet);

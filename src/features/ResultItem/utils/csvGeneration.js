@@ -11,6 +11,14 @@ const getUrlArrayFromPubIDs = (ids) => {
   return urlsFromIds;
 }
 
+const getEdgePublicationUrls = (item, edgeGroup, edgeId) => {
+  if (item?.evidence?.publications)
+    return item.evidence.publications.filter((pub) => pub.edges[edgeId] !== undefined).map((pub) => pub.url);
+  if (edgeGroup?.publications.length > 0)
+    return getUrlArrayFromPubIDs(edgeGroup.publications);
+  return null;
+}
+
 export const generateCsvFromItem = (item, csvSetter) => {
   return () => {
     const headers = [
@@ -32,13 +40,7 @@ export const generateCsvFromItem = (item, csvSetter) => {
         const edgeId = edge.id;
         if (!seen.has(edgeId)) {
           seen.add(edgeId);
-          const pubs = (item?.evidence?.publications) 
-            ? item.evidence.publications.filter((pub) => {
-                return pub.edges[edgeId] !== undefined;
-              }).map((pub) => pub.url)
-            : (subgraph[i]?.publications.length > 0) 
-              ? getUrlArrayFromPubIDs(subgraph[i].publications)
-              : null;
+          const pubs = getEdgePublicationUrls(item, edgeGroup, edgeId);
           const sources = item.evidence.sources.filter((source) => {
             return source.edges[edgeId] !== undefined;
           }).map((source) => source.url);

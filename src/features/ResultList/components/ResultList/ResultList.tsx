@@ -22,7 +22,7 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import useSortState from "@/features/ResultList/hooks/useSortState";
-import useResultPagination from "@/features/ResultList/hooks/useResultPagination";
+import useResultPagination, { parseItemsPerPage } from "@/features/ResultList/hooks/useResultPagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
@@ -168,7 +168,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   );
 
   // Pagination state management via hook
-  const initialItemsPerPage = ((!!prefs.results_per_page.pref_value) ? (typeof prefs.results_per_page.pref_value === "string") ? parseInt(prefs.results_per_page.pref_value) : prefs.results_per_page.pref_value : 10) as number;
+  const initialItemsPerPage = parseItemsPerPage(prefs.results_per_page.pref_value as string | number);
   const {
     itemOffset,
     setItemOffset,
@@ -180,6 +180,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     displayedResults,
     pageCount,
     handlePageClick,
+    handlePageChange,
     handlePageReset,
     calculateItemsPerPage,
   } = useResultPagination({ formattedResults, initialItemsPerPage });
@@ -288,12 +289,12 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     const tempItemsPerPage = calculateItemsPerPage(prefs.results_per_page.pref_value as string | number);
     setItemsPerPage(tempItemsPerPage);
     setEndResultIndex(tempItemsPerPage);
-  }, [prefs, calculateItemsPerPage]);
+  }, [prefs, calculateItemsPerPage, currentSortString, setItemsPerPage, setEndResultIndex]);
 
   const handleUpdateResults = useCallback((
     filters: Filter[],
     asFilters: string[],
-    summary: ResultSet | null,
+    summaryParam: ResultSet | null,
     or: Result[] = [],
     justSort = false,
     sortType: string,
@@ -301,8 +302,9 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     userSavesGroup: SaveGroup | null = null,
     pfState: PathFilterState | null = null,
   ): Result[] => {
-    if (!summary) return [];
+    if (!summaryParam) return [];
 
+    let summary = summaryParam;
     let newFormattedResults: Result[] = [];
     let newOriginalResults: Result[] = [];
     let newPathFilterState = pfState ? cloneDeep(pfState) : {};
@@ -391,7 +393,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
     rawResults.current = summary;
     return newFormattedResults;
-  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen,]);
+  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen, currentPage, firstLoad, originalResults, rawResults]);
 
   // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
   // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
@@ -417,7 +419,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       originalResults.current, true, currentSortString.current,
       isPathfinder, userSaves, pathFilterState
     );
-  }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState]);
+  }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState, currentSortString, originalResults, rawResults]);
   useLayoutEffect(() => { handleSortUpdateRef.current = handleSortUpdate; }); // see handleUpdateResultsRef comment
 
   // Memoized data prop for ResultListHeader
@@ -434,7 +436,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handlePageClick,
     noveltyBoost,
     onToggleNoveltyBoost: handleToggleNoveltyBoost,
-  }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost]);
+  }), [formattedResults, itemOffset, endResultIndex, pageCount, handlePageClick, noveltyBoost, handleToggleNoveltyBoost, currentPage, originalResults]);
 
   const resultListContextValue: ResultListContextValue = useMemo(() => ({
     userSaves,
@@ -483,6 +485,8 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     presetTypeObject, resultsComplete, isLoading, scoreWeights,
     showHiddenPaths, pathfinderIdOne, pathfinderLabelOne,
     pathfinderIdTwo, pathfinderLabelTwo, constraintText,
+    setExpandSharedResult, setShareModalOpen, setShareResultID, setShowHiddenPaths, setUserSaves,
+    shouldUpdateResultsAfterBookmark,
   ]);
 
   return (
@@ -490,7 +494,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       <ResultListModals
         shareResultID={shareResultID.current ? shareResultID.current : ""}
         presetTypeID={presetTypeID ? presetTypeID : ""}
-        handlePageClick={handlePageClick}
+        handlePageChange={handlePageChange}
         shareModalOpen={shareModalOpen}
         setShareModalOpen={setShareModalOpen}
         notesModalOpen={notesModalOpen}
@@ -556,6 +560,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                                 result={result}
                                 isEven={i % 2 !== 0}
                                 bookmarkItem={bookmarkItem}
+                                // Rank across the whole list, not the page, so
+                                // analytics can tell "first result" from
+                                // "first result on page 4".
+                                resultRank={itemOffset + i + 1}
                               />
                             )
                           })

@@ -1,4 +1,4 @@
-import { FC, ReactNode, useCallback, useMemo } from 'react';
+import { FC, ReactNode, useCallback, useMemo, useRef } from 'react';
 import styles from './CanvasGraph.module.scss';
 import {
   GraphView as TranslatorGraphView,
@@ -8,6 +8,7 @@ import {
   HoverGeometry,
   type GraphFocusRequest,
   type GraphAnnotation,
+  type DeleteSelection,
   type NodePositionMap,
   type FitViewPadding,
 } from 'translator-graph-view';
@@ -20,13 +21,16 @@ import CanvasLayoutWarningModal from '@/features/Canvas/components/CanvasLayoutW
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 import { canvasNodeChrome } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import { getNodeIcon as getCategoryIcon } from '@/features/Core/utils/entityLinks';
+import { useGraphNodeColor } from '@/features/Core/hooks/useNodeColors';
+import { canvasHasExportableGraph } from '@/features/Canvas/utils/canvasFunctions';
+import { CanvasGraphAreaContext } from './CanvasGraphAreaContext';
 
 /** Extra top inset keeps nodes below the overlay toolbar when fitView runs. */
 const CANVAS_FIT_VIEW_PADDING: FitViewPadding = {
   top: '56px',
-  right: 0.2,
-  bottom: 0.2,
-  left: 0.2,
+  right: 0.1,
+  bottom: 0.1,
+  left: 0.1,
 };
 
 interface CanvasGraphProps {
@@ -53,6 +57,8 @@ interface CanvasGraphProps {
   onEdgeHover?: (edge: GraphEdgeType | null, geometry: HoverGeometry | null) => void;
   onAnnotationHover?: (annotationId: string | null) => void;
   onNodeContextMenu?: (nodeId: string, position: { x: number; y: number }) => void;
+  /** Delete/Backspace pressed with a graph selection; the graph itself removes nothing. */
+  onSelectionDelete?: (selection: DeleteSelection) => void;
   onAddObject?: () => void;
   onAddAnnotation?: () => void;
   annotations?: GraphAnnotation[];
@@ -92,6 +98,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   onEdgeHover,
   onAnnotationHover,
   onNodeContextMenu,
+  onSelectionDelete,
   onAddObject,
   onAddAnnotation,
   annotations = [],
@@ -113,8 +120,9 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
     [canvas.nodes, canvas.edges, visibleNodes, visibleEdges],
   );
   const getNodeIcon = useCallback((type: string) => getCategoryIcon(type, null), []);
-  const hasNodes = Object.keys(canvas.nodes).length > 0;
-  const hasGraphContent = hasNodes || annotations.length > 0;
+  const getNodeColor = useGraphNodeColor();
+  const graphAreaRef = useRef<HTMLDivElement>(null);
+  const hasGraphContent = canvasHasExportableGraph({ nodes: canvas.nodes, annotations });
   const isLayoutLoading = hasGraphContent && !isCustomLayoutReady;
 
   let graphAreaContent: ReactNode = <CanvasEmptyState />;
@@ -141,7 +149,9 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           clearHoverOnViewportChange
           nodeChrome={canvasNodeChrome}
           getNodeIcon={getNodeIcon}
+          getNodeColor={getNodeColor}
           onNodeMenu={onNodeContextMenu}
+          onSelectionDelete={onSelectionDelete}
           nodeHoverAnchor="topCenter"
           edgeHoverAnchor="midpoint"
           onNodeClick={onNodeClick}
@@ -165,30 +175,32 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   }
 
   return (
-    <div className={styles.canvasGraph}>
-      <CanvasToolbar
-        title={canvas.label}
-        onRename={onRename}
-        layout={graphLayout}
-        onLayoutChange={onLayoutChange}
-        onUndo={onUndo}
-        onRedo={onRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onAddObject={onAddObject}
-        onAddAnnotation={onAddAnnotation}
-        saveStatus={saveStatus}
-        rightSlot={toolbarRight}
-      />
-      <div className={styles.graphArea}>
-        {graphAreaContent}
+    <CanvasGraphAreaContext.Provider value={graphAreaRef}>
+      <div className={styles.canvasGraph}>
+        <CanvasToolbar
+          title={canvas.label}
+          onRename={onRename}
+          layout={graphLayout}
+          onLayoutChange={onLayoutChange}
+          onUndo={onUndo}
+          onRedo={onRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onAddObject={onAddObject}
+          onAddAnnotation={onAddAnnotation}
+          saveStatus={saveStatus}
+          rightSlot={toolbarRight}
+        />
+        <div className={styles.graphArea} ref={graphAreaRef}>
+          {graphAreaContent}
+        </div>
+        <CanvasLayoutWarningModal
+          isOpen={layoutWarningOpen}
+          onConfirm={onConfirmLayoutChange ?? (() => undefined)}
+          onCancel={onCancelLayoutChange ?? (() => undefined)}
+        />
       </div>
-      <CanvasLayoutWarningModal
-        isOpen={layoutWarningOpen}
-        onConfirm={onConfirmLayoutChange ?? (() => undefined)}
-        onCancel={onCancelLayoutChange ?? (() => undefined)}
-      />
-    </div>
+    </CanvasGraphAreaContext.Provider>
   );
 };
 

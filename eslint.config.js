@@ -41,7 +41,7 @@ export default [
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console': 'off',
       'no-extra-boolean-cast': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -95,6 +95,19 @@ export default [
     files: ['**/*.tsx'],
     rules: {
       'max-lines-per-function': ['warn', { max: 180, skipBlankLines: true, skipComments: true }],
+    }
+  },
+  {
+    // Tests: long describe blocks and non-null assertions on known fixtures are expected
+    files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+      'no-restricted-syntax': ['warn',
+        {
+          selector: 'JSXAttribute[name.name="style"] ObjectExpression',
+          message: 'Use CSS modules instead of inline styles.',
+        },
+      ],
     }
   },
   {

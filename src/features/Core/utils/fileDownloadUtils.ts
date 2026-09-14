@@ -1,8 +1,7 @@
 /**
- * Triggers a browser file download
+ * Triggers a browser file download for an already-built blob
  */
-export const triggerDownload = (content: string, filename: string, mimeType: string): void => {
-  const blob = new Blob([content], { type: mimeType });
+export const triggerBlobDownload = (blob: Blob, filename: string): void => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -11,6 +10,13 @@ export const triggerDownload = (content: string, filename: string, mimeType: str
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+/**
+ * Triggers a browser file download
+ */
+export const triggerDownload = (content: string, filename: string, mimeType: string): void => {
+  triggerBlobDownload(new Blob([content], { type: mimeType }), filename);
 };
 
 /**

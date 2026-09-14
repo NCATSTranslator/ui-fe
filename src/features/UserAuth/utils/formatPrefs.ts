@@ -30,18 +30,7 @@ const ROOT_METADATA_KEYS = new Set(["user_id", "preferences"]);
 export const parsePreferencesResponse = (response: unknown): Preferences | null => {
   if (!response || typeof response !== "object") return null;
 
-  const record = response as Record<string, unknown>;
-  const raw: Record<string, unknown> = {};
-
-  const nested = record.preferences;
-  if (nested && typeof nested === "object" && nested !== null) {
-    Object.assign(raw, nested);
-  }
-
-  for (const [key, value] of Object.entries(record)) {
-    if (ROOT_METADATA_KEYS.has(key)) continue;
-    raw[key] = value;
-  }
+  const raw = collectRawPrefs(response as Record<string, unknown>);
 
   const merged: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(raw)) {
@@ -63,6 +52,23 @@ export const parsePreferencesResponse = (response: unknown): Preferences | null 
   if (Object.keys(merged).length === 0) return null;
 
   return merged as Preferences;
+};
+
+/** Merges prefs nested under `preferences` with prefs stored at the response root. */
+const collectRawPrefs = (record: Record<string, unknown>): Record<string, unknown> => {
+  const raw: Record<string, unknown> = {};
+
+  const nested = record.preferences;
+  if (nested && typeof nested === "object" && nested !== null) {
+    Object.assign(raw, nested);
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (ROOT_METADATA_KEYS.has(key)) continue;
+    raw[key] = value;
+  }
+
+  return raw;
 };
 
 const toCanonicalKey = (key: string): PrefKey | null => {
@@ -118,43 +124,25 @@ export const getPrefName = (key: string) => {
   return (!!defaultPrefs[key]) ? defaultPrefs[key].name : key;
 };
 
-export const getPrettyPrefValue = (value: string | number) => {
-  switch(value) {
-    case "scoreHighLow":
-      return "Confidence: High to Low";
-    case "scoreLowHigh":
-      return "Confidence: Low to High";
-    case "nameLowHigh":
-      return "Name: A to Z";
-    case "nameHighLow":
-      return "Name: Z to A";
-    case "evidenceLowHigh":
-      return "Evidence Count: Low to High";
-    case "evidenceHighLow":
-      return "Evidence Count: High to Low";
-    case "pathsHighLow":
-      return "Path Count: High to Low";
-    case "pathsLowHigh":
-      return "Path Count: Low to High";
-    // pref values used to use 'path' instead of 'paths', so we need to handle both
-    case "pathHighLow":
-      return "Path Count: High to Low";
-    case "pathLowHigh":
-      return "Path Count: Low to High";
-    case "titleHighLow":
-      return "Title: A to Z";
-    case "titleLowHigh":
-      return "Title: Z to A";
-    case "sourceHighLow":
-      return "Source: A to Z";
-    case "sourceLowHigh":
-      return "Source: Z to A";
-    case "dateHighLow":
-      return "Date: New to Old";
-    case "dateLowHigh":
-      return "Date: Old to New";
-    default:
-      return capitalizeFirstLetter(value.toString());
-  }
+const PRETTY_PREF_VALUES = new Map<string | number, string>([
+  ["scoreHighLow", "Confidence: High to Low"],
+  ["scoreLowHigh", "Confidence: Low to High"],
+  ["nameLowHigh", "Name: A to Z"],
+  ["nameHighLow", "Name: Z to A"],
+  ["evidenceLowHigh", "Evidence Count: Low to High"],
+  ["evidenceHighLow", "Evidence Count: High to Low"],
+  ["pathsHighLow", "Path Count: High to Low"],
+  ["pathsLowHigh", "Path Count: Low to High"],
+  // pref values used to use 'path' instead of 'paths', so we need to handle both
+  ["pathHighLow", "Path Count: High to Low"],
+  ["pathLowHigh", "Path Count: Low to High"],
+  ["titleHighLow", "Title: A to Z"],
+  ["titleLowHigh", "Title: Z to A"],
+  ["sourceHighLow", "Source: A to Z"],
+  ["sourceLowHigh", "Source: Z to A"],
+  ["dateHighLow", "Date: New to Old"],
+  ["dateLowHigh", "Date: Old to New"],
+]);
 
-};
+export const getPrettyPrefValue = (value: string | number) =>
+  PRETTY_PREF_VALUES.get(value) ?? capitalizeFirstLetter(value.toString());

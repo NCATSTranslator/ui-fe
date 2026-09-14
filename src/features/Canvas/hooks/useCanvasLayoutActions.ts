@@ -4,6 +4,7 @@ import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
 import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
 import useCanvasLayoutMutations from '@/features/Canvas/hooks/useCanvasLayoutMutations';
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 type SyncFn = (
   positions: NodePositionMap,
@@ -65,6 +66,7 @@ const useCanvasLayoutActions = (options: UseCanvasLayoutActionsOptions) => {
       setLayoutWarningOpen(true);
       return;
     }
+    trackEvent('canvas_layout_applied', { layout_name: targetLayout });
     applyLayoutChange(targetLayout);
   }, [applyLayoutChange, canvas, graphLayout]);
 
@@ -77,7 +79,10 @@ const useCanvasLayoutActions = (options: UseCanvasLayoutActionsOptions) => {
       const pending = pendingLayoutRef.current;
       pendingLayoutRef.current = null;
       setLayoutWarningOpen(false);
-      if (pending) applyLayoutChange(pending);
+      if (pending) {
+        trackEvent('canvas_layout_applied', { layout_name: pending });
+        applyLayoutChange(pending);
+      }
     }, [applyLayoutChange]),
     cancelLayoutChange: useCallback(() => {
       pendingLayoutRef.current = null;

@@ -12,7 +12,7 @@ interface FacetCheckboxProps {
   labelLeft?: boolean; 
   name?: string;
   title?: string; 
-  value?: string | number | undefined;
+  value?: string | number;
 }
 
 const FacetCheckbox: FC<FacetCheckboxProps> = ({

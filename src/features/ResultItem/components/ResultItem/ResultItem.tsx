@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import { Result, ResultBookmark } from '@/features/ResultList/types/results';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
@@ -28,13 +29,16 @@ type ResultItemProps = {
   isEven: boolean;
   isInUserSave?: boolean;
   result: Result | ResultBookmark;
+  /** 1-based position in the full result list; reported on result_opened. */
+  resultRank?: number;
 }
 
 const ResultItem: FC<ResultItemProps> = ({
     bookmarkItem,
     isEven = false,
     isInUserSave = false,
-    result
+    result,
+    resultRank
   }) => {
 
   const {
@@ -92,10 +96,6 @@ const ResultItem: FC<ResultItemProps> = ({
     shouldUpdateResultsAfterBookmark,
   });
 
-  const handleResultClick = useCallback(() => {
-    resultsNavigate(`/results/${result.id}`);
-  }, [resultsNavigate, result.id]);
-
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
   const pathCount: number = useMemo(() => {
     if(result?.pathCount !== undefined) return result.pathCount;
@@ -107,6 +107,17 @@ const ResultItem: FC<ResultItemProps> = ({
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
+
+  // Declared after subjectNode so the event can carry the real CURIE rather
+  // than the internal result ID, which means nothing outside a single session.
+  const handleResultClick = useCallback(() => {
+    trackEvent('result_opened', {
+      result_curie: subjectNode?.curies?.[0],
+      result_rank: resultRank,
+      has_paths: pathCount > 0 ? 'true' : 'false',
+    });
+    resultsNavigate(`/results/${result.id}`);
+  }, [resultsNavigate, result.id, subjectNode, pathCount, resultRank]);
 
   const accordionPanelClass = joinClasses(styles.accordionPanel, roleCount > 0 && !isInUserSave && styles.hasTags, (!!resultDescription && !isPathfinder) && styles.hasDescription, !!isInUserSave && styles.inUserSave);
 

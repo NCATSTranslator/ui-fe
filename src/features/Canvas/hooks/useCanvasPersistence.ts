@@ -1,15 +1,10 @@
-import { useEffect, useCallback, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import type { AppDispatch } from '@/redux/store';
-import {
-  selectCanvases,
-  setCanvases,
-  replaceCanvas,
-} from '@/features/Canvas/slices/canvasSlice';
+import { replaceCanvas } from '@/features/Canvas/slices/canvasSlice';
 import type {
   BackendCanvasGraph,
-  BackendUserCanvas,
   CanvasLayout,
   CreateCanvasAnnotationRequest,
   GraphSelection,
@@ -19,33 +14,16 @@ import type {
 import {
   listCanvases,
   updateCanvasMetadata,
-  getCanvasGraph,
   mergeCanvasGraph,
   trashCanvasElements,
   restoreCanvasElements,
   createCanvasAnnotation,
 } from '@/features/Canvas/utils/canvasApi';
-import {
-  backendCanvasListToCanvasList,
-  backendCanvasToCanvas,
-} from '@/features/Canvas/utils/canvasMappers';
+import { backendCanvasToCanvas } from '@/features/Canvas/utils/canvasMappers';
+import { trackCanvasWrite } from '@/features/Canvas/utils/canvasSyncUtils';
 import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
 import useCanvasGeometryWrites from '@/features/Canvas/hooks/useCanvasGeometryWrites';
 import useCanvasAnnotationTextWrites from '@/features/Canvas/hooks/useCanvasAnnotationTextWrites';
-
-export const useCanvasListQuery = () => {
-  const user = useSelector(currentUser);
-  return useQuery({
-    queryKey: ['userCanvases'],
-    queryFn: () => listCanvases(),
-    enabled: user !== null,
-    staleTime: Infinity,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    retry: false,
-  });
-};
 
 const selectionFromSubmission = (
   submission: GraphSubmission,
@@ -135,70 +113,10 @@ const executeQueuedGraphApply = async ({
   const isStale = () => generation !== generationRef.current;
   await enqueue(canvasId, async () => {
     await wrap(async () => {
-      await applyGraphChange(canvasId, apiFn, dispatch, isStale, onStale);
+      await trackCanvasWrite([canvasId], () =>
+        applyGraphChange(canvasId, apiFn, dispatch, isStale, onStale));
     });
   });
-};
-
-const pendingGraphLoads = new Set<number>();
-
-const canvasNeedsGraph = (canvasId: number, canvases: ReturnType<typeof selectCanvases>) => {
-  const existing = canvases.find(c => c.id === canvasId);
-  return !existing || !existing.graphLoaded;
-};
-
-const loadCanvasGraphIntoStore = async (
-  meta: BackendUserCanvas,
-  dispatch: AppDispatch,
-  canvases: ReturnType<typeof selectCanvases>,
-  isCancelled: () => boolean,
-) => {
-  if (!canvasNeedsGraph(meta.id, canvases) || pendingGraphLoads.has(meta.id)) return;
-
-  pendingGraphLoads.add(meta.id);
-  try {
-    const graph = await getCanvasGraph(meta.id);
-    if (isCancelled()) return;
-    dispatch(replaceCanvas(backendCanvasToCanvas(meta, graph)));
-  } catch {
-    // graph load failed — keep metadata-only canvas
-  } finally {
-    pendingGraphLoads.delete(meta.id);
-  }
-};
-
-export const useCanvasSync = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const canvases = useSelector(selectCanvases);
-  const canvasesRef = useRef(canvases);
-  canvasesRef.current = canvases;
-
-  const { data: canvasMetas, isSuccess: listLoaded } = useCanvasListQuery();
-
-  useEffect(() => {
-    if (!canvasMetas) return;
-    dispatch(setCanvases(backendCanvasListToCanvasList(canvasMetas)));
-  }, [canvasMetas, dispatch]);
-
-  useEffect(() => {
-    if (!listLoaded || !canvasMetas?.length) return;
-    let cancelled = false;
-    const isCancelled = () => cancelled;
-
-    const loadGraphs = async () => {
-      const metasToLoad = canvasMetas.filter(
-        meta => !meta.time_deleted && canvasNeedsGraph(meta.id, canvasesRef.current),
-      );
-      await Promise.all(
-        metasToLoad.map(meta => loadCanvasGraphIntoStore(meta, dispatch, canvasesRef.current, isCancelled)),
-      );
-    };
-
-    loadGraphs();
-    return () => { cancelled = true; };
-  }, [listLoaded, canvasMetas, dispatch]);
-
-  return { listLoaded, canvases };
 };
 
 const SAVED_INDICATOR_MS = 2000;
@@ -308,7 +226,6 @@ const useCanvasGraphSaves = (
 
 const useCanvasPersistence = () => {
   const queryClient = useQueryClient();
-  const { listLoaded } = useCanvasSync();
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
   }, [queryClient]);
@@ -318,21 +235,20 @@ const useCanvasPersistence = () => {
   const textWrites = useCanvasAnnotationTextWrites(wrap);
 
   const saveRename = useCallback(async (canvasId: number, label: string) => {
-    await wrap(() => updateCanvasMetadata(canvasId, { label }));
+    await wrap(() => trackCanvasWrite([canvasId], () => updateCanvasMetadata(canvasId, { label })));
   }, [wrap]);
 
   const saveLayout = useCallback(async (canvasId: number, layout: CanvasLayout) => {
-    await wrap(() => updateCanvasMetadata(canvasId, { layout }));
+    await wrap(() => trackCanvasWrite([canvasId], () => updateCanvasMetadata(canvasId, { layout })));
   }, [wrap]);
 
   const saveCreateAnnotation = useCallback(async (
     canvasId: number,
     request: CreateCanvasAnnotationRequest,
-  ) => wrap(() => createCanvasAnnotation(canvasId, request)), [wrap]);
+  ) => wrap(() => trackCanvasWrite([canvasId], () => createCanvasAnnotation(canvasId, request))), [wrap]);
 
   return {
     saveStatus,
-    loaded: listLoaded,
     saveRename,
     saveLayout,
     saveCreateAnnotation,

@@ -25,24 +25,19 @@ interface SoftDeleteState {
   setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
 }
 
-const useSoftDeleteMutations = ({
+const useSoftDeleteProjectMutations = ({
   closeModal,
   selectedProject,
   clearSelectedProject,
   setSelectedProjects,
-  setSelectedQueries,
 }: {
   closeModal: ModalsApi['closeModal'];
   selectedProject: ReturnType<typeof useSidebar>['selectedProject'];
   clearSelectedProject: () => void;
   setSelectedProjects: Dispatch<SetStateAction<Project[]>>;
-  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
 }) => {
   const queryClient = useQueryClient();
-  const location = useLocation();
-  const navigate = useNavigate();
   const deleteProjectsMutation = useDeleteProjects();
-  const deleteQueriesMutation = useDeleteQueries();
 
   const handleDeleteProjectInternal = useCallback((project: Project) => {
     setProjectsDeletedFlag(queryClient, [project.id], true);
@@ -86,7 +81,22 @@ const useSoftDeleteMutations = ({
     );
   }, [closeModal, deleteProjectsMutation, queryClient, setSelectedProjects]);
 
-  const handleDeleteQueriesInternal = useCallback((queries: UserQueryObject[]) => {
+  return { handleDeleteProjectInternal, handleDeleteProjectsInternal };
+};
+
+const useSoftDeleteQueriesMutation = ({
+  closeModal,
+  setSelectedQueries,
+}: {
+  closeModal: ModalsApi['closeModal'];
+  setSelectedQueries: Dispatch<SetStateAction<UserQueryObject[]>>;
+}) => {
+  const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const deleteQueriesMutation = useDeleteQueries();
+
+  return useCallback((queries: UserQueryObject[]) => {
     const querySids = queries.map(q => q.sid);
     setQueriesDeletedFlag(queryClient, querySids, true);
     deleteQueriesMutation.mutate(
@@ -108,8 +118,6 @@ const useSoftDeleteMutations = ({
       },
     );
   }, [closeModal, deleteQueriesMutation, location.search, navigate, queryClient, setSelectedQueries]);
-
-  return { handleDeleteProjectInternal, handleDeleteProjectsInternal, handleDeleteQueriesInternal };
 };
 
 export const useProjectSoftDeleteHandlers = ({
@@ -120,18 +128,18 @@ export const useProjectSoftDeleteHandlers = ({
   selectedQueries,
   setSelectedQueries,
 }: SoftDeleteState) => {
+  const { openModal, closeModal } = modals;
   const { selectedProject, clearSelectedProject } = useSidebar();
   const {
     handleDeleteProjectInternal,
     handleDeleteProjectsInternal,
-    handleDeleteQueriesInternal,
-  } = useSoftDeleteMutations({
-    closeModal: modals.closeModal,
+  } = useSoftDeleteProjectMutations({
+    closeModal,
     selectedProject,
     clearSelectedProject,
     setSelectedProjects,
-    setSelectedQueries,
   });
+  const handleDeleteQueriesInternal = useSoftDeleteQueriesMutation({ closeModal, setSelectedQueries });
 
   const handleDeleteProject = useCallback(() => {
     if (selectedProjects[0]) handleDeleteProjectInternal(selectedProjects[0]);
@@ -147,41 +155,41 @@ export const useProjectSoftDeleteHandlers = ({
 
   const openDeleteProjectModal = useCallback((project: Project) => {
     setSelectedProjects([project]);
-    if (deletePrompts.deleteProjects.shouldShow) modals.openModal('deleteProject');
+    if (deletePrompts.deleteProjects.shouldShow) openModal('deleteProject');
     else handleDeleteProjectInternal(project);
   }, [
     deletePrompts.deleteProjects.shouldShow,
     handleDeleteProjectInternal,
-    modals.openModal,
+    openModal,
     setSelectedProjects,
   ]);
 
   const openDeleteProjectsModal = useCallback((projects: Project[]) => {
     setSelectedProjects(projects);
-    if (deletePrompts.deleteProjects.shouldShow) modals.openModal('deleteProjects');
+    if (deletePrompts.deleteProjects.shouldShow) openModal('deleteProjects');
     else handleDeleteProjectsInternal(projects);
   }, [
     deletePrompts.deleteProjects.shouldShow,
     handleDeleteProjectsInternal,
-    modals.openModal,
+    openModal,
     setSelectedProjects,
   ]);
 
   const openDeleteQueriesModal = useCallback((queries: UserQueryObject[]) => {
     setSelectedQueries(queries);
-    if (deletePrompts.deleteQueries.shouldShow) modals.openModal('deleteQueries');
+    if (deletePrompts.deleteQueries.shouldShow) openModal('deleteQueries');
     else handleDeleteQueriesInternal(queries);
   }, [
     deletePrompts.deleteQueries.shouldShow,
     handleDeleteQueriesInternal,
-    modals.openModal,
+    openModal,
     setSelectedQueries,
   ]);
 
   const handleCancelDeleteProject = useCallback(() => {
-    modals.closeModal('deleteProject');
+    closeModal('deleteProject');
     setSelectedProjects([]);
-  }, [modals.closeModal, setSelectedProjects]);
+  }, [closeModal, setSelectedProjects]);
 
   return {
     handleDeleteProject,

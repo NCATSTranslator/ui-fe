@@ -1,9 +1,10 @@
-import { createContext, memo, useCallback, useContext, type FC, type MouseEvent, type ReactNode } from 'react';
+import { createContext, memo, useCallback, useContext, useMemo, type CSSProperties, type FC, type MouseEvent, type ReactNode } from 'react';
 import type { GraphNodeChrome } from 'translator-graph-view';
 import HorizontalDotMenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { getNodeIcon } from '@/features/Core/utils/entityLinks';
+import { useNodeColors } from '@/features/Core/hooks/useNodeColors';
 import ObjectListSearchName from '@/features/Canvas/components/CanvasObjectList/ObjectListSearchName';
 import type { CanvasSearchMatch } from '@/features/Canvas/utils/canvasFunctions';
 import styles from './CanvasNodeChrome.module.scss';
@@ -104,10 +105,22 @@ export const CanvasNodeChip = memo<CanvasNodeChipProps>(({
 }) => {
   const handleMouseEnter = useCallback(() => onHover(nodeId), [onHover, nodeId]);
   const handleMouseLeave = useCallback(() => onHover(null), [onHover]);
+  const colors = useNodeColors(type);
+  // Left unset while color mode is off, so the stylesheet default applies.
+  const colorStyle = useMemo(
+    () => colors
+      ? ({
+          '--canvas-node-bg': colors.background,
+          '--canvas-node-bg-hover': colors.hoverBackground,
+        } as CSSProperties)
+      : undefined,
+    [colors],
+  );
 
   return (
     <div
       className={styles.canvasNode}
+      style={colorStyle}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

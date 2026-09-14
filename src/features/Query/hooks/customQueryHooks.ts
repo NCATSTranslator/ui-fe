@@ -16,6 +16,36 @@ import { useClearHomeQueryNodeParams } from '@/features/Query/hooks/useClearHome
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { errorToast, unsupportedSmartQueryCategoryToast } from '@/features/Core/utils/toastMessages';
 import { noop } from '@/features/Core/utils/constants';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+import type { AnalyticsEventMap, QueryTypeName } from '@/features/Analytics/types/analytics';
+
+/** The backend has accepted a submission once it returns the new query's pk with a complete status. */
+const isAcceptedSubmission = (data: { data?: unknown; status?: string }): boolean =>
+  !!data.data && data.status === 'complete';
+
+type QuerySubmittedParams = Omit<AnalyticsEventMap['query_submitted'], 'query_type' | 'project_attached'>;
+
+/** Reports query_submitted only for a submission the backend accepted, so call sites need no guard. */
+const trackAcceptedQuerySubmission = (
+  data: { data?: unknown; status?: string },
+  queryType: QueryTypeName,
+  projectId: string | undefined,
+  params: QuerySubmittedParams,
+): void => {
+  if (!isAcceptedSubmission(data)) return;
+  trackEvent('query_submitted', {
+    query_type: queryType,
+    project_attached: projectId ? 'true' : 'false',
+    ...params,
+  });
+};
+
+const trackQuerySubmissionFailed = (queryType: QueryTypeName, error: unknown): void => {
+  trackEvent('query_submission_failed', {
+    query_type: queryType,
+    error_message: error instanceof Error ? error.message : 'unknown',
+  });
+};
 
 export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
 
@@ -132,7 +162,14 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
 
       const data = await response.json();
 
-      if (data.data && data.status === 'complete') {
+      trackAcceptedQuerySubmission(data, 'single', projectId, {
+        query_template_id: String(item.type.id),
+        query_template_label: item.type.label,
+        subject_category: item.type.filterType,
+        object_category: item.type.targetType,
+      });
+
+      if (isAcceptedSubmission(data)) {
         const nodeLabel = item.node?.label || "";
         const nodeID = item.node?.id || "";
         const newQueryPath = getResultsShareURLPath({
@@ -159,6 +196,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
         }
       }
     } catch (error) {
+      trackQuerySubmissionFailed('single', error);
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
       setIsLoading(false);
       console.error(error);
@@ -193,11 +231,17 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       });
 
       const data = await response.json();
+      const constraint = middleType?.replace("biolink:", "");
+      trackAcceptedQuerySubmission(data, 'pathfinder', projectId, {
+        subject_category: subjectType,
+        object_category: objectType,
+        constraint_category: constraint,
+      });
       let newQueryPath = getPathfinderResultsShareURLPath({
         itemOne,
         itemTwo,
         resultID: '0',
-        constraint: middleType?.replace("biolink:", ""),
+        constraint,
         pk: data.data,
         shouldHash: config?.include_hashed_parameters,
       });
@@ -210,6 +254,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
 
     } catch (error) {
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
+      trackQuerySubmissionFailed('pathfinder', error);
       setIsLoading(false);
       console.log(error);
       throw error;
@@ -241,6 +286,10 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
       });
 
       const data = await response.json();
+      trackAcceptedQuerySubmission(data, 'lookup', projectId, {
+        subject_category: subjectType,
+        object_category: rawCategory,
+      });
       const newQueryPath = getLookupResultsShareURLPath(
         item,
         rawCategory,
@@ -258,6 +307,7 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
 
     } catch (error) {
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
+      trackQuerySubmissionFailed('lookup', error);
       setIsLoading(false);
       console.error(error);
       throw error;

@@ -4,7 +4,7 @@ import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import { getHomeQueryPath, type HomeQueryTab } from '@/features/Query/utils/homeQueryParams';
 import { getCanvasNodeDisplayName, getCanvasNodePrimaryCategory } from '@/features/Canvas/utils/canvasFunctions';
 import { formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
-import { canvasEntityRemovedToast } from '@/features/Core/utils/toastMessages';
+import { finalizeCanvasElementRemoval } from '@/features/Canvas/utils/canvasRemovalUi';
 
 interface UseCanvasNodeActionsOptions {
   activeCanvas: Canvas | null;
@@ -45,9 +45,13 @@ const useCanvasNodeActions = ({
   const handleRemove = useCallback((nodeId: string) => {
     const nodeName = activeCanvas?.nodes[nodeId]?.names[0] || nodeId;
     removeNode(nodeId);
-    clearHover();
-    canvasEntityRemovedToast(nodeName);
-  }, [activeCanvas, removeNode, clearHover]);
+    finalizeCanvasElementRemoval({
+      clearHover,
+      setSelectedNodeIds,
+      pickedCount: 1,
+      singleEntityName: nodeName,
+    });
+  }, [activeCanvas, removeNode, clearHover, setSelectedNodeIds]);
 
   const handleInformation = useCallback((nodeId: string) => {
     clearHover();

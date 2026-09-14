@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
 import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Hook to fetch user projects with React Query
@@ -69,6 +70,7 @@ export const useCreateProject = () => {
   return useMutation({
     mutationFn: (projectData: ProjectCreate) => createProject(projectData),
     onSuccess: () => {
+      trackEvent('project_created');
       // Invalidate and refetch user projects
       queryClient.invalidateQueries({ queryKey: ['userProjects'] });
     },
@@ -98,7 +100,8 @@ export const useDeleteProjects = () => {
   
   return useMutation({
     mutationFn: (projectIds: string[]) => deleteProjects(projectIds),
-    onSuccess: () => {
+    onSuccess: (_data, projectIds) => {
+      trackEvent('project_deleted', { element_count: projectIds.length });
       // Invalidate and refetch user projects
       queryClient.invalidateQueries({ queryKey: ['userProjects'] });
     },
@@ -283,7 +286,7 @@ export const useSortSearchState = () => {
  * @returns {Record<string, string>, boolean} Object with curie->name mapping and loading state
  */
 export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean = true) => {
-  const queries = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['curieNames', curies],
     queryFn: async () => {
       const results: Record<string, string> = {};
@@ -306,8 +309,8 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
   });
 
   return {
-    data: queries.data || {},
-    isLoading: queries.isLoading,
+    data: data || {},
+    isLoading,
   };
 };
 

@@ -127,7 +127,7 @@ const ResultDetailView: FC = () => {
 
   const graph = useMemo(() => {
     if (!graphActive || !resultSet?.data || !result) return { nodes: {}, edges: {} };
-      return resultToGraphData(result, resultSet.data);
+    return resultToGraphData(result, resultSet.data);
   }, [graphActive, result, resultSet?.data]);
 
   if (!queryId) {

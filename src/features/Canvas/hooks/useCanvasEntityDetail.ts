@@ -8,6 +8,14 @@ export const canvasNodeDetailQueryKey = (canvasId: number, dataId: number) =>
 export const canvasEdgeDetailQueryKey = (canvasId: number, dataId: number) =>
   ['canvasEdgeDetail', canvasId, dataId] as const;
 
+/* Prefixes matching every cached detail for one canvas. react-query matches query keys by prefix,
+ * so these drop all of a canvas's node/edge detail at once — used when sync replaces its graph. */
+export const canvasNodeDetailQueryKeyPrefix = (canvasId: number) =>
+  ['canvasNodeDetail', canvasId] as const;
+
+export const canvasEdgeDetailQueryKeyPrefix = (canvasId: number) =>
+  ['canvasEdgeDetail', canvasId] as const;
+
 const isDetailQueryEnabled = (
   enabled: boolean,
   canvasId: number | undefined,

@@ -9,7 +9,8 @@ interface ResultListModalsProps {
   currentBookmarkID: string | null;
   focusModalOpen: boolean;
   formattedResultsLength: number;
-  handlePageClick: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  /** Untracked page change: accepting the focus modal is not a user paging through results. */
+  handlePageChange: (event: {selected: number}, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   noteLabel: string;
   notesModalOpen: boolean;
   onCloseNotesModal: () => void;
@@ -30,7 +31,7 @@ const ResultListModals: FC<ResultListModalsProps> = ({
   currentBookmarkID,
   focusModalOpen,
   formattedResultsLength,
-  handlePageClick,
+  handlePageChange,
   noteLabel,
   notesModalOpen,
   onCloseNotesModal,
@@ -66,7 +67,7 @@ const ResultListModals: FC<ResultListModalsProps> = ({
         isOpen={focusModalOpen}
         onAccept={() => {
           setFocusModalOpen(false);
-          handlePageClick({selected: sharedItem.page}, false, formattedResultsLength);
+          handlePageChange({selected: sharedItem.page}, false, formattedResultsLength);
           setExpandSharedResult(true);
           setAutoScrollToResult(true);
         }}

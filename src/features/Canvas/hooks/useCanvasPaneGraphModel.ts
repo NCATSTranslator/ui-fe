@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectSyncDeferredCanvasIds } from '@/features/Canvas/slices/canvasSlice';
 import useCanvas from '@/features/Canvas/hooks/useCanvas';
 import useCanvasPersistence from '@/features/Canvas/hooks/useCanvasPersistence';
 import useCanvasFilters from '@/features/Canvas/hooks/useCanvasFilters';
@@ -6,6 +8,7 @@ import useCanvasHoverState from '@/features/Canvas/hooks/useCanvasHoverState';
 import useCanvasGraphHover from '@/features/Canvas/hooks/useCanvasGraphHover';
 import useCanvasEntityNavigation from '@/features/Canvas/hooks/useCanvasEntityNavigation';
 import useCanvasNodeActions from '@/features/Canvas/hooks/useCanvasNodeActions';
+import useCanvasSelectionDelete from '@/features/Canvas/hooks/useCanvasSelectionDelete';
 import useCanvasPaneHandlers from '@/features/Canvas/hooks/useCanvasPaneHandlers';
 import useCanvasFocus from '@/features/Canvas/hooks/useCanvasFocus';
 import useCanvasNodePositions from '@/features/Canvas/hooks/useCanvasNodePositions';
@@ -16,6 +19,7 @@ import type { Canvas } from '@/features/Canvas/types/canvas';
 export const useCanvasPaneGraphModel = (activeCanvas: Canvas) => {
   const navigate = useNavigate();
   const persistence = useCanvasPersistence();
+  const syncDeferredCanvasIds = useSelector(selectSyncDeferredCanvasIds);
   const canvas = useCanvas(persistence);
   const { visibleNodes, visibleEdges } = useCanvasFilters(activeCanvas);
   const hoverState = useCanvasHoverState();
@@ -34,6 +38,12 @@ export const useCanvasPaneGraphModel = (activeCanvas: Canvas) => {
     setSelectedNodeIds: focus.setSelectedNodeIds,
     clearHover: hoverState.clearHover,
     removeNode: canvas.removeNode,
+  });
+  const handleSelectionDelete = useCanvasSelectionDelete({
+    activeCanvas,
+    removeElements: canvas.removeElements,
+    clearHover: hoverState.clearHover,
+    setSelectedNodeIds: focus.setSelectedNodeIds,
   });
   const graphHover = useCanvasGraphHover({ canvas: activeCanvas, navigateToEdge });
   const paneHandlers = useCanvasPaneHandlers({
@@ -61,21 +71,14 @@ export const useCanvasPaneGraphModel = (activeCanvas: Canvas) => {
       paneHandlers,
       graphHover,
       saveStatus: persistence.saveStatus,
+      /* A remote change to this canvas is waiting on the user's own writes to finish saving. */
+      syncDeferred: syncDeferredCanvasIds.includes(activeCanvas.id),
+      handleSelectionDelete,
       graphAnnotations: annotations.graphAnnotations,
       handleAnnotationsChange: annotations.handleAnnotationsChange,
       handleAddAnnotation: annotations.handleAddAnnotation,
     },
-    hover: {
-      hoveredNodeId: hoverState.hoveredNodeId,
-      hoveredEdgeId: hoverState.hoveredEdgeId,
-      hoveredAnnotationId: hoverState.hoveredAnnotationId,
-      selectedNodeIds: focus.selectedNodeIds,
-      focusRequest: focus.focusRequest,
-      setHoveredNodeId: hoverState.setHoveredNodeId,
-      setHoveredAnnotationId: hoverState.setHoveredAnnotationId,
-      findNodeOnCanvas: focus.findNodeOnCanvas,
-      findAnnotationOnCanvas: focus.findAnnotationOnCanvas,
-    },
+    hover: { ...hoverState, ...focus },
     history: {
       rename: canvas.rename,
       undo: canvas.undo,

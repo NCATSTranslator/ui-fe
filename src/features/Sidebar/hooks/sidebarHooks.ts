@@ -68,13 +68,12 @@ export const useSidebarRegistration = (options: SidebarRegistrationOptions) => {
 
     // Register/update the sidebar item
     registerSidebarItem(id, sidebarItem);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- callers supply their own dependency list via options.dependencies
   }, [registerSidebarItem, ...options.dependencies || []]);
 
   // Hook to handle cleanup on unmount or id change
   useEffect(() => {
-    const { id } = options;
-    sidebarItemIdRef.current = id;
+    sidebarItemIdRef.current = options.id;
     
     return () => {
       unregisterSidebarItem(sidebarItemIdRef.current);

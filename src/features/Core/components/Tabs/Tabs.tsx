@@ -15,6 +15,8 @@ interface TabsProps {
   tabClassName?: string;
   isOpen?: boolean;
   handleTabSelection?: (heading: string) => void;
+  /** Called only for user clicks, unlike handleTabSelection, which also runs when an invalid active tab is reset. */
+  onTabClick?: (heading: string) => void;
   handleOutsideTabListClick?: () => void;
   defaultActiveTab?: string;
   controlled?: boolean;
@@ -30,6 +32,7 @@ const Tabs: FC<TabsProps> = ({
   tabClassName = "",
   isOpen = true, 
   handleTabSelection = () => {}, 
+  onTabClick,
   handleOutsideTabListClick = () => {},
   defaultActiveTab,
   controlled = false,
@@ -80,8 +83,9 @@ const Tabs: FC<TabsProps> = ({
     if (!controlled) {
       setInternalActiveTab(heading);
     }
+    onTabClick?.(heading);
     handleTabSelection(heading);
-  }, [controlled, handleTabSelection]);
+  }, [controlled, handleTabSelection, onTabClick]);
 
   // Set tab ref
   const setTabRef = useCallback((heading: string, element: HTMLDivElement | null) => {

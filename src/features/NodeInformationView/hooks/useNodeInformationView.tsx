@@ -1,4 +1,4 @@
-import { FC, ReactNode, useMemo } from "react";
+import { FC, ReactNode, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
@@ -9,6 +9,7 @@ import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
 import useCanvasEntityViewState from "@/features/Canvas/hooks/useCanvasEntityViewState";
 import type { ChebiRole, Indication, ResultNode } from "@/features/ResultList/types/results.d";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface AnnotationOverrideProps {
   value: unknown;
@@ -170,6 +171,19 @@ const useNodeInformationView = () => {
     [node],
   );
   const { data: nodeTypeDefinition } = useNodeTypeDefinition(nodeType);
+
+  // Fire once per node, after the node resolves. The hook re-runs on every
+  // annotation fetch and canvas state change, so a plain effect on mount would
+  // both miss the CURIE and double count.
+  const trackedNodeId = useRef<string | null>(null);
+  useEffect(() => {
+    if (!node || !nodeId || trackedNodeId.current === nodeId) return;
+    trackedNodeId.current = nodeId;
+    trackEvent('node_info_opened', {
+      node_curie: node.curies?.[0],
+      node_category: nodeType ?? undefined,
+    });
+  }, [node, nodeId, nodeType]);
   const { showCanvasSkeleton, showCanvasNotFound } = useCanvasEntityViewState({
     isCanvasOnlyMode,
     isLoading: query.isLoading,

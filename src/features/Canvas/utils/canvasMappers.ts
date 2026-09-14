@@ -94,7 +94,9 @@ export const backendCanvasToCanvas = (
     annotations: backendAnnotationsToCanvasAnnotations(graph.annotations),
     timeCreated: meta.time_created,
     timeUpdated: meta.time_updated,
+    serverTimeUpdated: meta.time_updated,
     graphLoaded: true,
+    serverKnown: true,
   };
 };
 
@@ -110,7 +112,9 @@ export const backendMetaToCanvas = (meta: BackendUserCanvas): Canvas => ({
   annotations: [],
   timeCreated: meta.time_created,
   timeUpdated: meta.time_updated,
+  serverTimeUpdated: meta.time_updated,
   graphLoaded: false,
+  serverKnown: true,
 });
 
 export const backendCanvasListToCanvasList = (

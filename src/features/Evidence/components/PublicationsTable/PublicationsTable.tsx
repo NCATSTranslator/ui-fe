@@ -134,6 +134,7 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
 
       <TablePaginationControls
         label="Publications per Page"
+        tabName="Publications"
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         pageCount={pageCount}

@@ -22,6 +22,7 @@ import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
+import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 
 interface SidebarProjectCardProps {
   activeQueries: UserQueryObject[];
@@ -115,7 +116,10 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
 
     // Add query to project, clear add to project mode on success
     handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid], {
-      onSuccess: clearAddToProjectMode,
+      onSuccess: () => {
+        trackEvent('query_moved_to_project', { move_method: 'menu' });
+        clearAddToProjectMode();
+      },
     });
   }, [addToProjectQuery, project, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 

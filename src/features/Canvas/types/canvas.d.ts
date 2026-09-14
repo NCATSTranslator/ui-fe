@@ -197,8 +197,27 @@ export type Canvas = {
   resultRef: string | null;
   annotations: CanvasAnnotation[];
   timeCreated: string;
+  /** Local edit clock. Reducers stamp this optimistically, so it may run ahead of the server. */
   timeUpdated: string;
+  /**
+   * The server's time_updated for the graph data this canvas currently holds. Written only from
+   * backend payloads, never by a reducer, so comparing it against a freshly listed time_updated
+   * detects edits made in another tab or on another machine. Compared as an opaque string.
+   */
+  serverTimeUpdated: string;
   graphLoaded?: boolean;
+  /**
+   * True once the server has listed this canvas. A canvas created here has not been listed yet, so
+   * a poll response that predates the create legitimately omits it; once the server has listed it,
+   * a later omission means it was deleted somewhere else. Without this, absence from a list is
+   * ambiguous and the two cases cannot be told apart.
+   */
+  serverKnown?: boolean;
+  /**
+   * Bumped each time sync replaces this canvas with server state. Consumers holding derived state
+   * built from the old graph (undo stacks, cached entity detail) watch this to know to drop it.
+   */
+  syncGeneration?: number;
 };
 
 export type CanvasNode = {

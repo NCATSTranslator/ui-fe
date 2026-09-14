@@ -2,6 +2,16 @@ import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
 import { escapeCSVValue, joinArrayForCSV } from '@/features/Core/utils/csvUtils';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+
+export const buildCanvasExportFilename = (
+  label: string,
+  extension: string,
+  date: Date = new Date(),
+): string => {
+  const datePart = date.toISOString().split('T')[0];
+  return `${sanitizeForFilename(label)}_canvas_${datePart}.${extension}`;
+};
 
 type CanvasCSVRow = {
   record_type: 'edge' | 'node' | 'annotation';
@@ -119,9 +129,8 @@ export const buildCanvasCSV = (canvas: Canvas): string => {
   return lines.join('\n');
 };
 
-export const exportCanvasToFile = (canvas: Canvas): void => {
+export const exportCanvasToCSVFile = (canvas: Canvas): void => {
   const content = buildCanvasCSV(canvas);
-  const date = new Date().toISOString().split('T')[0];
-  const filename = `${sanitizeForFilename(canvas.label)}_canvas_${date}.csv`;
-  triggerDownload(content, filename, 'text/csv');
+  triggerDownload(content, buildCanvasExportFilename(canvas.label, 'csv'), 'text/csv');
+  trackEvent('canvas_exported', { export_format: 'csv' });
 };

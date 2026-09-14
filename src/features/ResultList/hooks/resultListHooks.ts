@@ -106,6 +106,7 @@ export const useResultsStatusQuery = (
   arsStatus: ARAStatusResponse | null,
   setArsStatus: (value: ARAStatusResponse) => void
 ) => {
+  // Polling side-effect query: refs/setters are intentionally excluded from queryKey
   return useQuery({
     queryKey: ['resultsStatus', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -210,14 +211,16 @@ const processResultsData = (
 /**
  * Helper function to handle results data errors
  */
-const handleResultsDataError = (
-  error: unknown,
-  formattedResults: Result[],
-  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
-  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  setIsError: (value: boolean) => void,
-  setIsLoading: (value: boolean) => void
-): void => {
+interface ResultsDataErrorContext {
+  formattedResults: Result[];
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
+  setIsError: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
+}
+
+const handleResultsDataError = (error: unknown, context: ResultsDataErrorContext): void => {
+  const { formattedResults, setIsFetchingARAStatus, setIsFetchingResults, setIsError, setIsLoading } = context;
   console.error('Results Data Error:', error);
   setIsFetchingARAStatus(false);
   setIsFetchingResults(false);
@@ -270,6 +273,7 @@ export const useResultsDataQuery = (
       copyQueryMutate(currentQueryID);
   };
 
+  // Polling side-effect query: refs/setters/callbacks are intentionally excluded from queryKey
   return useQuery({
     queryKey: ['resultsData', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -299,14 +303,13 @@ export const useResultsDataQuery = (
           handleQuerySeen
         );
       } catch (error) {
-        handleResultsDataError(
-          error,
+        handleResultsDataError(error, {
           formattedResults,
           setIsFetchingARAStatus,
           setIsFetchingResults,
           setIsError,
-          setIsLoading
-        );
+          setIsLoading,
+        });
       }
     },
     enabled: isFetchingResults,
@@ -449,5 +452,11 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     resetBookmarks();
     
     setNodeDescription("");
-  }, [currentQueryID]);
+  }, [
+    currentQueryID, itemsPerPageRef, prevQueryID, rawResults, prevRawResults, originalResults,
+    numberOfStatusChecks, currentPage, firstLoad, setIsFetchingARAStatus, setIsFetchingResults,
+    setIsLoading, setIsError, setFormattedResults, setFreshRawResults, resetFilters, setArsStatus,
+    setResultStatus, setItemOffset, setEndResultIndex, closeNotesModal, resetShareState,
+    resetBookmarks, setNodeDescription,
+  ]);
 };
