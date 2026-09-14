@@ -1,6 +1,6 @@
 import { ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo, RefObject } from "react";
-import { PublicationObject, SortPreference, TableState, Provenance, TrialObject } from "@/features/Evidence/types/evidence";
+import { PublicationObject, SortPreference, TableState, Provenance, ProvenanceCatalogEntry, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
@@ -348,12 +348,14 @@ export const useEvidenceData = () => {
    *
    * @param {ResultSet} resultSet - Result set containing the edge data.
    * @param {ResultEdge} selEdge - Selected edge object.
+   * @param {Record<string, ProvenanceCatalogEntry>} provenanceCatalog - Infores catalog entries used to name sources when there is no result set.
    * @returns {void} - This function does not return a value but updates the state directly.
    */
   const handleSelectedEdge = useCallback((
     resultSet: ResultSet | null,
     selEdge: ResultEdge,
     nodeNameLookup: Record<string, string> = {},
+    provenanceCatalog: Record<string, ProvenanceCatalogEntry> = {},
   ) => {
     if (!selEdge) return;
 
@@ -363,9 +365,9 @@ export const useEvidenceData = () => {
       trials: new Set<TrialObject>(),
     };
 
-    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications, selEdge));
+    filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications, selEdge, provenanceCatalog));
     filteredEvidence.trials = new Set(flattenTrialObject(resultSet, selEdge.trials));
-    filteredEvidence.sources = new Set(getEdgeProvenance(resultSet, selEdge));
+    filteredEvidence.sources = new Set(getEdgeProvenance(resultSet, selEdge, provenanceCatalog));
 
     processEvidence(filteredEvidence);
     setEdgeLabel(formatEvidenceEdgeLabel(selEdge, resultSet, nodeNameLookup));
@@ -392,8 +394,12 @@ interface UseEdgeInitializationProps {
   resolvedEdge: ResultEdge | null;
   resultSet: ResultSet | null | undefined;
   isCanvasOnlyMode?: boolean;
+  // Canvas-only evidence waits for node-name and infores catalog lookups so labels/sources are
+  // correct on first render; evidence state is built once per edge (later enriched with PubMed),
+  // so it can't be rebuilt after those lookups finish.
+  canvasLookupsSettled?: boolean;
   setSelectedEdge: (edge: ResultEdge) => void;
-  handleEvidenceData: (resultSet: ResultSet | null, edge: ResultEdge, nodeNameLookup?: Record<string, string>) => void;
+  handleEvidenceData: (resultSet: ResultSet | null, edge: ResultEdge) => void;
   markEdgeSeen: (id: string) => void;
 }
 
@@ -403,6 +409,7 @@ interface UseEdgeInitializationProps {
  * @param {string | undefined} edgeId - The edge ID to initialize.
  * @param {ResultEdge | null} resolvedEdge - The resolved edge object.
  * @param {ResultSet | null | undefined} resultSet - The result set containing the edge data.
+ * @param {boolean} canvasLookupsSettled - Whether canvas-only node-name and infores lookups have finished.
  * @param {Function} setSelectedEdge - Function to set the selected edge.
  * @param {Function} handleEvidenceData - Function to handle the evidence data.
  * @param {Function} markEdgeSeen - Function to mark the edge as seen.
@@ -413,6 +420,7 @@ export const useEdgeInitialization = ({
   resolvedEdge,
   resultSet,
   isCanvasOnlyMode = false,
+  canvasLookupsSettled = true,
   setSelectedEdge,
   handleEvidenceData,
   markEdgeSeen,
@@ -420,12 +428,12 @@ export const useEdgeInitialization = ({
   const lastInitEdge = useRef<ResultEdge | null>(null);
 
   useEffect(() => {
-    const canInit = resolvedEdge && (resultSet || isCanvasOnlyMode);
+    const canInit = resolvedEdge && (resultSet || (isCanvasOnlyMode && canvasLookupsSettled));
     if (canInit && !isEqual(lastInitEdge.current, resolvedEdge)) {
       setSelectedEdge(resolvedEdge);
       handleEvidenceData(resultSet ?? null, resolvedEdge);
       markEdgeSeen(resolvedEdge.id);
       lastInitEdge.current = resolvedEdge;
     }
-  }, [edgeId, resolvedEdge, resultSet, isCanvasOnlyMode, setSelectedEdge, handleEvidenceData, markEdgeSeen]);
+  }, [edgeId, resolvedEdge, resultSet, isCanvasOnlyMode, canvasLookupsSettled, setSelectedEdge, handleEvidenceData, markEdgeSeen]);
 };

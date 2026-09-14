@@ -29,7 +29,10 @@ const useEvidenceViewRouteData = () => {
 
   const prefs = useSelector(currentPrefs);
   const queryStatus = useSelector(getQueryStatusById(queryId));
-  const nodeNameLookup = useCanvasNodeNameLookup(canvasId, isCanvasOnlyMode);
+  const { lookup: nodeNameLookup, isSettled: nodeNameLookupSettled } = useCanvasNodeNameLookup(
+    canvasId,
+    isCanvasOnlyMode,
+  );
 
   const result = useMemo(
     () => (resultId ? getResultById(resultSet, resultId) : undefined),
@@ -88,6 +91,7 @@ const useEvidenceViewRouteData = () => {
     canvasEdgeLoading: canvasEdgeQuery.isLoading,
     canvasEdgeError: canvasEdgeQuery.isError,
     nodeNameLookup,
+    nodeNameLookupSettled,
   };
 };
 

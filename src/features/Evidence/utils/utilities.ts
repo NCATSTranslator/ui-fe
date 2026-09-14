@@ -1,6 +1,6 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport } from "@/features/Evidence/types/evidence";
+import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry } from "@/features/Evidence/types/evidence";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
@@ -447,12 +447,13 @@ const publicationObjectFromRef = (
   pubEntry: { id: string; support: PublicationSupport | null; infores: string },
   knowledgeLevel: string,
   edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
 ): PublicationObject => {
   const type = getTypeFromPub(pubEntry.id);
   return {
     knowledgeLevel,
     id: pubEntry.id,
-    source: getPublicationSource(null, pubEntry.infores, edge),
+    source: getPublicationSource(null, pubEntry.infores, edge, provenanceCatalog),
     support: pubEntry.support || null,
     type,
     url: getUrlByType(pubEntry.id, type),
@@ -478,9 +479,15 @@ const trialObjectFromRef = (id: string): TrialObject => ({
  * @param {ResultSet | null} resultSet - The dataset containing publication information.
  * @param {RawPublicationList} pubs - A structured object mapping knowledge levels to publication entries.
  * @param {ResultEdge} [edge] - The edge the publications belong to, used to resolve per source record links.
+ * @param {Record<string, ProvenanceCatalogEntry>} [provenanceCatalog] - Infores catalog entries used to name sources when there is no result set.
  * @returns {PublicationObject[]} - An array of publication objects with relevant metadata.
  */
-export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList, edge?: ResultEdge): PublicationObject[] => {
+export const flattenPublicationObject = (
+  resultSet: ResultSet | null,
+  pubs: RawPublicationList,
+  edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
 
   for (const kl in pubs) {
@@ -497,7 +504,7 @@ export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawP
           url: pub.url
         });
       } else {
-        pubArray.push(publicationObjectFromRef(pubEntry, kl, edge));
+        pubArray.push(publicationObjectFromRef(pubEntry, kl, edge, provenanceCatalog));
       }
     }
   }
