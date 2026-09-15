@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { LayoutType, NodePositionMap } from 'translator-graph-view';
 import type { Canvas, CanvasLayout } from '@/features/Canvas/types/canvas';
-import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils';
 import useCanvasLayoutMutations from '@/features/Canvas/hooks/useCanvasLayoutMutations';
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
@@ -26,8 +25,6 @@ type UseCanvasLayoutActionsOptions = {
 
 const useCanvasLayoutActions = (options: UseCanvasLayoutActionsOptions) => {
   const { canvas, graphLayout, layoutSaveGenerationRef, graphLayoutRef, syncPositionsToStore } = options;
-  const [layoutWarningOpen, setLayoutWarningOpen] = useState(false);
-  const pendingLayoutRef = useRef<LayoutType | null>(null);
   const layoutSavePendingRef = useRef<{ layout: LayoutType; generation: number } | null>(null);
   const lastAutoLayoutPositionsRef = useRef<NodePositionMap>({});
 
@@ -38,9 +35,7 @@ const useCanvasLayoutActions = (options: UseCanvasLayoutActionsOptions) => {
   });
 
   useEffect(() => {
-    pendingLayoutRef.current = null;
     layoutSavePendingRef.current = null;
-    setLayoutWarningOpen(false);
   }, [canvas?.id]);
 
   const handleLayoutComplete = useCallback(async (positions: NodePositionMap) => {
@@ -61,33 +56,14 @@ const useCanvasLayoutActions = (options: UseCanvasLayoutActionsOptions) => {
 
   const requestLayoutChange = useCallback((targetLayout: LayoutType) => {
     if (!canvas || targetLayout === graphLayout) return;
-    if (isCustomCanvasLayout(canvas.layout) && targetLayout !== 'custom') {
-      pendingLayoutRef.current = targetLayout;
-      setLayoutWarningOpen(true);
-      return;
-    }
     trackEvent('canvas_layout_applied', { layout_name: targetLayout });
     applyLayoutChange(targetLayout);
   }, [applyLayoutChange, canvas, graphLayout]);
 
   return {
-    layoutWarningOpen,
     handleGraphNodeDragStop,
     handleLayoutComplete,
     requestLayoutChange,
-    confirmLayoutChange: useCallback(() => {
-      const pending = pendingLayoutRef.current;
-      pendingLayoutRef.current = null;
-      setLayoutWarningOpen(false);
-      if (pending) {
-        trackEvent('canvas_layout_applied', { layout_name: pending });
-        applyLayoutChange(pending);
-      }
-    }, [applyLayoutChange]),
-    cancelLayoutChange: useCallback(() => {
-      pendingLayoutRef.current = null;
-      setLayoutWarningOpen(false);
-    }, []),
   };
 };
 
