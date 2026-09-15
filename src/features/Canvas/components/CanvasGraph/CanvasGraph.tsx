@@ -17,7 +17,6 @@ import type { Canvas, CanvasNode, CanvasEdge, SaveStatus } from '@/features/Canv
 import { filteredCanvasToGraphData } from '@/features/Canvas/utils/canvasGraphFunctions';
 import CanvasToolbar from '@/features/Canvas/components/CanvasToolbar/CanvasToolbar';
 import CanvasEmptyState from '@/features/Canvas/components/CanvasEmptyState/CanvasEmptyState';
-import CanvasLayoutWarningModal from '@/features/Canvas/components/CanvasLayoutWarningModal/CanvasLayoutWarningModal';
 import LoadingIcon from '@/features/Core/components/LoadingIcon/LoadingIcon';
 import { canvasNodeChrome } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import { getNodeIcon as getCategoryIcon } from '@/features/Core/utils/entityLinks';
@@ -40,12 +39,9 @@ interface CanvasGraphProps {
   graphLayout: LayoutType;
   nodePositions?: NodePositionMap;
   isCustomLayoutReady?: boolean;
-  layoutWarningOpen?: boolean;
   onLayoutChange: (layout: LayoutType) => void;
   onGraphNodeDragStop?: (nodeId: string, position: { x: number; y: number }, allPositions: NodePositionMap) => void;
   onLayoutComplete?: (positions: NodePositionMap) => void;
-  onConfirmLayoutChange?: () => void;
-  onCancelLayoutChange?: () => void;
   onRename: (title: string) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -81,12 +77,9 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
   graphLayout,
   nodePositions,
   isCustomLayoutReady = true,
-  layoutWarningOpen = false,
   onLayoutChange,
   onGraphNodeDragStop,
   onLayoutComplete,
-  onConfirmLayoutChange,
-  onCancelLayoutChange,
   onRename,
   onUndo,
   onRedo,
@@ -194,11 +187,6 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
         <div className={styles.graphArea} ref={graphAreaRef}>
           {graphAreaContent}
         </div>
-        <CanvasLayoutWarningModal
-          isOpen={layoutWarningOpen}
-          onConfirm={onConfirmLayoutChange ?? (() => undefined)}
-          onCancel={onCancelLayoutChange ?? (() => undefined)}
-        />
       </div>
     </CanvasGraphAreaContext.Provider>
   );
