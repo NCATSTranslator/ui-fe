@@ -114,7 +114,7 @@ const ResultItem: FC<ResultItemProps> = ({
     trackEvent('result_opened', {
       result_curie: subjectNode?.curies?.[0],
       result_rank: resultRank,
-      has_paths: pathCount > 0 ? 'true' : 'false',
+      path_count: pathCount,
     });
     resultsNavigate(`/results/${result.id}`);
   }, [resultsNavigate, result.id, subjectNode, pathCount, resultRank]);
