@@ -29,7 +29,6 @@ export type AnalyticsDimension =
   | 'sort_field'
   | 'sort_direction'
   | 'result_curie'
-  | 'has_paths'
   | 'share_scope'
   | 'evidence_source'
   | 'tab_name'
@@ -58,6 +57,7 @@ export type AnalyticsMetric =
   | 'page_number'
   | 'items_per_page'
   | 'result_rank'
+  | 'path_count'
   | 'path_rank'
   | 'path_length'
   | 'item_count'
@@ -118,7 +118,7 @@ export interface AnalyticsEventMap {
   result_opened: {
     result_curie?: string;
     result_rank?: number;
-    has_paths?: 'true' | 'false';
+    path_count?: number;
   };
   result_bookmarked: { result_curie?: string };
   result_unbookmarked: { result_curie?: string };
