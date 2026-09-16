@@ -1,6 +1,6 @@
 {
   "exportFormatVersion": 2,
-  "exportTime": "2026-09-11T17:49:27.013Z",
+  "exportTime": "2026-09-16T17:52:42.517Z",
   "containerVersion": {
     "path": "accounts/0/containers/0/versions/0",
     "accountId": "0",
@@ -1931,12 +1931,12 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "has_paths"
+                    "value": "path_count"
                   },
                   {
                     "type": "TEMPLATE",
                     "key": "parameterValue",
-                    "value": "{{DLV - has_paths}}"
+                    "value": "{{DLV - path_count}}"
                   }
                 ]
               }
@@ -3739,32 +3739,6 @@
         "accountId": "0",
         "containerId": "0",
         "variableId": "17",
-        "name": "DLV - has_paths",
-        "type": "v",
-        "parameter": [
-          {
-            "type": "INTEGER",
-            "key": "dataLayerVersion",
-            "value": "2"
-          },
-          {
-            "type": "BOOLEAN",
-            "key": "setDefaultValue",
-            "value": "false"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "name",
-            "value": "has_paths"
-          }
-        ],
-        "fingerprint": "0",
-        "formatValue": {}
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "variableId": "18",
         "name": "DLV - history_action",
         "type": "v",
         "parameter": [
@@ -3790,7 +3764,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "19",
+        "variableId": "18",
         "name": "DLV - item_count",
         "type": "v",
         "parameter": [
@@ -3816,7 +3790,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "20",
+        "variableId": "19",
         "name": "DLV - items_per_page",
         "type": "v",
         "parameter": [
@@ -3842,7 +3816,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "21",
+        "variableId": "20",
         "name": "DLV - layout_name",
         "type": "v",
         "parameter": [
@@ -3868,7 +3842,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "22",
+        "variableId": "21",
         "name": "DLV - link_domain",
         "type": "v",
         "parameter": [
@@ -3894,7 +3868,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "23",
+        "variableId": "22",
         "name": "DLV - link_type",
         "type": "v",
         "parameter": [
@@ -3920,7 +3894,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "24",
+        "variableId": "23",
         "name": "DLV - load_ms",
         "type": "v",
         "parameter": [
@@ -3946,7 +3920,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "25",
+        "variableId": "24",
         "name": "DLV - move_method",
         "type": "v",
         "parameter": [
@@ -3972,7 +3946,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "26",
+        "variableId": "25",
         "name": "DLV - node_category",
         "type": "v",
         "parameter": [
@@ -3998,7 +3972,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "27",
+        "variableId": "26",
         "name": "DLV - node_count",
         "type": "v",
         "parameter": [
@@ -4024,7 +3998,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "28",
+        "variableId": "27",
         "name": "DLV - node_curie",
         "type": "v",
         "parameter": [
@@ -4050,7 +4024,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "29",
+        "variableId": "28",
         "name": "DLV - object_category",
         "type": "v",
         "parameter": [
@@ -4076,7 +4050,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "30",
+        "variableId": "29",
         "name": "DLV - page_location",
         "type": "v",
         "parameter": [
@@ -4102,7 +4076,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "31",
+        "variableId": "30",
         "name": "DLV - page_number",
         "type": "v",
         "parameter": [
@@ -4128,7 +4102,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "32",
+        "variableId": "31",
         "name": "DLV - page_path",
         "type": "v",
         "parameter": [
@@ -4154,7 +4128,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "33",
+        "variableId": "32",
         "name": "DLV - page_title",
         "type": "v",
         "parameter": [
@@ -4180,7 +4154,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "variableId": "34",
+        "variableId": "33",
         "name": "DLV - pane_state",
         "type": "v",
         "parameter": [
@@ -4198,6 +4172,32 @@
             "type": "TEMPLATE",
             "key": "name",
             "value": "pane_state"
+          }
+        ],
+        "fingerprint": "0",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "34",
+        "name": "DLV - path_count",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "path_count"
           }
         ],
         "fingerprint": "0",

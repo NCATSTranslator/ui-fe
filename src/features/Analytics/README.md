@@ -69,7 +69,7 @@ GA4 `page_view`.
 | `results_loaded` | `query_type`, `query_status`, `result_count`, `load_ms` | First settled result set for a query. Once per query ID | `ResultList/hooks/useResultsData.ts` |
 | `results_sorted` | `sort_field`, `sort_direction` | A column header is clicked | `ResultList/components/ResultListTableHead/ResultListTableHead.tsx` |
 | `results_paginated` | `page_number`, `items_per_page` | User changes page. Resets and shared-result page jumps excluded | `ResultList/hooks/useResultPagination.ts` |
-| `result_opened` | `result_curie`, `result_rank`, `has_paths` | A result row is opened | `ResultItem/components/ResultItem/ResultItem.tsx` |
+| `result_opened` | `result_curie`, `result_rank`, `path_count` | A result row is opened | `ResultItem/components/ResultItem/ResultItem.tsx` |
 | `result_bookmarked` | `result_curie` | Bookmark save succeeds | `ResultItem/hooks/useBookmarkItem.ts` |
 | `result_unbookmarked` | `result_curie` | Bookmark delete succeeds, after confirmation | `ResultItem/hooks/useBookmarkItem.ts` |
 | `result_note_saved` | — | Notes modal closes after at least one save | `ResultItem/components/NotesModal/NotesModal.tsx` |
@@ -132,19 +132,19 @@ not logins.
 ## Parameter reference
 
 String parameters become GA4 **custom dimensions**, numeric ones become
-**custom metrics**. GA4 allows 50 of each; this taxonomy uses 33 and 12.
+**custom metrics**. GA4 allows 50 of each; this taxonomy uses 32 and 13.
 
 **Dimensions** — `query_type`, `query_template_id`, `query_template_label`,
 `subject_category`, `object_category`, `constraint_category`, `project_attached`,
 `error_message`, `query_status`, `sort_field`, `sort_direction`, `result_curie`,
-`has_paths`, `share_scope`, `evidence_source`, `tab_name`, `link_type`,
+`share_scope`, `evidence_source`, `tab_name`, `link_type`,
 `link_domain`, `layout_name`, `node_category`, `node_curie`, `entity_type`,
 `pane_state`, `add_method`, `element_type`, `history_action`, `annotation_type`,
 `export_format`, `download_scope`, `move_method`, `filter_type`, `filter_value`,
 `auth_provider`
 
 **Metrics** — `result_count`, `load_ms`, `page_number`, `items_per_page`,
-`result_rank`, `path_rank`, `path_length`, `item_count`, `node_count`,
+`result_rank`, `path_count`, `path_rank`, `path_length`, `item_count`, `node_count`,
 `edge_count`, `element_count`, `filter_count`
 
 `load_ms` is registered with `MILLISECONDS` as its measurement unit; the rest are
