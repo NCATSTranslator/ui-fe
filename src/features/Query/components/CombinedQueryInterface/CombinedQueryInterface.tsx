@@ -85,7 +85,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     searchParams, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam,
   );
   const tabFromUrl = getHomeQueryTabHeading(searchParams.get(HOME_QUERY_TAB_PARAM), homeQueryTabOptionsFromConfig(config));
-  const fallbackTab = isLookupEnabled ? HOME_QUERY_TAB_HEADING.lookup : HOME_QUERY_TAB_HEADING.smart;
+  const fallbackTab = HOME_QUERY_TAB_HEADING.smart;
   const [activeTab, setActiveTab] = useState(tabFromUrl ?? fallbackTab);
 
   useEffect(() => {
@@ -169,6 +169,19 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         tabListClassName={styles.tabList}
         tabListWrapperClassName={styles.tabListWrapper}
       >
+        <Tab heading={HOME_QUERY_TAB_HEADING.smart} className={styles.queryTab}>
+          <Query
+            isResults={isResults}
+            initPresetTypeObject={initPresetTypeObject}
+            initNodeLabelParam={nodeLabel}
+            initNodeIdParam={nodeId}
+            initNodeCategoryParam={nodeCategory}
+            selectedProject={selectedProject}
+            combinedStyles={styles}
+            shouldNavigate={shouldNavigate}
+            submissionCallback={onSubmitCallback}
+          />
+        </Tab>
         { isLookupEnabled ?
           <Tab
             heading={HOME_QUERY_TAB_HEADING.lookup}
@@ -187,19 +200,6 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
           </Tab>
           : null
         }
-        <Tab heading={HOME_QUERY_TAB_HEADING.smart} className={styles.queryTab}>
-          <Query
-            isResults={isResults}
-            initPresetTypeObject={initPresetTypeObject}
-            initNodeLabelParam={nodeLabel}
-            initNodeIdParam={nodeId}
-            initNodeCategoryParam={nodeCategory}
-            selectedProject={selectedProject}
-            combinedStyles={styles}
-            shouldNavigate={shouldNavigate}
-            submissionCallback={onSubmitCallback}
-          />
-        </Tab>
         { isPathfinderEnabled ? 
           <Tab
             heading={HOME_QUERY_TAB_HEADING.pathfinder}
