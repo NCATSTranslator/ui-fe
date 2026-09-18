@@ -14,7 +14,6 @@ import { ProjectRaw } from "@/features/Projects/types/projects";
 
 interface QueryProps {
   isResults?: boolean;
-  loading?: boolean;
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
@@ -27,7 +26,6 @@ interface QueryProps {
 
 const Query: FC<QueryProps> = ({
   isResults = false,
-  loading = false,
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
@@ -62,7 +60,7 @@ const Query: FC<QueryProps> = ({
     clearAutocompleteItems
   } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
 
-  const { isLoading, setIsLoading, submitQuery } = useQuerySubmission('single', shouldNavigate, submissionCallback);
+  const { isLoading, submitQuery } = useQuerySubmission('single', shouldNavigate, submissionCallback);
 
   const exampleQueries = useExampleQueries(config?.cached_queries);
 
@@ -126,11 +124,6 @@ const Query: FC<QueryProps> = ({
   const handleSubmission = useCallback((item: QueryItem | null) => {
     validateSubmission(item || queryItem);
   }, [validateSubmission, queryItem]);
-
-  // Effects
-  useEffect(() => {
-    setIsLoading(loading);
-  }, [loading, setIsLoading]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
