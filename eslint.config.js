@@ -9,6 +9,12 @@ import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
+    ignores: [
+      'src/pageRoutes/Articles/**',
+      'src/stories/**',
+    ],
+  },
+  {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
@@ -35,7 +41,7 @@ export default [
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console': 'off',
       'no-extra-boolean-cast': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -92,12 +98,31 @@ export default [
     }
   },
   {
+    // Tests: long describe blocks and non-null assertions on known fixtures are expected
+    files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+      'no-restricted-syntax': ['warn',
+        {
+          selector: 'JSXAttribute[name.name="style"] ObjectExpression',
+          message: 'Use CSS modules instead of inline styles.',
+        },
+      ],
+    }
+  },
+  {
     plugins: { sonarjs },
     rules: Object.fromEntries(
       Object.entries(sonarjs.configs.recommended.rules)
         .filter(([, severity]) => severity !== 'off')
         .map(([rule]) => [rule, 'warn'])
     ),
+  },
+  {
+    rules: {
+      'sonarjs/no-commented-code': 'off',
+      'sonarjs/todo-tag': 'off',
+    },
   },
   ...tanstackQuery.configs['flat/recommended'],
   ...storybook.configs["flat/recommended"],

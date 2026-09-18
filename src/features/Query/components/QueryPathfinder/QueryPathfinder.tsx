@@ -1,81 +1,66 @@
-import { useState, useCallback, useRef, FC, Dispatch, SetStateAction, useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { useState, useCallback, useRef, FC } from 'react';
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { AutocompleteItem, AutocompleteContext, AutocompleteConfig } from '@/features/Query/types/querySubmission';
-import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { formatBiolinkTypeString, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
 import ArrowRight from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 import PathfinderDivider from "@/assets/icons/directional/Pathfinder/Pathfinder.svg?react";
 import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
-import Select from '@/features/Common/components/Select/Select';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
-import { useAutocomplete, useQuerySubmission } from '@/features/Query/hooks/customQueryHooks';
+import Select from '@/features/Core/components/Select/Select';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
+import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { noop } from '@/features/Core/utils/constants';
+import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
-import QueryResultsHeader from '@/features/Query/components/QueryResultsHeader/QueryResultsHeader';
-import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
-import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { ProjectRaw } from '@/features/Projects/types/projects';
+import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
 import { User } from '@/features/UserAuth/types/user';
-import { getDecodedParams } from '@/features/Common/utils/web';
 
 type QueryPathfinderProps = {
   isResults?: boolean;
-  pk?: string;
-  setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
   selectedProject?: ProjectRaw | null;
   shouldNavigate?: boolean;
   submissionCallback?: () => void;
   user?: User | null;
+  initNodeIdParam?: string | null;
+  initNodeLabelParam?: string | null;
+  initNodeCategoryParam?: string | null;
 }
 
 const QueryPathfinder: FC<QueryPathfinderProps> = ({
   isResults = false,
-  pk,
-  setShareModalFunction = ()=>{},
   selectedProject = null,
   shouldNavigate = true,
-  submissionCallback = () => {},
-  user = null
+  submissionCallback = noop,
+  user = null,
+  initNodeIdParam = null,
+  initNodeLabelParam = null,
+  initNodeCategoryParam = null,
 }) => {
 
   const autocompleteOneId = 'ac1';
   const autocompleteTwoId = 'ac2';
-  const config = useSelector(currentConfig);
   const disabled = user === null;
-  const nameResolverEndpoint = (config?.name_resolver.endpoint) ? `${config.name_resolver.endpoint}/lookup` : 'https://name-lookup.transltr.io/lookup';
+  const nameResolverEndpoint = useNameResolverEndpoint();
   const submitRef = useRef<HTMLButtonElement>(null);
   const autocompleteInputRefOne = useRef<HTMLInputElement>(null);
   const autocompleteInputRefTwo = useRef<HTMLInputElement>(null);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
-  const [inputOneText, setInputOneText] = useState("");
+  const {
+    queryItem: queryItemOne,
+    setQueryItem: setQueryItemOne,
+    inputText: inputOneText,
+    setInputText: setInputOneText,
+    clear: clearSyncedItemOne,
+  } = useSyncedAutocompleteFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam);
   const [inputTwoText, setInputTwoText] = useState("");
-  const [queryItemOne, setQueryItemOne] = useState<AutocompleteItem | null>(null);
   const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
   const [middleType, setMiddleType] = useState<string>("");
 
-  const decodedParams = useMemo(() => getDecodedParams(), []);
-  const labelOne = getDataFromQueryVar("lone", decodedParams);
-  const labelTwo = getDataFromQueryVar("ltwo", decodedParams);
-  const idOne = getDataFromQueryVar("ione", decodedParams);
-  const idTwo = getDataFromQueryVar("itwo", decodedParams);
-  const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
-
-  const autocompleteConfig = useMemo<AutocompleteConfig>(() => ({
-    functions: {
-      filter: defaultQueryFilterFactory,
-      annotate: queryTypeAnnotator,
-      format: combinedQueryFormatter
-    },
-    limitTypes: ["Drug", "ChemicalEntity", "Disease", "Gene", "SmallMolecule", "PhenotypicFeature"],
-    limitPrefixes: [],
-    excludePrefixes: ["UMLS"],
-  }), []);
+  const autocompleteConfig = HOME_QUERY_AUTOCOMPLETE_CONFIG;
 
   const {
     autocompleteItems: autocompleteItemsOne,
@@ -106,12 +91,11 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setInputTwoText(e);
       delayedQueryTwo(e);
     }
-  },[delayedQueryOne, delayedQueryTwo]);
+  },[delayedQueryOne, delayedQueryTwo, setInputOneText, setQueryItemOne]);
 
-  const updateQueryItem = (selectedNode: AutocompleteItem, isFirstBar: boolean) => {
+  const updateQueryItem = (node: AutocompleteItem, isFirstBar: boolean) => {
     // add in match text for genes, which should be the species
-    if(selectedNode.id.includes("NCBIGene") && selectedNode?.match && !selectedNode.label.includes(`(${selectedNode.match})`))
-      selectedNode.label += ` (${selectedNode.match})`;
+    const selectedNode = withGeneMatchLabel(node);
 
     if(isFirstBar) {
       setInputOneText(selectedNode.label);
@@ -151,7 +135,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
       setErrorText("Second search term is not selected, please select a valid term.");
       return;
     }
-    submitPathfinderQuery!(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined, shouldNavigate);
+    submitPathfinderQuery?.(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
   }
 
   // Event handler for form submission
@@ -160,10 +144,10 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   }
 
   const clearItem = (item: number) => {
-    if(item === 1) {
-      setQueryItemOne(null);
-      setInputOneText("");
-    } else if(item === 2) {
+    if (item === 1) {
+      // First input is the one prefilled from canvas/node URL params.
+      clearSyncedItemOne();
+    } else if (item === 2) {
       setQueryItemTwo(null);
       setInputTwoText("");
     }
@@ -205,31 +189,15 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     cxt.event.preventDefault();
     cxt.event.stopPropagation();
     handleSubmission(queryItemOne, queryItemTwo);
-    return;
   }
 
   return (
     <div className={`${styles.queryPathfinder} ${isResults && styles.results}`}>
       { isResults
-        ?
-          <QueryResultsHeader
-            questionText={""}
-            entityId={idOne || undefined}
-            entityLabel={labelOne || undefined}
-            entityIdTwo={idTwo || undefined}
-            entityLabelTwo={labelTwo || undefined}
-            onShare={() => setShareModalFunction(true)}
-            pk={pk || ""}
-            className={styles.resultsHeader}
-            searchedTermClassName={styles.searchedTerm}
-            shareButtonClassName={styles.shareButton}
-            isPathfinder
-            constraintText={constraintText || undefined}
-          />
+        ? null
         :
           <>
             <p className={`blurb ${styles.blurb}`}>Enter two search terms to find paths beginning with the first term and ending with the second</p>
-            <p className='caption'>Genes, diseases or phenotypes, and drugs or chemicals are currently supported</p>
             {
               isError &&
               <p className={styles.error}>{errorText}</p>
@@ -260,6 +228,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefOne}
                 handleSwapTerms={swapTerms}
+                showDisclaimer
               />
               <PathfinderDivider className={styles.dividerIcon}/>
               {
@@ -277,11 +246,9 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                       noanimate
                       className={styles.middleTypeSelector}
                       >
-                      <option value="biolink:ChemicalEntity">Chemical</option>
-                      <option value="biolink:Disease">Disease</option>
-                      <option value="biolink:Drug">Drug</option>
-                      <option value="biolink:Gene">Gene</option>
-                      <option value="biolink:PhenotypicFeature">Phenotype</option>
+                      {BIOLINK_CATEGORIES.map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                      ))}
                     </Select>
                   </>
                 : 
@@ -306,6 +273,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
                 inputRef={autocompleteInputRefTwo}
+                showDisclaimer
               />
               <Button
                 ref={submitRef}

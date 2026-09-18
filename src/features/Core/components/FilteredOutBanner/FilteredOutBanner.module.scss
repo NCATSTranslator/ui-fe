@@ -1,0 +1,21 @@
+@use "@/assets/styles/variables" as *;
+
+.filteredBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $s;
+  margin: -$s 0 $s;
+  padding: $xs $s;
+  background-color: $lightGray;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  span {
+    color: $darkGray;
+    font-size: $bodyTwoSize;
+    font-weight: 400;
+  }
+  button span {
+    color: $purpleOne;
+  }
+}

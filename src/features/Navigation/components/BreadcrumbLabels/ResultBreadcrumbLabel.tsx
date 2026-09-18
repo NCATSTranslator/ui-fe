@@ -2,7 +2,8 @@ import { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { getNodeById, getResultById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
-import { capitalizeAllWords, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { Result, ResultSet } from '@/features/ResultList/types/results';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
@@ -15,10 +16,10 @@ const formatResultLabel = (resultSet: ResultSet | null, result: Result | undefin
   if(!node)
     return undefined;
 
-  if(node.types[0] === 'biolink:Gene' || node.types[0] === 'biolink:Protein')
+  if(result.drug_name.includes('/'))
+    return capitalizeAllWords(result.drug_name, '/');
+  else if(node.types[0] === 'biolink:Gene' || node.types[0] === 'biolink:Protein')
     return node.names[0].toUpperCase();
-  else if(result.drug_name.includes('/'))
-    return capitalizeAllWords(capitalizeAllWords(result.drug_name), '/');
   else 
     return capitalizeAllWords(result.drug_name);
 };

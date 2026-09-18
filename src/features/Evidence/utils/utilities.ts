@@ -1,108 +1,82 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap } from "@/features/Evidence/types/evidence";
-import { capitalizeAllWords } from "@/features/Common/utils/utilities";
-import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById } from "@/features/ResultList/slices/resultsSlice";
-import { ResultSet, ResultEdge, Result, Path } from "@/features/ResultList/types/results.d";
-import { checkProperties } from "@/features/Common/types/checkers";
+import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry } from "@/features/Evidence/types/evidence";
+import { isPublication } from "@/features/Evidence/types/checkers";
+import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
+import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
+import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
+import { getCompressedEdge } from "@/features/Core/utils/resultHelpers";
+import { isResultEdge } from "@/features/ResultList/types/checkers";
+
+interface EvidenceAccumulator {
+  pubs: Set<string>;
+  cts: Set<string>;
+  sources: Set<string>;
+  misc: Set<string>;
+}
+
+const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
+  for (const key in edge.publications) {
+    const pubArray = edge.publications[key];
+    if (!Array.isArray(pubArray)) continue;
+    for (const pubData of pubArray) {
+      const pub = getPubById(resultSet, pubData.id);
+      if (!pub) continue;
+      if (isPublication(pub, false))
+        acc.pubs.add(pub.url);
+      else
+        acc.misc.add(pub.url);
+    }
+  }
+};
+
+const addEdgeTrials = (edge: ResultEdge, acc: EvidenceAccumulator) => {
+  if (Array.isArray(edge.trials)) {
+    for (const trialId of edge.trials) {
+      acc.cts.add(trialId);
+    }
+  }
+};
+
+const addEdgeSources = (edge: ResultEdge, acc: EvidenceAccumulator) => {
+  if (edge.provenance) {
+    for (const source of edge.provenance) {
+      acc.sources.add(source.infores);
+    }
+  }
+};
+
+const collectEvidenceFromEdge = (
+  resultSet: ResultSet,
+  edge: ResultEdge | string,
+  acc: EvidenceAccumulator
+) => {
+  const resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
+  if (!resultEdge) return;
+
+  addEdgePublications(resultSet, resultEdge, acc);
+  addEdgeTrials(resultEdge, acc);
+  addEdgeSources(resultEdge, acc);
+};
 
 /**
- * Generates evidence ids for a provided edge, optionally including support edges
+ * Generates evidence ids for a provided edge
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
  * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
- * @param {boolean} includeSupport - Whether to include evidence from support edges (default: false).
- * @param {Set<string>} allPubs - Optional Set to add publication URLs to (if not provided, creates new Set).
- * @param {Set<string>} allCTs - Optional Set to add clinical trial IDs to (if not provided, creates new Set).
- * @param {Set<string>} allSources - Optional Set to add source names to (if not provided, creates new Set).
- * @param {Set<string>} allMisc - Optional Set to add miscellaneous URLs to (if not provided, creates new Set).
- * @param {Set<string>} visitedPathIds - Optional Set of path IDs currently being processed (used to prevent cycles in nested support).
  * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
  */
 export const getEvidenceFromEdge = (
-  resultSet: ResultSet, 
-  edge: ResultEdge | string,
-  includeSupport: boolean = false,
-  allPubs?: Set<string>,
-  allCTs?: Set<string>,
-  allSources?: Set<string>,
-  allMisc?: Set<string>,
-  visitedPathIds: Set<string> = new Set()
+  resultSet: ResultSet,
+  edge: ResultEdge | string
 ) => {
-  // Initialize Sets if not provided
-  const pubs = allPubs || new Set<string>();
-  const cts = allCTs || new Set<string>();
-  const sources = allSources || new Set<string>();
-  const misc = allMisc || new Set<string>();
-
-  // Helper function to process a single edge
-  const processEdge = (edgeToProcess: ResultEdge) => {
-    // Process publications
-    for(const key in edgeToProcess.publications) {
-      const pubArray = edgeToProcess.publications[key];
-      if (!Array.isArray(pubArray)) continue;
-      for(const pubData of pubArray) {
-        const pub = getPubById(resultSet, pubData.id);
-        if(!pub) 
-          continue;
-        const url = pub.url;
-        if(isPublication(pub)) 
-          pubs.add(url);
-        else 
-          misc.add(url);
-      }
-    }
-
-    // Process clinical trials (use of trial IDs for correct deduplication across edges)
-    if (Array.isArray(edgeToProcess.trials)) {
-      for (const trialId of edgeToProcess.trials) {
-        cts.add(trialId);
-      }
-    }
-
-    // Process sources
-    // don't process sources for inferred edges, only for direct edges
-    if(edgeToProcess.provenance && !edgeToProcess.inferred) { 
-      for(const source of edgeToProcess.provenance)
-        sources.add(source.name ?? "");
-    }
+  const acc: EvidenceAccumulator = {
+    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(),
   };
-
-  // Get the edge object
-  let resultEdge = (typeof edge === "string") ? getEdgeById(resultSet, edge) : edge;
-  
-  if(!!resultEdge) {
-    // Process the main edge
-    processEdge(resultEdge);
-    
-    // Process support edges if requested (recursively so nested support paths e.g. 2.a.i are counted)
-    if(includeSupport && resultEdge.inferred && resultEdge.support) {
-      for(const sp of resultEdge.support) {
-        const supportPath = (typeof sp === "string") ? getPathById(resultSet, sp): sp;
-        if(!supportPath) 
-          continue;
-        const pathId = supportPath.id ?? (typeof sp === "string" ? sp : "");
-        if(pathId && visitedPathIds.has(pathId))
-          continue; // avoid cycles
-        if(pathId) visitedPathIds.add(pathId);
-        try {
-          for(let j = 1; j < supportPath.subgraph.length; j += 2) {
-            getEvidenceFromEdge(resultSet, supportPath.subgraph[j], true, pubs, cts, sources, misc, visitedPathIds);
-          }
-        } finally {
-          if(pathId) visitedPathIds.delete(pathId);
-        }
-      }
-    }
-  }
-
-  return {
-    pubs,
-    cts,
-    sources,
-    misc
-  };
+  collectEvidenceFromEdge(resultSet, edge, acc);
+  const { pubs, cts, sources, misc } = acc;
+  return { pubs, cts, sources, misc };
 };
 
 /**
@@ -120,7 +94,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
 
   const processPathEdges = (path: Path) => {
     for(let i = 1; i < path.subgraph.length; i += 2) {
-      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i], true);
+      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i]);
       if(edgeEvidence.pubs.size > 0)
         allPubs = allPubs.union(edgeEvidence.pubs);
       if(edgeEvidence.cts.size > 0)
@@ -191,14 +165,10 @@ export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): numbe
  */
 export const formatPublicationSourceName = (sourceName: string): string => {
   let newSourceName = sourceName;
-  if(typeof sourceName === 'string')
-  switch (sourceName.toLowerCase()) {
-    case "semantic medline database":
+  if(typeof sourceName === 'string') {
+    if(sourceName.toLowerCase() === "semantic medline database") {
       newSourceName = "SemMedDB"
-      break;
-
-    default:
-      break;
+    }
   }
   return newSourceName;
 }
@@ -253,6 +223,16 @@ export const getUrlByType = (publicationID: string, type: string): string => {
  * @returns {string} - A label containing the subject node name, predicate, and object node name
  * separated by pipe characters. 
  */
+export const getEvidenceCountsFromCanvasEdge = (
+  edge: { publications?: Record<string, unknown[]>; trials?: unknown[] },
+): { pubCount: number; ctCount: number } => {
+  let pubCount = 0;
+  for (const entries of Object.values(edge.publications ?? {})) {
+    pubCount += entries.length;
+  }
+  return { pubCount, ctCount: edge.trials?.length ?? 0 };
+};
+
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
@@ -262,79 +242,72 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
   return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
 }
 
-/**
- * Type guard to check if an object is a PublicationObject.
- *
- * @param obj - The object to check.
- * @returns {boolean} True if the object is a PublicationObject, otherwise false.
- */
-export const isPublicationObject = (obj: unknown, warn = true): obj is PublicationObject => {
-  if (typeof obj !== 'object' || obj === null) {
-    if (warn) console.warn("[isPublicationObject] expected object, got:", typeof obj, obj);
-    return false;
-  }
-  const o = obj as Record<string, unknown>;
-  return checkProperties("isPublicationObject", obj, [
-    ["source", typeof o.source === 'object', "object", o.source],
-    ["type", typeof o.type === 'string', "string", o.type],
-    ["url", typeof o.url === 'string', "string", o.url],
-  ], warn);
-}
+export const getFormattedEdgeLabelWithNames = (
+  edge: ResultEdge,
+  nodeNames: Record<string, string>,
+): string => {
+  const subjectNodeName = nodeNames[edge.subject] ?? edge.subject;
+  const objectNodeName = nodeNames[edge.object] ?? edge.object;
+  return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
+};
+
+export const formatEvidenceEdgeLabel = (
+  edge: ResultEdge,
+  resultSet: ResultSet | null,
+  nodeNameLookup: Record<string, string> = {},
+): string => {
+  const raw = resultSet
+    ? getFormattedEdgeLabel(resultSet, edge)
+    : getFormattedEdgeLabelWithNames(edge, nodeNameLookup);
+  return raw.replaceAll('|', ' ');
+};
 
 /**
- * Type guard to check if an object is an array of PublicationObjects.
+ * Finds the publication entry (with its support data) matching a given publication ID on an edge.
  *
- * @param arr - The object to check.
- * @returns {boolean} True if the object is a PublicationsList, otherwise false.
+ * @param {string} pubID - The publication ID to look for.
+ * @param {ResultEdge} edge - The edge whose publications should be searched.
+ * @returns {{id: string; support: PublicationSupport;} | false} - The matching publication entry, or false if none is found.
  */
-export const isPublicationObjectArray = (arr: unknown, warn = true): arr is PublicationObject[] => {
-  if (!Array.isArray(arr)) {
-    if (warn) console.warn("[isPublicationObjectArray] expected array, got:", typeof arr, arr);
-    return false;
+export const findPublicationOnEdge = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
+  for (const pubTypeArr of Object.values(edge.publications)) {
+    const match = pubTypeArr.find(publication => publication.id === pubID);
+    if (match) return match;
   }
-  const invalidIndex = arr.findIndex(item => !isPublicationObject(item, warn));
-  if (invalidIndex !== -1) {
-    if (warn) console.warn(`[isPublicationObjectArray] item at index ${invalidIndex} failed validation`, arr[invalidIndex]);
-    return false;
-  }
-  return true;
-}
+  return false;
+};
 
 /**
- * Determines the type of publications structure in a ResultEdge object.
+ * Resolves the edge that was clicked within a path's (optionally compressed) subgraph.
  *
- * @param {ResultEdge} edgeObject - The edge object to check publications type for.
- * @returns {string} - A string indicating the type of publications structure ("PublicationObject[]", "{[key: string]: string[]}", or "Unknown type").
- */
-export const checkPublicationsType = (edgeObject: ResultEdge): string => {
-  if (isPublicationObjectArray(edgeObject.publications)) {
-    return "PublicationObject[]";
-  } else if (isPublicationDictionary(edgeObject.publications)) {
-    return "{[key: string]: string[]}";
-  } else {
-    return "Unknown type";
-  }
-}
-
-/**
- * Type guard to check if an object is a PublicationDictionary.
+ * When a compressed subgraph is available, the matching edge is located within it (handling
+ * grouped/compressed edges). Otherwise, a freshly compressed edge is built from the provided IDs.
  *
- * @param publications - The object to check.
- * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
+ * @param {ResultSet} resultSet - Result Set used to build a compressed edge when no subgraph is available.
+ * @param {(ResultNode | ResultEdge | ResultEdge[])[] | false} compressedSubgraph - The compressed subgraph to search, or false if unavailable.
+ * @param {string[]} edgeIDs - The clicked edge IDs (the first is used to match within the subgraph).
+ * @returns {ResultEdge | undefined} - The resolved edge, or undefined if none could be resolved.
  */
-export const isPublicationDictionary = (publications: unknown, warn = true): publications is {[key: string]: string[]} => {
-  if (typeof publications !== 'object' || publications === null || Array.isArray(publications)) {
-    if (warn) console.warn("[isPublicationDictionary] expected object, got:", typeof publications, publications);
-    return false;
+export const resolveClickedEdge = (
+  resultSet: ResultSet,
+  compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] | false,
+  edgeIDs: string[]
+): ResultEdge | undefined => {
+  if (!compressedSubgraph) {
+    const edge = getCompressedEdge(resultSet, edgeIDs);
+    return isResultEdge(edge) ? edge : undefined;
   }
-  for (const [key, value] of Object.entries(publications as Record<string, unknown>)) {
-    if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
-      if (warn) console.warn(`[isPublicationDictionary] invalid value at key "${key}": expected string[], got:`, value);
-      return false;
+  for (let i = 1; i < compressedSubgraph.length; i += 2) {
+    const edgeItem = compressedSubgraph[i];
+    if (Array.isArray(edgeItem)) {
+      const found = edgeItem.find(e => e.id === edgeIDs[0]);
+      if (found) return found;
+    } else if (isResultEdge(edgeItem) && edgeItem.id === edgeIDs[0]) {
+      return edgeItem;
     }
   }
-  return true;
-}
+  return undefined;
+};
 
 /**
  * Checks if any edge in the provided array has clinical trials attached.
@@ -358,26 +331,13 @@ export const checkEdgesForClinicalTrials = (edges: ResultEdge[]): boolean => {
  */
 export const checkEdgesForPubs = (edges: ResultEdge[]): boolean => {
   for(const edge of edges) {
-    if(Object.values(edge.publications).length > 0)
-      return true;
+    const publications = Object.values(edge.publications);
+    for(const publication of publications) {
+      if(publication.some(pub => isPublication(pub, false)))
+        return true;
+    }
   }
   return false;
-}
-
-/**
- * Determines if a publication object is categorized as a publication based on its type or ID.
- *
- * @param {PublicationObject | RawPublicationObject} publication - The publication object to check.
- * @returns {boolean} - True if the object is a publication (PMID or PMC), false otherwise.
- */
-export const isPublication = (publication: PublicationObject | RawPublicationObject) => {
-  if(isPublicationObject(publication) && (publication.type === "PMID" || publication.type === "PMC"))
-    return true;
-  else if(publication.id?.includes("PMID") || publication.id?.includes("PMC"))  {
-    return true;
-  }
-
-  return false
 }
 
 /**
@@ -467,13 +427,48 @@ export const getKnowledgeLevelString = (knowledgeLevel: string): string => {
  *
  */
 export const generatePubmedURL = (id: string): string => {
-  if(id.includes("PMC")) 
-    return `https://www.ncbi.nlm.nih.gov/pmc/${id}`;
+  if(id.includes("PMC"))
+    return `https://pmc.ncbi.nlm.nih.gov/articles/${id}`;
   if(id.includes("PMID"))
     return `http://www.ncbi.nlm.nih.gov/pubmed/${id.replace("PMID:", "")}`;
 
   return "";
 }
+
+const buildTrialUrl = (id: string): string => {
+  const nctMatch = id.match(/NCT\d+/i);
+  if (nctMatch) {
+    return `https://clinicaltrials.gov/study/${nctMatch[0].toUpperCase()}`;
+  }
+  return getUrlByType(id, getTypeFromPub(id));
+};
+
+const publicationObjectFromRef = (
+  pubEntry: { id: string; support: PublicationSupport | null; infores: string },
+  knowledgeLevel: string,
+  edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): PublicationObject => {
+  const type = getTypeFromPub(pubEntry.id);
+  return {
+    knowledgeLevel,
+    id: pubEntry.id,
+    source: getPublicationSource(null, pubEntry.infores, edge, provenanceCatalog),
+    support: pubEntry.support || null,
+    type,
+    url: getUrlByType(pubEntry.id, type),
+  };
+};
+
+const trialObjectFromRef = (id: string): TrialObject => ({
+  child: false,
+  id,
+  phase: 0,
+  size: 0,
+  start_date: '',
+  status: 'UNKNOWN',
+  url: buildTrialUrl(id),
+});
 
 /**
  * Retrieves and flattens publication objects from a structured publication list.
@@ -483,26 +478,33 @@ export const generatePubmedURL = (id: string): string => {
  *
  * @param {ResultSet | null} resultSet - The dataset containing publication information.
  * @param {RawPublicationList} pubs - A structured object mapping knowledge levels to publication entries.
+ * @param {ResultEdge} [edge] - The edge the publications belong to, used to resolve per source record links.
+ * @param {Record<string, ProvenanceCatalogEntry>} [provenanceCatalog] - Infores catalog entries used to name sources when there is no result set.
  * @returns {PublicationObject[]} - An array of publication objects with relevant metadata.
  */
-export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList): PublicationObject[] => {
+export const flattenPublicationObject = (
+  resultSet: ResultSet | null,
+  pubs: RawPublicationList,
+  edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
-  if(!resultSet)
-    return pubArray;
 
-  for (const key in pubs) {
-    const entries = pubs[key];
-    for (const entryID of entries) {
-      const pub = getPubById(resultSet, entryID.id);
-      if(!!pub) {
+  for (const kl in pubs) {
+    const pubEntries = pubs[kl];
+    for (const pubEntry of pubEntries) {
+      const pub = resultSet ? getPubById(resultSet, pubEntry.id) : undefined;
+      if (pub) {
         pubArray.push({
-          knowledgeLevel: key, 
-          id: entryID.id,
-          source: pub.source,
+          knowledgeLevel: kl,
+          id: pubEntry.id,
+          source: getPublicationSource(resultSet, pubEntry.infores, edge),
           support: pub.support || null,
           type: pub.type,
           url: pub.url
         });
+      } else {
+        pubArray.push(publicationObjectFromRef(pubEntry, kl, edge, provenanceCatalog));
       }
     }
   }
@@ -525,9 +527,8 @@ export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string
   if(!trialIDs)
     return trialArray;
   for (const id of trialIDs) {
-    const trial = getTrialById(resultSet, id);
-    if(!!trial) 
-      trialArray.push(trial);
+    const trial = resultSet ? getTrialById(resultSet, id) : undefined;
+    trialArray.push(trial ?? trialObjectFromRef(id));
   }
 
   return trialArray;

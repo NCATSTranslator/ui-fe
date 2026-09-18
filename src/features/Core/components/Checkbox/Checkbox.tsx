@@ -1,7 +1,7 @@
 import { useState, useEffect, FC, ReactNode, useCallback, MouseEvent, useId } from "react";
 import DefaultIcon from '@/assets/icons/buttons/Checkmark/Checkmark.svg?react';
 import styles from './Checkbox.module.scss';
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 import InputLabel from "../InputLabel/InputLabel";
 
@@ -16,7 +16,7 @@ export interface CheckboxProps {
   subtitle?: string;
   name?: string;
   title?: string; 
-  value?: string | number | undefined;
+  value?: string | number;
   disabled?: boolean;
   id?: string;
   'aria-describedby'?: string;

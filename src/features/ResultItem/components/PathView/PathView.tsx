@@ -1,92 +1,132 @@
 import styles from './PathView.module.scss';
-import { useMemo, useCallback, useRef, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import { useMemo, useCallback, useEffect, FC, Dispatch, SetStateAction, RefObject, createContext, useState } from "react";
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ReactPaginate from 'react-paginate';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
-import { isStringArray } from '@/features/Common/utils/utilities';
-import { getFilteredPathCount, getIsPathFiltered, getPathsWithSelectionsSet, isPathInferred } from '@/features/ResultItem/utils/utilities';
-import { PathFilterState, ResultNode, Path, ResultEdge, HoverTarget } from '@/features/ResultList/types/results';
+import { isStringArray } from '@/features/Core/utils/resultHelpers';
+import { getIsPathFiltered, getPathsPerPage, getFormattedPaths } from '@/features/ResultItem/utils/utilities';
+import { PathFilterState, ResultNode, Path, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { useHoverPathObject } from '@/features/Evidence/hooks/evidenceHooks';
+import { createHoverStore, HoverContext } from '@/features/ResultItem/hooks/hoverHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
+import { selectActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import { useSelector } from 'react-redux';
 import Button from '@/features/Core/components/Button/Button';
 import PathContainer from '@/features/ResultItem/components/PathContainer/PathContainer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { currentPrefs } from '@/features/UserAuth/slices/userSlice';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import { EMPTY_STRING_ARRAY, noop } from '@/features/Core/utils/constants';
+import { useDragActiveRef } from '@/features/DragAndDrop/hooks/useDragActiveRef';
 
-export const SupportPathDepthContext = createContext<number>(1);
-export const HoverContext = createContext<{
-  hoveredItem: HoverTarget;
-  setHoveredItem: (target: HoverTarget) => void;
-} | null>(null);
+// Supplies the id of the result this PathView belongs to, so node/edge navigation
+// works even when the route has no result id (e.g. the results list view).
+export const ResultItemIdContext = createContext<string | undefined>(undefined);
+
+// Stable defaults for callers that have nothing to filter by, so memoized
+// descendants aren't invalidated by a fresh literal on every render.
+const NO_FILTERS: Filter[] = [];
+const NO_PATH_FILTER_STATE: PathFilterState = {};
 
 interface PathViewProps {
   active: boolean;
-  activeEntityFilters: string[];
-  activeFilters: Filter[];
+  activeEntityFilters?: string[];
+  activeFilters?: Filter[];
   compressedSubgraph?: false | (ResultEdge | ResultNode | ResultEdge[])[];
   handleEdgeSpecificEvidence?:(edgeIDs: string[], path: Path) => void;
   inModal?: boolean;
   isEven: boolean;
+  isLookup?: boolean;
   pathArray: string[] | Path[];
-  pathFilterState: PathFilterState;
+  pathFilterState?: PathFilterState;
   pk: string;
+  resultId?: string;
   selectedEdge?: ResultEdge | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
-  selectedPaths: Set<Path> | null;
-  setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
+  setShowHiddenPaths?: Dispatch<SetStateAction<boolean>>;
   showHiddenPaths: boolean;
 }
 
 const PathView: FC<PathViewProps> = ({ 
   active,
-  activeEntityFilters,
-  activeFilters,
+  activeEntityFilters = EMPTY_STRING_ARRAY,
+  activeFilters = NO_FILTERS,
   compressedSubgraph,
   handleEdgeSpecificEvidence,
   inModal = false,
   isEven,
+  isLookup = false,
   pathArray,
-  pathFilterState,
+  pathFilterState = NO_PATH_FILTER_STATE,
   pk,
+  resultId: resultItemId,
   selectedEdge,
   selectedEdgeRef,
-  selectedPaths,
-  setShowHiddenPaths,
+  setShowHiddenPaths = noop,
   showHiddenPaths }) => {
-
+  
+  const prefs = useSelector(currentPrefs);
+  const hasActiveCanvas = !!useSelector(selectActiveCanvas);
   const { resultId } = useResultListContext();
+  const effectiveResultId = resultItemId ?? resultId;
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
-  const itemsPerPage: number = 10;
-  const formattedPaths = useMemo(() => getPathsWithSelectionsSet(resultSet, paths, pathFilterState, selectedPaths, true), [paths, selectedPaths, pathFilterState, resultSet]);
-  const filteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState), [formattedPaths, pathFilterState]);
-  const fullFilteredPathCount = useMemo(() => getFilteredPathCount(formattedPaths, pathFilterState, true, resultSet), [formattedPaths, pathFilterState, resultSet]);
+  const pathsPerPage: number = getPathsPerPage(prefs);
+  const formattedPaths = useMemo(() => getFormattedPaths(resultSet, paths, pathFilterState), [paths, pathFilterState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState(0)
-  const endResultIndex = useRef<number>(itemsPerPage);
-  const pageCount = (!showHiddenPaths) ? Math.ceil((formattedPaths.length - filteredPathCount) / itemsPerPage) : Math.ceil((formattedPaths.length) / itemsPerPage);
-  const [hoveredItem, setHoveredItem] = useState<HoverTarget>(null);
-  const { hoveredIndex } = useHoverPathObject(setHoveredItem);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hoverStore] = useState(createHoverStore);
+  // Clearing on both edges of a drag avoids leaving a stale highlight behind,
+  // since the hover handlers themselves are inert while dragging.
+  const handleDragActiveChange = useCallback(() => hoverStore.setHoveredItem(null), [hoverStore]);
+  const isDragActiveRef = useDragActiveRef(handleDragActiveChange);
+  const hoverContextValue = useMemo(
+    () => ({ store: hoverStore, isDragActiveRef }),
+    [hoverStore, isDragActiveRef]
+  );
+
+  // Path numbering is based on position in the full collection. Building the lookup
+  // once here keeps each PathContainer from scanning the whole array.
+  const pathIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    formattedPaths.forEach((path, index) => {
+      if (path.id) map.set(path.id, index);
+    });
+    return map;
+  }, [formattedPaths]);
   
-  const handlePageClick = (event: {selected: number} ) => {
-    let pathsLength = formattedPaths.length;
-    if(!pathsLength)
+  const { formattedPathsToDisplay, filteredPathCount } = useMemo(() => {
+    let filteredCount = 0;
+    const visible = formattedPaths.filter(path => {
+      const isFiltered = getIsPathFiltered(path, pathFilterState);
+      if (isFiltered) filteredCount++;
+      return !isFiltered;
+    });
+    return {
+      formattedPathsToDisplay: showHiddenPaths ? formattedPaths : visible,
+      filteredPathCount: filteredCount
+    };
+  }, [formattedPaths, pathFilterState, showHiddenPaths]);
+
+  const hasFilteredPaths = filteredPathCount > 0;
+  const pageCount = Math.ceil(formattedPathsToDisplay.length / pathsPerPage);
+  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, itemOffset + pathsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(0);
+    setItemOffset(0);
+  }, [pathsPerPage]);
+
+  const handlePageClick = useCallback((event: {selected: number}) => {
+    const pathsLength = formattedPathsToDisplay.length;
+    if (!pathsLength)
       return;
     setCurrentPage(event.selected);
-    const newOffset:number = isNaN((event.selected * itemsPerPage) % pathsLength) ? 0 : (event.selected * itemsPerPage) % pathsLength;
-    const endOffset:number = (newOffset + itemsPerPage) > pathsLength
-      ? pathsLength
-      : newOffset + itemsPerPage;
-    setItemOffset(newOffset);
-    endResultIndex.current = endOffset;
-  }
-  const formattedPathsToDisplay = (showHiddenPaths) ? formattedPaths : formattedPaths.filter(path => !getIsPathFiltered(path, pathFilterState));
-  const displayedPaths = formattedPathsToDisplay.slice(itemOffset, endResultIndex.current);
-  let directLabelDisplayed = false;
-  let inferredLabelDisplayed = false;
+    const newOffset = (event.selected * pathsPerPage) % pathsLength;
+    setItemOffset(isNaN(newOffset) ? 0 : newOffset);
+  }, [formattedPathsToDisplay.length, pathsPerPage]);
 
   const handleEdgeClick = useCallback((edgeIDs: string[], path: Path) => {
     handleEdgeSpecificEvidence?.(edgeIDs, path);
@@ -101,46 +141,28 @@ const PathView: FC<PathViewProps> = ({
         <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
       </Tooltip>
       {
-        !inModal && 
+        (!inModal && !isLookup) && 
         <div className={styles.header}>
-          <p>Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.</p>
+          <p>
+            {hasActiveCanvas
+              ? 'Drag and drop a result, path, object, or relationship to add it to the canvas.'
+              : 'Hover over any entity to view a definition (if available), or click on any relationship to view evidence that supports it.'}
+          </p>
         </div>
       }
       {
         (!active)
         ? <></>
         :
-        <HoverContext.Provider value={{ hoveredItem, setHoveredItem }}>
-          <SupportPathDepthContext.Provider value={0}>
-            <div className={`${styles.paths} ${inModal && styles.inModal}`}>
+        <ResultItemIdContext.Provider value={effectiveResultId}>
+        <HoverContext.Provider value={hoverContextValue}>
+            <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
                 displayedPaths.map((path: Path, i: number)=> {
                   if(!path.id) 
                     return null;
-                  const displayIndirectLabel = isPathInferred(resultSet, path) && !inferredLabelDisplayed;
-                    if(displayIndirectLabel)
-                      inferredLabelDisplayed = true;
-                  const displayDirectLabel = !isPathInferred(resultSet, path) && !directLabelDisplayed;
-                    if(displayDirectLabel)
-                      directLabelDisplayed = true;
-                                        return (
-                      <div key={path.id || i.toString()}>
-                      { displayDirectLabel && !inModal && (
-                        <p className={styles.inferenceLabel} data-tooltip-id="direct-label-tooltip">
-                          Direct <Information className={styles.infoIcon} />
-                          <Tooltip id='direct-label-tooltip'>
-                            <span className={styles.inferredLabelTooltip}>Established from explicit evidence in external sources. Example: A research paper stating 'X is related to Y.'</span>
-                          </Tooltip>
-                        </p>
-                      )}
-                      { displayIndirectLabel && !inModal && (
-                        <p className={styles.inferenceLabel} data-tooltip-id="inferred-label-tooltip">
-                          Indirect <Information className={styles.infoIcon} />
-                          <Tooltip id='inferred-label-tooltip'>
-                            <span className={styles.inferredLabelTooltip}>Indirect paths are identified by reasoning agents that use logic and pattern recognition to find connections between objects. The intermediary connections that explain these relationships can be found in the supporting paths below them. <a href="/help#indirect" target='_blank'>Learn More about Indirect Paths</a></span>
-                          </Tooltip>
-                        </p>
-                      )}
+                  return (
+                    <div key={path.id || i.toString()}>
                       <PathContainer
                         key={path.id}
                         path={path}
@@ -148,17 +170,14 @@ const PathView: FC<PathViewProps> = ({
                         compressedSubgraph={compressedSubgraph}
                         handleEdgeClick={handleEdgeClick}
                         activeEntityFilters={activeEntityFilters}
-                        selectedPaths={selectedPaths}
                         pathFilterState={pathFilterState}
-                        activeFilters={activeFilters}
                         pk={pk}
                         showHiddenPaths={showHiddenPaths}
                         selectedEdgeRef={selectedEdgeRef}
                         selectedEdge={selectedEdge}
                         isEven={isEven}
-                        hoveredIndex={hoveredIndex}
                         styles={styles}
-                        formattedPaths={formattedPaths}
+                        pathIndex={pathIndexMap.get(path.id) ?? -1}
                       />
                     </div>
                   )
@@ -166,17 +185,16 @@ const PathView: FC<PathViewProps> = ({
               }
             </div>
             {
-              Object.keys(activeFilters).length > 0 && fullFilteredPathCount > 0 && 
+              Object.keys(activeFilters).length > 0 && hasFilteredPaths && 
               <Button
-                handleClick={()=>{setShowHiddenPaths(prev=>!prev); handlePageClick({selected: 0})}}
-                variant="secondary"
+                handleClick={() => { setShowHiddenPaths(prev => !prev); setCurrentPage(0); setItemOffset(0); }}                variant="secondary"
                 small
-                dataTooltipId={`${resultId}-excluded-paths-toggle`}
-                className={`${!!isEven && styles.evenButton}`}
+                dataTooltipId={`${effectiveResultId}-excluded-paths-toggle`}
+                className={joinClasses(isEven && styles.evenButton)}
                 iconRight={<Information/>}
                 >
-                {showHiddenPaths ? `Hide ${fullFilteredPathCount} Excluded Paths` : `Show ${fullFilteredPathCount} Excluded Paths`}
-                <Tooltip id={`${resultId}-excluded-paths-toggle`}>
+                {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
+                <Tooltip id={`${effectiveResultId}-excluded-paths-toggle`}>
                   {
                     showHiddenPaths 
                     ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
@@ -185,8 +203,8 @@ const PathView: FC<PathViewProps> = ({
                 </Tooltip>
               </Button>
             }
-          </SupportPathDepthContext.Provider>
         </HoverContext.Provider>
+        </ResultItemIdContext.Provider>
       }
       {
         pageCount > 1 &&

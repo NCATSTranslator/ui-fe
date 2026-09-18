@@ -1,14 +1,18 @@
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
 import './App.scss';
-import { useGoogleAnalytics, useGoogleTagManager, useWindowSize, useScrollToHash } from '@/features/Common/hooks/customHooks';
+import { useGoogleAnalytics, isValidGAID } from '@/features/Core/hooks/useGoogleAnalytics';
+import { useGoogleTagManager, isValidGTMID } from '@/features/Core/hooks/useGoogleTagManager';
+import { usePageViewTracking } from '@/features/Analytics/hooks/usePageViewTracking';
+import { useAnalyticsTransport } from '@/features/Analytics/hooks/useAnalyticsTransport';
+import { useWindowSize } from '@/features/Core/hooks/useWindowSize';
+import { useScrollToHash } from '@/features/Core/hooks/useScrollToHash';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
-import { commonQueryClientOptions, getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { MAIN_CONTENT_ELEMENT_ID, MAIN_SCROLL_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
+import { commonQueryClientOptions } from '@/features/Core/utils/queryClientConfig';
 import { useFetchConfigAndPrefs, useGetSessionStatus } from '@/features/UserAuth/utils/userApi';
 import { AppToastContainer } from '@/features/Core/components/AppToastContainer/AppToastContainer';
 import Footer from '@/features/Page/components/Footer/Footer';
-import SmallScreenOverlay from '@/features/Common/components/SmallScreenOverlay/SmallScreenOverlay';
-import SendFeedbackModal from "@/features/Common/components/SendFeedbackModal/SendFeedbackModal";
+import SmallScreenOverlay from '@/features/Core/components/SmallScreenOverlay/SmallScreenOverlay';
 import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/SidebarProvider';
 import Sidebar from '@/features/Sidebar/components/Sidebar/Sidebar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,6 +23,19 @@ import { createPortal } from 'react-dom';
 import Header from '@/features/Page/components/Header/Header';
 import { ProjectModalsProvider } from '@/features/Projects/components/ProjectModalsProvider/ProjectModalsProvider';
 import DraggableQueryCardWrapper from '@/features/Projects/components/DraggableQueryCardWrapper/DraggableQueryCardWrapper';
+import ResultEntityDragOverlay, { ResultEntityDragOverlayData } from '@/features/DragAndDrop/components/ResultEntityDragOverlay/ResultEntityDragOverlay';
+import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
+import { getPathnameClasses, joinClasses } from '@/features/Core/utils/classHelpers';
+import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
+import CanvasDeleteConfirmationProvider from '@/features/Canvas/components/CanvasDeleteConfirmationProvider/CanvasDeleteConfirmationProvider';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCanvasEnabled } from '@/features/UserAuth/slices/userSlice';
+import { closePane } from '@/features/Canvas/slices/canvasSlice';
+
+// Lazy so translator-graph-view stays out of the entry chunk.
+const CanvasPane = lazy(() => import('@/features/Canvas/components/CanvasPane/CanvasPane'));
+// Renders nothing; owns the canvas sync poll so it runs regardless of which route is open.
+const CanvasSync = lazy(() => import('@/features/Canvas/components/CanvasSync/CanvasSync'));
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
@@ -28,25 +45,28 @@ const App = ({children}: {children?: ReactNode}) => {
   const minScreenWidth = 1024;
   const {width} = useWindowSize();
   const isSmallScreen = width && width < minScreenWidth;
+  const canvasEnabled = useSelector(selectCanvasEnabled);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!canvasEnabled) {
+      dispatch(closePane());
+    }
+  }, [canvasEnabled, dispatch]);
 
   const [gaID, setGaID] = useState<string | null>(null);
-  useGoogleAnalytics(gaID ?? undefined);
   const [gtmID, setGtmID] = useState<string | null>(null);
-  useGoogleTagManager(gtmID ?? undefined);
+  // Validated once so every analytics hook agrees on the transport: an ID the
+  // loaders would reject must not suppress gtag.js or claim GTM owns delivery.
+  const validGaID = gaID && isValidGAID(gaID) ? gaID : undefined;
+  const validGtmID = gtmID && isValidGTMID(gtmID) ? gtmID : undefined;
+  // GTM, when configured, owns the GA4 tag; gtag.js only loads as a fallback.
+  useGoogleAnalytics(validGaID, !!validGtmID);
+  useGoogleTagManager(validGtmID);
+  useAnalyticsTransport(validGaID, validGtmID);
+  usePageViewTracking();
 
-  let pathnameClass = location.pathname.replace('/', '');
-  pathnameClass = (pathnameClass.includes('/')) ? pathnameClass.replace(/\//g, '-') : pathnameClass;
-  pathnameClass = (pathnameClass === "") ? "home" : pathnameClass;
-
-  let additionalClasses = '';
-  if(location.pathname.includes('/projects/'))
-    additionalClasses += 'project-detail';
-
-  const initFeedbackModalOpen = getDataFromQueryVar("fm", window.location.search) === "true";
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(initFeedbackModalOpen);
-  const handleModalClose = () => {
-    setFeedbackModalOpen(false);
-  }
+  const { pathnameClass, additionalClasses } = getPathnameClasses(location.pathname);
 
   const [sessionStatus] = useGetSessionStatus();
   useFetchConfigAndPrefs(sessionStatus ? !!sessionStatus.user : undefined, setGaID, setGtmID);
@@ -54,6 +74,7 @@ const App = ({children}: {children?: ReactNode}) => {
 
   // Drag and drop state
   const [activeQuery, setActiveQuery] = useState<UserQueryObject | null>(null);
+  const [activeResultEntity, setActiveResultEntity] = useState<ResultEntityDragOverlayData | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }, // Require 8px movement before drag starts
@@ -61,14 +82,22 @@ const App = ({children}: {children?: ReactNode}) => {
   );
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    if (active.data.current?.type === 'query') {
-      const query = active.data.current?.data as UserQueryObject;
-      setActiveQuery(query);
+    const dragType = active.data.current?.type;
+    if (dragType === 'query') {
+      setActiveQuery(active.data.current?.data as UserQueryObject);
+      setActiveResultEntity(null);
+    } else if (isResultEntityDragType(dragType)) {
+      setActiveResultEntity(active.data.current as ResultEntityDragOverlayData);
+      setActiveQuery(null);
+    } else {
+      setActiveQuery(null);
+      setActiveResultEntity(null);
     }
   }
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveQuery(null);
+    setActiveResultEntity(null);
     
     if (over?.data.current?.onDrop) {
       try {
@@ -84,48 +113,66 @@ const App = ({children}: {children?: ReactNode}) => {
     <SidebarProvider>
       <QueryClientProvider client={queryClient}>
         <ProjectModalsProvider>
-          <div className={`app ${pathnameClass} ${additionalClasses}`}>
-            <AppToastContainer />
-            <SendFeedbackModal isOpen={feedbackModalOpen} onClose={()=>handleModalClose()} />
-            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="layout">
-                <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
-                <main id={MAIN_CONTENT_ELEMENT_ID} className='content scrollable'>
-                  <Header />
-                  {
-                    children && children
-                  }
-                  {
-                    isSmallScreen && <SmallScreenOverlay /> 
-                  }
-                  <Outlet context={setFeedbackModalOpen}/>
-                  <Footer>
-                    <nav>
-                      <a
-                        href="https://ncats.nih.gov/translator/about"
-                        rel="noreferrer"
-                        target="_blank"
-                      >About Translator</a>
-                      <NavLink to={`/terms-of-use`}
-                        className={({isActive}) => {return (isActive) ? 'active' : '' }}
-                      >Terms of Use</NavLink>
-                      <a
-                        href="https://ncats.nih.gov/privacy"
-                        rel="noreferrer"
-                        target="_blank"
-                      >Privacy Policy</a>
-                    </nav>
-                  </Footer>
-                </main>
+          <CanvasDeleteConfirmationProvider>
+            <CanvasContextMenuProvider>
+              <div className={joinClasses('app', pathnameClass, additionalClasses)}>
+                <AppToastContainer />
+                <Suspense fallback={null}>
+                  {canvasEnabled && <CanvasSync />}
+                </Suspense>
+                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <div className="layout">
+                    <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
+                    <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>
+                      <div id={MAIN_SCROLL_ELEMENT_ID} className='contentScroll scrollable'>
+                        <Header />
+                        {children}
+                        {
+                          isSmallScreen && <SmallScreenOverlay /> 
+                        }
+                        <Outlet />
+                        <Footer>
+                          <nav>
+                            <a
+                              href="https://ncats.nih.gov/translator/about"
+                              rel="noreferrer"
+                              target="_blank"
+                            >About Translator</a>
+                            <NavLink to={`/terms-of-use`}
+                              className={({isActive}) => joinClasses(isActive && 'active')}
+                            >Terms of Use</NavLink>
+                            <a
+                              href="https://ncats.nih.gov/privacy"
+                              rel="noreferrer"
+                              target="_blank"
+                            >Privacy Policy</a>
+                          </nav>
+                        </Footer>
+                      </div>
+                      <Suspense fallback={null}>
+                        {canvasEnabled && <CanvasPane />}
+                      </Suspense>
+                    </main>
+                  </div>
+                  {createPortal(
+                    <DragOverlay
+                      className={joinClasses('dragOverlayBase', activeResultEntity && 'dragOverlay')}
+                    >
+                      {activeQuery && (
+                        <DraggableQueryCardWrapper>
+                          <SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" />
+                        </DraggableQueryCardWrapper>
+                      )}
+                      {activeResultEntity && (
+                        <ResultEntityDragOverlay dragData={activeResultEntity} />
+                      )}
+                    </DragOverlay>,
+                    document.body,
+                  )}
+                </DndContext>
               </div>
-              {createPortal(
-                <DragOverlay>
-                  {activeQuery && <DraggableQueryCardWrapper><SidebarQueryCard query={activeQuery} className="dragOverlayQueryCard" /></DraggableQueryCardWrapper>}
-                </DragOverlay>,
-                document.body,
-              )}
-            </DndContext>
-          </div>
+            </CanvasContextMenuProvider>
+          </CanvasDeleteConfirmationProvider>
         </ProjectModalsProvider>
       </QueryClientProvider>
     </SidebarProvider>

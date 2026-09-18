@@ -41,20 +41,12 @@ export const FrequentlyAskedQuestions = () => {
         with little known about them or dietary supplements.
       </p>
 
-      <span className="hash-anchor" id="scores"></span>
+      <span className="hash-anchor" id="confidence"></span>
 
-      <h2 className="h6">How are result scores calculated?</h2>
-      <p>
-        Result scores range from 0.00 – 5.00 and reflect a combined assessment of{" "}
-        <strong>confidence, clinical evidence, and novelty</strong>; higher scores indicate stronger overall
-        support. Scores help you quickly identify <strong>high-confidence results</strong> that are most
-        likely to be meaningful.
-      </p>
-      <p>
-        Scores are unavailable when results are still{" "}
-        <Link to="/loading-and-syncing#loading">loading</Link>. Once the results are fully loaded, you can{" "}
-        <Link to="/loading-and-syncing#syncing">sync</Link> them to view scores.
-      </p>
+      <h2 className="h6">How do you decide what results to list first?</h2>
+      <p>The default ordering of results is by Confidence (high to low). Confidence is a reflection of the level of support that Translator has for each result.</p>
+      <p><strong>Lower Confidence doesn't mean a result is wrong</strong>, but it does warrant closer scrutiny of the relationship evidence before drawing conclusions.</p>
+      <p>You can change the default ordering of results in your <a href="#" onClick={(e) => { e.preventDefault(); togglePanel('settings'); }}>account settings</a> under "Preferences."</p>
 
       <h2 className="h6">Can I export results?</h2>
       <p>
@@ -112,19 +104,20 @@ export const FrequentlyAskedQuestions = () => {
         Queries are retained in our system indefinitely, making it possible to return to a query via a link or
         the user interface long after it was submitted. Even if you remove a query from your{" "}
         <a href="/projects-article">Projects</a> or{" "}
-        <a href="/query-historty-article">Query History</a>, its results remain accessible through any links
-        you’ve already generated.
+        <a href="/query-history-article">Query History</a>, its results remain accessible through any links
+        you've already generated.
       </p>
 
-      <h2 className="h6">
+      <h2 className="h6" id="limited-queries">
         Why are the types of queries and relationships I can explore with Translator so limited?
       </h2>
       <p>
         During the alpha-phase testing, a few limited domains were selected for user exploration based on
-        researcher interests, including chemicals, drugs, genes, and diseases.{" "}
-        <strong>Over time, more domains and additional relationships will be added.</strong> These
-        relationships are expected to have broad interest and allow us to understand how people would like to
-        interact with the Translator user interface and the results it returns.
+        researcher interests, genes, diseases, phenotypes, and chemicals, as well as biological entities 
+        like processes, anatomical structures, and cell lines.{" "} <strong>Over time, more domains and 
+        additional relationships will be added.</strong> These relationships are expected to have broad 
+        interest and allow us to understand how people would like to interact with the Translator user 
+        interface and the results it returns.
       </p>
       <p>
         <strong>We invite you to </strong>
@@ -137,7 +130,7 @@ export const FrequentlyAskedQuestions = () => {
         When you submit feedback using the <a href="#" onClick={(e) => { e.preventDefault(); togglePanel('feedback'); }}>Send Feedback</a> form in the sidebar, your comments
         are <strong>stored in a private repository</strong> used solely by the Translator team. Feedback is
         not shared outside this team unless required for maintenance, security, or by law. Your feedback is
-        extremely valuable to us, and we welcome you to send as much feedback as you’d like to{" "}
+        extremely valuable to us, and we welcome you to send as much feedback as you'd like to{" "}
         <strong>help us improve Translator</strong>!
       </p>
     </>

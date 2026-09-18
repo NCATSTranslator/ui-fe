@@ -1,4 +1,4 @@
-import { GeneAnnotation, GeneItem, NormalizedNode } from '@/features/Query/types/querySubmission';
+import { GeneAnnotation, GeneItem, GenericItem, NormalizedNode } from '@/features/Query/types/querySubmission';
 
 /**
  * Annotates normalized nodes based on their type, specifically handling gene nodes.
@@ -14,7 +14,7 @@ import { GeneAnnotation, GeneItem, NormalizedNode } from '@/features/Query/types
  *          returned unchanged.
  * 
  */
-export const queryTypeAnnotator = async (normalizedNodes: NormalizedNode[]): Promise<NormalizedNode[]> => {
+export const queryTypeAnnotator = async (normalizedNodes: NormalizedNode[]): Promise<GenericItem[]> => {
   const genes: { [key: string]: GeneItem } = {};
   const nonGeneNodes: NormalizedNode[] = [];
   

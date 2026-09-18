@@ -1,15 +1,91 @@
-import { useMemo, useState, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 import { Example, QueryItem, AutocompleteItem, AutocompleteConfig, ExampleQueries, QueryType } from '@/features/Query/types/querySubmission';
-import { incrementHistory } from '@/features/History/slices/historySlice';
 import { filterAndSortExamples, getAutocompleteTerms } from '@/features/Query/utils/autocompleteFunctions';
-import { getResultsShareURLPath, getPathfinderResultsShareURLPath } from '@/features/Common/utils/web';
+import { defaultQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
+import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
+import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
+import { getResultsShareURLPath, getPathfinderResultsShareURLPath, getLookupResultsShareURLPath } from '@/features/Core/utils/web';
 import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
-import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { buildInitialQueryItemState } from '@/features/Query/utils/queryInitState';
+import { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+import { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
+import { useClearHomeQueryNodeParams } from '@/features/Query/hooks/useClearHomeQueryNodeParams';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { errorToast } from '@/features/Core/utils/toastMessages';
+import { errorToast, unsupportedSmartQueryCategoryToast } from '@/features/Core/utils/toastMessages';
+import { noop } from '@/features/Core/utils/constants';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+import type { AnalyticsEventMap, QueryTypeName } from '@/features/Analytics/types/analytics';
+
+/** The backend has accepted a submission once it returns the new query's pk with a complete status. */
+const isAcceptedSubmission = (data: { data?: unknown; status?: string }): boolean =>
+  !!data.data && data.status === 'complete';
+
+type QuerySubmittedParams = Omit<AnalyticsEventMap['query_submitted'], 'query_type' | 'project_attached'>;
+
+/** Reports query_submitted only for a submission the backend accepted, so call sites need no guard. */
+const trackAcceptedQuerySubmission = (
+  data: { data?: unknown; status?: string },
+  queryType: QueryTypeName,
+  projectId: string | undefined,
+  params: QuerySubmittedParams,
+): void => {
+  if (!isAcceptedSubmission(data)) return;
+  trackEvent('query_submitted', {
+    query_type: queryType,
+    project_attached: projectId ? 'true' : 'false',
+    ...params,
+  });
+};
+
+const trackQuerySubmissionFailed = (queryType: QueryTypeName, error: unknown): void => {
+  trackEvent('query_submission_failed', {
+    query_type: queryType,
+    error_message: error instanceof Error ? error.message : 'unknown',
+  });
+};
+
+export const NAME_RESOLVER_FALLBACK_ENDPOINT = 'https://name-lookup.transltr.io/lookup';
+
+export const HOME_QUERY_AUTOCOMPLETE_CONFIG: AutocompleteConfig = {
+  functions: {
+    filter: defaultQueryFilterFactory,
+    annotate: queryTypeAnnotator,
+    format: combinedQueryFormatter,
+  },
+  limitTypes: [
+    "Drug",
+    "ChemicalEntity",
+    "Disease",
+    "Gene",
+    "SmallMolecule",
+    "PhenotypicFeature",
+    "BiologicalProcess",
+    "AnatomicalEntity",
+    "CellLine",
+  ],
+  limitPrefixes: [],
+  excludePrefixes: ["UMLS"],
+};
+
+/**
+ * Custom hook that resolves the name resolver lookup endpoint from config,
+ * falling back to the default public endpoint when config is unavailable.
+ *
+ * @returns {string} The name resolver lookup endpoint URL.
+ */
+export const useNameResolverEndpoint = (): string => {
+  const config = useSelector(currentConfig);
+  const endpoint = config?.name_resolver.endpoint;
+  return useMemo(
+    () => endpoint
+      ? `${endpoint}/lookup`
+      : NAME_RESOLVER_FALLBACK_ENDPOINT,
+    [endpoint]
+  );
+};
 
 /**
  * Custom hook that filters and sorts cached queries into categorized example queries.
@@ -56,9 +132,8 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
  *   - submitQuery: Async function to submit a query item to the API
  *   - submitPathfinderQuery: Async function to submit a pathfinder query with two items
  */
-export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = () => {}) => {
+export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup' = 'single', shouldNavigate: boolean = true, submissionCallback: () => void = noop) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const config = useSelector(currentConfig);
 
@@ -69,7 +144,6 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
     }
 
     setIsLoading(true);
-    const timestamp = new Date();
 
     try {
       const queryJson = JSON.stringify({
@@ -88,30 +162,24 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
 
       const data = await response.json();
 
-      if (data.data && data.status === 'complete') {
-        dispatch(
-          incrementHistory({
-            item,
-            date: timestamp.toDateString(),
-            time: timestamp.toLocaleTimeString([], {
-              hour12: true,
-              hour: 'numeric',
-              minute: '2-digit'
-            }),
-            id: data.data,
-          })
-        );
+      trackAcceptedQuerySubmission(data, 'single', projectId, {
+        query_template_id: String(item.type.id),
+        query_template_label: item.type.label,
+        subject_category: item.type.filterType,
+        object_category: item.type.targetType,
+      });
 
+      if (isAcceptedSubmission(data)) {
         const nodeLabel = item.node?.label || "";
         const nodeID = item.node?.id || "";
-        const newQueryPath = getResultsShareURLPath(
-          nodeLabel,
+        const newQueryPath = getResultsShareURLPath({
+          label: nodeLabel,
           nodeID,
-          item.type.id,
-          '0',
-          data.data,
-          config?.include_hashed_parameters
-        );
+          typeID: item.type.id,
+          resultID: '0',
+          pk: data.data,
+          shouldHash: config?.include_hashed_parameters,
+        });
 
         submissionCallback();
 
@@ -128,18 +196,18 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
         }
       }
     } catch (error) {
+      trackQuerySubmissionFailed('single', error);
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
       setIsLoading(false);
       console.error(error);
     }
-  }, [dispatch, navigate]);
+  }, [navigate, config, shouldNavigate, submissionCallback]);
 
   const submitPathfinderQuery = useCallback(async (
     itemOne: AutocompleteItem,
     itemTwo: AutocompleteItem,
     middleType?: string,
     projectId?: string,
-    shouldNavigate: boolean = true,
   ) => {
     setIsLoading(true);
 
@@ -163,38 +231,103 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' = 'single'
       });
 
       const data = await response.json();
-      let newQueryPath = getPathfinderResultsShareURLPath(
+      const constraint = middleType?.replace("biolink:", "");
+      trackAcceptedQuerySubmission(data, 'pathfinder', projectId, {
+        subject_category: subjectType,
+        object_category: objectType,
+        constraint_category: constraint,
+      });
+      let newQueryPath = getPathfinderResultsShareURLPath({
         itemOne,
         itemTwo,
-        '0',
-        middleType?.replace("biolink:", ""),
-        data.data,
-        config?.include_hashed_parameters
-      );
+        resultID: '0',
+        constraint,
+        pk: data.data,
+        shouldHash: config?.include_hashed_parameters,
+      });
       submissionCallback();
-      if(shouldNavigate)
-        navigate(`/${newQueryPath}`);
+      if (!shouldNavigate) {
+        setIsLoading(false);
+        return;
+      }
+      navigate(`/${newQueryPath}`);
 
     } catch (error) {
       errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
+      trackQuerySubmissionFailed('pathfinder', error);
       setIsLoading(false);
       console.log(error);
       throw error;
     }
-  }, [navigate, config]);
+  }, [navigate, config, shouldNavigate, submissionCallback]);
+
+  const submitLookupQuery = useCallback(async (
+    item: AutocompleteItem,
+    objectCategory: string,
+    projectId?: string,
+  ) => {
+    setIsLoading(true);
+
+    try {
+      const rawCategory = objectCategory.replace("biolink:", "");
+      const subjectType = item.types?.[0] || "";
+      const queryJson = JSON.stringify({
+        type: 'lookup',
+        subject: { id: item.id, category: subjectType },
+        object: { category: rawCategory },
+        node_one_label: item.label,
+        pid: projectId || null,
+      });
+
+      const response = await fetch(`${API_PATH_PREFIX}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: queryJson,
+      });
+
+      const data = await response.json();
+      trackAcceptedQuerySubmission(data, 'lookup', projectId, {
+        subject_category: subjectType,
+        object_category: rawCategory,
+      });
+      const newQueryPath = getLookupResultsShareURLPath(
+        item,
+        rawCategory,
+        '0',
+        data.data,
+        config?.include_hashed_parameters
+      );
+      submissionCallback();
+
+      if (!shouldNavigate) {
+        setIsLoading(false);
+        return;
+      }
+      navigate(`/${newQueryPath}`);
+
+    } catch (error) {
+      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
+      trackQuerySubmissionFailed('lookup', error);
+      setIsLoading(false);
+      console.error(error);
+      throw error;
+    }
+  }, [navigate, config, shouldNavigate, submissionCallback]);
 
   return {
     isLoading,
     setIsLoading,
     submitQuery: queryType === 'single' ? submitQuery : undefined,
-    submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined
+    submitPathfinderQuery: queryType === 'pathfinder' ? submitPathfinderQuery : undefined,
+    submitLookupQuery: queryType === 'lookup' ? submitLookupQuery : undefined,
   };
 };
 
 /**
  * Custom hook that manages autocomplete functionality including debounced API calls,
  * loading states, and autocomplete item management. Provides a 750ms debounced
- * query function to reduce API calls during user typing.
+ * query function to reduce API calls during user typing. Autocomplete fetch only
+ * runs when the input is at least 2 characters; shorter input clears suggestions.
  *
  * @param {AutocompleteConfig} config - Configuration object containing functions, types, and prefixes
  * @param {string} nameResolverEndpoint - API endpoint URL for name resolution
@@ -222,6 +355,11 @@ export const useAutocomplete = (
   const delayedQuery = useMemo(
     () => debounce(
       (inputText: string) => {
+        if (inputText.length < 2) {
+          setAutoCompleteItems(null);
+          setLoadingAutocomplete(false);
+          return;
+        }
         const { functions, limitTypes, limitPrefixes, excludePrefixes } = configRef.current;
         if (functions) {
           getAutocompleteTerms(
@@ -283,43 +421,81 @@ export const useAutocompleteConfig = (queryType: QueryType): AutocompleteConfig 
  *   - setInputText: Function to update input text
  *   - clear: Function to reset state to initial values
  */
+export { autocompleteItemFromNodeParams } from '@/features/Query/hooks/queryInitHelpers';
+export { useStateSyncedTo } from '@/features/Query/hooks/useStateSyncedTo';
+
+export const useSyncedAutocompleteFromNodeParams = (
+  initNodeIdParam: string | null | undefined,
+  initNodeLabelParam: string | null | undefined,
+  initNodeCategoryParam?: string | null,
+) => {
+  const clearHomeQueryNodeParams = useClearHomeQueryNodeParams();
+  const initItem = useMemo(
+    () => autocompleteItemFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam),
+    [initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
+  );
+  const initInputText = initNodeLabelParam || initNodeIdParam || '';
+  const [queryItem, setQueryItem] = useStateSyncedTo(initItem);
+  const [inputText, setInputText] = useStateSyncedTo(initInputText);
+
+  const clear = useCallback(() => {
+    setQueryItem(null);
+    setInputText('');
+    clearHomeQueryNodeParams();
+  }, [setQueryItem, setInputText, clearHomeQueryNodeParams]);
+
+  return { queryItem, setQueryItem, inputText, setInputText, clear };
+};
+
 export const useQueryItem = (
   initPresetTypeObject: QueryType | null,
   initNodeLabelParam: string | null,
-  initNodeIdParam: string | null
+  initNodeIdParam: string | null,
+  initNodeCategoryParam?: string | null,
 ) => {
-  // Compute derived initial query item
-  const initQueryItem = useMemo((): QueryItem => {
-    const initPresetType = initPresetTypeObject || queryTypes[0];
-    const initSelectedNode = initNodeIdParam && initNodeLabelParam
-      ? { id: initNodeIdParam, label: initNodeLabelParam, match: "", isExact: false, score: Infinity, types: [] }
-      : null;
+  const initState = useMemo(
+    () => buildInitialQueryItemState(
+      initPresetTypeObject,
+      initNodeLabelParam,
+      initNodeIdParam,
+      initNodeCategoryParam,
+    ),
+    [initPresetTypeObject, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam],
+  );
+  const toastKeyRef = useRef<string | null>(null);
 
-    return {
-      type: initPresetType,
-      node: initSelectedNode
-    };
-  }, [initPresetTypeObject, initNodeIdParam, initNodeLabelParam]);
+  useEffect(() => {
+    if (!initState.categoryUnsupported) return;
+    const toastKey = initNodeCategoryParam ?? '';
+    if (toastKeyRef.current === toastKey) return;
+    toastKeyRef.current = toastKey;
+    unsupportedSmartQueryCategoryToast();
+  }, [initState.categoryUnsupported, initNodeCategoryParam]);
 
-  // State
-  const [queryItem, setQueryItem] = useState<QueryItem>(initQueryItem);
-  const [inputText, setInputText] = useState<string>(initNodeLabelParam || "");
+  const { queryItem: initQueryItem, inputText: initInputText } = initState;
+  const nodeParamsKey = `${initNodeIdParam ?? ''}|${initNodeLabelParam ?? ''}|${initNodeCategoryParam ?? ''}`;
+  const hasNodeParams = !!(initNodeIdParam || initNodeLabelParam || initNodeCategoryParam);
 
-  // Track previous initQueryItem to detect prop changes (React 19 recommended pattern)
-  const [prevInitQueryItem, setPrevInitQueryItem] = useState<QueryItem>(initQueryItem);
-
-  // Adjust state during render when props change (avoids extra useEffect render cycle)
-  if (prevInitQueryItem !== initQueryItem) {
-    setPrevInitQueryItem(initQueryItem);
+  // Sync queryItem from URL prefills when they appear/change, but not when they are
+  // cleared — clearing must keep the current query type (init falls back to queryTypes[0]).
+  const [queryItem, setQueryItem] = useState(initQueryItem);
+  useEffect(() => {
+    if (!hasNodeParams) return;
     setQueryItem(initQueryItem);
-    setInputText(initNodeLabelParam || "");
-  }
+  }, [hasNodeParams, nodeParamsKey, initQueryItem]);
 
-  // Clear function to reset state
+  const [inputText, setInputText] = useStateSyncedTo(initInputText, nodeParamsKey);
+  const clearHomeQueryNodeParams = useClearHomeQueryNodeParams();
+
+  // Clear the selected entity while keeping the current query type.
+  // Do not reset to initQueryItem — when landing from canvas/node URL params,
+  // that would re-apply the prefilled node instead of clearing.
+  // Also strip those URL params so a remount/refresh cannot re-prefill.
   const clear = useCallback(() => {
-    setQueryItem(initQueryItem);
-    setInputText(initNodeLabelParam || "");
-  }, [initQueryItem, initNodeLabelParam]);
+    setQueryItem((prev) => ({ type: prev.type, node: null }));
+    setInputText('');
+    clearHomeQueryNodeParams();
+  }, [setQueryItem, setInputText, clearHomeQueryNodeParams]);
 
   return {
     queryItem,

@@ -1,6 +1,6 @@
 import { FC, ReactNode, useRef, useEffect } from "react";
 import styles from './InteriorPanelContainer.module.scss';
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import SidebarBackButton from "@/features/Sidebar/components/SidebarBackButton/SidebarBackButton";
 
 interface InteriorPanelContainerProps {

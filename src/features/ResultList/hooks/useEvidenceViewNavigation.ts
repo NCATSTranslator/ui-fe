@@ -1,25 +1,29 @@
 import { useCallback } from 'react';
-import { Path } from '@/features/ResultList/types/results.d';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
-import { buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
+import { buildEvidenceUrl, extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
+import { EvidenceNavigationOptions } from '@/features/Evidence/types/navigation';
 
 export interface UseEvidenceViewNavigationReturn {
-  navigateToEvidenceView: (selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => void;
+  navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;
 }
 
 const useEvidenceViewNavigation = (resultId?: string): UseEvidenceViewNavigationReturn => {
   const resultsNavigate = useResultsNavigate();
 
-  const navigateToEvidenceView = useCallback((selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => {
-    if (!resultId) return;
+  const navigateToEvidenceView = useCallback((options: EvidenceNavigationOptions) => {
+    const effectiveResultId = options.resultId ?? resultId;
+    if (!effectiveResultId) return;
+    const sets = options.compressedEdgeSets
+      ?? (options.path ? extractCompressedEdgeSets(options.path) : []);
     const { path: url, params } = buildEvidenceUrl({
-      resultId,
-      pathId: path.id,
-      primaryEdgeId: selectedEdgeId,
-      compressedEdgeSets,
-      pathKey,
+      resultId: effectiveResultId,
+      pathId: options.path?.id,
+      primaryEdgeId: options.edgeId,
+      compressedEdgeSets: sets,
+      pathKey: options.pathKey,
+      tab: options.tab,
     });
-    resultsNavigate(url, params);
+    resultsNavigate(url, { ...params, ...options.extraParams });
   }, [resultsNavigate, resultId]);
 
   return {

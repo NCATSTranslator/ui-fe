@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import styles from './Tooltips.module.scss';
+import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 
 export interface NodeTooltipContentProps {
   nameString: string;
@@ -18,7 +19,18 @@ const NodeTooltipContent: FC<NodeTooltipContentProps> = ({
   return (
     <div onClick={(e) => e.stopPropagation()}>
       <span><strong>{nameString}</strong> ({typeString})</span>
-      {description && <span className={styles.description}>{description}</span>}
+      {
+        description && (
+          <span className={styles.description}>
+            <SafeHtmlHighlighter
+              stripHtml
+              htmlString={description}
+              searchWords={[]}
+              highlightClassName="highlight"
+            />
+          </span>
+        )
+      }
       {provenance && typeof provenance === 'string' &&
         <a href={provenance} target="_blank" rel="noreferrer" className={styles.provenance}>
           <ExternalLink />

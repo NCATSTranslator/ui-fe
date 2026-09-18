@@ -2,17 +2,16 @@ import { FC, useRef, useState, useEffect, MouseEvent } from "react";
 import { ResultSet } from "@/features/ResultList/types/results";
 import { GraphHoverTarget } from "@/features/ResultGraphView/types/graphTypes";
 import { nodeToTooltipProps, edgeToTooltipEntry } from "@/features/Core/components/Tooltips/tooltipMappers";
-import EdgeTooltipContent from "@/features/Core/components/Tooltips/EdgeTooltipContent";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import EdgeTooltipContent, { PredicateClickOptions } from "@/features/Core/components/Tooltips/EdgeTooltipContent";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import NodeTooltipContent from "@/features/Core/components/Tooltips/NodeTooltipContent";
 
 interface GraphHoverTooltipsProps {
-  cursor: { x: number; y: number } | null;
   resultSet?: ResultSet;
   target: GraphHoverTarget;
   onTooltipEnter?: () => void;
   onTooltipLeave?: () => void;
-  onPredicateClick?: (e: MouseEvent<HTMLParagraphElement>, edgeId: string) => void;
+  onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string, options?: PredicateClickOptions) => void;
 }
 
 interface Slot {
@@ -72,7 +71,6 @@ const useSlotPair = (target: GraphHoverTarget, kind: 'node' | 'edge'): SlotPair 
 };
 
 const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
-  cursor,
   resultSet,
   target,
   onPredicateClick,
@@ -84,7 +82,7 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
 
   const renderNodeSlot = (slot: Slot, id: string) => {
     const props = slot.target?.kind === 'node' ? nodeToTooltipProps(slot.target.node) : null;
-    const position = slot.target?.anchor ?? cursor ?? undefined;
+    const position = slot.target?.anchor;
     return (
       <Tooltip
         key={id}
@@ -102,10 +100,10 @@ const GraphHoverTooltips: FC<GraphHoverTooltipsProps> = ({
   };
 
   const renderEdgeSlot = (slot: Slot, id: string) => {
-    const entries = slot.target?.kind === 'edge' && resultSet
-      ? [edgeToTooltipEntry(resultSet, slot.target.edge)]
+    const entries = slot.target?.kind === 'edge'
+      ? [edgeToTooltipEntry(resultSet ?? null, slot.target.edge)]
       : [];
-    const position = slot.target?.anchor ?? cursor ?? undefined;
+    const position = slot.target?.anchor;
     return (
       <Tooltip
         key={id}

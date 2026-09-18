@@ -1,7 +1,5 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
-  Provenance, PublicationSupport } from "@/features/Evidence/types/evidence";
-import * as tc from "@/features/Common/types/checkers";
-import { isProvenance } from "@/features/Evidence/types/checkers";
+  EdgeProvenance, ProvenanceCatalogEntry, PublicationSupport } from "@/features/Evidence/types/evidence";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -11,9 +9,10 @@ export type ResultSet = {
     meta: Meta,
     nodes: {[key: string]: ResultNode},
     paths: {[key: string]: Path},
+    provenance: {[infores: string]: ProvenanceCatalogEntry},
     publications: {[key: string]: PublicationObject},
     results: Result[],
-    tags: Tags,
+    tags: ResultSetTags,
     trials: {[key: string]: TrialObject}
   }
 }
@@ -31,7 +30,7 @@ export interface Result {
   scores: Score[];
   // node ID
   subject: string;
-  tags: Tags;
+  tags: EntityTags;
 }
 
 export type SharedItem = {
@@ -54,23 +53,21 @@ export interface Path {
   compressedIDs?: string[];
   // Compressed subgraph with edges as arrays
   compressedSubgraph?: (string | string[])[] | null;
-  highlighted?: boolean;
   id?: string;
   score?: number;
   // Original subgraph
   subgraph: string[];
-  tags: Tags;
-}
-
-export interface RankedPath extends Path {
-  // array of nodes and edges in order
-  subgraph: (RankedEdge | ResultNode)[];
+  tags: EntityTags;
 }
 
 export type PathRank = {
   path: Path;
   rank: number;
-  support: PathRank[];
+}
+
+export type EdgeRank = {
+  edgeID: string;
+  rank: number;
 }
 
 export type EdgeMetadata = {
@@ -85,7 +82,6 @@ export interface ResultEdge {
   "is_root": boolean;
   compressed_edges?: ResultEdge[];
   id: string;
-  inferred: boolean;
   knowledge_level: KnowledgeLevel;
   metadata: EdgeMetadata;
   // nodeID
@@ -93,23 +89,30 @@ export interface ResultEdge {
   predicate: string;
   predicate_url: string;
   description?: string | null;
-  provenance: Provenance[];
-  publications: {[key: string]: {id: string; support: PublicationSupport}[]};
+  provenance: EdgeProvenance[];
+  publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
+  signature: string;
+  source_time: string;
   // nodeID
   subject: string;
-  // array of path ids or Path objects
-  support: string[] | Path[];
-  tags: Tags;
+  tags: EntityTags;
   trials: string[];
-  type: string;
-}
-
-export interface RankedEdge extends ResultEdge {
-  support: RankedPath[];
 }
 
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
 export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
+
+export type AnnotationSource = {
+  name: string;
+  url: string;
+}
+
+export type AnnotationSection<T> = {
+  value: T;
+  metadata: {
+    sources: AnnotationSource[];
+  };
+}
 
 export type Annotation = {
   chemical: ChemicalAnnotation;
@@ -122,26 +125,34 @@ export type ChebiRole = {
   name: string;
 }
 
+export type Indication = {
+  name: string;
+  ids: string[];
+  urls: string[];
+}
+
 export type ChemicalAnnotation = {
-  approval: number | null;
-  clinical_trials: string[] | null;
-  descriptions: string[] | null;
-  indications: string[] | null;
-  otc_status: {code: number, label: string} | null;
-  other_names: {commercial: string[], generic: string[]} | null;
-  roles: ChebiRole[] | null;
+  approval: AnnotationSection<number> | null;
+  clinical_trials: AnnotationSection<string[]> | null;
+  descriptions: AnnotationSection<string[]> | null;
+  indications: AnnotationSection<Indication[]> | null;
+  otc_status: AnnotationSection<{code: number, label: string}> | null;
+  roles: AnnotationSection<ChebiRole[]> | null;
+  synonyms: AnnotationSection<{commercial: string[], generic: string[]}> | null;
 }
 
 export type DiseaseAnnotation = {
-  curies: string[] | null;
-  descriptions: string[] | null;
+  clinical_trials: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<string[]> | null;
+  descriptions: AnnotationSection<string[]> | null;
+  synonyms: AnnotationSection<string[]> | null;
 }
 
 export type GeneAnnotation = {
-  descriptions: string[] | null;
-  name: string | null;
-  species: Species;
-  tdl: Tdl;
+  descriptions: AnnotationSection<string[]> | null;
+  name: AnnotationSection<string> | null;
+  species: AnnotationSection<Species> | null;
+  tdl: AnnotationSection<Tdl[]> | null;
 }
 
 export type ResultNode = {
@@ -154,8 +165,10 @@ export type ResultNode = {
   other_names: {[key: string]: string[]};
   // link to relevant info about node
   provenance: string[];
+  signature: string;
+  source_time: string;
   synonyms: string[];
-  tags: Tags;
+  tags: EntityTags;
   // array of biolink types
   types: string[];
 }
@@ -186,12 +199,30 @@ export type ResultGraph = {
   }[];
 }
 
-export type Tags = {
-  [key:string]: {name: string, value: string} | null;
+export type TagDescription = {
+  name: string;
+  description: string;
+};
+
+export type TagObject = {
+  id: string;
+  description: TagDescription;
+};
+
+export type ResultSetTags = {
+  [key:string]: TagDescription
+}
+
+export type EntityTags = {
+  [key:string]: TagObject
 }
 
 export type PathFilterState = {
   [pid: string]: boolean;
+}
+
+export type EdgeFilterState = {
+  [eid: string]: boolean;
 }
 
 export type Score = {

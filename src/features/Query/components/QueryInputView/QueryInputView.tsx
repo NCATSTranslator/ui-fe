@@ -8,7 +8,7 @@ import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { QueryTypeIcon } from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { User } from '@/features/UserAuth/types/user';
 import { useNavigate } from 'react-router-dom';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 
 interface QueryInputViewProps {
   queryItem: QueryItem;

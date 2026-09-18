@@ -1,28 +1,31 @@
 import { AnyAction, configureStore, ThunkDispatch } from '@reduxjs/toolkit';
-import historyReducer from '@/features/History/slices/historySlice';
 import resultsReducer from '@/features/ResultList/slices/resultsSlice';
 import seenStatusReducer from '@/features/ResultList/slices/seenStatusSlice';
 import queryStatusReducer from '@/features/ResultList/slices/queryStatusSlice';
 import userReducer from '@/features/UserAuth/slices/userSlice';
+import canvasReducer from '@/features/Canvas/slices/canvasSlice';
+import colorModeReducer from '@/features/Core/slices/colorModeSlice';
 import { createAppListenerMiddleware } from '@/redux/listenerMiddleware';
 
 export type RootState = {
-  history: ReturnType<typeof historyReducer>;
   resultSets: ReturnType<typeof resultsReducer>;
   seenStatus: ReturnType<typeof seenStatusReducer>;
   queryStatus: ReturnType<typeof queryStatusReducer>;
   user: ReturnType<typeof userReducer>;
+  canvas: ReturnType<typeof canvasReducer>;
+  colorMode: ReturnType<typeof colorModeReducer>;
 }
 export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
 
 const listenerMiddleware = createAppListenerMiddleware();
 export const store = configureStore({
   reducer: {
-    history: historyReducer,
     resultSets: resultsReducer,
     seenStatus: seenStatusReducer,
     queryStatus: queryStatusReducer,
     user: userReducer,
+    canvas: canvasReducer,
+    colorMode: colorModeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(listenerMiddleware.middleware),

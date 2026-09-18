@@ -1,12 +1,28 @@
 @use "@/assets/styles/variables" as *;
 
-.evidenceView {
+.evidenceViewWrapper {
   padding: 0 $l $m;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr;
-  max-width: $resultsViewMaxWidth;
+  // Fill the main scroll area but grow with the tables instead of shrinking under the header and footer.
+  flex: 1 0 auto;
+  width: calc(100% - #{$l * 2});
+  max-width: $maxWidth;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.evidenceContent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.evidenceView {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
 }
 
 .title {
@@ -44,13 +60,6 @@
   }
 }
 
-.inferredDisclaimer {
-  text-align: center;
-  display: grid;
-  align-content: center;
-  padding: $l;
-}
-
 .tabs {
   overflow-y: hidden;
   display: grid;
@@ -59,11 +68,12 @@
 }
 .tab {
   display: grid;
-  grid-template-rows: auto 1fr;
-  overflow-y: auto;
 }
 .tableHead {
   padding-right: 0;
+  .head {
+    justify-content: flex-start;
+  }
 }
 .tableBody {
   box-shadow: $dropShadow;
@@ -133,13 +143,8 @@
       display: grid;
       grid-template-columns: 1.25fr 3.75fr;
     }
-    .source, .link {
-      text-align: center;
-    }
     .source {
       display: flex;
-      justify-content: center;
-      align-items: center;
     }
     .tooltipSpan {
       margin: 0 2px;
@@ -179,9 +184,6 @@
     span {
       display: block;
     }
-  }
-  .link a {
-    justify-content: center;
   }
 }
 .pValueTable, .otherTable {
@@ -227,9 +229,6 @@
 .title {
   margin-bottom: 0;
   font-weight: 800;
-}
-.evidenceCount {
-  margin-bottom: $m;
 }
 .pathViewContainer {
   background-color: $palePurple;

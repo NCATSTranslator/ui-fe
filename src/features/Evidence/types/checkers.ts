@@ -1,7 +1,16 @@
-import * as tc from "@/features/Common/types/checkers";
-import { Provenance } from "./evidence";
+import * as tc from "@/features/Core/types/checkers";
+import { EdgeProvenance, Provenance, ProvenanceCatalogEntry, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
+import { ResultEdge } from "@/features/ResultList/types/results";
+import { EvidenceTabName } from "./navigation";
 
-export const isProvenance = (obj: unknown, warn = true): obj is Provenance => {
+/**
+ * Type guard to check if an object is a Provenance object.
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a Provenance.
+ * @returns {boolean} - True if the object is a Provenance, otherwise false.
+ */
+export const isProvenance = (obj: unknown, warn = false): obj is Provenance => {
   if (!tc.isObject(obj)) {
     if (warn) console.warn("[isProvenance] expected object, got:", typeof obj, obj);
     return false;
@@ -13,4 +22,143 @@ export const isProvenance = (obj: unknown, warn = true): obj is Provenance => {
     ["url", tc.nullable(obj.url, tc.isString), "string | null", obj.url],
     ["wiki", tc.nullable(obj.wiki, tc.isString), "string | null", obj.wiki],
   ], warn);
+}
+
+/**
+ * Type guard to check if an object is an EdgeProvenance reference
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not an EdgeProvenance.
+ * @returns {boolean} - True if the object is an EdgeProvenance, otherwise false.
+ */
+export const isEdgeProvenance = (obj: unknown, warn = false): obj is EdgeProvenance => {
+  if (!tc.isObject(obj)) {
+    if (warn) console.warn("[isEdgeProvenance] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  return tc.checkProperties("isEdgeProvenance", obj, [
+    ["infores", tc.isString(obj.infores), "string", obj.infores],
+    ["records", tc.isStringArray(obj.records), "string[]", obj.records],
+  ], warn);
+}
+
+/**
+ * Type guard to check if an object is a ProvenanceCatalogEntry (a record from the infores catalog).
+ *
+ * @param {unknown} obj - The object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a ProvenanceCatalogEntry.
+ * @returns {boolean} - True if the object is a ProvenanceCatalogEntry, otherwise false.
+ */
+export const isProvenanceCatalogEntry = (obj: unknown, warn = false): obj is ProvenanceCatalogEntry => {
+  if (!tc.isObject(obj)) {
+    if (warn) console.warn("[isProvenanceCatalogEntry] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  return tc.checkProperties("isProvenanceCatalogEntry", obj, [
+    ["knowledge_level", tc.isString(obj.knowledge_level), "string", obj.knowledge_level],
+    ["name", tc.nullable(obj.name, tc.isString), "string | null", obj.name],
+    ["url", tc.nullable(obj.url, tc.isString), "string | null", obj.url],
+    ["wiki", tc.nullable(obj.wiki, tc.isString), "string | null", obj.wiki],
+  ], warn);
+}
+
+/**
+ * Determines if a publication object is categorized as a publication based on its type or ID
+ *
+ * @param {PublicationObject | RawPublicationObject} publication - The publication object to check.
+ * @param {boolean} warn - Whether to warn if the object is not a publication.
+ * @returns {boolean} - True if the object is a publication (PMID or PMC), false otherwise.
+ */
+export const isPublication = (obj: PublicationObject | RawPublicationObject, warn = false): boolean => {
+  const isPub = (isPublicationObject(obj, false) && (obj.type === "PMID" || obj.type === "PMC")) || (obj.id?.includes("PMID") || obj.id?.includes("PMC"));
+  if (isPub)
+    return true;
+
+  if(warn) console.warn("[isPublication] expected publication, got:", typeof obj, obj);
+
+  return false;
+}
+
+/**
+ * Type guard to check if an object is a PublicationObject.
+ *
+ * @param obj - The object to check.
+ * @returns {boolean} True if the object is a PublicationObject, otherwise false.
+ */
+export const isPublicationObject = (obj: unknown, warn = false): obj is PublicationObject => {
+  if (typeof obj !== 'object' || obj === null) {
+    if (warn) console.warn("[isPublicationObject] expected object, got:", typeof obj, obj);
+    return false;
+  }
+  const o = obj as Record<string, unknown>;
+  return tc.checkProperties("isPublicationObject", obj, [
+    ["infores", Array.isArray(o.infores) && o.infores.length > 0 && o.infores.every(tc.isString), "non-empty string[]", o.infores],
+    ["type", tc.isString(o.type), "string", o.type],
+    ["url", tc.isString(o.url), "string", o.url],
+  ], warn);
+}
+
+/**
+ * Type guard to check if an object is an array of PublicationObjects.
+ *
+ * @param arr - The object to check.
+ * @returns {boolean} True if the object is a PublicationsList, otherwise false.
+ */
+export const isPublicationObjectArray = (arr: unknown, warn = false): arr is PublicationObject[] => {
+  if (!Array.isArray(arr)) {
+    if (warn) console.warn("[isPublicationObjectArray] expected array, got:", typeof arr, arr);
+    return false;
+  }
+  const invalidIndex = arr.findIndex(item => !isPublicationObject(item, warn));
+  if (invalidIndex !== -1) {
+    if (warn) console.warn(`[isPublicationObjectArray] item at index ${invalidIndex} failed validation`, arr[invalidIndex]);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Determines the type of publications structure in a ResultEdge object.
+ *
+ * @param {ResultEdge} edgeObject - The edge object to check publications type for.
+ * @returns {string} - A string indicating the type of publications structure ("PublicationObject[]", "{[key: string]: string[]}", or "Unknown type").
+ */
+export const checkPublicationsType = (edgeObject: ResultEdge): string => {
+  if (isPublicationObjectArray(edgeObject.publications)) {
+    return "PublicationObject[]";
+  } else if (isPublicationDictionary(edgeObject.publications)) {
+    return "{[key: string]: string[]}";
+  } else {
+    return "Unknown type";
+  }
+}
+
+/**
+ * Type guard to check if an object is a PublicationDictionary.
+ *
+ * @param publications - The object to check.
+ * @returns {boolean} True if the object is a PublicationDictionary, otherwise false.
+ */
+export const isPublicationDictionary = (publications: unknown, warn = false): publications is {[key: string]: string[]} => {
+  if (typeof publications !== 'object' || publications === null || Array.isArray(publications)) {
+    if (warn) console.warn("[isPublicationDictionary] expected object, got:", typeof publications, publications);
+    return false;
+  }
+  for (const [key, value] of Object.entries(publications as Record<string, unknown>)) {
+    if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
+      if (warn) console.warn(`[isPublicationDictionary] invalid value at key "${key}": expected string[], got:`, value);
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Checks if a string is a valid evidence tab name.
+ *
+ * @param tab - The string to check.
+ * @returns {boolean} True if the string is a valid evidence tab name, otherwise false.
+ */
+export const isValidEvidenceTabName = (tab: string): tab is EvidenceTabName => {
+  return tab === 'Publications' || tab === 'Clinical Trials' || tab === 'Miscellaneous' || tab === 'Knowledge Sources';
 }

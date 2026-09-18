@@ -1,6 +1,6 @@
-import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Common/utils/web';
-import { isProjectRaw, isProjectRawArray, isUserQueryObject, ProjectCreate, ProjectUpdate, 
-  UserQueryObject, ProjectRaw, QueryUpdate, isUserQueryObjectArray} from '@/features/Projects/types/projects.d';
+import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Core/utils/web';
+import { ProjectCreate, ProjectUpdate, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
+import { isProjectRaw, isProjectRawArray, isUserQueryObject, isUserQueryObjectArray } from '@/features/Projects/types/checkers';
 
 // Base API path prefix
 export const API_PATH_PREFIX = '/api/v1';
@@ -92,7 +92,7 @@ export const deleteProjects = async (
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -111,7 +111,7 @@ export const permanentDeleteProjects = async (
     () => remove(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -130,7 +130,7 @@ export const restoreProjects = async (
     () => put(url, projectIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -139,7 +139,7 @@ export const restoreProjects = async (
  * Updates a list of query IDs by setting the deleted flag to true.
  */
 export const deleteQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -149,7 +149,7 @@ export const deleteQueries = async (
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -158,7 +158,7 @@ export const deleteQueries = async (
  * Permanently deletes a list of query IDs.
  */
 export const permanentDeleteQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -168,7 +168,7 @@ export const permanentDeleteQueries = async (
     () => remove(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -177,7 +177,7 @@ export const permanentDeleteQueries = async (
  * Updates a list of query IDs by setting the deleted flag to false.
  */
 export const restoreQueries = async (
-  queryIds: string[],
+  queryIds: number[],
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
@@ -187,7 +187,7 @@ export const restoreQueries = async (
     () => put(url, queryIds),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is "OK" => true
+    (_data: unknown): _data is "OK" => true
   );
 };
 
@@ -211,19 +211,38 @@ export const updateQuery = async (
 };
 
 /**
+ * POST /api/v1/users/me/queries/copy
+ * Copies an existing query to the current user's queries.
+ */
+export const copyQuery = async (
+  pk: string,
+  httpErrorHandler?: ErrorHandler,
+  fetchErrorHandler?: ErrorHandler
+): Promise<"OK"> => {
+  const url = `${API_PATH_PREFIX}/users/me/queries/copy`;
+
+  return fetchWithErrorHandling<"OK">(
+    () => post(url, { pk }),
+    httpErrorHandler,
+    fetchErrorHandler,
+    (_data: unknown): _data is "OK" => true
+  );
+};
+
+/**
  * PUT /api/v1/users/me/queries/touch
  * Updates the last_seen timestamp for a query.
  */
 export const touchQuery = async (
-  sid: string,
+  sid: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler
-): Promise<{ sid: string; data: { last_seen: Date } }> => {
+): Promise<{ sid: number; data: { last_seen: Date } }> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/touch`;
-  return fetchWithErrorHandling<{ sid: string; data: { last_seen: Date } }>(
+  return fetchWithErrorHandling<{ sid: number; data: { last_seen: Date } }>(
     () => put(url, { sid }),
     httpErrorHandler,
     fetchErrorHandler,
-    (data: unknown): data is { sid: string; data: { last_seen: Date } } => 
+    (data: unknown): data is { sid: number; data: { last_seen: Date } } => 
       typeof data === 'object' && data !== null && 'sid' in data && 'data' in data );
 };

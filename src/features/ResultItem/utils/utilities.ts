@@ -1,17 +1,19 @@
-import { getEdgesByIds, getEdgeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, Tags } from "@/features/ResultList/types/results.d";
-import { isResultEdge } from "@/features/ResultList/types/checkers";
+import { getPathById } from "@/features/ResultList/slices/resultsSlice";
+import { Path, ResultSet, PathFilterState, EntityTags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import { Filter } from "@/features/ResultFiltering/types/filters";
+import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
+import { Preferences } from "@/features/UserAuth/types/user";
 
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
  *
- * @param {Tags} tags - The tags object from a ResultItem.
+ * @param {EntityTags} tags - The tags object from a ResultItem.
  * @returns {string[]} - An array of ARA names (the portion after "infores:").
  */
-export const getARATagsFromResultTags = (tags: Tags): string[] => {
+export const getARATagsFromResultTags = (tags: EntityTags): string[] => {
   const araTags: string[] = [];
 
   if (!tags) return araTags;
@@ -31,131 +33,6 @@ export const getARATagsFromResultTags = (tags: Tags): string[] => {
 };
 
 /**
- * Extracts all edge IDs from a Path's subgraph.
- *
- * This function returns the edge IDs from a Path object, whether it uses
- * the compressed or standard subgraph format. Edges are assumed to reside
- * at the odd-numbered indices of the subgraph array.
- *
- * @param {Path} path - The path object from which to extract edge IDs.
- * @returns {string[]} - An array of edge ID strings.
- */
-export const getEdgeIdsFromPath = (path: Path): string[] => {
-  const graph = path.compressedSubgraph ?? path.subgraph;
-  return graph.filter((_, i) => !isNodeIndex(i)).flat();
-};
-
-/**
- * Recursively collects all support path IDs from a list of initial paths.
- *
- * @param {Path[]} paths - The initial paths to analyze.
- * @param {ResultSet} resultSet - The result set used to resolve path and edge references.
- * @param {Set<string>} [visited=new Set()] - Used internally to track visited path IDs and avoid infinite loops.
- * @returns {string[]} - An array of all unique support path IDs reachable from the initial paths.
- */
-export const getAllSupportPathIDs = (
-  paths: Path[],
-  resultSet: ResultSet,
-  visited: Set<string> = new Set()
-): string[] => {
-  const supportPathIDs: Set<string> = new Set();
-
-  const traverseSupportPaths = (edgeIds: string[]) => {
-    const edges = getEdgesByIds(resultSet, edgeIds);
-
-    for (const edge of edges) {
-      if (!edge.support) continue;
-
-      const supports = Array.isArray(edge.support)
-        ? edge.support
-        : [];
-
-      for (const support of supports) {
-        const pathID = typeof support === 'string'
-          ? support
-          : support.id;
-
-        if (!pathID || visited.has(pathID)) continue;
-        visited.add(pathID);
-        supportPathIDs.add(pathID);
-
-        const supportPath = typeof support === 'string'
-          ? getPathById(resultSet, pathID)
-          : support;
-
-        if (!supportPath) continue;
-
-        const nestedEdgeIds = getEdgeIdsFromPath(supportPath);
-        traverseSupportPaths(nestedEdgeIds);
-      }
-    }
-  };
-
-  for (const path of paths) {
-    if (!path?.id || visited.has(path.id)) continue;
-    visited.add(path.id);
-
-    const edgeIds = getEdgeIdsFromPath(path);
-    traverseSupportPaths(edgeIds);
-  }
-
-  return Array.from(supportPathIDs);
-};
-
-/**
- * Returns a set of all path IDs from a list of paths, including their recursively supported paths if `full` is true and a resultSet is provided.
- *
- * @param {Path[]} paths - The initial list of paths to check.
- * @param {boolean} full - If true, includes all recursively supported paths via edges.
- * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
- * @returns {Set<string>} - A set of all path IDs.
- */
-export const getPathIdSet = (paths: Path[], full: boolean = false, resultSet?: ResultSet | null): Set<string> => {
-  const allPathIDs = new Set<string>();
-  if(full && !!resultSet) {
-    const supportPathIDs = getAllSupportPathIDs(paths, resultSet);
-    for (const id of supportPathIDs)
-      allPathIDs.add(id);
-  }
-  for(const path of paths) {
-    if(path.compressedIDs) {
-      for(const id of path.compressedIDs) {
-        allPathIDs.add(id);
-      }
-    } else if (path?.id) {
-      allPathIDs.add(path.id);
-    }
-  }
-  return allPathIDs;
-}
-
-/**
- * Counts how many of the provided paths are filtered, including their recursively supported paths if `full` is true.
- *
- * @param {Path[]} paths - The initial list of paths to check.
- * @param {PathFilterState} pathFilterState - A mapping of path IDs to their filtered status.
- * @param {boolean} full - If true, includes all recursively supported paths via edges.
- * @param {ResultSet} [resultSet] - The result set used to resolve edge and path references when full is enabled.
- * @returns {number} - The total count of filtered paths (initial + supported).
- */
-export const getFilteredPathCount = (
-  paths: Path[],
-  pathFilterState: PathFilterState,
-  full: boolean = false,
-  resultSet?: ResultSet | null
-): number => {
-  const allPathIDs = getPathIdSet(paths, full, resultSet);
-
-  let count = 0;
-  for (const id of allPathIDs) {
-    if (pathFilterState[id])
-      count++;
-  }
-
-  return count;
-};
-
-/**
  * Returns an array of edge IDs extracted from a subgraph sequence, which consists of alternating
  * node and edge IDs, always starting and ending with a node ID.
  *
@@ -166,60 +43,46 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
   subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**
- * Takes a list of paths/path IDs along with a PathFilterState object and a set of selected paths, then compresses them.
- * The compressed paths are sorted by the PathFilterState, then have their highlighted status set according to the active
- * selected paths. The paths are then sorted by highlighted status and returned.
+ * Compresses paths and sorts them.
+ * Paths are sorted via sortArrayByIndirect (length, filter state).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @param {PathFilterState} pathFilterState - The current Path Filter State
- * @param {Set<Path> | null} selectedPaths - The currently selected paths
  * @returns {Path[]} - The array of properly formatted paths.
  */
-export const getPathsWithSelectionsSet = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, selectedPaths: Set<Path> | null, isTopLevel: boolean = false) => {
+export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState) => {
   if(!paths || !resultSet)
     return [];
 
-  let newPaths = getCompressedPaths(resultSet, paths);
+  const newPaths = getCompressedPaths(resultSet, paths);
 
-  newPaths.sort((a: Path, b: Path) => {
-    if(b?.id && pathFilterState[b.id] === true)
-      return -1;
-    else
-      return 1;
-  });
-
-  if(selectedPaths!== null && selectedPaths.size > 0) {
-    for(const selPath of selectedPaths) {
-      for(const path of newPaths) {
-        if(selPath?.id && path?.id && selPath.id === path.id)
-          path.highlighted = true;
-      }
-    }
-    newPaths.sort((a: Path, b: Path) => (b.highlighted === a.highlighted ? 0 : b.highlighted ? -1 : 1));
-  }
-
-  if(isTopLevel)
-    return sortArrayByIndirect(resultSet, newPaths);
-  else
-    return newPaths;
+  return sortArrayByIndirect(resultSet, newPaths, pathFilterState);
 }
 
 /**
- * Takes a ResultSet and an array of paths and sorts them by whether they contain any inferred edges.
- * Paths with inferred edges are sorted to the bottom of the array.
+ * Sorts paths for top-level display. Priority order:
+ * 1. Shorter subgraph (fewer hops) before longer
+ * 2. Non-filtered before filtered
  *
  * @param {ResultSet} resultSet - ResultSet Object.
- * @param {(Path)[]} paths - An array of paths or path IDs
- * @returns {Path[]} - The array of sorted paths.
+ * @param {Path[]} paths - An array of paths.
+ * @param {PathFilterState} [pathFilterState] - Optional filter state for tiebreaking.
+ * @returns {Path[]} - The sorted array of paths.
  */
-export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[]) => {
+export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], pathFilterState?: PathFilterState) => {
   if(!resultSet)
     return paths;
   return cloneDeep(paths).sort((a, b) => {
-      let inferredA = isPathInferred(resultSet, a) ? 1 : 0;
-      let inferredB = isPathInferred(resultSet, b) ? 1 : 0;
-      return inferredA - inferredB;
+      const lengthDiff = (a.subgraph?.length ?? 0) - (b.subgraph?.length ?? 0);
+      if(lengthDiff !== 0)
+        return lengthDiff;
+      if(pathFilterState) {
+        const aFiltered = (a?.id && pathFilterState[a.id] === true) ? 1 : 0;
+        const bFiltered = (b?.id && pathFilterState[b.id] === true) ? 1 : 0;
+        return aFiltered - bFiltered;
+      }
+      return 0;
   });
 }
 
@@ -247,29 +110,45 @@ export const getIsPathFiltered = (path: Path, pathFilterState: PathFilterState) 
 }
 
 /**
- * Takes a list of paths/path IDs and compresses them if any paths have the same nodes and their edges have
- * the same support status (provided by the extractPathSequence helper function).
+ * Determines whether a path ID should be treated as filtered out for display,
+ * accounting for compressed path groups (a compressed path is hidden only when
+ * all members are filtered).
+ */
+export const getIsPathIdFiltered = (
+  resultSet: ResultSet | null | undefined,
+  pathId: string,
+  paths: (string | Path)[] | undefined,
+  pathFilterState: PathFilterState | undefined,
+): boolean => {
+  if (!pathFilterState || !pathId) return false;
+
+  if (!resultSet || !paths?.length) {
+    return pathFilterState[pathId] === true;
+  }
+
+  const compressedPaths = getCompressedPaths(resultSet, paths);
+  const displayPath = compressedPaths.find(
+    (path) => path.id === pathId || path.compressedIDs?.includes(pathId),
+  );
+
+  if (!displayPath) {
+    return pathFilterState[pathId] === true;
+  }
+
+  return getIsPathFiltered(displayPath, pathFilterState);
+};
+
+/**
+ * Takes a list of paths/path IDs and compresses them if any paths share the same node
+ * sequence (provided by the getPathSequenceKey helper function).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @returns {Path[]} - The array of compressed paths.
  */
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
-  // Helper function to extract the path sequence from a subgraph
-  const extractPathSequence = (resultSet: ResultSet, subgraph: string[]): string[] => {
-    return subgraph.map((item, i) => {
-      if(isNodeIndex(i)) {
-        return item;
-      } else {
-        const edge = getEdgeById(resultSet, item);
-        // edges return 'indirect' or 'direct' based on presence of support
-        return (edge?.inferred ?? false) ? "indirect" : "direct";
-      }
-    })
-  };
-
-  const mergeTags = (tags1: Tags, tags2: Tags): Tags => {
-    const mergedTags: Tags = { ...tags1 };
+  const mergeTags = (tags1: EntityTags, tags2: EntityTags): EntityTags => {
+    const mergedTags: EntityTags = { ...tags1 };
 
     for (const key in tags2) {
       const tag1 = tags1[key];
@@ -277,12 +156,9 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 
       // If the tag exists in both tags1 and tags2, ensure no duplicates
       if (tag1 && tag2) {
-        // Check if the tag is the same by comparing name and value
-        if (tag1.name === tag2.name && tag1.value === tag2.value) {
-          // Use the existing tag
+        if (tag1.id === tag2.id) {
           mergedTags[key] = tag1;
         } else {
-          // If different, prioritize tag2 or handle conflicts as needed
           mergedTags[key] = tag2;
         }
       } else {
@@ -301,8 +177,9 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
     const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
     if(!checkedPath)
       continue;
-    // Use the path sequence as the key
-    const pathSequence = extractPathSequence(resultSet, checkedPath.subgraph).join(",");
+    const pathSequence = getPathSequenceKey(resultSet, checkedPath);
+    if(!pathSequence)
+      continue;
     const existingPath = groupedPaths.get(pathSequence);
 
     // check for existing path in groupedPaths
@@ -345,11 +222,6 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
           ].filter((id): id is string => id !== undefined)
         )
       );
-
-      // Merge highlighted
-      if (checkedPath.highlighted) {
-        existingPath.highlighted = true;
-      }
     } else {
       // Add the current path to the map
       groupedPaths.set(pathSequence, {
@@ -364,31 +236,6 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
 
   // Return the compressed paths as an array
   return Array.from(groupedPaths.values());
-}
-
-/**
- * Takes a Path object and returns a boolean value based on whether any of its edges have support paths.
- *
- * @param {ResultSet} resultSet - ResultSet Object.
- * @param {Path} path - Path Object.
- * @returns {boolean} - Does the path have any edges with support paths attached.
- */
-export const isPathInferred = (resultSet: ResultSet, path: Path) => {
-  if(!path || path === null)
-    return false;
-
-  for(const [i, itemID] of path.subgraph.entries()) {
-    if(isNodeIndex(i))
-      continue;
-
-    const edge = getEdgeById(resultSet, itemID);
-    if(!isResultEdge(edge))
-      continue;
-
-    if(edge.inferred)
-      return true;
-  }
-  return false;
 }
 
 /**
@@ -436,38 +283,24 @@ export const generatePathD = (
 };
 
 /**
- * Generates a unique identifier for a predicate based on the path and edge IDs.
- *
- * @param {Path} path - The path object.
- * @param {string[]} edgeIds - The edge IDs.
- * @returns {string} - The unique predicate ID.
- */
-export const generatePredicateId = (path: Path, edgeIds: string[]) => {
-    return `${path.id}-${edgeIds.join('-')}`;
-}
-
-/**
  * Checks if the notes on a save are empty.
  *
  * @param {string | null} notes - The notes.
  * @returns {boolean} - Whether the notes are empty.
  */
 export const isNotesEmpty = (notes?: string | null) => {
-  const notesObj = JSON.parse(notes || "{}");
+  const children = JSON.parse(notes || "{}")?.root?.children;
+  if (!Array.isArray(children)) return true;
+  if (children.length > 1) return false;
+  return !children.some(hasNoteContent);
+}
 
-  if(Array.isArray(notesObj?.root?.children)) {
-    if(notesObj?.root?.children.length > 1)
-      return false;
+type NoteNode = { children?: { text?: string }[] } | null | undefined;
 
-    for(const child of notesObj.root.children) {
-      if(Array.isArray(child?.children)) {
-        if(child.children.length > 1 || (child.children[0]?.text && child.children[0]?.text.length > 0))
-          return false;
-      }
-    }
-  }
-
-  return true;
+const hasNoteContent = (child: NoteNode): boolean => {
+  const grandchildren = child?.children;
+  if (!Array.isArray(grandchildren)) return false;
+  return grandchildren.length > 1 || !!grandchildren[0]?.text;
 }
 
 
@@ -510,4 +343,55 @@ export const handleTagClick = (filterID: string, filter: Filter, handleFilter: (
     value: filter.name
   };
   handleFilter(newObj);
+}
+
+/**
+ * Gets the description of a node from its annotations or descriptions.
+ * Prefers descriptions from annotations over descriptions attached to the node itself.
+ *
+ * @param {ResultNode} node - The node object.
+ * @returns {string | null} - The description of the node.
+ */
+export const getNodeDescription = (node: ResultNode) => {
+  for(const key in node.annotations) {
+    const annotation = node.annotations[key as keyof typeof node.annotations];
+    const descriptions = annotation.descriptions?.value;
+    if(descriptions && descriptions.length > 0)
+      return descriptions[0];
+  }
+  if(node.descriptions && node.descriptions.length > 0)
+    return node.descriptions[0];
+  return null;
+}
+
+/**
+ * Checks if an edge is an accepted ontology edge.
+ *
+ * @param {ResultEdge} edge - The edge object.
+ * @returns {boolean} - Whether the edge is an accepted ontology edge.
+ */
+export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
+  return edge.predicate === "subclass of" || edge.predicate === "superclass of";
+}
+
+/**
+ * Gets a string of role tags from a ResultItem's tags object.
+ *
+ * @param {EntityTags} tags - The tags object from a ResultItem.
+ * @param {Filter[]} availableFilters - The available filters.
+ * @returns {string} - A string of role tags, comma separated.
+ */
+export const getResultRoleTagsString = (tags: EntityTags, availableFilters: { [key: string]: Filter }) => {
+  return Object.keys(tags).filter((fid) => availableFilters[fid] && getTagFamily(fid) === FILTERING_CONSTANTS.FAMILIES.ROLE).map((fid) => availableFilters[fid].name).join(', ');
+}
+
+/**
+ * Gets the number of paths to show per page from the user preferences.
+ *
+ * @param {Preferences} prefs - The user preferences.
+ * @returns {number} - The number of paths to show per page.
+ */
+export const getPathsPerPage = (prefs: Preferences) => {
+  const value = prefs?.path_show_count?.pref_value || 10;
+  return typeof value === "string" ? parseInt(value) : value;
 }

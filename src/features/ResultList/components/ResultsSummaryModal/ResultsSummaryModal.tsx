@@ -1,8 +1,8 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, ReactNode, useCallback, useMemo } from "react";
 import styles from "./ResultsSummaryModal.module.scss";
-import Modal from "@/features/Common/components/Modal/Modal";
+import Modal from "@/features/Core/components/Modal/Modal";
 import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import { ResultContextObject } from "@/features/ResultList/utils/llm";
 import loadingIcon from '@/assets/images/loading/loading-purple.png';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
@@ -18,6 +18,29 @@ interface ResultsSummaryModalProps {
   resultContext: ResultContextObject[];
   streamedText: string;
 }
+
+const linkifyParagraph = (
+  paragraph: string,
+  paraIndex: number,
+  regex: RegExp,
+  resultContext: ResultContextObject[],
+  onMatchClick: (match: ResultContextObject) => void,
+): ReactNode[] =>
+  paragraph.split(regex).map((part, index) => {
+    const match = resultContext.find((contextItem) => !!part && contextItem.name.toLowerCase() === part.toLowerCase());
+    if (!match) return part;
+    return (
+      <span
+        key={`${paraIndex}-${index}`}
+        onClick={() => onMatchClick(match)}
+        className={styles.summaryMatch}
+        data-tooltip-id={`${paraIndex}-${index}`}
+      >
+        <Tooltip id={`${paraIndex}-${index}`}><span>View this result</span></Tooltip>
+        {match.name}
+      </span>
+    );
+  });
 
 const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
   handleResultMatchClick,
@@ -42,23 +65,7 @@ const ResultsSummaryModal: FC<ResultsSummaryModalProps> = ({
 
     return paragraphs.map((paragraph, paraIndex) => {
       const isLastParagraph = (paraIndex === paragraphs.length - 1);
-      const processedParagraph = paragraph.split(regex).map((part, index) => {
-        const match = resultContext.find((contextItem) => !!part && contextItem.name.toLowerCase() === part.toLowerCase());
-        if (match) {
-          return (
-            <span
-              key={`${paraIndex}-${index}`}
-              onClick={() => handleMatchedNameClick(match)}
-              className={styles.summaryMatch}
-              data-tooltip-id={`${paraIndex}-${index}`}
-            >
-              <Tooltip id={`${paraIndex}-${index}`}><span>View this result</span></Tooltip>
-              {match.name}
-            </span>
-          );
-        }
-        return part;
-      });
+      const processedParagraph = linkifyParagraph(paragraph, paraIndex, regex, resultContext, handleMatchedNameClick);
 
       if(paragraph.length <= 0)
         return null;

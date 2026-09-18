@@ -7,11 +7,12 @@
 
 .tableBody .tableItem  {
   .sourceName {
+    justify-content: flex-start;
     align-items: flex-start;
   }
   .sourceNameText {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
 }

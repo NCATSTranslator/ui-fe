@@ -7,20 +7,20 @@ import { useSortSearchState, useUserQueries } from "@/features/Projects/hooks/cu
 import QueriesTableHeader from "@/features/Projects/components/TableHeader/QueriesTableHeader/QueriesTableHeader";
 import QueryCard from "@/features/Projects/components/QueryCard/QueryCard";
 import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
-import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
+import { useSimpleSearch } from "@/features/Core/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
-import Tabs from "@/features/Common/components/Tabs/Tabs";
-import Tab from "@/features/Common/components/Tabs/Tab";
-import CardList from "@/features/Projects/components/CardList/CardList";
+import Tabs from "@/features/Core/components/Tabs/Tabs";
+import Tab from "@/features/Core/components/Tabs/Tab";
+import CardList from "@/features/Core/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
-import SearchPlusIcon from '@/assets/icons/projects/searchplus.svg?react';
+import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import { useAnimateHeight } from "@/features/Core/hooks/useAnimateHeight";
 import AnimateHeight from "react-animate-height";
 import CombinedQueryInterface from "@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface";
 import EmptyArea from "@/features/Projects/components/EmptyArea/EmptyArea";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
 
@@ -60,7 +60,7 @@ const QueryList = () => {
       />
       <div className={styles.list}>
         <Button 
-          iconLeft={<SearchPlusIcon />}
+          iconLeft={<CirclePlusIcon />}
           iconRight={<ChevDownIcon className={styles.iconRight} />}
           handleClick={handleAddNewQueryClick}
           title="Add New Query"
@@ -83,6 +83,7 @@ const QueryList = () => {
                 handleTabSelection={() => {}}
                 defaultActiveTab={queriesTabHeading}
                 className={styles.queryTabs}
+                tabListWrapperClassName={styles.queryTabsTabListWrapper}
                 activeTab={queriesTabHeading}
                 controlled
               >
@@ -108,34 +109,19 @@ const QueryList = () => {
                         sortDirection={sortSearchState.sortDirection}
                         onSort={sortSearchState.handleSort}
                       />
-                      {
-                        (searchTerm.length === 0 && filteredQueries.length === 0)
-                        ? (
-                          <EmptyArea heading="No Queries">
-                            {
-                              <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
-                            }
-                          </EmptyArea>
-                          ) 
-                        : 
-                          (
-                            filteredQueries.length === 0 ? (
-                              <EmptyArea>
-                                <p>No queries found matching your search.</p>
-                              </EmptyArea>
-                            ) : (
-                              <>
-                                {
-                                  filteredQueries.map((query) => {
-                                    return (
-                                      <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
-                                    )
-                                  })
-                                }
-                              </>
-                            )
-                          )
-                      }
+                      {searchTerm.length === 0 && filteredQueries.length === 0 && (
+                        <EmptyArea heading="No Queries">
+                          <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                        </EmptyArea>
+                      )}
+                      {searchTerm.length > 0 && filteredQueries.length === 0 && (
+                        <EmptyArea>
+                          <p>No queries found matching your search.</p>
+                        </EmptyArea>
+                      )}
+                      {filteredQueries.map((query) => (
+                        <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+                      ))}
                     </CardList>
                   </Tab>
                 ]}

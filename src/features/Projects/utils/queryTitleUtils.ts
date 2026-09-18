@@ -1,6 +1,8 @@
-import { capitalizeAllWords, capitalizeFirstLetter, formatBiolinkTypeString } from '@/features/Common/utils/utilities';
+import { capitalizeAllWords, capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
+import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
+import { QueryType } from '@/features/Query/types/querySubmission';
 /**
  * Generates the title of a query based on the query object
  * @param {UserQueryObject} query - The query to generate the title for
@@ -13,7 +15,9 @@ export const generateQueryTitleFromQueryObject = (query: UserQueryObject): strin
   const queryType = query.data.query.type;
   const nodeOneLabel = query.data.query.node_one_label || query.data.query.subject?.id || '';
   const nodeTwoLabel = query.data.query.node_two_label || query.data.query.object?.id || '';
-  const constraint = query.data.query.constraint || null;
+  const constraint = queryType === 'lookup'
+    ? query.data.query.object?.category || null
+    : query.data.query.constraint || null;
 
   return generateQueryTitle(queryType, nodeOneLabel, nodeTwoLabel, constraint);
 }
@@ -30,18 +34,45 @@ export const generateQueryTitle = (queryTypeId: string | null, nodeOneLabel: str
   let title = 'No title available';
 
   if(queryTypeId === 'p' || queryTypeId === 'pathfinder') {
-    title = constraint
-      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${formatBiolinkTypeString(constraint)} Connections`
+    const constraintLabel = constraint ? getBiolinkCategoryDisplay(constraint) : null;
+    title = constraintLabel
+      ? `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)} — ${constraintLabel} Connections`
       : `${capitalizeAllWords(nodeOneLabel)} and ${capitalizeAllWords(nodeTwoLabel)}`;
+  } else if(queryTypeId === 'l' || queryTypeId === 'lookup') {
+    const constraintLabel = constraint ? getBiolinkCategoryDisplay(constraint, true) : null;
+    title = constraintLabel
+      ? `${capitalizeAllWords(nodeOneLabel)} — ${constraintLabel} Lookup`
+      : `${capitalizeAllWords(nodeOneLabel)} — Lookup`;
   } else {
     const queryTypeObject = queryTypes.find(type => type.targetType === queryTypeId || type.id === parseInt(queryTypeId || '0'));
     if(queryTypeObject)
-      title = `${nodeOneLabel} — ${capitalizeFirstLetter(queryTypeObject.targetType)}s`;
+      title = generateSmartQueryTitle(queryTypeObject, nodeOneLabel);
     else
       console.warn(`Query type object not found for query type: ${queryTypeId}`);
   }
 
   return title;
+}
+
+/**
+ * Generates the title of a smart query based on the query type object and node one label
+ * @param {QueryType} queryTypeObject - The query type object
+ * @param {string} nodeOneLabel - The label of the first node
+ * @returns {string} The title of the smart query
+ */
+const generateSmartQueryTitle = (queryTypeObject: QueryType, nodeOneLabel: string) => {
+  if(queryTypeObject.targetType === 'chemical') {
+    if(queryTypeObject.direction === 'increased')
+      return `${nodeOneLabel} — Chemical Upregulators`;
+    else 
+      return `${nodeOneLabel} — Chemical Downregulators`;
+  } else if(queryTypeObject.targetType === 'gene') {
+    if(queryTypeObject.direction === 'increased')
+      return `${nodeOneLabel} — Gene Upregulation`;
+    else 
+      return `${nodeOneLabel} — Gene Downregulation`;
+  }
+  return `${nodeOneLabel} — ${capitalizeFirstLetter(queryTypeObject.targetType)}s`;
 }
 
 /**
@@ -64,7 +95,7 @@ export const extractAllCuriesFromTitles = (titles: string[]): string[] => {
  * @returns {string[]} Array of all curies found in the title
  */
 export const findAllCuriesInTitle = (title: string): string[] => {
-  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
+  const curieRegex = /\b[A-Za-z]\w*:[A-Za-z0-9_-]+\b/g;
   const matches = title.match(curieRegex);
   return matches || [];
 }

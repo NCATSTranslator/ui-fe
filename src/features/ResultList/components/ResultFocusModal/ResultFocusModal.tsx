@@ -1,7 +1,7 @@
-import Modal from '@/features/Common/components/Modal/Modal';
+import Modal from '@/features/Core/components/Modal/Modal';
 import styles from './ResultFocusModal.module.scss';
 import Button from '@/features/Core/components/Button/Button';
-import { truncateStringIfTooLong, getFormattedPathfinderName } from '@/features/Common/utils/utilities';
+import { truncateStringIfTooLong, getFormattedPathfinderName } from '@/features/Core/utils/stringFormatters';
 import { FC } from 'react';
 
 interface ResultFocusModalProps {

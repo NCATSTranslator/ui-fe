@@ -1,7 +1,7 @@
 import { FC } from "react";
 import SummaryIcon from '@/assets/icons/buttons/SparklesEmpty.svg?react';
 import SummaryFilledIcon from '@/assets/icons/buttons/SparklesFilled.svg?react';
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Button from "@/features/Core/components/Button/Button";
 import styles from './ResultItemInteractables.module.scss';
 

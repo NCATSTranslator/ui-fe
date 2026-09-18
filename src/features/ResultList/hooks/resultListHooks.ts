@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction, useEffect, useState, RefObject, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
-import { fetchWithErrorHandling } from "@/features/Common/utils/web";
+import { API_PATH_PREFIX, useUser } from "@/features/UserAuth/utils/userApi";
+import { fetchWithErrorHandling } from "@/features/Core/utils/web";
 import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ARAStatusResponse, Result, ResultSet } from "@/features/ResultList/types/results.d";
 import { queryStatusResultsCompleteToast } from "@/features/Core/utils/toastMessages";
-import { useUpdateQueryLastSeen } from "@/features/Projects/hooks/customHooks";
+import { useUpdateQueryLastSeen, useCopyQuery } from "@/features/Projects/hooks/customHooks";
 
 
 // Constants
@@ -96,6 +96,7 @@ export const useResultsStatusQuery = (
   currentQueryID: string | null,
   isFetchingARAStatus: boolean | null,
   setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
+  isFetchingARAStatusRef: RefObject<boolean | null>,
   numberOfStatusChecks: RefObject<number>,
   formattedResults: Result[],
   setIsError: (value: boolean) => void,
@@ -105,6 +106,7 @@ export const useResultsStatusQuery = (
   arsStatus: ARAStatusResponse | null,
   setArsStatus: (value: ARAStatusResponse) => void
 ) => {
+  // Polling side-effect query: refs/setters are intentionally excluded from queryKey
   return useQuery({
     queryKey: ['resultsStatus', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -140,6 +142,7 @@ export const useResultsStatusQuery = (
         // Check if status polling should stop
         if (shouldStopStatusPolling(data.status, numberOfStatusChecks.current)) {
           console.log(`Stopping ARA status polling. Status: ${data.status}, Checks: ${numberOfStatusChecks.current}`);
+          isFetchingARAStatusRef.current = false;
           setIsFetchingARAStatus(false);
           setIsFetchingResults(true);
         }
@@ -208,14 +211,16 @@ const processResultsData = (
 /**
  * Helper function to handle results data errors
  */
-const handleResultsDataError = (
-  error: unknown,
-  formattedResults: Result[],
-  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
-  setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  setIsError: (value: boolean) => void,
-  setIsLoading: (value: boolean) => void
-): void => {
+interface ResultsDataErrorContext {
+  formattedResults: Result[];
+  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
+  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
+  setIsError: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
+}
+
+const handleResultsDataError = (error: unknown, context: ResultsDataErrorContext): void => {
+  const { formattedResults, setIsFetchingARAStatus, setIsFetchingResults, setIsError, setIsLoading } = context;
   console.error('Results Data Error:', error);
   setIsFetchingARAStatus(false);
   setIsFetchingResults(false);
@@ -252,9 +257,23 @@ export const useResultsDataQuery = (
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  sid?: string
+  sid?: number
 ) => {
-  const { mutate: updateQueryLastSeen } = useUpdateQueryLastSeen(sid);
+  const [user] = useUser();
+  const { mutate: touchQueryLastSeen } = useUpdateQueryLastSeen(sid);
+  const { mutate: copyQueryMutate } = useCopyQuery();
+
+  const handleQuerySeen = () => {
+    // if user isn't logged in, don't do anything
+    if (!user)
+      return;
+    if (sid !== undefined)
+      touchQueryLastSeen();
+    else if (currentQueryID)
+      copyQueryMutate(currentQueryID);
+  };
+
+  // Polling side-effect query: refs/setters/callbacks are intentionally excluded from queryKey
   return useQuery({
     queryKey: ['resultsData', currentQueryID],
     queryFn: async (): Promise<void> => {
@@ -281,17 +300,16 @@ export const useResultsDataQuery = (
           numberOfStatusChecks,
           setIsFetchingARAStatus,
           setIsFetchingResults,
-          updateQueryLastSeen
+          handleQuerySeen
         );
       } catch (error) {
-        handleResultsDataError(
-          error,
+        handleResultsDataError(error, {
           formattedResults,
           setIsFetchingARAStatus,
           setIsFetchingResults,
           setIsError,
-          setIsLoading
-        );
+          setIsLoading,
+        });
       }
     },
     enabled: isFetchingResults,
@@ -434,5 +452,11 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     resetBookmarks();
     
     setNodeDescription("");
-  }, [currentQueryID]);
+  }, [
+    currentQueryID, itemsPerPageRef, prevQueryID, rawResults, prevRawResults, originalResults,
+    numberOfStatusChecks, currentPage, firstLoad, setIsFetchingARAStatus, setIsFetchingResults,
+    setIsLoading, setIsError, setFormattedResults, setFreshRawResults, resetFilters, setArsStatus,
+    setResultStatus, setItemOffset, setEndResultIndex, closeNotesModal, resetShareState,
+    resetBookmarks, setNodeDescription,
+  ]);
 };

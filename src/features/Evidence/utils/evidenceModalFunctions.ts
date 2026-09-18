@@ -1,7 +1,7 @@
 // Focus: Evidence modal-specific functionality and UI state management
 import { Dispatch, SetStateAction } from 'react';
-import { sortNameHighLow, sortNameLowHigh, sortJournalHighLow, sortJournalLowHigh,
-  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Common/utils/sortingFunctions';
+import { sortTitleHighLow, sortTitleLowHigh, sortJournalHighLow, sortJournalLowHigh,
+  sortDateYearHighLow, sortDateYearLowHigh } from '@/features/Core/utils/sortingFunctions';
 import cloneDeep from 'lodash/cloneDeep';
 import { EvidenceSortState, PublicationObject, SortingState, SortPreference } from '@/features/Evidence/types/evidence';
 import { Preferences } from '@/features/UserAuth/types/user';
@@ -28,13 +28,13 @@ export const handleEvidenceSort = (
   let newSortingState: EvidenceSortState = { title: null, journal: null, date: null };
   switch (sortName) {
     case 'titleLowHigh':
-      sortedPubmedEvidence = sortNameLowHigh(sortedPubmedEvidence) as PublicationObject[];
+      sortedPubmedEvidence = sortTitleLowHigh(sortedPubmedEvidence);
       newSortingState.title = true;
       newSortingState.journal = null;
       newSortingState.date = null;
       break;
     case 'titleHighLow':
-      sortedPubmedEvidence = sortNameHighLow(sortedPubmedEvidence) as PublicationObject[];
+      sortedPubmedEvidence = sortTitleHighLow(sortedPubmedEvidence);
       newSortingState.title = false;
       newSortingState.journal = null;
       newSortingState.date = null;
@@ -86,8 +86,9 @@ export const handleEvidenceSort = (
 export const getInitItemsPerPage = (prefs: Preferences, defaultItemsPerPage: number): number => {
   const value = prefs?.evidence_per_page?.pref_value;
   if (!value) return defaultItemsPerPage;
-  
-  return typeof value === "string" ? parseInt(value) : value;
+
+  const parsed = typeof value === "string" ? parseInt(value, 10) : value;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultItemsPerPage;
 };
 
 /**
@@ -102,8 +103,8 @@ export const getSortingFunction = (sortPreference: SortPreference) => {
     dateLowHigh: sortDateYearLowHigh,
     journalHighLow: sortJournalHighLow,
     journalLowHigh: sortJournalLowHigh,
-    titleHighLow: sortNameHighLow,
-    titleLowHigh: sortNameLowHigh,
+    titleHighLow: sortTitleHighLow,
+    titleLowHigh: sortTitleLowHigh,
   };
   return sortFunctions[sortPreference];
 };

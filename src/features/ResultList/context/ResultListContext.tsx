@@ -1,8 +1,9 @@
 import { createContext, useContext, FC, ReactNode, RefObject, Dispatch, SetStateAction } from 'react';
-import { Path, PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
+import { PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
+import { EvidenceNavigationOptions } from '@/features/Evidence/types/navigation';
 
 export interface ResultListContextValue {
   userSaves: SaveGroup | null;
@@ -11,11 +12,14 @@ export interface ResultListContextValue {
   activeFilters: Filter[];
   availableFilters: { [key: string]: Filter };
   handleFilter: (filter: Filter) => void;
+  handleClearAllFilters: () => void;
+  visibleResultIds: Set<string>;
   bookmarkAddedToast: () => void;
   bookmarkRemovedToast: () => void;
   handleBookmarkError: () => void;
+  isLookup: boolean;
   isPathfinder: boolean;
-  navigateToEvidenceView: (selectedEdgeId: string, compressedEdgeSets: string[][], path: Path, pathKey: string) => void;
+  navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;
   pathFilterState: PathFilterState | null;
   pk: string | null;
   resultId: string | undefined;
@@ -25,6 +29,8 @@ export interface ResultListContextValue {
   queryNodeDescription: string | null;
   queryType: QueryType | null;
   resultsComplete: boolean;
+  /** True until the list has produced its first batch of results, which is when `visibleResultIds` becomes meaningful. */
+  resultsLoading: boolean;
   scoreWeights: ScoreWeights;
   setExpandSharedResult: (state: boolean) => void;
   setShareModalOpen: Dispatch<SetStateAction<boolean>>;
@@ -33,12 +39,21 @@ export interface ResultListContextValue {
   setShowHiddenPaths: Dispatch<SetStateAction<boolean>>;
   shouldUpdateResultsAfterBookmark: RefObject<boolean>;
   updateUserSaves: Dispatch<SetStateAction<SaveGroup | null>>;
+  pathfinderIdOne: string | null;
+  pathfinderLabelOne: string | null;
+  pathfinderIdTwo: string | null;
+  pathfinderLabelTwo: string | null;
+  constraintText: string | null;
+  lookupCategory: string | null;
 }
 
 const ResultListContext = createContext<ResultListContextValue | null>(null);
 
+export const useOptionalResultListContext = (): ResultListContextValue | null =>
+  useContext(ResultListContext);
+
 export const useResultListContext = (): ResultListContextValue => {
-  const ctx = useContext(ResultListContext);
+  const ctx = useOptionalResultListContext();
   if (!ctx) throw new Error('useResultListContext must be used within a ResultListProvider');
   return ctx;
 };

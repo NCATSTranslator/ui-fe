@@ -1,6 +1,6 @@
 import { FC, ReactNode, CSSProperties, useMemo } from 'react';
 import { useDndContext, useDroppable } from '@dnd-kit/core';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import styles from './DroppableArea.module.scss';
 import { DraggableData, DroppableAreaData } from '@/features/DragAndDrop/types/types';
 

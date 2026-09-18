@@ -1,0 +1,240 @@
+@use "@/assets/styles/variables" as *;
+
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  align-items: flex-start;
+  padding: $s;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.left {
+  display: flex;
+  justify-self: flex-start;
+  align-items: center;
+  min-width: 0;
+  gap: $s;
+  pointer-events: auto;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.right {
+  position: relative;
+  justify-self: flex-end;
+  align-self: stretch;
+  width: $panelWidth;
+  min-width: $panelWidth;
+  pointer-events: none;
+}
+
+.interactions {
+  display: flex;
+  gap: $xxs;
+  button {
+    margin: 0;
+    border-radius: 20px;
+    border: none;
+    padding: 0;
+    display: flex;
+    cursor: pointer;
+    height: $s;
+    width: $s;
+    justify-content: center;
+    align-items: center;
+  }
+  .closeButton {
+    background: $red;
+  }
+  .collapseButton {
+    background: $yellow;
+  }
+  .expandButton {
+    background: $green;
+  }
+}
+
+.title {
+  font-size: $subTwoSize;
+  font-weight: 600;
+  color: $black;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 3px 5px;
+  max-width: 240px;
+}
+
+.titleInput {
+  font-size: $subTwoSize;
+  font-weight: 600;
+  color: $black;
+  border: 1px solid $purpleTwo;
+  border-radius: $defaultBorderRadius;
+  padding: 2px $xxs;
+  outline: none;
+  width: 200px;
+}
+
+.undoRedoGroup {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  .toolButton {
+    svg path {
+      fill: transparent;
+    }
+  }
+}
+
+.divider {
+  width: 1px;
+  height: $s;
+  background-color: $midGray;
+}
+
+.addMenuWrapper {
+  position: relative;
+  margin-right: $xxs;
+}
+
+.addButton {
+  &.active {
+    background: $purpleTwo;
+  }
+
+  svg path {
+    stroke: $white;
+  }
+}
+
+.addMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 140px;
+  padding: $xxs 0;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: 0 2px 8px $dropShadowColor;
+  z-index: 10;
+}
+
+.addMenuItem {
+  display: block;
+  width: 100%;
+  padding: $xxs $s;
+  border: none;
+  background: transparent;
+  color: $black;
+  font-size: $captionSize;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+}
+
+.saveIndicator {
+  font-size: $captionSize;
+  color: $darkGray;
+  margin-left: $xs;
+  opacity: 0;
+  transition: $defaultAnim;
+  width: 100px;
+
+  &.visible,
+  &.saving,
+  &.saveError {
+    opacity: 1;
+  }
+
+  &.saving {
+    font-style: italic;
+  }
+
+  &.saveError {
+    color: $red;
+  }
+}
+
+.settingsMenuWrapper {
+  position: relative;
+}
+
+.settingsMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  padding: $xxs 0;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: 0 2px 8px $dropShadowColor;
+  z-index: 10;
+}
+
+.settingsMenuLabel {
+  padding: $xxs $s $xxxs;
+  color: $darkGray;
+  font-size: $captionSize;
+  font-weight: 600;
+  user-select: none;
+}
+
+.settingsMenuDivider {
+  height: 1px;
+  margin: $xxs 0;
+  background: $midGray;
+}
+
+.settingsMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $xs;
+  width: 100%;
+  padding: $xxs $s;
+  border: none;
+  background: transparent;
+  color: $black;
+  font-size: $captionSize;
+  text-align: left;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover:not(:disabled) {
+    background: $hoverGray;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.settingsMenuItemActive {
+  font-weight: 600;
+}
+
+.settingsMenuItemDanger {
+  color: $red;
+
+  &:hover:not(:disabled) {
+    background: $hoverGray;
+  }
+}

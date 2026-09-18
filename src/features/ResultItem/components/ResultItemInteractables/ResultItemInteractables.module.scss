@@ -1,11 +1,15 @@
    @use "@/assets/styles/variables" as *;
 
 .interactablesContainer {
-  display: flex;
-  gap: $xs;
+  display: grid;
+  // Column flow rather than a fixed count: the button set varies with sign-in
+  // state, query type, and whether summarization is enabled.
+  grid-auto-flow: column;
+  gap: 8px;
   transition: $defaultAnim;
   z-index: 10;
   &.belowBreakpoint {
+    grid-auto-flow: row;
     grid-template-columns: 1fr;
     gap: 0;
     opacity: 0;

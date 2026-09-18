@@ -1,6 +1,9 @@
 @use "@/assets/styles/variables" as *;
 
 .settingsPanel {
+  .idpLogoutForm {
+    display: none;
+  }
   .top {
     display: flex;
     flex-direction: column;
@@ -51,6 +54,28 @@
     padding: $s;
     margin: 0 (-$s) $s;
   }
+  .displaySection {
+    padding: 0 $s;
+  }
+  .displayPref {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $s;
+    .displayPrefLabel {
+      min-width: 0;
+      p {
+        margin: 0;
+      }
+    }
+    .prefLabel {
+      margin-bottom: $xxxs;
+    }
+  }
+  .apiSection {
+    padding: 0 $s;
+    margin-top: $l;
+  }
   .helpText, .helpText a {
     font-size: $captionSize;
     color: $darkGray;
@@ -66,6 +91,8 @@
     color: $darkGray;
     font-weight: 800;
     margin-bottom: $xxs;
+    display: flex;
+    gap: $xxxs;
   }
   .prefValueButton {
     width: 100%;
@@ -77,6 +104,9 @@
       font-weight: 400;
       padding: 0;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
     }
     svg {
       path {
@@ -94,6 +124,9 @@
       font-weight: 400;
       padding: 0;
       font-size: $bodyTwoSize;
+      display: flex;
+      align-items: center;
+      gap: $xxs;
     }
     &.active {
       background-color: $lightPurpleTwo;
@@ -102,4 +135,19 @@
       }
     }
   }
+  svg.confidenceTooltipIcon {
+    height: 18px;
+    width: 18px;
+    path {
+      fill: $black;
+      stroke: transparent;
+    }
+  }
+}
+span.confidenceTooltipLink {
+  color: $white;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: $xs;
+  display: block;
 }

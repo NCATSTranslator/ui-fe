@@ -1,33 +1,38 @@
 import { DraggableData } from "@/features/DragAndDrop/types/types";
-import { Project, isUserQueryObject } from "@/features/Projects/types/projects.d";
+import { Project } from "@/features/Projects/types/projects.d";
+import { isUserQueryObject } from "@/features/Projects/types/checkers";
 import { Active } from "@dnd-kit/core";
 import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
+import type { HandleUpdateProject } from "@/features/Projects/hooks/useEditProjectHandlers";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Handles the dropping of a query into a project. (WRAP IN A USECALLBACK IF PROVIDING TO DroppableArea)
  * @param {DraggableData} draggedItem - The dragged item data.
  * @param {Project} project - The project to drop the query into.
  * @param {string[]} projectQIds - The qids in the project.
- * @param {function} handleUpdateProject - The function to update the project.
+ * @param {HandleUpdateProject} handleUpdateProject - The function to update the project.
  */
 export const handleQueryDrop = (
   draggedItem: DraggableData,
   project: Project,
   projectQIds: string[],
-  handleUpdateProject: (id: number | string, newName?: string, newQids?: string[]) => void) => {
+  handleUpdateProject: HandleUpdateProject) => {
   if (draggedItem.type === 'query') {
     // if query does not exist in project, add it
     const isQueryInProject = projectQIds.some((q: string) => q === draggedItem.data.data.qid);
-    if(isQueryInProject) {
+    if(isQueryInProject && draggedItem.data.data.title) {
       queryAlreadyInProjectToast(draggedItem.data.data.title, project.data.title);
       return;
     }
     if(!project?.id || !isUserQueryObject(draggedItem.data)) {
-      console.error('No project or query found');
+      console.error('handleQueryDrop: No project or query found', project, draggedItem.data);
       return;
     }
-    
-    handleUpdateProject(project?.id?.toString(), undefined, [...projectQIds, draggedItem.data.data.qid]);
+
+    handleUpdateProject(project?.id?.toString(), undefined, [...projectQIds, draggedItem.data.data.qid], {
+      onSuccess: () => trackEvent('query_moved_to_project', { move_method: 'drag' }),
+    });
   }
 }
 

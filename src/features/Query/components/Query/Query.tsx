@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback, FC, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, useCallback, FC } from "react";
 import { useSelector } from 'react-redux';
 import { useLocation } from "react-router-dom";
 import { AutocompleteItem, QueryItem, QueryType } from "@/features/Query/types/querySubmission";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
-import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries } from "@/features/Query/hooks/customQueryHooks";
+import { useQueryItem, useAutocompleteConfig, useAutocomplete, useQuerySubmission, useExampleQueries, useNameResolverEndpoint } from "@/features/Query/hooks/customQueryHooks";
+import { noop } from "@/features/Core/utils/constants";
+import { withGeneMatchLabel } from "@/features/Query/utils/autocompleteFunctions";
 import { queryTypes } from "@/features/Query/utils/queryTypes";
 import styles from './Query.module.scss';
-import QueryResultsView from '@/features/Query/components/QueryResultsView/QueryResultsView';
 import QueryInputView from '@/features/Query/components/QueryInputView/QueryInputView';
 import { User } from "@/features/UserAuth/types/user";
 import { ProjectRaw } from "@/features/Projects/types/projects";
@@ -16,9 +17,7 @@ interface QueryProps {
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
-  nodeDescription?: string | null;
-  setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
-  pk?: string;
+  initNodeCategoryParam?: string | null;
   selectedProject?: ProjectRaw | null;
   combinedStyles?: { [key: string]: string };
   shouldNavigate?: boolean;
@@ -30,21 +29,17 @@ const Query: FC<QueryProps> = ({
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
-  nodeDescription = null,
-  setShareModalFunction = () => {},
-  pk = "",
+  initNodeCategoryParam = null,
   selectedProject = null,
   combinedStyles,
   shouldNavigate = true,
-  submissionCallback = () => {}
+  submissionCallback = noop
 }) => {
   const { pathname } = useLocation();
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser) as User | null;
 
-  const nameResolverEndpoint = config?.name_resolver.endpoint
-    ? `${config.name_resolver.endpoint}/lookup`
-    : 'https://name-lookup.transltr.io/lookup';
+  const nameResolverEndpoint = useNameResolverEndpoint();
 
   const {
     queryItem,
@@ -52,7 +47,7 @@ const Query: FC<QueryProps> = ({
     clear: clearQueryItem,
     inputText,
     setInputText,
-  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam);
+  } = useQueryItem(initPresetTypeObject, initNodeLabelParam, initNodeIdParam, initNodeCategoryParam);
 
   const autocompleteConfig = useAutocompleteConfig(queryItem.type);
 
@@ -104,11 +99,9 @@ const Query: FC<QueryProps> = ({
 
   const handleItemSelection = useCallback((item: AutocompleteItem) => {
     setIsError(false);
-    if (item.id.includes("NCBIGene") && item?.match) {
-      item.label += ` (${item.match})`;
-    }
-    setInputText(item.label);
-    setQueryItem((prev) => ({ type: prev.type, node: item }));
+    const labeledItem = withGeneMatchLabel(item);
+    setInputText(labeledItem.label);
+    setQueryItem((prev) => ({ type: prev.type, node: labeledItem }));
     setAutocompleteVisibility(false);
   }, [setInputText, setQueryItem, setAutocompleteVisibility]);
 
@@ -140,14 +133,7 @@ const Query: FC<QueryProps> = ({
     <>
       <div className={`${styles.query} ${isResults ? styles.results : ''}`}>
         <div className={styles.container}>
-          {isResults ? (
-            <QueryResultsView
-              queryItem={queryItem}
-              nodeDescription={nodeDescription}
-              pk={pk}
-              setShareModalFunction={setShareModalFunction}
-            />
-          ) : (
+          {isResults ? null : (
             <QueryInputView
               queryItem={queryItem}
               inputText={inputText}

@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { useSelector } from 'react-redux';
-import { currentConfig }from "@/features/UserAuth/slices/userSlice";
+// import { useSelector } from 'react-redux';
+// import { currentConfig }from "@/features/UserAuth/slices/userSlice";
 import styles from './ResultListHeader.module.scss';
 import ReactPaginate from 'react-paginate';
 import SelectedFilterTag from '@/features/ResultFiltering/components/SelectedFilterTag/SelectedFilterTag';
@@ -28,15 +28,16 @@ interface ResultListHeaderProps {
 
 const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
 
-  const config = useSelector(currentConfig);
-  const showNoveltyBoost = config?.show_novelty_boost;
+  // const config = useSelector(currentConfig);
+  // TODO: Reenable novelty boost toggle once scoring is updated to properly use novelty weights
+  // const showNoveltyBoost = config?.show_novelty_boost;
+  const showNoveltyBoost = false;
   const { activeFilters, handleFilter } = useResultListContext();
 
   return(
     <div className={styles.resultsHeader}>
-      <div className={styles.top}>
+      <div className={styles.bottom}>
         <div>
-          <h5 className={styles.heading}>Results</h5>
           {
             data.formattedResultsLength !== 0 &&
             <p className={styles.resultsCount}>
@@ -84,16 +85,18 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
           />
         </div>
       </div>
-      <div className={styles.activeFilters}>
-        {
-          activeFilters.length > 0 &&
-          activeFilters.map((activeFilter, i)=> {
-            return(
-              <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
-            )
-          })
-        }
-      </div>
+      {
+        activeFilters.length > 0 &&
+        <div className={styles.activeFilters}>
+          {
+            activeFilters.map((activeFilter, i)=> {
+              return(
+                <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
+              )
+            })
+          }
+        </div>
+      }
     </div>
   )
 }

@@ -1,0 +1,131 @@
+@use "@/assets/styles/variables" as *;
+
+.apiKeysPanel {
+  padding: $s $s 0;
+
+  code {
+    font-family: monospace;
+    font-size: $captionSize;
+    word-break: break-all;
+  }
+
+  .helpText {
+    font-size: $captionSize;
+    color: $darkGray;
+    margin-bottom: $s;
+  }
+
+  .createKey {
+    margin-bottom: $s;
+
+    .createButton {
+      width: 100%;
+      margin-top: $xs;
+      justify-content: center;
+    }
+  }
+
+  .newKey {
+    border: 1px solid $midGray;
+    border-radius: 4px;
+    background-color: $lightGray;
+    padding: $xs;
+    margin-bottom: $s;
+
+    .newKeyTitle {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      margin: 0 0 $xxs;
+    }
+    .newKeyWarning {
+      font-size: $captionSize;
+      color: $red;
+      margin: 0 0 $xs;
+    }
+    .newKeyValue {
+      display: block;
+      background-color: $white;
+      border: 1px solid $midGray;
+      border-radius: 4px;
+      padding: $xs;
+      margin-bottom: $xs;
+      user-select: all;
+    }
+    .newKeyActions {
+      display: flex;
+      gap: $xs;
+    }
+  }
+
+  .keyList {
+    .listTitle {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      margin: 0 0 $xs;
+    }
+    .emptyText {
+      font-size: $captionSize;
+      color: $darkGray;
+    }
+  }
+
+  .key {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $xs;
+    padding: $xs 0;
+    border-bottom: 1px solid $midGray;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .keyInfo {
+      display: flex;
+      flex-direction: column;
+      gap: $xxxs;
+      min-width: 0;
+    }
+    .keyName {
+      font-size: $bodyTwoSize;
+      font-weight: 800;
+      color: $black;
+      word-break: break-word;
+    }
+    .keyDisplay {
+      color: $darkGray;
+    }
+    .keyMeta {
+      font-size: $captionSize;
+      color: $darkGray;
+    }
+  }
+
+  .revokeButton {
+    flex-shrink: 0;
+    background-color: transparent;
+    padding: $xxs;
+
+    svg path {
+      fill: $darkGray;
+    }
+    &:hover svg path {
+      fill: $red;
+    }
+  }
+
+  .confirmRevoke {
+    display: flex;
+    align-items: center;
+    gap: $xxs;
+    flex-shrink: 0;
+
+    .confirmText {
+      font-size: $captionSize;
+      color: $darkGray;
+    }
+  }
+}

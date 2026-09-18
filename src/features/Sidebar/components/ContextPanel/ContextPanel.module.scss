@@ -12,7 +12,8 @@
     padding: $s;
     // border bottom, but inset
     box-shadow: inset 0px -1px 0 0 $midGray;
-    .title {
+    .title, .title a {
+      font-size: $h6Size;
       margin-bottom: 0;
       white-space: nowrap;
       color: $black;

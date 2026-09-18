@@ -1,4 +1,4 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .hidden {
   display: none;
@@ -13,12 +13,12 @@
     column-gap: $l;
     align-items: flex-start;
     position: relative;
-    max-width: $resultsViewMaxWidth;
+    max-width: $maxWidth;
     width: auto;
-    padding: $l;
+    padding: 0 $l $l;
     .resultsTableContainer.pathfinder {
       .tableHead {
-        grid-template-columns: 1fr auto 110px 90px 90px 24px;
+        grid-template-columns: 1fr auto 110px 90px 24px;
       }
     }
     .resultsTable {
@@ -28,9 +28,15 @@
       .tableBody {
         &>div:nth-child(odd){
           background-color: $lightGray;
+          &:hover {
+            background-color: $resultGrayRowHover;
+          }
         }
         &>div:first-child {
           background-color: $purpleTwo;
+          &:hover {
+            background-color: $purpleTwo;
+          }
         }
       }
       .tableHead {
@@ -39,7 +45,7 @@
         padding: 12px $s;
         border-radius: 5px 5px 0 0;
         user-select: none;
-        grid-template-columns: 1fr auto 110px 90px 90px 24px;
+        grid-template-columns: 1fr auto 110px 90px 24px;
         column-gap: $s;
         .head {
           display: flex;
@@ -65,7 +71,7 @@
           cursor: default;
           position: relative;
         }
-        .fdaHead, .evidenceHead, .scoreHead, .pathsHead, .nameHead {
+        .fdaHead, .evidenceHead, .pathsHead, .nameHead {
           svg {
             margin-left: 2px;
             width: 24px;
@@ -85,7 +91,7 @@
           font-size: 12px;
           text-transform: none;
         }
-        .nameHead, .evidenceHead, .scoreHead, .pathsHead {
+        .nameHead, .evidenceHead, .pathsHead {
           &:hover {
             cursor: pointer;
           }
@@ -113,6 +119,9 @@
         }
       }
     }
+  }
+  .clearAllButton, .clearAllButton span {
+    font-size: $captionSize;
   }
 }
 
@@ -158,3 +167,4 @@
 .downloadIcon {
   transform: rotate(180deg);
 }
+

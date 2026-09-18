@@ -444,36 +444,11 @@
       color: $darkGray;
     }
   }
-  .support {
-    grid-column: 1/8;
-    grid-row: 2;
-    background-color: $palePurple;
-    border: 1px solid $lightPurpleTwo;
-    border-radius: $defaultBorderRadius;
-    margin: $s 0 0 0;
-    position: relative;
-    left: -42px;
-    overflow: hidden visible !important;
-    .formattedPath:last-of-type {
-      margin-bottom: 0;
-    }
-    .supportGroupContainer {
-      display: grid;
-      overflow-x: auto;
-      outline: none;
-      padding: $s $s;
-    }
-  }
   button.evenButton {
     background-color: $white;
     border-color: $white;
     margin-top: 28px;
   }
-}
-
-.unhighlighted {
-  opacity: .5;
-  z-index: 10;
 }
 
 .edgeLabel {

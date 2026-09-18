@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import AppToast from "@/features/Core/components/AppToast/AppToast";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
+import { CUSTOM_EVENTS } from "@/features/Core/constants/customEvents";
 
 // Projects
 export const projectRestoredToast = () => {
@@ -51,9 +52,28 @@ export const queryUpdatedToast = () => {
   return toast(AppToast, { data: { topText: 'Query updated' } });
 };
 
+// API keys
+export const apiKeyCreatedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key created' } });
+};
+export const apiKeyCopiedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key copied to clipboard' } });
+};
+export const apiKeyRevokedToast = () => {
+  return toast(AppToast, { data: { topText: 'API key revoked' } });
+};
+
 // Shared
 export const errorToast = (message: string) => {
   return toast.error(AppToast, { data: { topText: message } });
+};
+export const unsupportedSmartQueryCategoryToast = () => {
+  return toast.error(AppToast, {
+    toastId: 'unsupportedSmartQueryCategoryToast',
+    data: {
+      topText: 'The node category in this link is not supported for Smart Query. Select a query type and entity manually.',
+    },
+  });
 };
 export const unableToReachLinkToast = () => {
   return toast.error(AppToast, { toastId: 'unableToReachLinkToast', data: { topText: 'Unable to reach link' } });
@@ -64,13 +84,13 @@ export const unauthorizedErrorToast = (location?: Location) => {
   return toast.error(AppToast, { toastId: 'unauthorizedErrorToast', data: { topText: 'Your login has expired or is invalid.', bottomText: <>Please try logging in again.<br/><a href={getFormattedLoginURL(location)}>Log In</a></> } });
 };
 export const forbiddenErrorToast = (location?: Location) => {
-  return toast.error(AppToast, { toastId: 'forbiddenErrorToast', data: { topText: 'You do not have permission to access this resource. Please contact support if you believe this is an error.', bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
+  return toast.error(AppToast, { toastId: 'forbiddenErrorToast', data: { topText: <>You do not have permission to access this resource. Please <span onClick={() => window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL))} className="link">submit feedback</span> if you believe this is an error.</>, bottomText: <a href={getFormattedLoginURL(location)}>Log In</a> } });
 };
 export const notFoundErrorToast = () => {
-  return toast.error(AppToast, { toastId: 'notFoundErrorToast', data: { topText: 'The requested resource was not found.', bottomText: 'Please contact support if you believe this is an error.' } });
+  return toast.error(AppToast, { toastId: 'notFoundErrorToast', data: { topText: 'The requested resource was not found.', bottomText: <>Please <span onClick={() => window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL))} className="link">submit feedback</span> if you believe this is an error.</> } });
 };
 export const internalServerErrorToast = () => {
-  return toast.error(AppToast, { toastId: 'internalServerErrorToast', data: { topText: 'An internal server error occurred.', bottomText: 'Please try again later or contact support if the problem persists.' } });
+  return toast.error(AppToast, { toastId: 'internalServerErrorToast', data: { topText: 'An internal server error occurred.', bottomText: <>Please try again later or <span onClick={() => window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_FEEDBACK_PANEL))} className="link">submit feedback</span> if the problem persists.</> } });
 };
 export const preferencesSavedToast = () => {
   return toast(AppToast, { data: { topText: 'Preferences Saved' } });
@@ -90,4 +110,35 @@ export const bookmarkErrorToast = () => {
 // Query Status
 export const queryStatusResultsCompleteToast = () => {
   return toast(AppToast, { data: { topText: 'Results Complete' } });
+};
+
+// Canvas
+export const canvasEntityAddedToast = (entityName: string, canvasTitle: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: `Added to ${canvasTitle}` } });
+};
+export const canvasEntitiesAddedToast = (count: number, canvasTitle: string, noun = 'objects') => {
+  return toast(AppToast, { data: { topText: `${count} ${noun} added`, bottomText: `Added to ${canvasTitle}` } });
+};
+export const canvasEntityAlreadyAddedToast = (entityName: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: 'Already on this canvas' } });
+};
+export const canvasEntityRemovedToast = (entityName: string) => {
+  return toast(AppToast, { data: { topText: entityName, bottomText: 'Removed from canvas' } });
+};
+export const canvasEntitiesRemovedToast = (count: number) => {
+  return toast(AppToast, {
+    data: { topText: `${count} item${count === 1 ? '' : 's'}`, bottomText: 'Removed from canvas' },
+  });
+};
+export const canvasSaveErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas save failed', bottomText: 'Your changes may not be saved' } });
+};
+export const canvasDeletedToast = () => {
+  return toast(AppToast, { data: { topText: 'Canvas deleted' } });
+};
+export const canvasImageExportErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas image export failed', bottomText: 'Please try again' } });
+};
+export const canvasDeleteErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Canvas delete failed', bottomText: 'The canvas may not have been removed' } });
 };

@@ -3,16 +3,20 @@
 
 .pageHeading {
   text-align: center;
-  margin: $xxl 0 $l 0;
-  font-size: $h3Size;
+  margin: $xxl 0 $xs 0;
+  font-size: $h4Size;
   font-weight: 800;
   color: $purpleTwo;
+}
+.intro {
+  max-width: 640px;
+  margin: 0 auto $m;
 }
 
 .homePageContent {
   .container {
     padding: 0;
-    max-width: $mediumLarge;
+    max-width: $desktop;
   }
   .heading {
     text-align: center;
@@ -25,44 +29,93 @@
   .section {
     padding: $xxl 0;
   }
-  .section:nth-of-type(odd){
+  .section:nth-of-type(even){
     background-color: $lightGray;
-  }
-  .images {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: $xs;
-    justify-content: space-between;
-    align-items: center;
-    .image {
-      width: 100%;
-      height: 100%;
-    }
   }
   .threeCol {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: $m;
+    gap: $m;
   }
   .twoCol {
     display: grid;
     grid-template-columns: repeat(2, 2fr);
     gap: $l;
     @media screen and (min-width: $desktop) {
-      gap: $xxl;
+      gap: $xl;
     }
   }
-  .colTwo {
-    a {
-      text-decoration: none;
-      color: $purpleOne;
-      font-weight: 800;
-      font-size: $bodyOneSize;
-      margin: 0 0 $s;
+  .iconSection {
+    padding: $m 0 $xxl;
+  }
+  .iconGrid {
+    gap: $xl;
+    .iconCol {
       display: flex;
-      &:hover {
-        text-decoration: underline;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      svg {
+        height: $l;
+        width: $l;
+        path {
+          fill: $purpleTwo;
+        }
       }
+      p {
+        margin: 0 0 $xxs;
+        &:last-of-type {
+          margin: 0;
+        }
+      }
+    }
+  }
+  .videoSection {
+    p a {
+      display: inline;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+  }
+  .iframeContainer, .videoThumbnail {
+    width: 100%;
+    height: 340px;
+    border-radius: $largeBorderRadius;
+  }
+  .iframeContainer {
+    background-color: $black;
+  }
+  .videoThumbnail {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: none;
+    background: $black;
+    cursor: pointer;
+    img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      display: block;
+      border-radius: $largeBorderRadius;
+    }
+  }
+  .playButton {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 68px;
+    height: 68px;
+    transition: transform 0.2s ease;
+
+    .videoThumbnail:hover & {
+      transform: translate(-50%, -50%) scale(1.1);
     }
   }
   .collaborators {
@@ -77,5 +130,17 @@
       height: 100%;
       margin-bottom: $m;
     }
+  }
+  .articlesCol {
+    a {
+      display: block;
+      margin-bottom: $s;
+    }
+  }
+  .aboutTranslatorText {
+    margin-bottom: $xs;
+  }
+  .learnMoreLink {
+    font-size: $captionSize;
   }
 }

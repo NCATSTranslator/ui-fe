@@ -1,15 +1,16 @@
 import { FC } from 'react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import styles from './ResultDetailViewSkeleton.module.scss';
+import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
 const ResultDetailViewSkeleton: FC = () => {
   return (
     <div className={styles.container}>
+      <ViewTopBar/>
       <div className={styles.tableHeader}>
-        <SkeletonBar width="40px" height="10px" />
+        <div />
         <div />
         <SkeletonBar width="60px" height="10px" />
-        <SkeletonBar width="40px" height="10px" />
         <SkeletonBar width="40px" height="10px" />
       </div>
       <div className={styles.header}>
@@ -18,7 +19,6 @@ const ResultDetailViewSkeleton: FC = () => {
           <SkeletonBar width="100%" height="32px" />
           <SkeletonBar width="80px" height="14px" />
           <SkeletonBar width="60px" height="14px" />
-          <SkeletonBar width="50px" height="14px" />
         </div>
         <div className={styles.tags}>
           <SkeletonBar width="72px" height="24px" borderRadius="12px" />

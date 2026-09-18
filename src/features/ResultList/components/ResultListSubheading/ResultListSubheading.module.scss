@@ -1,0 +1,43 @@
+@use "@/assets/styles/variables" as *;
+
+.resultListSubheading {
+  max-width: $maxWidth;
+  margin: 0 auto;
+  padding: 0 $l;
+  .subHeading {
+    margin: 0;
+    font-weight: 800;
+    color: $black;
+  }
+  .searchedTerm {
+    font-weight: 800;
+    color: $purpleOne;
+    text-decoration: none;
+    font-size: inherit;
+    display: inline-flex;
+    align-items: center;
+    svg {
+      height: 18px;
+      width: 18px;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.nodeLink {
+  margin: 0;
+  .nodeLinkAnchor {
+    display: inline;
+    font-size: 12px;
+    svg {
+      margin-left: 4px;
+      width: 14px;
+      height: 14px;
+      path {
+        fill: $white;
+      }
+    }
+  }
+}

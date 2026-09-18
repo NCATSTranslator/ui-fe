@@ -8,7 +8,7 @@ import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 
 export interface BookmarkFunctionParams {
   result: Result | ResultBookmark;
-  resultSet: ResultSet;
+  resultSet: ResultSet | null;
   queryNodeID: string | null;
   queryNodeLabel: string | null;
   queryNodeDescription: string | null;
@@ -99,18 +99,18 @@ export const createBookmarkObject = (params: {
   const bookmarkResult: ResultBookmark = cloneDeep(result);
   const safeResultSet: ResultSet = generateSafeResultSet(resultSet, bookmarkResult);
   
-  const bookmarkObject = getFormattedBookmarkObject(
-    "result",
-    bookmarkResult.drug_name,
-    "",
-    queryNodeID || "",
-    queryNodeLabel || "",
-    queryNodeDescription || "",
-    queryType,
-    result,
-    currentQueryID || "",
-    safeResultSet
-  );
+  const bookmarkObject = getFormattedBookmarkObject({
+    bookmarkType: "result",
+    bookmarkName: bookmarkResult.drug_name,
+    notes: "",
+    queryNodeID: queryNodeID || "",
+    queryNodeLabel: queryNodeLabel || "",
+    queryNodeDescription: queryNodeDescription || "",
+    typeObject: queryType,
+    saveItem: result,
+    pk: currentQueryID || "",
+    resultSet: safeResultSet
+  });
   
   bookmarkObject.user_id = user?.id || null;
   const currentDate = new Date().toDateString();
@@ -146,7 +146,9 @@ export const handleBookmarkRemoval = async (params: BookmarkFunctionParams): Pro
   if (shouldUpdateResultsAfterBookmark)
     shouldUpdateResultsAfterBookmark.current = true;
   
-  return false; // Bookmark removal doesn't return an ID
+  // The removed bookmark's ID, so callers can tell a completed removal from one
+  // that failed or is still waiting on the confirmation modal.
+  return bookmarkId;
 };
 
 /**

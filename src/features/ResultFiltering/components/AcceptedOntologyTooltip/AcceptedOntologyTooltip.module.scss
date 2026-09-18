@@ -1,0 +1,13 @@
+@use "@/assets/styles/variables" as *;
+
+svg.infoIcon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  right: 16px;
+  path {
+    fill: $black;
+  }
+}

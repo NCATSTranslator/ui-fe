@@ -1,19 +1,15 @@
 import { redirect } from 'react-router-dom';
-import { decodeBase64Param, encodeParams } from '@/features/Common/utils/web';
-import { getEdgeById, getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { decodeBase64Param, encodeParams } from '@/features/Core/utils/web';
+import { getEdgeById } from '@/features/ResultList/slices/resultsSlice';
 import { Result, ResultEdge, ResultSet, Path } from '@/features/ResultList/types/results.d';
-import { getCompressedEdge, intToChar, intToNumeral } from '@/features/Common/utils/utilities';
+import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 
 export const MAIN_CONTENT_ELEMENT_ID = 'main';
+export const MAIN_SCROLL_ELEMENT_ID = 'main-scroll';
 
 /**
- * Derives the display key for a path (e.g. "2", "1.a", "1.a.i") by searching
- * the result's top-level paths and then walking support chains recursively.
- * Matches the depth-based convention from SupportPathGroup:
- *   depth 0 → numeric (1, 2, 3)
- *   depth 1 → intToChar (a, b, c)
- *   depth 2 → intToNumeral (i, ii, iii)
- *   alternates for deeper levels
+ * Derives the display key for a path (e.g. "2") from its position among the
+ * result's top-level paths. Returns null when the path is not one of them.
  */
 export const derivePathKey = (
   resultSet: ResultSet | null | undefined,
@@ -29,57 +25,8 @@ export const derivePathKey = (
     if (pId === pathId) return (i + 1).toString();
   }
 
-  for (let i = 0; i < paths.length; i++) {
-    const p = paths[i];
-    const pId = typeof p === 'string' ? p : p.id;
-    if (!pId) continue;
-    const found = findInSupportChain(resultSet, pId, pathId, (i + 1).toString(), 1);
-    if (found) return found;
-  }
-
   return null;
 };
-
-const depthKeyFormatter = (depth: number, index: number): string => {
-  return depth % 2 === 1 ? intToChar(index) : intToNumeral(index);
-};
-
-const findInSupportChain = (
-  resultSet: ResultSet,
-  parentPathId: string,
-  targetPathId: string,
-  parentKey: string,
-  depth: number,
-): string | null => {
-  const parentPath = getPathById(resultSet, parentPathId);
-  if (!parentPath) return null;
-
-  for (let i = 1; i < parentPath.subgraph.length; i += 2) {
-    const edgeId = parentPath.subgraph[i];
-    const edge = getEdgeById(resultSet, edgeId);
-    if (!edge || !edge.inferred) continue;
-
-    const supportPaths = edge.support;
-    if (!Array.isArray(supportPaths)) continue;
-
-    for (let j = 0; j < supportPaths.length; j++) {
-      const sp = supportPaths[j];
-      const spId = typeof sp === 'string' ? sp : (sp as Path).id;
-      if (!spId) continue;
-
-      const childKey = depthKeyFormatter(depth, j + 1);
-      const fullKey = `${parentKey}.${childKey}`;
-
-      if (spId === targetPathId) return fullKey;
-
-      const deeper = findInSupportChain(resultSet, spId, targetPathId, fullKey, depth + 1);
-      if (deeper) return deeper;
-    }
-  }
-
-  return null;
-};
-
 
 /**
  * Extracts all compressed edge groups from a path's compressedSubgraph (or subgraph).
@@ -104,6 +51,7 @@ interface EvidenceUrlOptions {
   primaryEdgeId: string;
   compressedEdgeSets?: string[][];
   pathKey?: string;
+  tab?: string;
 }
 /**
  * Builds the evidence URL and extraParams object for evidence navigation.
@@ -126,6 +74,7 @@ export const buildEvidenceUrl = ({
   primaryEdgeId,
   compressedEdgeSets,
   pathKey,
+  tab,
 }: EvidenceUrlOptions): { path: string; params?: Record<string, string> } => {
   const encodedEdgeId = encodeURIComponent(primaryEdgeId);
   const path = pathId
@@ -134,6 +83,7 @@ export const buildEvidenceUrl = ({
 
   const params: Record<string, string> = {};
   if (pathKey) params.pkey = pathKey;
+  if (tab) params.tab = tab;
   if (compressedEdgeSets && compressedEdgeSets.length > 0) {
     params.ceids = compressedEdgeSets
       .map(group => group.join(','))
@@ -218,9 +168,11 @@ export const resultsLoader = ({ request }: { request: Request }) => {
 
   // Current format: r= is a plain query param
   if (url.searchParams.has('r')) {
-    const resultId = url.searchParams.get('r')!;
-    url.searchParams.delete('r');
-    return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    const resultId = url.searchParams.get('r');
+    if (resultId) {
+      url.searchParams.delete('r');
+      return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    }
   }
 
   // Legacy format: r= may be inside a base64-encoded segment

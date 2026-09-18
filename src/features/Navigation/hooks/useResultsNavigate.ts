@@ -6,7 +6,7 @@ export interface ResultsNavigateOptions {
 }
 
 // Parameters that are not persisted in the URL after navigation
-export const TRANSIENT_PARAMS = ['pkey', 'ceids'] as const;
+export const TRANSIENT_PARAMS = ['pkey', 'ceids', 'tab'] as const;
 
 /**
  * A hook that navigates to a results page with the current search params.

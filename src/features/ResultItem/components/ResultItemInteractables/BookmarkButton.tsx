@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Link } from 'react-router-dom';
 import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Button from "@/features/Core/components/Button/Button";
 import styles from './ResultItemInteractables.module.scss';
 
@@ -45,7 +45,7 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({
           {isBookmarked ? (
             <>Remove this bookmark.</>
           ) : (
-            <>Bookmark this result to review it later in the <Link to="/workspace" target='_blank'>Workspace</Link>.</>
+            <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects</Link>.</>
           )}
         </span>
       </Tooltip>

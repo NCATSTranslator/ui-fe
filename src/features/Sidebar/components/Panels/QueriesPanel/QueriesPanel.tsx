@@ -9,14 +9,14 @@ import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import SidebarQueryCard from "@/features/Sidebar/components/SidebarQueryCard/SidebarQueryCard";
 import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
-import { useSimpleSearch } from "@/features/Common/hooks/simpleSearchHook";
+import { useSimpleSearch } from "@/features/Core/hooks/simpleSearchHook";
 import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { getFormattedLoginURL } from "@/features/UserAuth/utils/userApi";
 import SidebarProjectList from "@/features/Sidebar/components/SidebarProjectList/SidebarProjectList";
-import { getDataFromQueryVar } from "@/features/Common/utils/utilities";
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import DropLabel from "@/features/Projects/components/DropLabel/DropLabel";
 import SidebarBackButton from "@/features/Sidebar/components/SidebarBackButton/SidebarBackButton";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 const QueriesPanel = () => {
   const location = useLocation();
@@ -27,9 +27,9 @@ const QueriesPanel = () => {
   const filteredQueries = useFilteredQueries(queries, false, sortSearchState, searchTerm);
   const { addToProjectQuery, isSelectedProjectMode, clearAddToProjectMode, setSelectedProjectMode }= useSidebar();
   const activeQueryId = useMemo(() => {
-    const currentQid = getDataFromQueryVar('q', window.location.search);
+    const currentQid = getDataFromQueryVar('q', location.search);
     return filteredQueries.find(query => query.data.qid === currentQid)?.data.qid;
-  }, [filteredQueries, window.location.search]);
+  }, [filteredQueries, location.search]);
 
   const handleCloseProjectList = () => {
     clearAddToProjectMode();

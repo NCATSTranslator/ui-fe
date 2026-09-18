@@ -1,0 +1,46 @@
+@use "@/assets/styles/variables" as *;
+
+.overlay {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+  width: max-content;
+  max-width: 420px;
+  padding: $xs $s;
+  background: $white;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  box-shadow: $dropShadowHover;
+  pointer-events: none;
+  cursor: grabbing;
+
+  &[data-kind='edge'] {
+    max-width: 520px;
+
+    .label {
+      color: $purpleTwo;
+      text-decoration: underline;
+      white-space: normal;
+    }
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: $bodyOneSize;
+  font-weight: 600;
+  color: $black;
+}

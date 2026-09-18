@@ -1,5 +1,4 @@
 import { Example } from "@/features/Query/types/querySubmission";
-import { checkProperties } from "@/features/Common/types/checkers";
 
 // User Prefs
 export type PrefObject = {
@@ -20,7 +19,6 @@ export type Preferences = {
   [key:string]: PrefObject;
   result_sort: PrefObject;
   results_per_page: PrefObject;
-  graph_visibility: PrefObject;
   graph_layout: PrefObject;
   path_show_count: PrefObject;
   evidence_sort: PrefObject;
@@ -28,7 +26,7 @@ export type Preferences = {
 }
 
 export type PrefType = "results" | "evidence" | "graphs";
-export type PrefKey = "result_sort" | "results_per_page" | "graph_visibility" | "graph_layout" 
+export type PrefKey = "result_sort" | "results_per_page" | "graph_layout" 
 | "path_show_count" | "evidence_sort" | "evidence_per_page";
 
 export type User = {
@@ -40,6 +38,23 @@ export type User = {
   profile_pic_url: string;
   time_created: string;
   time_updated: string;
+}
+
+// API keys. The key itself is only ever returned by the create endpoint; everything else
+// carries key_display, a truncated form safe to show.
+export type ApiKey = {
+  id: string;
+  user_id: string;
+  name: string;
+  key_display: string;
+  time_created: string;
+  time_last_used: string | null;
+  time_revoked: string | null;
+}
+
+export type CreateApiKeyResponse = {
+  api_key: ApiKey;
+  key: string;
 }
 
 export type Session = {
@@ -62,7 +77,10 @@ export type SessionStatus = {
 export type Config = {
   cached_queries: Example[];
   gaID: string;
+  gtmID?: string;
+  include_canvas?: boolean;
   include_hashed_parameters: boolean;
+  include_lookup: boolean;
   include_pathfinder: boolean;
   include_projects: boolean;
   include_query_status_polling: boolean;
@@ -89,19 +107,3 @@ export type UserState = {
   currentPrefs: Preferences;
   currentConfig: Config | null;
 }
-
-export const isConfig = (obj: unknown, warn = true): obj is Config => {
-  if (typeof obj !== 'object' || obj === null) {
-    if (warn) console.warn("[isConfig] expected object, got:", typeof obj, obj);
-    return false;
-  }
-  const o = obj as Record<string, unknown>;
-  return checkProperties("isConfig", obj, [
-    ["gaID", "gaID" in obj, "present", o.gaID],
-    ["name_resolver", "name_resolver" in obj, "present", o.name_resolver],
-    ["social_providers", "social_providers" in obj, "present", o.social_providers],
-    ["include_pathfinder", "include_pathfinder" in obj, "present", o.include_pathfinder],
-    ["include_summarization", "include_summarization" in obj, "present", o.include_summarization],
-    ["cached_queries", "cached_queries" in obj, "present", o.cached_queries],
-  ], warn);
-};

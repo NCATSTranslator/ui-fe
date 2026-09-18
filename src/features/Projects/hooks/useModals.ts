@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ModalObject, ModalType } from '@/features/Projects/types/projects.d';
 
 /**
@@ -6,25 +6,27 @@ import { ModalObject, ModalType } from '@/features/Projects/types/projects.d';
  * @param initialModals - Object defining the initial state of all modals
  * @returns {Object} - An object containing modal states and handlers
  */
-export const useModals = ( initialModals: ModalObject) => {
+export const useModals = (initialModals: ModalObject) => {
   const [modals, setModals] = useState(initialModals);
+  const initialModalsRef = useRef(initialModals);
+  initialModalsRef.current = initialModals;
 
-  const openModal = (modalType: ModalType) => {
+  const openModal = useCallback((modalType: ModalType) => {
     setModals(prev => ({ ...prev, [modalType]: true }));
-  };
+  }, []);
 
-  const closeModal = (modalType: ModalType) => {
+  const closeModal = useCallback((modalType: ModalType) => {
     setModals(prev => ({ ...prev, [modalType]: false }));
-  };
+  }, []);
 
-  const closeAllModals = () => {
-    setModals(initialModals);
-  };
+  const closeAllModals = useCallback(() => {
+    setModals(initialModalsRef.current);
+  }, []);
 
-  return { 
-    modals, 
-    openModal, 
-    closeModal, 
-    closeAllModals 
+  return {
+    modals,
+    openModal,
+    closeModal,
+    closeAllModals,
   };
 };

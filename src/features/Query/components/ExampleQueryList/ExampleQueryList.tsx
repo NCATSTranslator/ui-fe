@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styles from './ExampleQueryList.module.scss';
-import { getResultsShareURLPath } from '@/features/Common/utils/web';
+import { getResultsShareURLPath } from '@/features/Core/utils/web';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import AnimateHeight from 'react-animate-height';
 import Button from '@/features/Core/components/Button/Button';
@@ -9,8 +9,9 @@ import { Example } from '@/features/Query/types/querySubmission';
 import QueryTypeIcon from '@/features/Query/components/QueryTypeIcon/QueryTypeIcon';
 import { currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { useSelector } from 'react-redux';
-import { joinClasses } from '@/features/Common/utils/utilities';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 type ExampleQueryListProps = {
   examples: Example[] | null;
@@ -59,12 +60,19 @@ const ExampleQueryList: FC<ExampleQueryListProps> = ({
                           el.direction.toLowerCase() === item.direction.toLowerCase() &&
                           el.targetType.toLowerCase() === item.type.toLowerCase()
                       );
+                const shareURL = getResultsShareURLPath({ label: item.name, nodeID: item.id, typeID, resultID: '0', pk: item.uuid, shouldHash: config?.include_hashed_parameters });
                 return (
                   <Button
                     className={`${styles.button} example-query`}
-                    handleClick={() => setPresetURL(getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters))}
+                    handleClick={() => {
+                      trackEvent('example_query_selected', {
+                        query_template_id: String(typeID),
+                        query_template_label: queryTypes[typeID]?.label,
+                      });
+                      setPresetURL(shareURL);
+                    }}
                     data-testid={item.name}
-                    data-url={getResultsShareURLPath(item.name, item.id, typeID, '0', item.uuid, config?.include_hashed_parameters)}
+                    data-url={shareURL}
                     key={item.id}
                     iconLeft={<QueryTypeIcon type={queryTypes[typeID].searchTypeString}/>}
                     smallFont

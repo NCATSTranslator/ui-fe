@@ -1,8 +1,10 @@
 import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
-import { filterCompare } from '@/features/Common/utils/sortingFunctions';
+import { filterCompare } from '@/features/Core/utils/sortingFunctions';
+import { isEntityFilter, isSameFilterValue } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export type HandleUpdateResultsFn = (
   filters: Filter[],
@@ -14,7 +16,6 @@ export type HandleUpdateResultsFn = (
   isPathfinder?: boolean,
   userSavesGroup?: SaveGroup | null,
   pfState?: PathFilterState | null,
-  fr?: Result[],
 ) => Result[];
 
 export interface UseResultFilteringReturn {
@@ -27,6 +28,7 @@ export interface UseResultFilteringReturn {
   pathFilterState: PathFilterState | null;
   setPathFilterState: Dispatch<SetStateAction<PathFilterState | null>>;
   handleFilter: (filter: Filter) => void;
+  handleSetFilters: (filters: Filter[]) => void;
   handleClearAllFilters: () => void;
   resetFilters: () => void;
 }
@@ -70,20 +72,24 @@ const useResultFiltering = ({
     setActiveFilters(filtersToActivate);
     let newFormattedResults = handleUpdateResultsRef.current(filtersToActivate, entityFilters, rawResultsVal, originalResultsVal, false, sortString, isPathfinderVal, userSavesVal);
     handlePageReset(false, newFormattedResults.length);
-  }, [handlePageReset]);
+  }, [handlePageReset, handleUpdateResultsRef]);
 
   const handleFilter = useCallback((filter: Filter) => {
     // Try to find a filter with same {id, value, negated} — for toggle-off
     const exactMatchIndex = activeFilters.findIndex(
       (f) =>
         f.id === filter.id &&
-        f.value === filter.value &&
+        isSameFilterValue(f.value, filter.value) &&
         f.negated === filter.negated
     );
 
     if (exactMatchIndex !== -1) {
       // Exact match found → toggle off by removing it
       const updatedFilters = activeFilters.filter((_, i) => i !== exactMatchIndex);
+      trackEvent('filter_cleared', {
+        filter_type: filter.id ?? filter.name,
+        filter_count: updatedFilters.length,
+      });
       handleApplyFilterAndCleanup(
         updatedFilters,
         activeEntityFilters,
@@ -100,7 +106,7 @@ const useResultFiltering = ({
     const sameIdValueIndex = activeFilters.findIndex(
       (f) =>
         f.id === filter.id &&
-        f.value === filter.value &&
+        isSameFilterValue(f.value, filter.value) &&
         f.negated !== filter.negated
     );
 
@@ -117,6 +123,13 @@ const useResultFiltering = ({
 
     updatedFilters.sort(filterCompare);
 
+    trackEvent('filter_applied', {
+      filter_type: filter.id ?? filter.name,
+      // Facet values are labels and CURIEs, bounded enough to report on. A string
+      // filter's value is whatever the user typed, so only its use is recorded.
+      filter_value: isEntityFilter(filter) ? 'string filter' : filter.value,
+      filter_count: updatedFilters.length,
+    });
     handleApplyFilterAndCleanup(
       updatedFilters,
       activeEntityFilters,
@@ -128,7 +141,20 @@ const useResultFiltering = ({
     );
   }, [activeFilters, handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
 
+  const handleSetFilters = useCallback((filters: Filter[]) => {
+    handleApplyFilterAndCleanup(
+      filters,
+      activeEntityFilters,
+      rawResults.current,
+      originalResults.current,
+      currentSortString.current,
+      isPathfinder,
+      userSavesRef.current
+    );
+  }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+
   const handleClearAllFilters = useCallback(() => {
+    trackEvent('filter_cleared', { filter_type: 'all', filter_count: 0 });
     handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, isPathfinder, userSavesRef.current);
   }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
 
@@ -149,6 +175,7 @@ const useResultFiltering = ({
     pathFilterState,
     setPathFilterState,
     handleFilter,
+    handleSetFilters,
     handleClearAllFilters,
     resetFilters,
   };

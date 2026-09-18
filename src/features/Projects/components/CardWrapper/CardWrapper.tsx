@@ -36,7 +36,7 @@ const CardWrapper: FC<CardWrapperProps> = ({
     title
   }
 
-  if(linkTo)
+  if(linkTo) {
     return (
       <Link
         to={linkTo}
@@ -46,14 +46,15 @@ const CardWrapper: FC<CardWrapperProps> = ({
         {children}
       </Link>
     );
+  }
 
-    return (
-      <div 
-        {...commonProps}
-      >
-        {children}
-      </div>
-    );
+  return (
+    <div 
+      {...commonProps}
+    >
+      {children}
+    </div>
+  );
 };
 
 export default CardWrapper;

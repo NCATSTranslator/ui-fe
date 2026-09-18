@@ -2,8 +2,7 @@
 
 .entitySearch {
   display: block;
-  border-bottom: 1px solid $midGray;
-  padding: $s;
+  padding: 0 $s $xs;
   .activeFilters {
     padding: $xs 0 0 0;
   }

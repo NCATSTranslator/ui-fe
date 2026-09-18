@@ -6,9 +6,9 @@ import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
-import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
-import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
+import { useEditProjectHandlers } from "@/features/Projects/hooks/useEditProjectHandlers";
+import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
+import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { DroppableArea } from "@/features/DragAndDrop/components/DroppableArea/DroppableArea";
 import { handleQueryDrop } from "@/features/Projects/utils/dragDropUtils";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
@@ -44,7 +44,8 @@ const ProjectCard: FC<ProjectCardProps> = ({
   const icon = <FolderIcon />;
   const { active } = useDndContext();
   const isQueryInProject = useMemo(() => active ? isDraggedQueryInProject(active, project) : false, [active, project]);
-  const date = getTimeRelativeDate(new Date(project.time_updated));
+  const createdTime = getTimeRelativeDate(new Date(project.time_created));
+  const lastSeenTime = getTimeRelativeDate(new Date(project.time_updated));
 
   const {
     isRenaming,
@@ -106,7 +107,8 @@ const ProjectCard: FC<ProjectCardProps> = ({
           queriesLoading={queriesLoading}
           bookmarksCount={project.bookmark_count}
           notesCount={project.note_count}
-          date={date}
+          createdTime={createdTime}
+          lastSeenTime={lastSeenTime}
         />
       </DroppableArea>
     </OutsideClickHandler>

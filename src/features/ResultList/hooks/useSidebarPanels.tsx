@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, useMemo, useRef, Dispatch, SetStateAction } from "react";
 import { useSidebarRegistration, useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { useResultsCompleteToast } from "@/features/ResultList/hooks/resultListHooks";
 import { getQueryStatusIndicatorStatus } from "@/features/Projects/utils/utilities";
@@ -10,8 +10,10 @@ import DownloadIcon from '@/assets/icons/buttons/Export.svg?react';
 import QueryStatusPanel from "@/features/Sidebar/components/Panels/QueryStatusPanel/QueryStatusPanel";
 import FiltersPanel from "@/features/Sidebar/components/Panels/FiltersPanel/FiltersPanel";
 import ResultDownloadPanel from "@/features/Sidebar/components/Panels/ResultDownloadPanel/ResultDownloadPanel";
-import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
+import BetaTag from "@/features/Core/components/BetaTag/BetaTag";
 import StatusSidebarIcon from "@/features/ResultList/components/StatusSidebarIcon/StatusSidebarIcon";
+import IconBadge from "@/features/Sidebar/components/IconBadge/IconBadge";
+import Button from "@/features/Core/components/Button/Button";
 
 interface UseSidebarPanelsArgs {
   styles: Record<string, string>;
@@ -29,9 +31,11 @@ interface UseSidebarPanelsArgs {
   // Filters panel
   activeFilters: Filter[];
   handleFilter: (filter: Filter) => void;
+  handleSetFilters: (filters: Filter[]) => void;
   handleClearAllFilters: () => void;
   availableFilters: { [key: string]: Filter };
   isPathfinder: boolean;
+  currentQueryID: string | null;
   // Download panel
   resultSet: ResultSet | null;
   userSaves: SaveGroup | null;
@@ -52,21 +56,39 @@ const useSidebarPanels = ({
   isLoading,
   activeFilters,
   handleFilter,
+  handleSetFilters,
   handleClearAllFilters,
   availableFilters,
   isPathfinder,
   resultSet,
   userSaves,
   queryTitle,
+  currentQueryID,
 }: UseSidebarPanelsArgs): void => {
-  const { togglePanel, activePanelId } = useSidebar();
+  const { togglePanel, openPanel, activePanelId } = useSidebar();
+
+  // Auto-open the filters panel at the moment results first appear for a query.
+  // Storing the query ID (rather than a bool) re-arms the auto-open when a new
+  // query loads. We mark the query handled as soon as results land — so if
+  // another panel is open at that moment we skip the auto-open and never retry.
+  const autoOpenedForQuery = useRef<string | null>(null);
+  const availableFilterCount = Object.keys(availableFilters).length;
+  useEffect(() => {
+    if (!currentQueryID || autoOpenedForQuery.current === currentQueryID)
+      return;
+    if (formattedResults.length > 0 && availableFilterCount > 0) {
+      if (activePanelId === 'none')
+        openPanel('filters');
+      autoOpenedForQuery.current = currentQueryID;
+    }
+  }, [currentQueryID, formattedResults.length, availableFilterCount, activePanelId, openPanel]);
 
   // Toast state — only used by sidebar status icon
   const [showQueryStatusToast, setShowQueryStatusToast] = useState(true);
 
   useEffect(() => {
     setShowQueryStatusToast(hasFreshResults && activePanelId !== 'queryStatus');
-  }, [hasFreshResults]);
+  }, [hasFreshResults, activePanelId]);
 
   // Data for the loading button in the Query Status panel
   const loadingButtonData: ResultListLoadingData = useMemo(() => ({
@@ -79,14 +101,14 @@ const useSidebarPanels = ({
     setIsActive: setIsLoading
   }), [handleResultsRefresh, isFetchingARAStatus, isFetchingResults, isError, setIsLoading, hasFreshResults]);
 
-  const { status: statusIndicatorStatus } = getQueryStatusIndicatorStatus(
+  const { status: statusIndicatorStatus } = getQueryStatusIndicatorStatus({
     arsStatus,
-    isFetchingARAStatus || false,
+    isFetchingARAStatus: isFetchingARAStatus || false,
     hasFreshResults,
     isFetchingResults,
     resultStatus,
-    formattedResults.length || 0
-  );
+    resultCount: formattedResults.length || 0,
+  });
 
   useResultsCompleteToast(arsStatus, isFetchingResults);
 
@@ -111,14 +133,25 @@ const useSidebarPanels = ({
   // Register the filters sidebar item
   useSidebarRegistration({
     ariaLabel: "Filters",
-    icon: <FilterIcon />,
+    buttonComponent: () => (
+      activeFilters.length > 0 ? (
+        <Button smallFont variant="textOnly" handleClick={handleClearAllFilters} className={styles.clearAllButton}>Clear All</Button>
+      ) : (
+        null
+      )
+    ),
+    icon: (
+      <IconBadge count={activeFilters.length}>
+        <FilterIcon />
+      </IconBadge>
+    ),
     id: 'filters',
     title: "Filters",
     panelComponent: () => (
       <FiltersPanel
         activeFilters={activeFilters}
         onFilter={handleFilter}
-        onClearAll={handleClearAllFilters}
+        onSetFilters={handleSetFilters}
         availableFilters={availableFilters}
         isPathfinder={isPathfinder}
       />
@@ -128,7 +161,10 @@ const useSidebarPanels = ({
     dependencies: [
       activeFilters,
       availableFilters,
-      isPathfinder
+      isPathfinder,
+      handleFilter,
+      handleSetFilters,
+      handleClearAllFilters,
     ],
   });
 

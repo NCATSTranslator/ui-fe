@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { MAIN_CONTENT_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
+import { MAIN_SCROLL_ELEMENT_ID } from '@/features/Navigation/utils/navigationUtils';
 
 /**
  * Preserves and restores scroll position of the main content area
@@ -16,16 +16,16 @@ const useScrollPreservation = (isBaseView: boolean) => {
   const scrollRef = useRef(0);
 
   useEffect(() => {
-    const mainEl = document.getElementById(MAIN_CONTENT_ELEMENT_ID);
-    if (!mainEl) return;
+    const scrollEl = document.getElementById(MAIN_SCROLL_ELEMENT_ID);
+    if (!scrollEl) return;
 
     if (isBaseView) {
-      requestAnimationFrame(() => mainEl.scrollTo({ top: scrollRef.current }));
-      const onScroll = () => { scrollRef.current = mainEl.scrollTop; };
-      mainEl.addEventListener('scroll', onScroll, { passive: true });
-      return () => mainEl.removeEventListener('scroll', onScroll);
+      requestAnimationFrame(() => scrollEl.scrollTo({ top: scrollRef.current }));
+      const onScroll = () => { scrollRef.current = scrollEl.scrollTop; };
+      scrollEl.addEventListener('scroll', onScroll, { passive: true });
+      return () => scrollEl.removeEventListener('scroll', onScroll);
     } else {
-      mainEl.scrollTo({ top: 0 });
+      scrollEl.scrollTo({ top: 0 });
     }
   }, [isBaseView]);
 };

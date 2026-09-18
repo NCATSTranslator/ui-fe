@@ -19,9 +19,9 @@ const SidebarLinkList: FC<SidebarLinkListProps> = ({ items }) => {
         const tooltipText = item.tooltipText || '';
         const noUserTooltipText = item.noUserTooltipText || '';
         const icon = item.icon;
-        const disabled = ((item.id === 'projects' || item.id === 'queries') && !user) || item.disabled;
+        const disabled = ((item.id === 'projects' || item.id === 'queries' || item.id === 'canvases') && !user) || item.disabled;
         const hasRedDot = item.id === 'settings' && !user;
-        const onClick = disabled ? undefined : item.onClick ? item.onClick : () => togglePanel(item.id);
+        const onClick = disabled ? undefined : (item.onClick || (() => togglePanel(item.id)));
 
         return item.type === 'link'
           ? 

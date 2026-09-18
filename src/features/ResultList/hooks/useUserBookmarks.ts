@@ -72,7 +72,7 @@ const useUserBookmarks = ({
     shouldUpdateResultsAfterBookmark.current = false;
     const tempUserSaves = cloneDeep(userSaves);
     handleUpdateResultsRef.current?.(activeFiltersRef.current, activeEntityFiltersRef.current, prevRawResults.current, [], false, currentSortString.current, isPathfinderRef.current, tempUserSaves);
-  }, [userSaves]);
+  }, [userSaves, prevRawResults, currentSortString, handleUpdateResultsRef]);
 
   const resetBookmarks = useCallback(() => {
     setUserSaves(null);

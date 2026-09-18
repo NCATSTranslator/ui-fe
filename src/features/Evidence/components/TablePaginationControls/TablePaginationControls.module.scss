@@ -1,0 +1,95 @@
+@use "@/assets/styles/variables" as *;
+
+.tablePagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: $m;
+  margin: $s $xs 0;
+  .perPage {
+    display: flex;
+    .label {
+      color: $darkGray;
+      font-size: 14px;
+      font-weight: 800;
+      margin: 0 $xs 0 0;
+      padding: 15px 0;
+    }
+    label {
+      margin: 0;
+      width: 115px;
+    }
+  }
+  .pagination {
+    grid-column: 2/3;
+    .pageNums {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0 0 0 auto;
+      .button {
+        display: flex;
+        margin-bottom: 0;
+        background-color: $lightGray;
+        padding: $xxs;
+        border-radius: $defaultBorderRadius;
+        color: $white;
+        font-weight: 800;
+        cursor: pointer;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -o-user-select: none;
+        svg {
+          height: $m;
+          width: $m;
+          path {
+            stroke: $black;
+          }
+        }
+        &:hover {
+          background-color: $palePurple;
+        }
+      }
+      .disabled {
+        display: none;
+      }
+      .pageNum {
+        a {
+          cursor: pointer;
+          height: $l;
+          width: $l;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          line-height: 1;
+          margin: $xxs;
+          transition: $defaultAnim;
+          border: 1px solid transparent;
+          border-radius: $defaultBorderRadius;
+          color: $darkGray;
+          font-size: $captionSize;
+          font-weight: 800;
+          -moz-user-select: none;
+          -webkit-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+          -o-user-select: none;
+          &:hover {
+            background-color: $palePurple;
+            color: $purpleOne;
+          }
+        }
+        &.current {
+          a {
+            background-color: $palePurple;
+            color: $purpleOne;
+          }
+        }
+      }
+    }
+  }
+}

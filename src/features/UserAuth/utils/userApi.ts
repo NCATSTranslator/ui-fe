@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
-import { cloneDeep } from 'lodash';
-import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Common/utils/web';
+import cloneDeep from 'lodash/cloneDeep';
+import { get, post, put, remove, fetchWithErrorHandling } from '@/features/Core/utils/web';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { Path, Result, ResultBookmark, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results';
-import { Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config, isConfig } from '@/features/UserAuth/types/user.d';
-import { setCurrentUser, setCurrentConfig, setCurrentPrefs } from '@/features/UserAuth/slices/userSlice';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { ApiKey, CreateApiKeyResponse, Preferences, PreferencesContainer, PrefObject, SessionStatus, User, Config } from '@/features/UserAuth/types/user';
+import { isConfig } from '@/features/UserAuth/types/checkers';
+import { setCurrentUser, setCurrentConfig, setCurrentPrefs, currentUser } from '@/features/UserAuth/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { getEdgeById, getNodeById, getPathById, getPubById } from '@/features/ResultList/slices/resultsSlice';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
-import { formatPrefs } from '@/features/UserAuth/utils/formatPrefs';
-import { getFullPathname } from '@/features/Common/utils/utilities';
+import { formatPrefs, parsePreferencesResponse } from '@/features/UserAuth/utils/formatPrefs';
+import { getFullPathname } from '@/features/Core/utils/urlHelpers';
 import { Location as RouterLocation } from 'react-router-dom';
 
 // Base API path prefix
@@ -32,8 +31,6 @@ export const prefKeyToString = (prefKey: string): string => {
       return "Sort results by";
     case "results_per_page":
       return "Results to show per page";
-    case "graph_visibility":
-      return "Graph visibility";
     case "graph_layout":
       return "Graph layout";
     case "path_show_count":
@@ -132,34 +129,55 @@ const formatUserSaves = (saves: Save[]): { [key: string]: SaveGroup } => {
   return filteredSaves;
 }
 
+interface FormattedBookmarkObjectParams {
+  bookmarkType?: string;
+  bookmarkName: string;
+  notes?: string;
+  queryNodeID: number | string | undefined;
+  queryNodeLabel?: string;
+  queryNodeDescription?: string;
+  typeObject: QueryType | null;
+  saveItem: ResultBookmark;
+  pk: string;
+  resultSet: ResultSet;
+}
+
 /**
  * Constructs a save object for bookmarking based on the provided parameters
- * 
- * @param {string} [bookmarkType="result"] - The type of the bookmark (e.g., "result").
- * @param {string} bookmarkName - The name of the bookmark.
- * @param {string} [notes=""] - Additional notes associated with the bookmark.
- * @param {number} queryNodeID - The ID of the query node related to the bookmark.
- * @param {string} [queryNodeLabel=""] - The label of the query node.
- * @param {string} [queryNodeDescription=""] - The description of the query node.
- * @param {Object} typeObject - The type object associated with the bookmark.
- * @param {Object} saveItem - The item to be saved.
- * @param {string} pk - The primary key associated with the save.
+ *
+ * @param {FormattedBookmarkObjectParams} params - The bookmark parameters.
+ * @param {string} [params.bookmarkType="result"] - The type of the bookmark (e.g., "result").
+ * @param {string} params.bookmarkName - The name of the bookmark.
+ * @param {string} [params.notes=""] - Additional notes associated with the bookmark.
+ * @param {number} params.queryNodeID - The ID of the query node related to the bookmark.
+ * @param {string} [params.queryNodeLabel=""] - The label of the query node.
+ * @param {string} [params.queryNodeDescription=""] - The description of the query node.
+ * @param {Object} params.typeObject - The type object associated with the bookmark.
+ * @param {Object} params.saveItem - The item to be saved.
+ * @param {string} params.pk - The primary key associated with the save.
  * @returns {Save} The formatted bookmark object.
  */
-export const getFormattedBookmarkObject = (
-    bookmarkType: string = "result",
-    bookmarkName: string,
-    notes: string = "",
-    queryNodeID: number | string | undefined,
-    queryNodeLabel: string = "",
-    queryNodeDescription: string = "",
-    typeObject: QueryType | null,
-    saveItem: ResultBookmark,
-    pk: string,
-    resultSet: ResultSet
-  ): Save => { 
+export const getFormattedBookmarkObject = ({
+    bookmarkType = "result",
+    bookmarkName,
+    notes = "",
+    queryNodeID,
+    queryNodeLabel = "",
+    queryNodeDescription = "",
+    typeObject,
+    saveItem,
+    pk,
+    resultSet
+  }: FormattedBookmarkObjectParams): Save => { 
 
-    let queryObject = getQueryObjectForSave(queryNodeID, queryNodeLabel, queryNodeDescription, typeObject, pk, resultSet);
+    let queryObject = getQueryObjectForSave({
+      nodeID: queryNodeID,
+      nodeLabel: queryNodeLabel,
+      nodeDescription: queryNodeDescription,
+      typeObject,
+      pk,
+      resultSet
+    });
     return { 
       save_type: "bookmark", 
       label: bookmarkName, 
@@ -178,24 +196,34 @@ export const getFormattedBookmarkObject = (
     }
 }
 
+interface QueryObjectForSaveParams {
+  nodeID?: number | string;
+  nodeLabel?: string;
+  nodeDescription?: string;
+  typeObject: QueryType | null;
+  pk: string;
+  resultSet: ResultSet;
+}
+
 /**
  * Constructs a query object for saving, encapsulating node and type details.
- * 
- * @param {number} [nodeID=0] - The ID of the node related to the save.
- * @param {string} [nodeLabel=""] - The label of the node.
- * @param {string} [nodeDescription=""] - The description of the node.
- * @param {Object} typeObject - The type object for the save.
- * @param {string} pk - The primary key for the save.
+ *
+ * @param {QueryObjectForSaveParams} params - The query object parameters.
+ * @param {number} [params.nodeID=0] - The ID of the node related to the save.
+ * @param {string} [params.nodeLabel=""] - The label of the node.
+ * @param {string} [params.nodeDescription=""] - The description of the node.
+ * @param {Object} params.typeObject - The type object for the save.
+ * @param {string} params.pk - The primary key for the save.
  * @returns {Object} The constructed query object.
  */
-export const getQueryObjectForSave = (
-    nodeID: number | string = 0, 
-    nodeLabel: string = "", 
-    nodeDescription: string = "", 
-    typeObject: QueryType | null, 
-    pk: string,
-    resultSet: ResultSet
-  ): QueryObject => {
+export const getQueryObjectForSave = ({
+    nodeID = 0,
+    nodeLabel = "",
+    nodeDescription = "",
+    typeObject,
+    pk,
+    resultSet
+  }: QueryObjectForSaveParams): QueryObject => {
     return {
       type: typeObject, 
       nodeId: nodeID,
@@ -233,6 +261,65 @@ export const getUserPreferences = async (
     fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
   ): Promise<PreferencesContainer> => {
     return getUserData(`${userApiPath}/preferences`, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Fetches the current user's API keys.
+ *
+ * @param {boolean} [doIncludeRevoked=false] - Whether to include revoked keys in the result.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<ApiKey[]>} A promise that resolves to the user's API keys.
+ */
+export const getUserApiKeys = async (
+    doIncludeRevoked: boolean = false,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<ApiKey[]> => {
+    const qp = doIncludeRevoked ? '?include_revoked=true' : '';
+    return getUserData(`${userApiPath}/api-keys${qp}`, httpErrorHandler, fetchErrorHandler);
+}
+
+/**
+ * Creates a new API key for the current user. The response carries the key itself, which the
+ * server cannot return again -- surface it to the user immediately or it is lost.
+ *
+ * @param {string} name - A label used to identify the key later.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<CreateApiKeyResponse>} A promise resolving to the new key and its metadata.
+ */
+export const createUserApiKey = async (
+    name: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<CreateApiKeyResponse> => {
+    const response = await fetchUserData<CreateApiKeyResponse>(
+      async () => await post(`${userApiPath}/api-keys`, { name: name }),
+      httpErrorHandler,
+      fetchErrorHandler
+    );
+
+    if(response === undefined || response === null)
+      throw new Error('Failed to create API key.');
+
+    return response;
+}
+
+/**
+ * Revokes one of the current user's API keys. The key stops working immediately.
+ *
+ * @param {string} keyId - The ID of the key to revoke.
+ * @param {ErrorHandler} [httpErrorHandler=defaultHttpErrorHandler] - A handler function for HTTP errors.
+ * @param {ErrorHandler} [fetchErrorHandler=defaultFetchErrorHandler] - A handler function for fetch errors.
+ * @returns {Promise<boolean>} Indicates success or failure of the revocation.
+ */
+export const revokeUserApiKey = async (
+    keyId: string,
+    httpErrorHandler: ErrorHandler = defaultHttpErrorHandler,
+    fetchErrorHandler: ErrorHandler = defaultFetchErrorHandler
+  ): Promise<boolean> => {
+    return deleteUserData(`${userApiPath}/api-keys/${keyId}`, httpErrorHandler, fetchErrorHandler);
 }
 
 /**
@@ -627,14 +714,18 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         formattedPrefs = defaultPrefs;
         console.warn("no user available, setting to default prefs.");
       } else {
-        const prefs = await getUserPreferences(() => {
-          console.warn("no prefs found for this user, setting to default prefs.");
-        });
-        console.log("initial fetch of user prefs: ", prefs);
-        if(prefs === undefined) {
+        const prefsResponse = await fetchWithErrorHandling<PreferencesContainer>(
+          () => get(`${userApiPath}/preferences`),
+          (error) => console.warn("no prefs found for this user, setting to default prefs.", error.message),
+          (error) => console.warn("Fetch error getting user preferences:", error.message),
+        ).catch(() => undefined);
+        console.log("initial fetch of user prefs: ", prefsResponse);
+
+        const storedPrefs = parsePreferencesResponse(prefsResponse);
+        if(!storedPrefs) {
           formattedPrefs = defaultPrefs;
         } else {
-          formattedPrefs = formatPrefs(prefs.preferences);
+          formattedPrefs = formatPrefs(storedPrefs);
         }
       }
       if(!!formattedPrefs) 
@@ -656,8 +747,15 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         if(config?.gaID)
           setGaID(config.gaID);
 
+        // GTM is the transport for product events. The build-time value wins so a
+        // deploy can point at a different container without a backend change.
+        const gtmID = import.meta.env.VITE_GTM_ID || config?.gtmID;
+        if(gtmID)
+          setGtmID(gtmID);
+
         const configWithBuildInfo = {
           ...config,
+          include_canvas: config.include_canvas ?? false,
           buildInfo: import.meta.env.VITE_BUILD_INFO
         };
 
@@ -668,7 +766,9 @@ export const useFetchConfigAndPrefs = (userFound: boolean | undefined,  setGaID:
         const defaultConfig: Config = {
           cached_queries: [],
           gaID: '',
+          include_canvas: false,
           include_hashed_parameters: false,
+          include_lookup: false,
           include_pathfinder: false,
           include_projects: false,
           include_query_status_polling: false,
@@ -706,22 +806,23 @@ export const useUser = (): [ user: User | null | undefined, loading: boolean ] =
   return [ user, loading ];
 };
 
+/**
+ * Resolves the string ID for a path reference, which may be a raw ID string or a Path object.
+ *
+ * @param {string | Path} pathRef - The original path reference (ID string or Path object).
+ * @param {Path | null | undefined} resolvedPath - The resolved Path object.
+ * @returns {string} The path ID, or an empty string when unavailable.
+ */
+const resolvePathId = (pathRef: string | Path, resolvedPath: Path | null | undefined): string =>
+  (typeof pathRef === "string") ? pathRef : (resolvedPath?.id ?? "");
+
 const getAllPathsFromResult = (resultSet: ResultSet, result: Result) => {
   let paths: {[key: string]: Path} = {};
 
   for(const pathID of result.paths) {
-    let path;
-    let tempPathID = "";
-    if(typeof pathID === "string") {
-      path = getPathById(resultSet, pathID);
-      tempPathID = pathID;
-    } else {
-      path = pathID;
-      tempPathID = (!!path?.id) ? path.id : "";
-    } 
-
-    if(!!path) 
-      paths[tempPathID] = path;
+    const path = (typeof pathID === "string") ? getPathById(resultSet, pathID) : pathID;
+    if(!!path)
+      paths[resolvePathId(pathID, path)] = path;
   }
   return paths;
 }
@@ -738,23 +839,13 @@ const getAllNodesFromPath = (resultSet: ResultSet, path: Path, nodes: {[key: str
     
   }
 }
-const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, paths: {[key: string]: Path}, edges: {[key: string]: ResultEdge}, nodes: {[key: string]: ResultNode}) => {
+const getAllEdgesFromPath = (resultSet: ResultSet, path: Path, edges: {[key: string]: ResultEdge}) => {
   for (let i = 1; i < path.subgraph.length; i += 2) {
-    const edge = getEdgeById(resultSet, path.subgraph[i]); 
-    if(!!edge)
-      edges[path.subgraph[i]] = edge;
+    const edge = getEdgeById(resultSet, path.subgraph[i]);
+    if(!edge)
+      continue;
 
-    if(!!edge?.support) {
-      for(const supPathID of edge.support) {
-        const supPath = (typeof supPathID === "string") ? getPathById(resultSet, supPathID) : supPathID; 
-        if(!!supPath) {
-          const tempSupPathID = (typeof supPathID === "string") ? supPathID : (supPath.id) ? supPath.id : "";
-          paths[tempSupPathID] = supPath;
-          getAllEdgesFromPath(resultSet, supPath, paths, edges, nodes);
-          getAllNodesFromPath(resultSet, supPath, nodes);
-        }
-      }
-    }
+    edges[path.subgraph[i]] = edge;
   }
 }
 const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string]: Path}) => {
@@ -762,7 +853,7 @@ const getAllNodesAndEdgesFromPaths = (resultSet: ResultSet, paths: {[key: string
   let nodes: {[key: string]: ResultNode} = {};
 
   for(const path of Object.values(paths)) {
-    getAllEdgesFromPath(resultSet, path, paths, edges, nodes);
+    getAllEdgesFromPath(resultSet, path, edges);
     getAllNodesFromPath(resultSet, path, nodes);
   }
 
@@ -794,6 +885,7 @@ export const generateSafeResultSet = (resultSet: ResultSet, result: Result): Res
       meta: resultSet.data.meta,
       nodes: allSubgraphItems.nodes,
       paths: allPaths,
+      provenance: resultSet.data.provenance,
       publications: allPubs,
       results: [result],
       tags: resultSet.data.tags,
@@ -848,7 +940,6 @@ export const isPreferences = (obj: unknown): obj is Preferences => {
     const requiredKeys: Array<keyof Preferences> = [
       'result_sort',
       'results_per_page',
-      'graph_visibility',
       'graph_layout',
       'path_show_count',
       'evidence_sort',

@@ -7,9 +7,21 @@ type ToggleProps = {
   setActive?: (newActive: boolean) => void;
   labelOne?: string;
   labelTwo?: string;
+  /** Associates the checkbox with visible label text elsewhere in the DOM. */
+  ariaLabelledBy?: string;
+  /** Associates the checkbox with supplementary description text. */
+  ariaDescribedBy?: string;
 }
 
-const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, labelOne, labelTwo}) => {
+const Toggle: FC<ToggleProps> = ({
+  className = "",
+  active = false,
+  setActive,
+  labelOne,
+  labelTwo,
+  ariaLabelledBy,
+  ariaDescribedBy,
+}) => {
   const toggleId = useId();
 
   const handleToggle = () => {
@@ -23,6 +35,8 @@ const Toggle: FC<ToggleProps> = ({className = "", active = false, setActive, lab
         id={toggleId} 
         checked={active}
         onChange={handleToggle}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
       />
       {labelOne && <span className={`${styles.label} ${styles.labelOne} ${active ? styles.active : styles.inactive}`}>{labelOne}</span>}
       <label 

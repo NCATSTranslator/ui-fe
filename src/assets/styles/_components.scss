@@ -910,6 +910,8 @@ $edgeWidth: 178px;
   font-size: $captionSize;
 }
 .reasoning, .function-call {
+  // Spans rather than divs so the sanitizer's allowlist keeps them.
+  display: block;
   color: $purpleOne;
   font-style: italic;
   padding: $s;

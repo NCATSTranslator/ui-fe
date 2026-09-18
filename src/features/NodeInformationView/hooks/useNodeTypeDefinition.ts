@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { post, fetchWithErrorHandling } from "@/features/Common/utils/web";
+import { post, fetchWithErrorHandling } from "@/features/Core/utils/web";
 import { API_PATH_PREFIX } from "@/features/UserAuth/utils/userApi";
 
 type NodeDescriptionsResponse = Record<string, string>;
@@ -20,7 +20,10 @@ const fetchNodeTypeDefinition = async (nodeType: string): Promise<string | null>
 const useNodeTypeDefinition = (nodeType: string | null) => {
   return useQuery({
     queryKey: ["nodeTypeDefinition", nodeType],
-    queryFn: () => fetchNodeTypeDefinition(nodeType!),
+    queryFn: () => {
+      if (!nodeType) return Promise.resolve(null);
+      return fetchNodeTypeDefinition(nodeType);
+    },
     enabled: !!nodeType,
   });
 };

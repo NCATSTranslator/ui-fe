@@ -1,13 +1,11 @@
 import { PublicationSupport } from "@/features/Evidence/types/evidence";
-import { Path } from "@/features/ResultList/types/results";
 
 export type SummaryEdgeObject = Record<string, SummaryEdge>;
 export type SummaryEdge = {
   subject: string;
   predicate: string;
   object: string;
-  support: (string | Path)[];
-  publications: { [key: string]: { id: string; support: PublicationSupport }[] };
+  publications: { [key: string]: { id: string; support: PublicationSupport; infores: string }[] };
   trials: string[];
 };
 

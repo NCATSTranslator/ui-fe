@@ -2,13 +2,13 @@
 
 .container {
   padding: $xs $l $m;
-  max-width: $resultsViewMaxWidth;
+  max-width: $maxWidth;
   margin: 0 auto;
 }
 
 .tableHeader, .top {
   display: grid;
-  grid-template-columns: 1fr 112px 110px 90px 90px;
+  grid-template-columns: 1fr 112px 110px 90px;
   column-gap: $s;
 }
 
@@ -43,8 +43,6 @@
 }
 
 .tabContentItem {
-  margin: 0 0 $xs $l;
-  &:first-child {
-    margin-left: 0;
-  }
+  margin-left: 0;
+  margin-bottom: $xs;
 }

@@ -35,14 +35,6 @@ export const faqItems: FAQItem[] = [
     ]
   },
   {
-    id: "indirect-paths",
-    title: "What are indirect paths?",
-    paragraphs: [
-      { text: "Indirect paths are identified by reasoning agents that use logic and pattern recognition to uncover inferred links between objects. When two pieces of information aren't directly connected in our database, also called a knowledge graph, these agents look at existing relationships and apply logical rules to suggest possible connections.", anchor: "indirect" },
-      "For example, say Gene A affects Protein B, and Protein B is linked to Disease C. Translator reasoners can infer a possible connection between Gene A and Disease C even if no research paper directly states it. These connections are built step by step, and the supporting paths that follow them on the list of paths show the intermediary connections that explain why the objects in the indirect path are associated with each other."
-    ]
-  },
-  {
     id: "evidence-support",
     title: "Is it possible to see the evidence supporting each result?",
     paragraphs: [

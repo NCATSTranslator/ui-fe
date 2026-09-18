@@ -1,16 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useCallback } from 'react';
-import { createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries, 
+import { copyQuery, createProject, deleteProjects, deleteQueries, getUserProjects, getUserQueries,
   restoreProjects, restoreQueries, touchQuery, updateProjects, updateQuery } from '@/features/Projects/utils/projectsApi';
 import { ProjectCreate, ProjectUpdate, ProjectRaw, UserQueryObject, Project, QueryUpdate, SortField, 
   SortDirection, SortSearchState } from '@/features/Projects/types/projects.d';
-import { fetchNodeNameFromCurie } from '@/features/Projects/utils/utilities';
+import { fetchNodeNameFromCurie, getQueryLink } from '@/features/Projects/utils/utilities';
 import { extractAllCuriesFromTitles, replaceCuriesInTitle, hasTitleBeenUpdated, generateQueryTitleFromQueryObject,
   createUpdatedQueryWithTitle, findAllCuriesInTitle } from '@/features/Projects/utils/queryTitleUtils';
 import { useSelector } from 'react-redux';
 import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { filterAndSortProjects } from '@/features/Projects/utils/filterAndSortingFunctions';
-import { useSimpleSearch } from '@/features/Common/hooks/simpleSearchHook';
+import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Hook to fetch user projects with React Query
@@ -38,7 +39,7 @@ export const useUserQueries = () => {
   const shouldFetch = user !== null;
   const config = useSelector(currentConfig);
   const refetchInterval = config?.include_query_status_polling ? 15 * 1000 : false; // 15s
-  const query = useQuery({
+  return useQuery({
     queryKey: ['userQueries'],
     queryFn: () => getUserQueries(),
     enabled: shouldFetch,
@@ -47,30 +48,17 @@ export const useUserQueries = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retry: false,
+    select: (data) => data.map(queryItem => {
+      if (queryItem.data.title !== null) return queryItem;
+      return {
+        ...queryItem,
+        data: {
+          ...queryItem.data,
+          title: generateQueryTitleFromQueryObject(queryItem),
+        },
+      };
+    }),
   });
-
-  // Process queries to replace null titles with generated titles
-  const processedData = useMemo(() => {
-    if (!query.data) return query.data;
-    
-    return query.data.map(queryItem => {
-      if (queryItem.data.title === null) {
-        return {
-          ...queryItem,
-          data: {
-            ...queryItem.data,
-            title: generateQueryTitleFromQueryObject(queryItem)
-          }
-        };
-      }
-      return queryItem;
-    });
-  }, [query.data]);
-
-  return {
-    ...query,
-    data: processedData
-  };
 };
 
 /**
@@ -82,6 +70,7 @@ export const useCreateProject = () => {
   return useMutation({
     mutationFn: (projectData: ProjectCreate) => createProject(projectData),
     onSuccess: () => {
+      trackEvent('project_created');
       // Invalidate and refetch user projects
       queryClient.invalidateQueries({ queryKey: ['userProjects'] });
     },
@@ -111,7 +100,8 @@ export const useDeleteProjects = () => {
   
   return useMutation({
     mutationFn: (projectIds: string[]) => deleteProjects(projectIds),
-    onSuccess: () => {
+    onSuccess: (_data, projectIds) => {
+      trackEvent('project_deleted', { element_count: projectIds.length });
       // Invalidate and refetch user projects
       queryClient.invalidateQueries({ queryKey: ['userProjects'] });
     },
@@ -140,7 +130,7 @@ export const useDeleteQueries = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (queryIds: string[]) => deleteQueries(queryIds),
+    mutationFn: (queryIds: number[]) => deleteQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
@@ -155,9 +145,23 @@ export const useRestoreQueries = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (queryIds: string[]) => restoreQueries(queryIds),
+    mutationFn: (queryIds: number[]) => restoreQueries(queryIds),
     onSuccess: () => {
       // Invalidate and refetch user query status
+      queryClient.invalidateQueries({ queryKey: ['userQueries'] });
+    },
+  });
+};
+
+/**
+ * Hook to copy an existing query to the current user's queries
+ */
+export const useCopyQuery = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (pk: string) => copyQuery(pk),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });
     },
   });
@@ -234,7 +238,7 @@ export const useFormattedProjects = (
  * @returns {Function} resetState - Function to reset the state
  */
 export const useSortSearchState = () => {
-  const [sortField, setSortField] = useState<SortField>('lastSeen');
+  const [sortField, setSortField] = useState<SortField>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const { searchTerm, handleSearch } = useSimpleSearch();
 
@@ -252,7 +256,7 @@ export const useSortSearchState = () => {
   }, [handleSearch]);
 
   const resetState = useCallback(() => {
-    setSortField('lastSeen');
+    setSortField('created');
     setSortDirection('desc');
     handleSearch('');
   }, [handleSearch]);
@@ -282,7 +286,7 @@ export const useSortSearchState = () => {
  * @returns {Record<string, string>, boolean} Object with curie->name mapping and loading state
  */
 export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean = true) => {
-  const queries = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['curieNames', curies],
     queryFn: async () => {
       const results: Record<string, string> = {};
@@ -305,9 +309,22 @@ export const useMultipleResolvedCurieNames = (curies: string[], enabled: boolean
   });
 
   return {
-    data: queries.data || {},
-    isLoading: queries.isLoading,
+    data: data || {},
+    isLoading,
   };
+};
+
+/**
+ * Hook to get a query link with hashed parameters when configured.
+ * @param {UserQueryObject} userQuery - The query to get the link for
+ * @returns {string} The full URL for the query
+ */
+export const useQueryLink = (userQuery: UserQueryObject) => {
+  const config = useSelector(currentConfig);
+  return useMemo(
+    () => getQueryLink(userQuery, config?.include_hashed_parameters),
+    [userQuery, config?.include_hashed_parameters],
+  );
 };
 
 /**
@@ -381,19 +398,15 @@ export const useGetQueriesUpdatedTitles = (queryObjects: UserQueryObject[]): { q
  * 
  * @param sid - The query save ID
  */
-export const useUpdateQueryLastSeen = (sid?: string) => {
+export const useUpdateQueryLastSeen = (sid?: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      if (!sid) {
-        console.log("No query save ID provided, skipping query last_seen timestamp update");
+      if (sid === undefined) {
+        console.warn("No query save ID provided, skipping query last_seen timestamp update");
         return;
       }
-      await touchQuery(
-        sid, 
-        () => console.warn('http error updating query last_seen timestamp'), 
-        () => console.warn('fetch error updating query last_seen timestamp')
-      );
+      return await touchQuery(sid);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userQueries'] });

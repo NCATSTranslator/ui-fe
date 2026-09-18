@@ -6,6 +6,7 @@ interface SafeHtmlHighlighterProps {
   htmlString: string;
   searchWords: string[];
   highlightClassName?: string;
+  stripHtml?: boolean;
 }
 
 const ALLOWED_TAGS = ['a', 'b', 'i', 'em', 'strong', 'br', 'p', 'span', 'ul', 'ol', 'li', 'sub', 'sup'];
@@ -15,10 +16,14 @@ const SafeHtmlHighlighter: FC<SafeHtmlHighlighterProps> = ({
   htmlString,
   searchWords,
   highlightClassName = 'highlight',
+  stripHtml = false,
 }) => {
   const sanitized = useMemo(
-    () => DOMPurify.sanitize(htmlString, { ALLOWED_TAGS, ALLOWED_ATTR }),
-    [htmlString]
+    () =>
+      stripHtml
+        ? DOMPurify.sanitize(htmlString, { ALLOWED_TAGS: [], ALLOWED_ATTR: [], KEEP_CONTENT: true })
+        : DOMPurify.sanitize(htmlString, { ALLOWED_TAGS, ALLOWED_ATTR }),
+    [htmlString, stripHtml]
   );
 
   const escapedWords = useMemo(

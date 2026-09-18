@@ -1,10 +1,9 @@
 import { FC, useMemo } from "react";
 import { UserQueryObject } from "@/features/Projects/types/projects";
 import StatusIndicator from "@/features/Projects/components/StatusIndicator/StatusIndicator";
-import { getQueryLink } from "@/features/Projects/utils/utilities";
 import DataCard from "@/features/Projects/components/DataCard/DataCard";
 import styles from "@/features/Projects/components/DataCard/DataCard.module.scss";
-import { useGetQueryCardTitle, useUserProjects } from "@/features/Projects/hooks/customHooks";
+import { useGetQueryCardTitle, useQueryLink, useUserProjects } from "@/features/Projects/hooks/customHooks";
 import { DraggableCard } from "@/features/DragAndDrop/components/DraggableCard/DraggableCard";
 import { DraggableData } from "@/features/DragAndDrop/types/types";
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
@@ -13,10 +12,11 @@ import FolderPlusIcon from '@/assets/icons/projects/folderplus.svg?react';
 import FolderEmptyIcon from '@/assets/icons/projects/folderempty.svg?react';
 import ShareIcon from '@/assets/icons/buttons/Share.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
-import { getTimeRelativeDate } from "@/features/Common/utils/utilities";
+import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import useAddToProject from "@/features/Projects/hooks/useAddToProject";
+import { useEditProjectHandlers } from "@/features/Projects/hooks/useEditProjectHandlers";
 import { projectUpdatedToast } from "@/features/Core/utils/toastMessages";
 
 interface QueryCardProps {
@@ -32,26 +32,23 @@ const QueryCard: FC<QueryCardProps> = ({
 }) => {
   const { title } = useGetQueryCardTitle(query);  
   const { openDeleteQueriesModal, openShareQueryModal } = useProjectModals();
-  const { activePanelId, setAddToProjectMode, togglePanel } = useSidebar();
+  const { addToProject } = useAddToProject();
   const { handleUpdateProject } = useEditProjectHandlers();
   const { data: projects = [] } = useUserProjects();
+  const { activePanelId } = useSidebar();
 
   const currentPage = useLocation().pathname.replace('/', '');
   const disableDragging = useMemo(() => {
     return activePanelId !== 'projects' && (query.data.deleted || !currentPage.includes('projects'));
   }, [query.data.deleted, currentPage, activePanelId]);
 
-  const queryURL = getQueryLink(query);
-  const queryTime = getTimeRelativeDate(new Date(query.data.time_updated));
+  const queryURL = useQueryLink(query);
+  const queryCreatedTime = getTimeRelativeDate(new Date(query.data.time_created));
+  const queryLastSeenTime = query.data.time_viewed ? getTimeRelativeDate(new Date(query.data.time_viewed)) : "--";
   
   const icon = <StatusIndicator status={query.status} />;
 
-  const handleAddToProject = () => {
-    setAddToProjectMode(query);
-    if (activePanelId !== 'projects') {
-      togglePanel('projects');
-    }
-  };
+  const handleAddToProject = () => addToProject(query);
   const handleShareQuery = () => {
     openShareQueryModal(query);
   };
@@ -97,7 +94,8 @@ const QueryCard: FC<QueryCardProps> = ({
         type="query"
         bookmarksCount={query.data.bookmark_ids.length}
         notesCount={query.data.note_count}
-        date={queryTime}
+        createdTime={queryCreatedTime}
+        lastSeenTime={queryLastSeenTime}
         queryType={query.data.query.type}
       />
     </DraggableCard>

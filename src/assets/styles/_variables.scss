@@ -33,7 +33,7 @@ $placeholderGray: #A5A5A5;
 $midGray: #CED0D0;
 $hoverGray: #F5F4FF;
 $grayHover: #D8D5E0;
-$whiteHover: #E1DEE9;
+$whiteHover: #E2DEE9;
 $lightGray: #F2F4F7;
 $transparentBlack: #202124CC; // Black 80% 
 $dropShadowColor: #20212433; // Black 20%
@@ -62,6 +62,9 @@ $whitePathObjectSeen: #F2F4F7;
 $whitePathObjectSeenHover: #CECCDA;
 $pathObjectSelected: $lightPurpleTwo;
 $pathObjectSelectedHover: #C4C4D5;
+
+$resultWhiteRowHover: #E2DEE9;
+$resultGrayRowHover: #D6D5E2;
 
 $backgroundBlur: 3px;
 
@@ -92,14 +95,13 @@ $l: 32px;
 $xl: 48px;
 $xxl: 64px;
 $interiorContainerWidth: 920px;
-$maxwidth: 1250px;
-$resultsViewMaxWidth: 1400px;
-$panelWidth: 292px;
+$maxWidth: 1400px;
+$panelWidth: 300px;
 
 // Grids //
-$projectCardColumns: 1fr $xl $xl 85px 110px 14px;
+$projectCardColumns: 1fr $xl $xl 85px 110px 110px 14px;
 $dataCardGap: $l;
-$queryCardColumns: 1fr $xl $xl 120px 110px 14px;
+$queryCardColumns: 1fr $xl $xl 120px 110px 110px 14px;
 
 // Screens //
 $small: 425px;

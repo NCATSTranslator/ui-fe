@@ -2,12 +2,13 @@ import styles from './FacetTag.module.scss';
 import { FC } from "react";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import FacetCheckbox from "@/features/ResultFiltering/components/FacetCheckbox/FacetCheckbox";
-import { formatBiolinkEntity, joinClasses } from "@/features/Common/utils/utilities";
+import { formatBiolinkEntity } from "@/features/Core/utils/stringFormatters";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import Include from '@/assets/icons/buttons/Checkmark/Circle Checkmark.svg?react';
 import Exclude from '@/assets/icons/buttons/View & Exclude/Exclude.svg?react';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
-import { getTagType } from '@/features/ResultFiltering/utils/filterFunctions';
-import { CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getTagType, FILTERING_CONSTANTS, formatPredicateFilterName } from '@/features/ResultFiltering/utils/filterFunctions';
+import AcceptedOntologyTooltip from '@/features/ResultFiltering/components/AcceptedOntologyTooltip/AcceptedOntologyTooltip';
 
 interface FacetTagProps {
   activeFilters: Filter[];
@@ -35,8 +36,12 @@ const generateTagName = (isEntitySearch: boolean, filter: Filter, family: string
   let tagName = "";
   if(isEntitySearch)
     tagName = (!!filter?.value) ? `"${filter.value}"` : filter.name;
+  else if (family === 'pc')
+    tagName = formatBiolinkEntity(filter.name);
+  else if (family === 'pred')
+    tagName = formatPredicateFilterName(filter.name);
   else
-    tagName = (family === 'pc') ? formatBiolinkEntity(filter.name) : filter.name;
+    tagName = filter.name;
 
   return tagName;
 }
@@ -51,37 +56,84 @@ const getIsChecked = (isEntitySearch: boolean, activeFilters: Filter[], tagKey: 
   return checked;
 }
 
+const getTagNameClass = (tagKey: string) => joinClasses(
+  styles.tagName,
+  (tagKey.includes('r/role') || tagKey.includes('r/ara')) && styles.roleTagName,
+  (tagKey.includes('p/pred') && styles.predicateTagName),
+);
+
+interface FacetClickHandlerArgs {
+  filter: Filter;
+  tagKey: string;
+  tagName: string;
+  negated: boolean;
+  checked: boolean;
+  isEntitySearch: boolean;
+  onFilter: FacetTagProps['onFilter'];
+  handleInteractExistingEntity: FacetTagProps['handleInteractExistingEntity'];
+}
+
+const getFacetClickHandler = ({
+  filter,
+  tagKey,
+  tagName,
+  negated,
+  checked,
+  isEntitySearch,
+  onFilter,
+  handleInteractExistingEntity,
+}: FacetClickHandlerArgs) => (
+  isEntitySearch && !!handleInteractExistingEntity
+    ? () => handleInteractExistingEntity(filter, checked, true)
+    : () => handleFacetChange(onFilter, tagKey, filter, negated, tagName)
+);
+
+interface FacetCountProps {
+  count?: number;
+  family: string;
+  tagKey: string;
+}
+
+const FacetCount: FC<FacetCountProps> = ({ count, family, tagKey }) => (
+  <span className={styles.facetCount}>
+    {(count) ? count : 0}
+    {
+    (family === "role") &&
+      <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
+        <ExternalLink className={styles.extLinkIcon}/>
+      </a>
+    }
+  </span>
+);
+
 const FacetTag: FC<FacetTagProps> = ({
   activeFilters,
   family,
   filterObject,
   handleInteractExistingEntity,
   isEntitySearch = false,
-  onFilter}) => {
+  onFilter,
+}) => {
 
-  let tagKey = filterObject[0];
-  let filter = filterObject[1];
+  let [tagKey, filter] = filterObject;
   let tagName: string = generateTagName(isEntitySearch, filter, family);
   let positiveChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, false, filter);
   let negativeChecked = getIsChecked(isEntitySearch, activeFilters, tagKey, true, filter);
   const type = getTagType(tagKey);
-  const shouldShowCount = !isEntitySearch && type !== CONSTANTS.PATH;
+  const shouldShowCount = !isEntitySearch && type !== FILTERING_CONSTANTS.PATH;
+  const isAcceptedOntology = tagKey.includes('p/ev/ontology');
+  const clickHandlerArgs = { filter, tagKey, tagName, isEntitySearch, onFilter, handleInteractExistingEntity };
 
   const classNames = joinClasses(
     styles.facetContainer,
     positiveChecked ? styles.containerPositiveChecked : "",
     negativeChecked ? styles.containerNegativeChecked : "",
-    family === 'role' ? styles.roleFacet : ""
   );
 
   return (
     <div className={classNames} key={tagKey} data-facet-name={tagName}>
       <FacetCheckbox
-        handleClick={
-          isEntitySearch && !!handleInteractExistingEntity
-          ? () => handleInteractExistingEntity(filter, positiveChecked, true)
-          : () => handleFacetChange(onFilter, tagKey, filter, false, tagName)
-        }
+        handleClick={getFacetClickHandler({ ...clickHandlerArgs, negated: false, checked: positiveChecked })}
         checked={positiveChecked}
         className={`${styles.checkbox} ${styles.positive}`}
         checkedClassName={positiveChecked ? styles.positiveChecked : ""}
@@ -89,28 +141,22 @@ const FacetTag: FC<FacetTagProps> = ({
         labelLeft
         title="Include"
         >
-        <span className={styles.tagName} title={tagName}>
+        <span
+          className={getTagNameClass(tagKey)}
+          title={tagName}
+        >
           {tagName}
+          {
+            isAcceptedOntology && <AcceptedOntologyTooltip/>
+          }
         </span>
         {
           shouldShowCount &&
-          <span className={styles.facetCount}>
-            {(filter.count) ? filter.count : 0}
-            {
-            (family === "role") &&
-              <a href={getRoleLinkout(tagKey)} rel="noreferrer" target="_blank">
-                <ExternalLink className={styles.extLinkIcon}/>
-              </a>
-            }
-          </span>
+          <FacetCount count={filter.count} family={family} tagKey={tagKey} />
         }
       </FacetCheckbox>
       <FacetCheckbox
-        handleClick={
-          isEntitySearch && !!handleInteractExistingEntity
-          ? () => handleInteractExistingEntity(filter, negativeChecked, true)
-          : () => handleFacetChange(onFilter, tagKey, filter, true, tagName)
-        }
+        handleClick={getFacetClickHandler({ ...clickHandlerArgs, negated: true, checked: negativeChecked })}
         checked={negativeChecked}
         className={`${styles.checkbox} ${styles.negative}`}
         checkedClassName={negativeChecked ? styles.negativeChecked : ""}

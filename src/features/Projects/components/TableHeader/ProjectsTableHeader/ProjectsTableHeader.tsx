@@ -60,6 +60,16 @@ const ProjectsTableHeader = ({
             Queries
           </SortableHeader>
         </div>
+        <div className={styles.createdColumn}>
+          <SortableHeader 
+            field="created" 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          >
+            Created
+          </SortableHeader>
+        </div>
         <div className={styles.lastSeenColumn}>
           <SortableHeader 
             field="lastSeen" 

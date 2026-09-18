@@ -2,7 +2,7 @@ import { FC, FormEvent, RefObject, MouseEvent } from 'react';
 import styles from './ListHeader.module.scss';
 import ProjectSearchBar from '@/features/Projects/components/ProjectSearchBar/ProjectSearchBar';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
-import OutsideClickHandler from '@/features/Common/components/OutsideClickHandler/OutsideClickHandler';
+import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 
 interface ListHeaderProps {
   heading: string;

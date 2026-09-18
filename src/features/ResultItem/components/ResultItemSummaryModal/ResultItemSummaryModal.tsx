@@ -1,9 +1,10 @@
 import { FC, ReactNode } from "react";
 import LoadingWrapper from "@/features/Core/components/LoadingWrapper/LoadingWrapper";
-import Modal from "@/features/Common/components/Modal/Modal";
+import Modal from "@/features/Core/components/Modal/Modal";
 import styles from "./ResultItemSummaryModal.module.scss";
 import Button from "@/features/Core/components/Button/Button";
 import LoadingIcon from "@/features/Core/components/LoadingIcon/LoadingIcon";
+import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter";
 import { Result } from "@/features/ResultList/types/results";
 
 interface ResultItemSummaryModalProps {
@@ -48,10 +49,9 @@ const ResultItemSummaryModal: FC<ResultItemSummaryModalProps> = ({
                   </div>
                 :
                 <>
-                  <div 
-                    className={styles.summary}
-                    dangerouslySetInnerHTML={{ __html: summary as string }}
-                  />
+                  <div className={styles.summary}>
+                    <SafeHtmlHighlighter htmlString={(summary as string) ?? ''} searchWords={[]} />
+                  </div>
                   {isStreaming && <LoadingIcon size="small" className={styles.streamingIcon} />}
                 </>
             }

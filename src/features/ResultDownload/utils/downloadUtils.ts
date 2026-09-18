@@ -1,5 +1,5 @@
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
-import { getNodeSpecies } from "@/features/ResultList/slices/resultsSlice";
+import { getNodeSpecies, getEdgeProvenance, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import {
@@ -14,9 +14,11 @@ import {
   ExportedTrial,
   ExportFormat,
 } from "@/features/ResultDownload/types/download.d";
-import { exportToCSV } from "@/features/ResultDownload/utils/csvUtils";
-import { replaceTreatWithImpact } from "@/features/Common/utils/utilities";
+import { exportToCSV } from "@/features/Core/utils/csvUtils";
+import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
+import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 /**
  * Returns results based on the specified scope
@@ -142,18 +144,6 @@ export const collectRelatedEntities = (
               }
             });
           }
-
-          // Recursively collect support paths and their entities
-          if (edge.support && Array.isArray(edge.support)) {
-            edge.support.forEach(supportPathOrId => {
-              const supportPathId = typeof supportPathOrId === 'string'
-                ? supportPathOrId
-                : supportPathOrId.id;
-              if (supportPathId) {
-                collectFromPath(supportPathId);
-              }
-            });
-          }
         }
       }
     });
@@ -203,22 +193,18 @@ const cleanNode = (node: ResultNode, nodeId: string): ExportedNode => ({
  * @param edge The edge object
  * @param edgeId The edge ID (from dictionary key, used if edge.id is undefined)
  */
-const cleanEdge = (edge: ResultEdge, edgeId: string): ExportedEdge => ({
+const cleanEdge = (edge: ResultEdge, edgeId: string, resultSet: ResultSet): ExportedEdge => ({
   id: edge.id || edgeId,
   subject: edge.subject,
   object: edge.object,
   predicate: edge.predicate,
   predicate_url: edge.predicate_url,
   knowledge_level: edge.knowledge_level,
-  provenance: edge.provenance,
+  provenance: getEdgeProvenance(resultSet, edge),
   publications: edge.publications,
   trials: edge.trials,
-  support: Array.isArray(edge.support)
-    ? edge.support.map(s => (typeof s === 'string' ? s : s.id || ''))
-    : [],
   aras: edge.aras,
   description: edge.description,
-  type: edge.type,
 });
 
 /**
@@ -248,10 +234,10 @@ const cleanPath = (path: Path, pathId: string): ExportedPath => ({
  * @param pub The publication object
  * @param pubId The publication ID (from dictionary key, used if pub.id is undefined)
  */
-const cleanPublication = (pub: PublicationObject, pubId: string): ExportedPublication => ({
+const cleanPublication = (pub: PublicationObject, pubId: string, resultSet: ResultSet): ExportedPublication => ({
   id: pub.id || pubId,
   url: pub.url,
-  source: pub.source,
+  source: pub.source ?? getPublicationSource(resultSet, pub.infores?.[0]),
   support: pub.support,
   knowledgeLevel: pub.knowledgeLevel,
 });
@@ -296,7 +282,7 @@ export const cleanResultSet = (
 
   // Clean edges
   Object.entries(entities.edges).forEach(([id, edge]) => {
-    cleanedEdges[id] = cleanEdge(edge, id);
+    cleanedEdges[id] = cleanEdge(edge, id, resultSet);
     // replace any instances of "treats" or "treat" with "impacts" or "impact" in the predicate
     cleanedEdges[id].predicate = replaceTreatWithImpact(cleanedEdges[id].predicate);
   });
@@ -308,7 +294,7 @@ export const cleanResultSet = (
 
   // Clean publications
   Object.entries(entities.publications).forEach(([id, pub]) => {
-    cleanedPublications[id] = cleanPublication(pub, id);
+    cleanedPublications[id] = cleanPublication(pub, id, resultSet);
   });
 
   // Clean trials
@@ -343,39 +329,6 @@ export const exportToJSON = (exportedResultSet: ExportedResultSet): string => {
 };
 
 /**
- * Triggers a browser file download
- */
-export const triggerDownload = (content: string, filename: string, mimeType: string): void => {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
-/**
- * Sanitizes a string for use in a filename
- * - Removes or replaces special characters
- * - Limits length
- * - Converts spaces to underscores
- */
-export const sanitizeForFilename = (str: string, maxLength: number = 50): string => {
-  if (!str) return '';
-
-  return str
-    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
-    .replace(/\s+/g, '-')            // Replace spaces with dashes
-    .replace(/-+/g, '-')             // Collapse multiple hyphens
-    .replace(/_+/g, '_')             // Collapse multiple underscores
-    .slice(0, maxLength)             // Limit length
-    .replace(/[_-]+$/, '');          // Remove trailing underscores/hyphens
-};
-
-/**
  * Generates a filename for the export
  */
 export const generateFilename = (scope: DownloadScope, format: ExportFormat, queryTitle?: string): string => {
@@ -385,19 +338,23 @@ export const generateFilename = (scope: DownloadScope, format: ExportFormat, que
   return `${titlePart}_${scope}_results_${date}.${format}`;
 };
 
+export interface DownloadResultSources {
+  allResults: Result[];
+  filteredResults: Result[];
+  userSaves: SaveGroup | null;
+}
+
 /**
  * Main export function that orchestrates the entire download process
  */
 export const downloadResults = (
   resultSet: ResultSet,
-  allResults: Result[],
-  filteredResults: Result[],
-  userSaves: SaveGroup | null,
+  sources: DownloadResultSources,
   options: DownloadOptions,
   queryTitle?: string
 ): void => {
   // Get results based on scope
-  const scopedResults = getResultsByScope(options.scope, allResults, filteredResults, userSaves);
+  const scopedResults = getResultsByScope(options.scope, sources.allResults, sources.filteredResults, sources.userSaves);
 
   if (scopedResults.length === 0) {
     console.warn('No results to export for the selected scope');
@@ -412,6 +369,14 @@ export const downloadResults = (
 
   // Generate filename
   const filename = generateFilename(options.scope, options.format, queryTitle);
+
+  // Tracked after the empty-scope bail-out, so this counts files that are
+  // actually produced rather than clicks on the download button.
+  trackEvent('results_downloaded', {
+    export_format: options.format,
+    download_scope: options.scope,
+    result_count: scopedResults.length,
+  });
 
   if (options.format === 'json') {
     const jsonContent = exportToJSON(cleanedResultSet);

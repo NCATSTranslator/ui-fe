@@ -1,10 +1,10 @@
 import { FC, ReactNode, MouseEvent, useState, FormEvent, RefObject } from "react";
 import styles from "./SidebarCard.module.scss";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import SidebarCardTitle from "@/features/Sidebar/components/SidebarCardTitle/SidebarCardTitle";
 import Button from "@/features/Core/components/Button/Button";
-import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
 
@@ -91,8 +91,8 @@ const SidebarCard: FC<SidebarCardProps> = ({
         />
         {(bottomLeft || bottomRight) && (
           <div className={styles.bottom}>
-            {bottomLeft && bottomLeft}
-            {bottomRight && bottomRight}
+            {!bottomLeft ? null : bottomLeft}
+            {!bottomRight ? null : bottomRight}
           </div>
         )}
         {
@@ -105,7 +105,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
                 </Button>
               </OutsideClickHandler>
               <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
-                {options && options}
+                {options}
               </OptionsPane>
             </div>
           )

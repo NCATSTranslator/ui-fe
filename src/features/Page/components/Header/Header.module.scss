@@ -3,7 +3,7 @@
 .header {
   box-shadow: $dropShadow;
   position: sticky;
-  z-index: 10000;
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   top: 0;
@@ -24,9 +24,10 @@
   }
   .disclaimer {
     font-size: $captionSize;
-    color: $black;
-    font-weight: 400;
+    color: $red;
+    font-weight: 800;
     margin: 0;
+    letter-spacing: -4%;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     line-clamp: 1;

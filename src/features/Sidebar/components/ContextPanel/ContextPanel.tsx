@@ -4,7 +4,7 @@ import Button from "@/features/Core/components/Button/Button";
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { SidebarItemId } from "@/features/Sidebar/types/sidebar";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 interface ContextPanelProps {
   activePanelId: SidebarItemId | 'none';
@@ -39,7 +39,7 @@ const ContextPanel: FC<ContextPanelProps> = ({
       <div className={styles.header}>
         <h6 className={styles.title}>{title}</h6>
         <div className={styles.buttonContainer}>
-          {buttonComponent && buttonComponent}
+          {!buttonComponent ? null : buttonComponent}
           <Button
             handleClick={handleClosePanel}
             iconLeft={<CloseIcon />}

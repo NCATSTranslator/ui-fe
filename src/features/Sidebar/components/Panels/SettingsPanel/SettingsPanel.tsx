@@ -7,16 +7,46 @@ import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWra
 import { getFormattedLoginURL, useUser } from '@/features/UserAuth/utils/userApi';
 import { PrefKey, PrefObject, PrefType } from '@/features/UserAuth/types/user';
 import ChevRight from "@/assets/icons/directional/Chevron/Chevron Right.svg?react";
-import { capitalizeFirstLetter } from '@/features/Common/utils/utilities';
+import { capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
 import { useDispatch, useSelector } from 'react-redux';
 import { currentPrefs, setCurrentPrefs, currentConfig } from '@/features/UserAuth/slices/userSlice';
 import { Preferences} from '@/features/UserAuth/types/user';
 import { updateUserPreferences } from '@/features/UserAuth/utils/userApi';
 import cloneDeep from 'lodash/cloneDeep';
 import { getPrettyPrefValue } from '@/features/UserAuth/utils/formatPrefs';
+import { defaultPrefs } from '@/features/UserAuth/utils/userDefaults';
 import { errorToast, preferencesSavedToast } from '@/features/Core/utils/toastMessages';
 import InteriorPanelContainer from '@/features/Sidebar/components/InteriorPanelContainer/InteriorPanelContainer';
 import SidebarTransitionButton from '@/features/Sidebar/components/SidebarTransitionButton/SidebarTransitionButton';
+import ConfidenceTooltip from './ConfidenceTooltip';
+import ApiKeysSection from './ApiKeysSection';
+import DisplaySection from './DisplaySection';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+
+const isConfidenceSort = (value: string | number): boolean =>
+  value === 'scoreHighLow' || value === 'scoreLowHigh';
+
+const getPrefsForType = (prefTypeId: PrefType | null, userPrefs: Preferences) => {
+  switch (prefTypeId) {
+    case "results":
+      return {
+        results_per_page: userPrefs.results_per_page ?? defaultPrefs.results_per_page,
+        path_show_count: userPrefs.path_show_count ?? defaultPrefs.path_show_count,
+        result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
+      };
+    case "evidence":
+      return {
+        evidence_sort: userPrefs.evidence_sort ?? defaultPrefs.evidence_sort,
+        evidence_per_page: userPrefs.evidence_per_page ?? defaultPrefs.evidence_per_page,
+      };
+    case "graphs":
+      return {
+        graph_layout: userPrefs.graph_layout ?? defaultPrefs.graph_layout,
+      };
+    default:
+      return undefined;
+  }
+};
 
 const SettingsPanel = () => {
   const location = useLocation();
@@ -25,8 +55,10 @@ const SettingsPanel = () => {
   const [activePrefObject, setActivePrefObject] = useState<{prefObject: PrefObject, prefKey: PrefKey} | null>(null);
 
   const handleSetActivePrefObject = (prefId: PrefKey, prefs: Preferences) => {
-    setActivePrefObject({prefObject: prefs[prefId as keyof Preferences], prefKey: prefId});
-  }
+    const prefObject = prefs[prefId] ?? defaultPrefs[prefId];
+    if (!prefObject) return;
+    setActivePrefObject({ prefObject, prefKey: prefId });
+  };
 
   const initPrefs = useSelector(currentPrefs);
   const [userPrefs, setUserPrefs] = useState<Preferences>(initPrefs);
@@ -48,6 +80,7 @@ const SettingsPanel = () => {
   const postLogoutRedirectUri = `${window.location.protocol}//${window.location.host}/logout`;
 
   const handleLogout = () => {
+    trackEvent('auth_logout', { auth_provider: idpLogoutProvider ? 'idp' : 'local' });
     if (idpLogoutProvider && idpLogoutFormRef.current) {
       idpLogoutFormRef.current.submit();
     } else {
@@ -55,34 +88,10 @@ const SettingsPanel = () => {
     }
   };
   
-  const resultPrefs = useMemo(()=> {
-    return {
-      result_sort: userPrefs.result_sort,
-      results_per_page: userPrefs.results_per_page,
-      path_show_count: userPrefs.path_show_count,
-    }
-  }, [userPrefs]);
-
-  const evidencePrefs = useMemo(()=> {
-    return {
-      evidence_sort: userPrefs.evidence_sort,
-      evidence_per_page: userPrefs.evidence_per_page,
-    }
-  }, [userPrefs]);
-
-  const graphPrefs = useMemo(()=> {
-    return {
-      graph_visibility: userPrefs.graph_visibility,
-      graph_layout: userPrefs.graph_layout,
-    }
-  }, [userPrefs]);
-
-  const prefsToDisplay = useMemo(()=> {
-    if(activePrefTypeId === "results") return resultPrefs;
-    if(activePrefTypeId === "evidence") return evidencePrefs;
-    if(activePrefTypeId === "graphs") return graphPrefs;
-    return undefined;
-  }, [activePrefTypeId, resultPrefs, evidencePrefs, graphPrefs]);
+  const prefsToDisplay = useMemo(
+    () => getPrefsForType(activePrefTypeId, userPrefs),
+    [activePrefTypeId, userPrefs]
+  );
 
   const handleSubmitUserPrefs = async (prefs: Preferences) => {
     try {
@@ -128,7 +137,7 @@ const SettingsPanel = () => {
                       ref={idpLogoutFormRef}
                       method="post"
                       action={idpLogoutProvider.logout_uri}
-                      style={{ display: 'none' }}
+                      className={styles.idpLogoutForm}
                     >
                       <input type="hidden" name="client_id" value={idpLogoutProvider.client_id} />
                       <input type="hidden" name="show_prompt" value="false" />
@@ -143,6 +152,7 @@ const SettingsPanel = () => {
               )
             }
         </div>
+        <DisplaySection />
         {
           !!user &&
           <>
@@ -160,6 +170,7 @@ const SettingsPanel = () => {
                 label="Graphs"
               />
             </div>
+            <ApiKeysSection />
             {
               activePrefTypeId && 
               <InteriorPanelContainer
@@ -168,7 +179,7 @@ const SettingsPanel = () => {
               >
                 <div className={styles.activePrefTypeContent}>
                   {
-                    prefsToDisplay && Object.entries(prefsToDisplay).map(([key, pref]) => (
+                    prefsToDisplay && Object.entries(prefsToDisplay).filter(([, pref]) => !!pref).map(([key, pref]) => (
                       <div className={styles.activePref} key={key}>
                         <h6 className={styles.prefLabel}>{pref.name}</h6>
                         <Button 
@@ -176,8 +187,12 @@ const SettingsPanel = () => {
                           variant="secondary"
                           iconRight={<ChevRight />}
                           handleClick={() => handleSetActivePrefObject(key as PrefKey, userPrefs)}
+                          dataTooltipId={isConfidenceSort(pref.pref_value) ? `confidence-explanation-tooltip-${pref.pref_value}` : undefined}
                         >
                           {getPrettyPrefValue(pref.pref_value)}
+                          {
+                            isConfidenceSort(pref.pref_value) && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} linkClassName={styles.confidenceTooltipLink} dataTooltipId={`confidence-explanation-tooltip-${pref.pref_value}`} />
+                          }
                         </Button>
                       </div>
                     ))
@@ -186,20 +201,24 @@ const SettingsPanel = () => {
               </InteriorPanelContainer>
             }
             {
-              activePrefObject && activePrefObject.prefObject.possible_values &&
+              activePrefObject?.prefObject?.possible_values &&
               <InteriorPanelContainer
                 handleBack={() => setActivePrefObject(null)}
                 backButtonLabel={activePrefObject.prefObject.name}
               >
-                <div className={styles.activePrefContent}>
+                <div>
                   {activePrefObject.prefObject.possible_values.map((value) => (
                     <Button
                       key={value}
-                      className={`${styles.prefValueSelectorButton} ${userPrefs[activePrefObject.prefKey].pref_value === value ? styles.active : ''}`}
+                      className={`${styles.prefValueSelectorButton} ${(userPrefs[activePrefObject.prefKey] ?? defaultPrefs[activePrefObject.prefKey])?.pref_value === value ? styles.active : ''}`}
                       variant="secondary"
                       handleClick={() => handlePrefValueClick(activePrefObject.prefKey, value)}
+                      dataTooltipId={isConfidenceSort(value) ? `confidence-explanation-tooltip-${value}` : undefined}
                       >
                       {getPrettyPrefValue(value)}
+                      {
+                        isConfidenceSort(value) && <ConfidenceTooltip iconClassName={styles.confidenceTooltipIcon} linkClassName={styles.confidenceTooltipLink} dataTooltipId={`confidence-explanation-tooltip-${value}`} />
+                      }
                     </Button>
                   ))}
                 </div>

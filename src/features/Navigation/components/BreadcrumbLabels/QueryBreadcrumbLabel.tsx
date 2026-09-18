@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { generateQueryTitle } from '@/features/Projects/utils/queryTitleUtils';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
@@ -7,9 +7,16 @@ import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 const QueryBreadcrumbLabel: FC = () => {
   const decodedParams = useDecodedParams();
   const queryType = getDataFromQueryVar("t", decodedParams);
-  const nodeOneLabel = queryType === "p" ? getDataFromQueryVar("lone", decodedParams) : getDataFromQueryVar("l", decodedParams) || '';
+  const nodeOneLabel = (queryType === "p" || queryType === "l")
+    ? getDataFromQueryVar("lone", decodedParams)
+    : getDataFromQueryVar("l", decodedParams) || '';
   const nodeTwoLabel = queryType === "p" ? getDataFromQueryVar("ltwo", decodedParams) : '';
-  const constraint = queryType === "p" ? getDataFromQueryVar("c", decodedParams) : null;
+  let constraint = null;
+  if (queryType === "p") {
+    constraint = getDataFromQueryVar("c", decodedParams);
+  } else if (queryType === "l") {
+    constraint = getDataFromQueryVar("cat", decodedParams);
+  }
 
   const queryTitle = generateQueryTitle(queryType, nodeOneLabel || '', nodeTwoLabel || '', constraint);
 

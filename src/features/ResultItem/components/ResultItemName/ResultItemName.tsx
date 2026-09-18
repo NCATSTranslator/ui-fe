@@ -1,7 +1,8 @@
 import { FC, ReactNode } from "react";
 import styles from './ResultItemName.module.scss';
 import { Result, ResultNode } from "@/features/ResultList/types/results.d";
-import { formatBiolinkNode, getNodeIcon, getFormattedPathfinderName } from "@/features/Common/utils/utilities";
+import { formatBiolinkNode, getFormattedPathfinderName } from "@/features/Core/utils/stringFormatters";
+import { getNodeIcon } from "@/features/Core/utils/entityLinks";
 import Highlighter from "react-highlight-words";
 import ArrowIcon from "@/assets/icons/directional/Arrows/Arrow Right.svg?react";
 
@@ -49,7 +50,7 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
                 const pfNameString = getPFNameString(i, isNotLastItem, name, subjectNode, objectNode);
                 const originalBiolinkName = `biolink:${pfNameString.replaceAll(" ", "_")}`;
                 return (
-                  <span className={styles.nameContainer}>
+                  <span className={styles.nameContainer} title={pfNameString}>
                     {
                       i === 0 &&
                       subjectIcon
@@ -81,7 +82,7 @@ const ResultItemName: FC<ResultItemNameProps> = ( {isPathfinder = false, subject
         :
           <>
             <span className={styles.icon}>{icon}</span>
-            <span className={styles.name}>
+            <span className={styles.name} title={nameString}>
               <Highlighter
                 highlightClassName="highlight"
                 searchWords={activeEntityFilters}

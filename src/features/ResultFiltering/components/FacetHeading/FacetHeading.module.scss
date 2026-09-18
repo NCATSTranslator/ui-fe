@@ -4,18 +4,27 @@
   width: 100%;
   .labelHeading {
     display: grid;
-    grid-template-columns: 1fr $m;
     align-items: center;
     width: 100%;
+    &.includeArrow {
+      grid-template-columns: 1fr $m;
+    }
   }
   .filterCount {
     background-color: $midGray;
     color: $darkGray;
-    font-size: $captionSize;
+    font-size: $captionSize !important;
     font-weight: 800;
     line-height: 1.25;
-    padding: 2.5px 6px;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: $defaultBorderRadius;
+    justify-self: center;
+    text-decoration: none !important;
   }
   .label {
     display: flex;
@@ -45,6 +54,17 @@
     font-weight: 800;
     font-size: $subTwoSize;
     color: $darkGray;
+    &:hover {
+      text-decoration: underline;
+    }
+    &.hasClearButton {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      &.chebiRoleFamily {
+        max-width: 150px;
+      }
+    }
   }
   .caption {
     font-size: $captionSize;
@@ -61,4 +81,25 @@
       transition: $defaultAnim;
     }
   }
+  .filterCountContainer {
+    display: flex;
+    align-items: center;
+    gap: $xs;
+  }
+  .clearButton {
+    cursor: pointer;
+    color: $purpleOne;
+    font-weight: 800;
+    font-size: $captionSize;
+    padding: 0 6px 0 0;
+    text-decoration: none !important;
+    &:hover {
+      text-decoration: underline !important;
+    }
+  }
+}
+
+// tooltips render in a portal, so this lives outside .labelContainer
+.tooltipBold {
+  font-weight: 800 !important;
 }

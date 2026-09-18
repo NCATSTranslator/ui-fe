@@ -1,12 +1,12 @@
 import { FC, ReactNode, MouseEvent, useState, useMemo, FormEvent, RefObject } from "react";
 import styles from "./DataCard.module.scss";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react';
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import CardName from "@/features/Projects/components/CardName/CardName";
 import Button from "@/features/Core/components/Button/Button";
-import OutsideClickHandler from "@/features/Common/components/OutsideClickHandler/OutsideClickHandler";
+import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 import { QueryTypeString } from "@/features/Projects/types/projects";
 import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
@@ -32,7 +32,8 @@ interface DataCardProps {
   queryCount?: number;
   queryType?: QueryTypeString;
   queriesLoading?: boolean;
-  date: string;
+  createdTime: string;
+  lastSeenTime: string;
 }
 
 const DataCard: FC<DataCardProps> = ({
@@ -56,7 +57,8 @@ const DataCard: FC<DataCardProps> = ({
   queryCount,
   queryType,
   queriesLoading,
-  date
+  createdTime,
+  lastSeenTime
 }) => {
 
   const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
@@ -65,6 +67,7 @@ const DataCard: FC<DataCardProps> = ({
   const queryTypeLabel = useMemo(() => {
     if(queryType === 'drug' || queryType === 'gene' || queryType === 'chemical') return 'Smart Query';
     if(queryType === 'pathfinder') return 'Pathfinder Query';
+    if(queryType === 'lookup') return 'Lookup Query';
     return 'Unknown Query Type';
   }, [queryType]);
 
@@ -121,7 +124,10 @@ const DataCard: FC<DataCardProps> = ({
           }
         </div>
         <div className={styles.date}>
-          {date}
+          {createdTime}
+        </div>
+        <div className={styles.date}>
+          {lastSeenTime}
         </div>
         {
           options &&
@@ -133,7 +139,7 @@ const DataCard: FC<DataCardProps> = ({
                 </Button>
               </OutsideClickHandler>
               <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
-                {options && options}
+                {options}
               </OptionsPane>
             </div>
           )

@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById } from '@/features/ResultList/slices/resultsSlice';
-import { getDataFromQueryVar } from '@/features/Common/utils/utilities';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { derivePathKey } from '@/features/Navigation/utils/navigationUtils';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';

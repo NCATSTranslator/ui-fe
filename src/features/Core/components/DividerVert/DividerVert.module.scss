@@ -1,0 +1,7 @@
+@use "@/assets/styles/variables" as *;
+
+.dividerVert {
+  height: 30px;
+  width: 1px;
+  background-color: $midGray;
+}

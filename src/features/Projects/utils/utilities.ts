@@ -1,9 +1,9 @@
-import { getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Common/utils/web";
+import { getLookupResultsShareURLPath, getPathfinderResultsShareURLPath, getResultsShareURLPath } from "@/features/Core/utils/web";
 import { Project, ProjectRaw, QueryStatus, UserQueryObject } from "@/features/Projects/types/projects.d";
 import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { unableToReachLinkToast } from "@/features/Core/utils/toastMessages";
 import { ARAStatusResponse } from "@/features/ResultList/types/results.d";
-import { getFormattedNodeName } from "@/features/Common/utils/utilities";
+import { getFormattedNodeName } from '@/features/Core/utils/stringFormatters';
 
 /**
  * Get the status of a project based on the most recent query's status
@@ -99,43 +99,91 @@ export const fetchNodeNameFromCurie = async (curie: string, signal?: AbortSignal
 }
 
 /**
+ * Build an AutocompleteItem from a node id and optional label.
+ */
+const toAutocompleteItem = (id: string, label?: string | null): AutocompleteItem => ({
+  id,
+  label: label || id,
+  isExact: false,
+  score: 0,
+});
+
+const getPathfinderSharePath = (
+  queryData: UserQueryObject['data']['query'],
+  qid: string,
+  resultID: string,
+  shouldHash: boolean,
+): string | null => {
+  if (!queryData.subject?.id || !queryData.object?.id) return null;
+  return getPathfinderResultsShareURLPath({
+    itemOne: toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+    itemTwo: toAutocompleteItem(queryData.object.id, queryData.node_two_label),
+    resultID,
+    constraint: queryData.constraint || undefined,
+    pk: qid,
+    shouldHash,
+  });
+};
+
+const getLookupSharePath = (
+  queryData: UserQueryObject['data']['query'],
+  qid: string,
+  resultID: string,
+  shouldHash: boolean,
+): string | null => {
+  if (!queryData.subject?.id) return null;
+  return getLookupResultsShareURLPath(
+    toAutocompleteItem(queryData.subject.id, queryData.node_one_label),
+    queryData.object?.category || '',
+    resultID,
+    qid,
+    shouldHash,
+  );
+};
+
+/**
+ * Get the share URL path for a query using the appropriate builder for its type.
+ */
+export const getQueryShareURLPath = (
+  query: UserQueryObject,
+  resultID = '0',
+  shouldHash = false,
+): string | null => {
+  const { qid, query: queryData } = query.data;
+
+  if (queryData.type === 'pathfinder' && queryData.subject && queryData.object) {
+    return getPathfinderSharePath(queryData, qid, resultID, shouldHash);
+  }
+
+  if (queryData.type === 'lookup' && queryData.subject) {
+    return getLookupSharePath(queryData, qid, resultID, shouldHash);
+  }
+
+  const curie = queryData.curie || '';
+  return getResultsShareURLPath({
+    label: queryData.node_one_label || curie,
+    nodeID: curie,
+    typeID: getTypeIDFromType(queryData.type, queryData.direction || null),
+    resultID,
+    pk: qid,
+    shouldHash,
+  });
+};
+
+/**
  * Get the link for a query
  * @param {UserQueryObject} query - The query to get the link for
+ * @param {boolean} shouldHash - Whether to hash the URL parameters
  * @returns {string} The link for the query
  */
-export const getQueryLink = (query: UserQueryObject) => {
-  const qid = query.data.qid;
-
-  if(query.data.query.type === 'pathfinder' && query.data.query.subject && query.data.query.object) {
-    if(!query.data.query.subject || !query.data.query.object) {
-      unableToReachLinkToast();
-      return "";
-    }
-    const itemOne: AutocompleteItem = {
-      id: query.data.query.subject.id,
-      label: query.data.query.node_one_label || query.data.query.subject.id,
-      isExact: false,
-      score: 0
-    }
-    const itemTwo: AutocompleteItem = {
-      id: query.data.query.object.id,
-      label: query.data.query.node_two_label || query.data.query.object.id,
-      isExact: false,
-      score: 0
-    }
-    const constraint = query.data.query.constraint || undefined;
-    const path = getPathfinderResultsShareURLPath(itemOne, itemTwo, "0", constraint, qid);
-    return encodeURI(`${window.location.origin}/${path}`);
-  } else {
-    const curie = query.data.query.curie || '';
-    const label = query.data.query.node_one_label || curie|| '';
-    const type = query.data.query.type;
-    const direction = query.data.query.direction || null;
-    const typeID = getTypeIDFromType(type, direction);
-    const path = getResultsShareURLPath(label, curie, typeID, "0", qid);
-    return encodeURI(`${window.location.origin}/${path}`);
+export const getQueryLink = (query: UserQueryObject, shouldHash = false) => {
+  const path = getQueryShareURLPath(query, '0', shouldHash);
+  if (!path) {
+    unableToReachLinkToast();
+    return '';
   }
-}
+  return encodeURI(`${window.location.origin}/${path}`);
+};
 
 /**
  * Get the percentage of the query status based on the number of ARAs returned and the total number of ARAs
@@ -180,45 +228,57 @@ export const getBlankProjectTitle = (projects: Project[]) => {
   return `New Project ${highestNumber + 1}`;
 }
 
-export const getQueryStatusIndicatorStatus = (
-  arsStatus: ARAStatusResponse | null,
-  isFetchingARAStatus: boolean,
-  hasFreshResults: boolean,
-  isFetchingResults: boolean,
-  resultStatus: "error" | "running" | "success" | "unknown",
-  resultCount: number
-): { 
+export type QueryStatusIndicatorInput = {
+  arsStatus: ARAStatusResponse | null;
+  isFetchingARAStatus: boolean;
+  hasFreshResults: boolean;
+  isFetchingResults: boolean;
+  resultStatus: "error" | "running" | "success" | "unknown";
+  resultCount: number;
+};
+
+export type QueryStatusIndicatorResult = {
   label: 'Error' | 'New Results Available' | 'All Results Shown' | 'No Results' | 'Unknown' | '';
   status: 'complete' | 'running' | 'error' | 'unknown';
-} => {
-  // Error states take highest priority
-  if(arsStatus?.status === 'error' || resultStatus === 'error' || (!isFetchingARAStatus && !isFetchingResults && arsStatus === null)) {
-    return { label: 'Error', status: 'error' };
+};
+
+const isQueryStatusError = ({
+  arsStatus,
+  isFetchingARAStatus,
+  isFetchingResults,
+  resultStatus,
+}: Pick<QueryStatusIndicatorInput, 'arsStatus' | 'isFetchingARAStatus' | 'isFetchingResults' | 'resultStatus'>) =>
+  arsStatus?.status === 'error'
+  || resultStatus === 'error'
+  || (!isFetchingARAStatus && !isFetchingResults && arsStatus === null);
+
+const isQueryStatusLoading = ({
+  arsStatus,
+  isFetchingARAStatus,
+  isFetchingResults,
+}: Pick<QueryStatusIndicatorInput, 'arsStatus' | 'isFetchingARAStatus' | 'isFetchingResults'>) =>
+  isFetchingARAStatus
+  || arsStatus?.status === 'running'
+  || arsStatus === null
+  || isFetchingResults;
+
+export const getQueryStatusIndicatorStatus = (
+  input: QueryStatusIndicatorInput,
+): QueryStatusIndicatorResult => {
+  if (isQueryStatusError(input)) return { label: 'Error', status: 'error' };
+
+  if (input.hasFreshResults) {
+    const status = input.arsStatus?.status === 'complete' ? 'complete' : 'running';
+    return { label: 'New Results Available', status };
   }
-  
-  // Check for fresh results
-  if(hasFreshResults) {
-    if(arsStatus?.status === 'complete') {
-      return { label: 'New Results Available', status: 'complete' };
-    } else {
-      return { label: 'New Results Available', status: 'running' };
-    }
+
+  if (input.arsStatus?.status === 'complete' && !input.isFetchingResults) {
+    return input.resultCount === 0
+      ? { label: 'No Results', status: 'unknown' }
+      : { label: 'All Results Shown', status: 'complete' };
   }
-  
-  // Check if complete and all loaded
-  if(arsStatus?.status === 'complete' && !isFetchingResults) {
-    if(resultCount === 0) {
-      return { label: 'No Results', status: 'unknown' };
-    } else {
-      return { label: 'All Results Shown', status: 'complete' };
-    }
-  }
-  
-  // Loading states
-  if(isFetchingARAStatus || arsStatus?.status === 'running' || arsStatus === null || isFetchingResults) {
-    return { label: '', status: 'running' };
-  }
-  
-  // Default fallback
-  return { label: '', status: 'unknown' };
-}
+
+  if (isQueryStatusLoading(input)) return { label: '', status: 'running' };
+
+  return { label: 'Unknown', status: 'unknown' };
+};

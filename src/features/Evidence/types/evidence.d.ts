@@ -1,22 +1,10 @@
-export type EvidenceItem = {
-  edges: EdgeList;
-  id: string;
-}
-export type EvidenceObjectContainer = {
-  [key: string]: EvidenceItem;
-}
-export type EvidenceContainer = {
-  distinctSources: any;
-  length?: number;
-  publications: any;
-  sources: any;
-}
 export type PublicationObject = {
   id?: string;
+  infores?: string[];
   journal?: string;
   knowledgeLevel?: string;
   pubdate?: string;
-  source: SourceObject;
+  source?: SourceObject;
   snippet?: string;
   support: PublicationSupport | null;
   title?: string;
@@ -31,12 +19,14 @@ export type SourceObject = {
   name: string;
   url: string;
 }
-type RawPublicationObject = {
+
+export type RawPublicationObject = {
   id: string;
+  infores: string;
   support: PublicationSupport | null;
 }
 export type RawPublicationList = {
-  [key: string]: RawPublication[];
+  [key: string]: RawPublicationObject[];
 }
 export type EvidenceCountsContainer = {
   clinicalTrialCount: number;
@@ -44,19 +34,21 @@ export type EvidenceCountsContainer = {
   publicationCount: number;
   sourceCount: number;
 }
-export type OldEvidence = {
-  distinctSources: any[];
-  length: number;
-  publications: {[key: string]: PublicationObject};
-  sources: any[];
-}
 
-export type Provenance = {
-  infores: string;
+export type ProvenanceCatalogEntry = {
   knowledge_level: KnowledgeLevel;
   name: string | null;
   url: string | null;
   wiki: string | null;
+}
+
+export type Provenance = ProvenanceCatalogEntry & {
+  infores: string;
+}
+
+export type EdgeProvenance = {
+  infores: string;
+  records: string[];
 }
 
 export type PublicationSupport = {
@@ -79,7 +71,7 @@ export type TrialObject = {
   phase: number;
   size: number;
   start_date: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  status: string;
   title?: string;
   type?: 'enrolled' | 'anticipated';
   url: string;
@@ -112,9 +104,6 @@ export type KnowledgeLevelFilterType = 'all' | 'trusted' | 'ml';
 export type SortPreference = 'dateHighLow' | 'dateLowHigh' | 'journalHighLow' | 'journalLowHigh' | 'titleHighLow' | 'titleLowHigh';
 
 export type TableState = {
-  itemsPerPage: number;
-  currentPage: number;
-  itemOffset: number;
   knowledgeLevelFilter: KnowledgeLevelFilterType;
   sortingState: SortingState;
   isLoading: boolean;

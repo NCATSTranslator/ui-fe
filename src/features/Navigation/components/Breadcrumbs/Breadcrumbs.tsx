@@ -1,15 +1,12 @@
 import { FC } from 'react';
 import styles from './Breadcrumbs.module.scss';
-import { useMatches, useNavigate, useSearchParams } from 'react-router-dom';
+import { useMatches, useSearchParams } from 'react-router-dom';
 import { BreadcrumbHandle } from '@/features/Navigation/types/navigation.d';
 import BreadcrumbLink from '@/features/Navigation/components/BreadcrumbLink/BreadcrumbLink';
-import ArrowLeftIcon from '@/assets/icons/directional/Arrows/Arrow Left.svg?react';
-import Button from '@/features/Core/components/Button/Button';
 
-const Breadcrumbs: FC = () => {
+const Breadcrumbs: FC<{ hideBaseView?: boolean }> = ({ hideBaseView = true }) => {
   const matches = useMatches();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const crumbs = matches
     .filter((match) => (match.handle as BreadcrumbHandle)?.breadcrumb)
     .map((match) => ({
@@ -17,17 +14,10 @@ const Breadcrumbs: FC = () => {
       path: match.pathname,
     }));
 
-  if (crumbs.length <= 1) return null;
+  if (crumbs.length <= 1 && hideBaseView) return null;
 
   return (
     <nav aria-label="Breadcrumb" className={styles.breadcrumbs}>
-      <Button
-        variant="secondary"
-        iconOnly
-        iconLeft={<ArrowLeftIcon className={styles.arrowLeftIcon} />}
-        handleClick={() => navigate(-1)}
-        className={styles.arrowLeftButton}
-      />
       <ol className={styles.list}>
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;

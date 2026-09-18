@@ -1,24 +1,158 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState } from "@/features/ResultList/types/results.d";
+import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState, EdgeFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { makePathRank, updatePathRanks, pathRankSort } from "@/features/Common/utils/sortingFunctions";
+import { makePathRank, updatePathRanks, pathRankSort, makeEdgeRank, updateEdgeRank, getExcludingFilter } from "@/features/Core/utils/sortingFunctions";
+import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
-import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
+import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/utilities";
+import { FILTERING_CONSTANTS, makeFilter, applyPredicateFilterDisplayNames } from "@/features/ResultFiltering/utils/filterFunctions";
+import { createDebugToggle } from "@/features/Core/utils/debugToggle";
+
+export type StringMatchField =
+  | 'drug_name'
+  | 'subject_description'
+  | 'node_name'
+  | 'node_description'
+  | 'node_curie'
+  | 'edge_predicate';
+
+export type StringMatchLocation = {
+  field: StringMatchField;
+  value: string;
+  itemId?: string;
+};
+
+/**
+ * Returns a match location when `value` contains the normalized (lowercased) term, otherwise null.
+ */
+const matchAt = (
+  field: StringMatchField,
+  value: string | null | undefined,
+  term: string,
+  itemId?: string,
+): StringMatchLocation | null =>
+  value?.toLowerCase().includes(term) ? { field, value, itemId } : null;
+
+/**
+ * Returns the fields on a path node or edge that contain the search term.
+ * Pass `firstOnly` to stop at the first match when the caller only needs a yes/no.
+ */
+export const getItemStringMatchLocations = (
+  item: ResultNode | ResultEdge,
+  term: string,
+  firstOnly = false,
+): StringMatchLocation[] => {
+  const locations: StringMatchLocation[] = [];
+  if (!term) return locations;
+
+  // Records a match; returns true once no further fields need checking.
+  const record = (location: StringMatchLocation | null): boolean => {
+    if (location) locations.push(location);
+    return firstOnly && locations.length > 0;
+  };
+
+  if (isResultEdge(item)) {
+    record(matchAt('edge_predicate', item.predicate, term, item.id));
+    return locations;
+  }
+
+  if (record(matchAt('node_name', item.names?.[0], term, item.id))) return locations;
+  if (record(matchAt('node_description', getNodeDescription(item), term, item.id))) return locations;
+  for (const curie of item.curies ?? []) {
+    if (record(matchAt('node_curie', curie, term, item.id))) break;
+  }
+  return locations;
+};
+
+const stringMatchDebug = createDebugToggle('__textSearchDebug');
+
+/**
+ * Turn text-search match console logging on or off. Defaults to off, since it logs
+ * every matching field on every filter pass. Also exposed as `window.__textSearchDebug`;
+ * re-apply a filter after enabling it to see output.
+ */
+export const setStringMatchLogging = stringMatchDebug.set;
+
+/**
+ * Logs the field and value where a text-search term matched, plus enough
+ * result/path context to find it in the UI. No-ops unless logging is enabled.
+ */
+export const logStringMatch = (
+  term: string,
+  result: Result,
+  location: StringMatchLocation,
+  pathId?: string,
+): void => {
+  if (!stringMatchDebug.isEnabled()) return;
+  console.log('[text search] match found', {
+    term,
+    field: location.field,
+    value: location.value,
+    result: result.drug_name,
+    resultId: result.id,
+    pathId,
+    itemId: location.itemId,
+  });
+};
+
+const logAndHasMatch = (
+  term: string,
+  result: Result,
+  locations: StringMatchLocation[],
+  pathId?: string,
+): boolean => {
+  for (const location of locations) {
+    logStringMatch(term, result, location, pathId);
+  }
+  return locations.length > 0;
+};
+
+/**
+ * Checks a result's drug name and subject node description for the normalized search term.
+ */
+const matchesShallowProperties = (resultSet: ResultSet, result: Result, normalizedTerm: string): boolean => {
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const locations = [
+    matchAt('drug_name', result.drug_name, normalizedTerm),
+    matchAt('subject_description', subjectNode ? getNodeDescription(subjectNode) : null, normalizedTerm, subjectNode?.id),
+  ].filter((location): location is StringMatchLocation => location !== null);
+
+  return logAndHasMatch(normalizedTerm, result, locations);
+};
+
+/**
+ * Re-ranks a result's paths against the path filters, then re-sorts its path ranks.
+ */
+const updateResultPathRanks = (
+  resultSet: ResultSet,
+  result: Result,
+  pathRanks: Map<string, PathRank> | undefined,
+  pathFilters: Filter[]
+): void => {
+  for (const p of result.paths) {
+    const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+    const rank = path?.id && pathRanks?.get(path.id);
+    if (path && rank) {
+      updatePathRanks(resultSet, path, rank, pathFilters);
+    }
+  }
+  pathRankSort([...pathRanks?.values() || []]);
+};
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
  *
  * This function checks the `Result` object for a match with the provided search term by:
  * - Comparing the term against the `drug_name` and the primary description of the subject node
- * - Recursively traversing all paths and their support subpaths
+ * - Traversing each of the result's paths
  * - Matching the term against node names, curies, descriptions, and edge predicates
  *
  * During traversal, the function also mutates the corresponding `PathRank` objects to influence relevance scoring:
- * - Decreases rank when a direct match is found
- * - Increases rank when a supporting subpath contains a match
+ * - Decreases rank for each matching element on a path
+ * - Sets an excluding rank when the term is an exclusion and the path matches
  *
  * @param resultSet - The full ResultSet containing all nodes, edges, and paths
  * @param result - The individual result to check for a string match
@@ -26,19 +160,15 @@ import { isNotesEmpty } from "@/features/ResultItem/utils/utilities";
  * @param pathRanks - Mutable ranking data structure, updated based on path relevance
  * @returns True if the search term is found in the result or any associated path; false otherwise
  */
-
 export const findStringMatch = (
   resultSet: ResultSet,
   result: Result,
   filter: Filter,
   pathRanks: Map<string, PathRank>): boolean => {
-  const normalizedTerm = (filter.value || '').toLowerCase();
+  const normalizedTerm = filtering.normalizeSearchTermForMatch(filter.value || '');
   const isExclusion = filtering.isExclusion(filter);
   // Shallow properties: drug name and subject node description
-  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = subjectNode?.descriptions?.[0]?.toLowerCase().includes(normalizedTerm) ?? false;
-  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+  let matched = !normalizedTerm || matchesShallowProperties(resultSet, result, normalizedTerm);
   if (isExclusion && matched) return true;
   for (let i = 0; i < result.paths.length; i++) {
     const path = isPath(result.paths[i])
@@ -46,95 +176,45 @@ export const findStringMatch = (
       : getPathById(resultSet, result.paths[i] as string);
 
     if (!!path && typeof path !== 'string') {
-      const pathRank = (path && typeof path !== 'string' && path.id) ? pathRanks.get(path.id) : null;
+      const pathRank = (path.id) ? pathRanks.get(path.id) : null;
       if (!!pathRank) {
-        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion, 0);
+        const subMatch = _checkPathForMatch(resultSet, path, pathRank, isExclusion);
         matched ||= subMatch;
       }
     }
   }
   return matched;
 
-  function _checkItemForMatch(item?: ResultNode | ResultEdge): boolean {
+  function _checkItemForMatch(item?: ResultNode | ResultEdge, pathId?: string): boolean {
     if (!item) return false;
-
-    if (isResultEdge(item)) {
-      return !!item.predicate?.toLowerCase().includes(normalizedTerm);
-    }
-
-    return (item.names &&
-        item.names.length > 0 &&
-        item.names[0].toLowerCase().includes(normalizedTerm)) ||
-      (item.descriptions &&
-        item.descriptions.length > 0 &&
-        item.descriptions[0].toLowerCase().includes(normalizedTerm)) ||
-      item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
+    // Only collect every matching field when someone is reading the logs.
+    const firstOnly = !stringMatchDebug.isEnabled();
+    return logAndHasMatch(normalizedTerm, result, getItemStringMatchLocations(item, normalizedTerm, firstOnly), pathId);
   }
 
   function _checkPathForMatch(
       resultSet: ResultSet,
       path: Path,
       pathRank: PathRank,
-      isExclusion: boolean,
-      depth: number): boolean {
+      isExclusion: boolean): boolean {
+    // Look for matches on any node/edge of this path, accumulating rank
+    // for every matching element (not just the first).
     for (let i = 0; i < path.subgraph.length; i++) {
-      const elementID = path.subgraph[i];
-      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
-      if (depth === 1 && _checkItemForMatch(item)) {
-        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
-        if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
-          return false;
-        }
-        _cascadePathRank(resultSet, path, pathRank);
-        return true;
-      }
-      // Recursive support path checking
-      if (isResultEdge(item) && item.inferred) {
-        for (let j = 0; j < item.support.length; j++) {
-          const support = item.support[j];
-          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
-          const supportRank = pathRank.support?.[j];
-          if (supportPath && typeof supportPath !== "string" && supportRank) {
-            const subMatch = _checkPathForMatch(resultSet, supportPath, supportRank, isExclusion, depth+1);
-            if (subMatch && supportRank.rank < 0) {
-              pathRank.rank += supportRank.rank;
-            }
-          }
-        }
-      }
-      // Direct match
-      if (depth !== 1 && _checkItemForMatch(item)) {
-        if (isExclusion) {
-          pathRank.rank = filtering.CONSTANTS.WEIGHT.HEAVY
-          return false;
-        }
-        pathRank.rank += -1 * filtering.CONSTANTS.WEIGHT.LIGHT;
-      }
-    }
-    return (!isExclusion && pathRank.rank < 0);
-  }
+      const item = isNodeIndex(i)
+        ? getNodeById(resultSet, path.subgraph[i])
+        : getEdgeById(resultSet, path.subgraph[i]);
+      if (!_checkItemForMatch(item, path.id)) continue;
 
-  function _cascadePathRank(
-      resultSet: ResultSet,
-      path: Path,
-      pathRank: PathRank) {
-    for (let i = 0; i < path.subgraph.length; i++) {
-      const elementID = path.subgraph[i];
-      const item = isNodeIndex(i) ? getNodeById(resultSet, elementID) : getEdgeById(resultSet, elementID);
-      // Recursive support path checking
-      if (isResultEdge(item) && item.inferred) {
-        for (let j = 0; j < item.support.length; j++) {
-          const support = item.support[j];
-          const supportPath = isPath(support) ? support : getPathById(resultSet, support as string);
-          const supportRank = pathRank.support?.[j];
-          if (supportPath && typeof supportPath !== "string" && supportRank) {
-            supportRank.rank = pathRank.rank;
-            _cascadePathRank(resultSet, supportPath, supportRank);
-          }
-        }
+      if (isExclusion) {
+        // rank this path heavily so it is filtered
+        // out by the path filter state without excluding the whole result.
+        pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
+        return false;
       }
+      pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
     }
+
+    return (!isExclusion && pathRank.rank < 0);
   }
 }
 
@@ -166,6 +246,7 @@ export const applyFilters = (
   results: Result[];
   updatedEntityFilters: string[];
   updatedPathFilterState: PathFilterState;
+  updatedEdgeFilterState: EdgeFilterState;
   facetCounts: {
     resultFacets: Filter[];
     negatedResultFacets: Filter[];
@@ -175,7 +256,7 @@ export const applyFilters = (
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
 } => {
-  let [resultFilters, pathFilters, globalFilters] = filtering.groupFilterByType(filters);
+  let [resultFilters, pathFilters, edgeFilters, globalFilters] = filtering.groupFilterByType(filters);
   const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
   const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
   resultFilters = negatedResultFacets.concat(globalFilters);
@@ -185,6 +266,7 @@ export const applyFilters = (
       results: filteredResults,
       updatedEntityFilters: [],
       updatedPathFilterState: genPathFilterState(summary),
+      updatedEdgeFilterState: {},
       facetCounts: {
         resultFacets: resultFacets,
         negatedResultFacets: negatedResultFacets,
@@ -213,11 +295,15 @@ export const applyFilters = (
     _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
   }
 
+  _propagateExclusionAcrossCompressionGroups(summary, resultsAfterFacets, pathFilters, pathFilterState);
+
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
+  const updatedEdgeFilterState = _genEdgeFilterState(summary, finalResults, edgeFilters);
 
   return {
     results: finalResults,
     updatedEntityFilters,
+    updatedEdgeFilterState,
     updatedPathFilterState: pathFilterState,
     facetCounts: {
       resultFacets,
@@ -258,7 +344,7 @@ export const applyFilters = (
       for (const p of result.paths) {
         const path: Path | null = typeof p === "string" ? getPathById(resultSet, p) : p as Path;
         if (path?.id) {
-          pathRanks.set(path.id, makePathRank(resultSet, path));
+          pathRanks.set(path.id, makePathRank(path));
         }
       }
 
@@ -332,16 +418,7 @@ export const applyFilters = (
 
       if (!include) continue;
 
-      const pathRanks = resultPathRanks.get(result.id);
-      for (const p of result.paths) {
-        const path = typeof p === "string" ? getPathById(resultSet, p) : p;
-        const rank = path?.id && pathRanks?.get(path.id);
-        if (path && rank) {
-          updatePathRanks(resultSet, path, rank, pathFilters);
-        }
-      }
-
-      pathRankSort([...pathRanks?.values() || []]);
+      updateResultPathRanks(resultSet, result, resultPathRanks.get(result.id), pathFilters);
       results.push(result);
     }
 
@@ -370,6 +447,38 @@ export const applyFilters = (
 }
 
 /**
+ * Ranks every edge reachable from the given results against the active edge
+ * filters and returns a map of edge ID to filtered state.
+ *
+ * @param {ResultSet} resultSet - The full dataset used for path and edge lookup.
+ * @param {Result[]} results - The results whose edges should be ranked.
+ * @param {Filter[]} edgeFilters - The active edge ('e/...') filters.
+ * @returns {EdgeFilterState} A map of edge IDs to whether that edge is filtered out.
+ */
+function _genEdgeFilterState(resultSet: ResultSet, results: Result[], edgeFilters: Filter[]): EdgeFilterState {
+  const edgeFilterState: EdgeFilterState = {};
+  if (edgeFilters.length === 0) return edgeFilterState;
+
+  for (const result of results) {
+    for (const p of result.paths) {
+      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+      if (!path) continue;
+      for (const [i, elementID] of path.subgraph.entries()) {
+        // An edge shared across paths only needs ranking once.
+        if (isNodeIndex(i) || elementID in edgeFilterState) continue;
+        const edge = getEdgeById(resultSet, elementID);
+        if (!edge) continue;
+        const edgeRank = makeEdgeRank(elementID);
+        updateEdgeRank(edge, edgeFilters, edgeRank);
+        edgeFilterState[elementID] = edgeRank.rank > 0;
+      }
+    }
+  }
+
+  return edgeFilterState;
+}
+
+/**
  * Injects dynamic filters into the result set based on the bookmark set.
  * This is used to display the bookmark and note tags on the result item.
  * @param {ResultSet} summary - The result set containing the full tag list.
@@ -391,9 +500,9 @@ export const injectDynamicFilters = (
   for (let i = 0; i < formattedResults.length; i++) {
     const save = bookmarkSet.saves.get(formattedResults[i].id);
     if (save) {
-      tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.BOOKMARK});
+      tagsAdded.push({index: i, tag: FILTERING_CONSTANTS.DYNAMIC_TAG.BOOKMARK});
       if (!isNotesEmpty(save.notes)) {
-        tagsAdded.push({index: i, tag: filtering.CONSTANTS.DYNAMIC_TAG.NOTE});
+        tagsAdded.push({index: i, tag: FILTERING_CONSTANTS.DYNAMIC_TAG.NOTE});
       }
     }
   }
@@ -404,9 +513,9 @@ export const injectDynamicFilters = (
   for (const tagEntry of tagsAdded) {
     const tag = tagEntry.tag;
     const ridx = tagEntry.index;
-    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
-    modifiedFormattedResults[ridx].tags[tag.id] = null;
-    modifiedOriginalResults[ridx].tags[tag.id] = null;
+    modifiedSummary.data.tags[tag.id] = tag.description;
+    modifiedFormattedResults[ridx].tags[tag.id] = tag;
+    modifiedOriginalResults[ridx].tags[tag.id] = tag;
   }
   return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }
@@ -444,6 +553,7 @@ export const calculateFacetCounts = (
 ): Filters => {
   // Create a list of tags from the master tag list provided by the backend
   const countedTags = cloneDeep(summary.data.tags) as Filters;
+  applyPredicateFilterDisplayNames(countedTags);
   const activeFamilies = new Set(activeFacets.map(facet => filtering.getFilterFamily(facet)));
   for(const result of filteredResults) {
     // Determine the distance between a result's facets and the facet selection
@@ -497,8 +607,8 @@ export const calculateFacetCounts = (
       // If the tag exists on the list, either increment it or initialize its count
       if (predicate(tag)) {
         if (!countedTags[tag].count) {
-          countedTags[tag] = filtering.makeFilter(countedTags[tag].name, filtering.CONSTANTS.WEIGHT.LIGHT,
-            filtering.CONSTANTS.WEIGHT.HEAVY);
+          countedTags[tag] = makeFilter(countedTags[tag].name, FILTERING_CONSTANTS.WEIGHT.LIGHT,
+            FILTERING_CONSTANTS.WEIGHT.HEAVY);
         } else {
           countedTags[tag].count += 1;
         }
@@ -508,9 +618,9 @@ export const calculateFacetCounts = (
 }
 
 /**
- * Updates the path filter state based on the rank and support relationships of each path.
- * Recursively traverses supported paths and marks a path as filtered if all of its supports are filtered.
- * A path is included if it is ranked positively or meets the fallback condition for unranked paths.
+ * Updates the path filter state based on the rank of each path.
+ * A path is filtered out if it ranked positively, or if it went unranked (rank 0)
+ * while some other path in the set did match.
  * @param {{[key: string]: boolean}} pathFilterState - The current map of path IDs to their filtered state.
  * @param {PathRank[]} pathRanks - The ranked paths to evaluate and update in the state.
  * @param {boolean} unrankedIsFiltered - Whether paths with rank 0 should be considered filtered.
@@ -518,28 +628,65 @@ export const calculateFacetCounts = (
 function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
                                 pathRanks: PathRank[],
                                 unrankedIsFiltered: boolean) {
-  __updateState(pathFilterState, pathRanks, unrankedIsFiltered, 0);
+  for (let pathRank of pathRanks) {
+    const pid = pathRank.path.id;
+    if (!pid) continue;
+    pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
+  }
+}
 
-  function __updateState(pathFilterState: {[key: string]: boolean},
-                        pathRanks: PathRank[],
-                        unrankedIsFiltered: boolean,
-                        depth: number) {
-    for (let pathRank of pathRanks) {
-      const pid = pathRank.path.id;
-      if (!pid) continue;
-      pathFilterState[pid] = false;
-      __updateState(pathFilterState, pathRank.support, unrankedIsFiltered, depth+1);
-      if (pathRank.support.length !== 0) {
-        let filterIndirect = true;
-        for (let supportRank of pathRank.support) {
-          const supportPid = supportRank.path.id;
-          if (!!supportPid) {
-            filterIndirect = filterIndirect && pathFilterState[supportPid];
-          }
+/**
+ * Scaffolding for strict-mode compression-group exclusion propagation.
+ *
+ * Currently a no-op: propagatesExclusionAcrossCompressionGroups returns false for
+ * all path filters, so negatedPathFilters is always empty. Per-member exclusion
+ * is handled solely by updatePathRanks.
+ *
+ * When strict mode is re-enabled in propagatesExclusionAcrossCompressionGroups,
+ * matching negated filters will spread filtered state to every member of a
+ * compression group (same node sequence). ARA inclusion exemption is preserved
+ * via getExcludingFilter.
+ */
+function _propagateExclusionAcrossCompressionGroups(
+  resultSet: ResultSet,
+  results: Result[],
+  pathFilters: Filter[],
+  pathFilterState: PathFilterState
+): void {
+  const negatedPathFilters = pathFilters.filter(
+    (ftr) =>
+      filtering.isExclusion(ftr) &&
+      filtering.propagatesExclusionAcrossCompressionGroups(ftr)
+  );
+  if (negatedPathFilters.length === 0) return;
+
+  const hasAraInclusion = pathFilters.some(
+    (ftr) =>
+      !ftr.negated &&
+      filtering.getFilterFamily(ftr) === FILTERING_CONSTANTS.FAMILIES.ARA
+  );
+
+  for (const result of results) {
+    const groups = new Map<string, Path[]>();
+    for (const p of result.paths) {
+      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+      if (!path?.id) continue;
+      const key = getPathSequenceKey(resultSet, path);
+      if (!key) continue;
+      const group = groups.get(key);
+      if (group) group.push(path);
+      else groups.set(key, [path]);
+    }
+
+    for (const members of groups.values()) {
+      if (members.length <= 1) continue;
+      const anyExcluded = members.some((path) =>
+        getExcludingFilter(path, negatedPathFilters, hasAraInclusion) !== null
+      );
+      if (anyExcluded) {
+        for (const path of members) {
+          if (path.id) pathFilterState[path.id] = true;
         }
-        pathFilterState[pid] = filterIndirect;
-      } else {
-        pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
       }
     }
   }

@@ -1,0 +1,893 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { applyFilters, findStringMatch, genPathFilterState, getItemStringMatchLocations, logStringMatch, setStringMatchLogging } from '@/features/ResultList/utils/resultsInteractionFunctions';
+import { getExcludingFilter, makePathRank } from '@/features/Core/utils/sortingFunctions';
+import { getPathById } from '@/features/ResultList/slices/resultsSlice';
+import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
+import { Filter } from '@/features/ResultFiltering/types/filters';
+import { EntityTags, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, ResultSetTags, TagDescription, TagObject } from '@/features/ResultList/types/results.d';
+import { getCompressedPaths, getIsPathFiltered, getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
+
+// ---------------------------------------------------------------------------
+// Minimal fixture factories
+// ---------------------------------------------------------------------------
+
+const makeNode = (id: string, overrides: Partial<ResultNode> = {}): ResultNode => ({
+  id,
+  annotations: { chemical: {}, disease: {}, gene: {} },
+  aras: [],
+  curies: [],
+  descriptions: [],
+  names: [],
+  other_names: {},
+  provenance: [],
+  synonyms: [],
+  types: [],
+  tags: {},
+  ...overrides,
+} as ResultNode);
+
+const makeEdge = (id: string, overrides: Partial<ResultEdge> = {}): ResultEdge => ({
+  id,
+  aras: [],
+  is_root: false,
+  knowledge_level: 'knowledge_assertion',
+  metadata: { edge_bindings: [], inverted_id: null, is_root: false },
+  object: '',
+  predicate: 'biolink:related_to',
+  predicate_url: '',
+  provenance: [],
+  publications: {},
+  subject: '',
+  tags: {},
+  ...overrides,
+} as unknown as ResultEdge);
+
+const makePath = (id: string, subgraph: string[], overrides: Partial<Path> = {}): Path => ({
+  id,
+  aras: [],
+  subgraph,
+  tags: {},
+  ...overrides,
+});
+
+const makeResult = (overrides: Partial<Result> = {}): Result => ({
+  drug_name: '',
+  id: 'result-1',
+  object: 'object-node',
+  paths: [],
+  scores: [],
+  subject: 'subject-node',
+  tags: {},
+  ...overrides,
+} as Result);
+
+const makeResultSet = (data: Partial<ResultSet['data']>): ResultSet => ({
+  status: 'success',
+  data: {
+    edges: {},
+    errors: {},
+    meta: {},
+    nodes: {},
+    paths: {},
+    provenance: {},
+    publications: {},
+    results: [],
+    tags: {},
+    trials: {},
+    ...data,
+  },
+} as unknown as ResultSet);
+
+const makeEntityFilter = (value: string, negated = false): Filter => ({
+  id: 'g/str',
+  name: '',
+  value,
+  negated,
+  includeWeight: FILTERING_CONSTANTS.WEIGHT.LIGHT,
+  excludeWeight: FILTERING_CONSTANTS.WEIGHT.HEAVY,
+});
+
+const makePathFilter = (id: string, negated = false): Filter => ({
+  id,
+  name: id,
+  value: '',
+  negated,
+  includeWeight: FILTERING_CONSTANTS.WEIGHT.LIGHT,
+  excludeWeight: FILTERING_CONSTANTS.WEIGHT.HEAVY,
+});
+
+const PRED_TREATS = 'p/pred/treats';
+const PRED_AFFECTS = 'p/pred/affects';
+const PRED_CAUSES = 'p/pred/causes';
+const PRED_UNRELATED = 'p/pred/unrelated';
+const ARA_EXCLUDE = 'p/ara/agent-a';
+const ARA_INCLUDE = 'p/ara/agent-b';
+
+const makeTagDescription = (name: string): TagDescription => ({ name, description: '' });
+
+const makePathTag = (id: string, name: string): TagObject => ({
+  id,
+  description: makeTagDescription(name),
+});
+
+const pathTags = (tags: Record<string, string>): EntityTags =>
+  Object.fromEntries(Object.entries(tags).map(([id, name]) => [id, makePathTag(id, name)]));
+
+const resultSetTags = (tags: Record<string, string>): ResultSetTags =>
+  Object.fromEntries(Object.entries(tags).map(([id, name]) => [id, makeTagDescription(name)]));
+
+/** Runs applyFilters for a single result and returns the full response. */
+const runApplyFilters = (rs: ResultSet, result: Result, filters: Filter[]) => {
+  const pathFilterState = genPathFilterState(rs);
+  return applyFilters(filters, [result], [result], rs, pathFilterState);
+};
+
+/** Two compressible paths (same nodes, different predicates) plus tag metadata. */
+const buildCompressedFixture = (extraPaths: Record<string, Path> = {}) => {
+  const rs = makeResultSet({
+    nodes: {
+      n1: makeNode('n1'),
+      n2: makeNode('n2'),
+      n3: makeNode('n3'),
+    },
+    edges: {
+      e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+      e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      e3: makeEdge('e3', { predicate: 'biolink:causes' }),
+      e4: makeEdge('e4', { predicate: 'biolink:related_to' }),
+    },
+    paths: {
+      P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+      P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
+      P3: makePath('P3', ['n1', 'e3', 'n2'], { tags: pathTags({ [PRED_CAUSES]: 'causes' }) }),
+      P4: makePath('P4', ['n1', 'e4', 'n3']),
+      ...extraPaths,
+    },
+    tags: resultSetTags({
+      [PRED_TREATS]: 'treats',
+      [PRED_AFFECTS]: 'affects',
+      [PRED_CAUSES]: 'causes',
+      [PRED_UNRELATED]: 'unrelated',
+      [ARA_EXCLUDE]: 'Agent A',
+      [ARA_INCLUDE]: 'Agent B',
+    }),
+  });
+  const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3', 'P4'] });
+  return { rs, result };
+};
+
+/** Builds the per-result path-rank map the way _filterResults does. */
+const buildPathRanks = (rs: ResultSet, result: Result): Map<string, PathRank> => {
+  const ranks = new Map<string, PathRank>();
+  for (const p of result.paths) {
+    const path = typeof p === 'string' ? getPathById(rs, p) : (p as Path);
+    if (path?.id) ranks.set(path.id, makePathRank(path));
+  }
+  return ranks;
+};
+
+const run = (rs: ResultSet, result: Result, filter: Filter) =>
+  findStringMatch(rs, result, filter, buildPathRanks(rs, result));
+
+beforeEach(() => {
+  // getNodeById/getEdgeById warn on missing lookups; keep test output clean.
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+// ---------------------------------------------------------------------------
+// normalizeSearchTerm
+// ---------------------------------------------------------------------------
+
+describe('normalizeSearchTerm', () => {
+  it('trims surrounding whitespace', () => {
+    expect(normalizeSearchTerm('  aspirin  ')).toBe('aspirin');
+  });
+  it('collapses internal whitespace runs', () => {
+    expect(normalizeSearchTerm('acetyl   salicylic\tacid')).toBe('acetyl salicylic acid');
+  });
+  it('returns empty string for whitespace-only input', () => {
+    expect(normalizeSearchTerm('   ')).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getItemStringMatchLocations / logStringMatch
+// ---------------------------------------------------------------------------
+
+describe('getItemStringMatchLocations', () => {
+  it('reports a node name match', () => {
+    const node = makeNode('n1', { names: ['Cyclooxygenase'] });
+    expect(getItemStringMatchLocations(node, 'cyclo')).toEqual([
+      { field: 'node_name', value: 'Cyclooxygenase', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports a node description match', () => {
+    const node = makeNode('n1', { descriptions: ['Inhibits prostaglandin synthesis'] });
+    expect(getItemStringMatchLocations(node, 'prostaglandin')).toEqual([
+      { field: 'node_description', value: 'Inhibits prostaglandin synthesis', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports matching curies', () => {
+    const node = makeNode('n1', { curies: ['NCBIGene:5742', 'HGNC:9604'] });
+    expect(getItemStringMatchLocations(node, 'ncbigene')).toEqual([
+      { field: 'node_curie', value: 'NCBIGene:5742', itemId: 'n1' },
+    ]);
+  });
+
+  it('reports an edge predicate match', () => {
+    const edge = makeEdge('e0', { predicate: 'biolink:interacts_with' });
+    expect(getItemStringMatchLocations(edge, 'interacts')).toEqual([
+      { field: 'edge_predicate', value: 'biolink:interacts_with', itemId: 'e0' },
+    ]);
+  });
+
+  it('reports every matching field on the same node', () => {
+    const node = makeNode('n1', {
+      names: ['COX-1'],
+      descriptions: ['A COX enzyme'],
+      curies: ['NCBIGene:cox'],
+    });
+    expect(getItemStringMatchLocations(node, 'cox')).toEqual([
+      { field: 'node_name', value: 'COX-1', itemId: 'n1' },
+      { field: 'node_description', value: 'A COX enzyme', itemId: 'n1' },
+      { field: 'node_curie', value: 'NCBIGene:cox', itemId: 'n1' },
+    ]);
+  });
+
+  it('returns no locations for an empty term', () => {
+    const node = makeNode('n1', { names: ['Cyclooxygenase'] });
+    expect(getItemStringMatchLocations(node, '')).toEqual([]);
+  });
+
+  it('stops at the first matching field when firstOnly is set', () => {
+    const node = makeNode('n1', {
+      names: ['COX-1'],
+      descriptions: ['A COX enzyme'],
+      curies: ['NCBIGene:cox'],
+    });
+    expect(getItemStringMatchLocations(node, 'cox', true)).toEqual([
+      { field: 'node_name', value: 'COX-1', itemId: 'n1' },
+    ]);
+  });
+
+  it('stops at the first matching curie when firstOnly is set', () => {
+    const node = makeNode('n1', { curies: ['NCBIGene:cox1', 'NCBIGene:cox2'] });
+    expect(getItemStringMatchLocations(node, 'cox', true)).toEqual([
+      { field: 'node_curie', value: 'NCBIGene:cox1', itemId: 'n1' },
+    ]);
+  });
+});
+
+describe('logStringMatch', () => {
+  afterEach(() => {
+    setStringMatchLogging(false);
+  });
+
+  it('does not log when logging is off', () => {
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1' });
+    logStringMatch('aspirin', result, { field: 'drug_name', value: 'Aspirin' });
+    expect(console.log).not.toHaveBeenCalled();
+  });
+
+  it('logs the match site to the console when enabled', () => {
+    setStringMatchLogging(true);
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1' });
+    logStringMatch('aspirin', result, { field: 'drug_name', value: 'Aspirin' });
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', {
+      term: 'aspirin',
+      field: 'drug_name',
+      value: 'Aspirin',
+      result: 'Aspirin',
+      resultId: 'result-1',
+      pathId: undefined,
+      itemId: undefined,
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — shallow (drug_name / subject description)
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — shallow matches', () => {
+  const baseRS = () =>
+    makeResultSet({ nodes: { 'subject-node': makeNode('subject-node', { descriptions: ['A common pain reliever'] }) } });
+
+  it('matches on drug_name (case-insensitive)', () => {
+    const rs = baseRS();
+    const result = makeResult({ drug_name: 'Aspirin' });
+    expect(run(rs, result, makeEntityFilter('aspirin'))).toBe(true);
+    expect(run(rs, result, makeEntityFilter('ASPIRIN'))).toBe(true);
+  });
+
+  it.each([
+    ['matches on subject node description', 'pain reliever', true],
+    ['tolerates surrounding whitespace in the search term', '  aspirin  ', true],
+    ['returns false when nothing matches', 'ibuprofen', false],
+  ])('%s', (_name, term, expected) => {
+    const rs = baseRS();
+    const result = makeResult({ drug_name: 'Aspirin' });
+    expect(run(rs, result, makeEntityFilter(term))).toBe(expected);
+  });
+
+  it('matches the subject description sourced from annotations (not just descriptions[0])', () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node', {
+          descriptions: [],
+          annotations: {
+            chemical: { descriptions: { value: ['Inhibits prostaglandin synthesis'], metadata: { sources: [] } } },
+            disease: {},
+            gene: {},
+          },
+        } as unknown as Partial<ResultNode>),
+      },
+    });
+    const result = makeResult({ drug_name: 'Aspirin' });
+    expect(run(rs, result, makeEntityFilter('prostaglandin synthesis'))).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — path object matches (include)
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — path content (include)', () => {
+  // result -> path P1: [subject-node, e0, target-node]
+  const setup = (targetNode: ResultNode, edge?: ResultEdge) => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        'target-node': targetNode,
+      },
+      edges: { e0: edge ?? makeEdge('e0') },
+      paths: { P1: makePath('P1', ['subject-node', 'e0', 'target-node']) },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1'] });
+    return { rs, result };
+  };
+
+  it('matches a node name inside a path', () => {
+    const { rs, result } = setup(makeNode('target-node', { names: ['Cyclooxygenase'] }));
+    const ranks = buildPathRanks(rs, result);
+    expect(findStringMatch(rs, result, makeEntityFilter('cyclooxygenase'), ranks)).toBe(true);
+    expect(ranks.get('P1')!.rank).toBeLessThan(0);
+  });
+
+  it('matches a node curie inside a path', () => {
+    const { rs, result } = setup(makeNode('target-node', { curies: ['NCBIGene:5742'] }));
+    expect(run(rs, result, makeEntityFilter('ncbigene:5742'))).toBe(true);
+  });
+
+  it('matches an edge predicate inside a path', () => {
+    const { rs, result } = setup(makeNode('target-node'), makeEdge('e0', { predicate: 'biolink:interacts_with' }));
+    expect(run(rs, result, makeEntityFilter('interacts_with'))).toBe(true);
+  });
+
+  it('accumulates rank for every matching element in a path (not just the first)', () => {
+    // Path P1 has three matching elements: node, edge predicate, node.
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        na: makeNode('na', { names: ['COX-1'] }),
+        nb: makeNode('nb', { names: ['COX-2'] }),
+      },
+      edges: { e0: makeEdge('e0', { predicate: 'biolink:cox_pathway' }) },
+      paths: { P1: makePath('P1', ['na', 'e0', 'nb']) },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1'] });
+    const ranks = buildPathRanks(rs, result);
+
+    expect(findStringMatch(rs, result, makeEntityFilter('cox'), ranks)).toBe(true);
+    // three matches → three LIGHT decrements
+    expect(ranks.get('P1')!.rank).toBe(-3 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — match logging
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — match logging', () => {
+  // result -> path P1: [subject-node, e0, target-node]; target matches "cox" on name and curie
+  const setup = () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        'target-node': makeNode('target-node', { names: ['COX-1'], curies: ['NCBIGene:cox'] }),
+      },
+      edges: { e0: makeEdge('e0') },
+      paths: { P1: makePath('P1', ['subject-node', 'e0', 'target-node']) },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', id: 'result-1', paths: ['P1'] });
+    return { rs, result };
+  };
+
+  afterEach(() => {
+    setStringMatchLogging(false);
+  });
+
+  it('logs every matching field on a path with its path and item ids', () => {
+    setStringMatchLogging(true);
+    const { rs, result } = setup();
+    expect(run(rs, result, makeEntityFilter('cox'))).toBe(true);
+
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'node_name', value: 'COX-1', resultId: 'result-1', pathId: 'P1', itemId: 'target-node',
+    }));
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'node_curie', value: 'NCBIGene:cox', resultId: 'result-1', pathId: 'P1', itemId: 'target-node',
+    }));
+  });
+
+  it('logs a shallow drug_name match without a path id', () => {
+    setStringMatchLogging(true);
+    const { rs, result } = setup();
+    expect(run(rs, result, makeEntityFilter('aspirin'))).toBe(true);
+
+    expect(console.log).toHaveBeenCalledWith('[text search] match found', expect.objectContaining({
+      field: 'drug_name', value: 'Aspirin', resultId: 'result-1', pathId: undefined,
+    }));
+  });
+
+  it('ranks paths the same whether logging is on or off', () => {
+    // Logging collects every matching field per item; rank must still drop once per item.
+    const { rs, result } = setup();
+    const quietRanks = buildPathRanks(rs, result);
+    findStringMatch(rs, result, makeEntityFilter('cox'), quietRanks);
+
+    setStringMatchLogging(true);
+    const loggedRanks = buildPathRanks(rs, result);
+    findStringMatch(rs, result, makeEntityFilter('cox'), loggedRanks);
+
+    expect(loggedRanks.get('P1')!.rank).toBe(-1 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+    expect(loggedRanks.get('P1')!.rank).toBe(quietRanks.get('P1')!.rank);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — exclude semantics ("hide matching paths only")
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — exclude', () => {
+  it('returns true (exclude whole result) on a shallow name match', () => {
+    const rs = makeResultSet({ nodes: { 'subject-node': makeNode('subject-node') } });
+    const result = makeResult({ drug_name: 'Aspirin' });
+    expect(run(rs, result, makeEntityFilter('aspirin', true))).toBe(true);
+  });
+
+  it('does NOT exclude the whole result on a path-only match, but ranks the path HEAVY', () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        'target-node': makeNode('target-node', { names: ['Ibuprofen'] }),
+      },
+      edges: { e0: makeEdge('e0') },
+      paths: { P1: makePath('P1', ['subject-node', 'e0', 'target-node']) },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1'] });
+    const ranks = buildPathRanks(rs, result);
+
+    // path content match for an exclude filter must not remove the whole result
+    expect(findStringMatch(rs, result, makeEntityFilter('ibuprofen', true), ranks)).toBe(false);
+    // the matching path is ranked heavily so it gets hidden downstream
+    expect(ranks.get('P1')!.rank).toBe(FILTERING_CONSTANTS.WEIGHT.HEAVY);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStringMatch — paths are ranked independently
+// ---------------------------------------------------------------------------
+
+describe('findStringMatch — path independence', () => {
+  it('ranks only the path that matches, leaving sibling paths unranked', () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        n1: makeNode('n1'),
+        n2: makeNode('n2', { names: ['Prostaglandin'] }),
+        n3: makeNode('n3'),
+      },
+      edges: {
+        e0: makeEdge('e0', { predicate: 'biolink:related_to' }),
+        e1: makeEdge('e1'),
+      },
+      paths: {
+        P1: makePath('P1', ['subject-node', 'e0', 'n1']),
+        P2: makePath('P2', ['subject-node', 'e1', 'n2']),
+      },
+    });
+    const result = makeResult({ drug_name: 'Aspirin', paths: ['P1', 'P2'] });
+    const ranks = buildPathRanks(rs, result);
+
+    expect(findStringMatch(rs, result, makeEntityFilter('prostaglandin'), ranks)).toBe(true);
+    expect(ranks.get('P2')!.rank).toBeLessThan(0);
+    expect(ranks.get('P1')!.rank).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getExcludingFilter — path exclusion helper
+// ---------------------------------------------------------------------------
+
+describe('getExcludingFilter', () => {
+  it('returns the matching negated filter when the path carries that tag', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) });
+    const filter = makePathFilter(PRED_TREATS, true);
+
+    expect(getExcludingFilter(path, [filter], false)).toBe(filter);
+  });
+
+  it('returns null when the path does not carry the excluded tag', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) });
+    const filter = makePathFilter(PRED_AFFECTS, true);
+
+    expect(getExcludingFilter(path, [filter], false)).toBeNull();
+  });
+
+  it('ignores negated ARA filters when an ARA inclusion is active', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) });
+    const araExclude = makePathFilter(ARA_EXCLUDE, true);
+
+    expect(getExcludingFilter(path, [araExclude], true)).toBeNull();
+  });
+
+  it('applies negated ARA filters when no ARA inclusion is active', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) });
+    const araExclude = makePathFilter(ARA_EXCLUDE, true);
+
+    expect(getExcludingFilter(path, [araExclude], false)).toBe(araExclude);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — uncompressed path predicate filtering
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — uncompressed path predicate filtering', () => {
+  const buildSinglePathFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: { e1: makeEdge('e1', { predicate: 'biolink:treats' }) },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+      },
+      tags: resultSetTags({ [PRED_TREATS]: 'treats' }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1'] });
+    return { rs, result };
+  };
+
+  it('filters a single path when its predicate is excluded', () => {
+    const { rs, result } = buildSinglePathFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_TREATS, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(getIsPathFiltered(getPathById(rs, 'P1')!, updatedPathFilterState)).toBe(true);
+    expect(results).toHaveLength(0);
+  });
+
+  it('keeps a single path visible when its predicate is included', () => {
+    const { rs, result } = buildSinglePathFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_TREATS, false),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(getIsPathFiltered(getPathById(rs, 'P1')!, updatedPathFilterState)).toBe(false);
+    expect(results).toHaveLength(1);
+  });
+
+  it('filters a single path when an included predicate is not present', () => {
+    const { rs, result } = buildSinglePathFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_AFFECTS, false),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(results).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — compressed path predicate filtering
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — compressed path predicate filtering', () => {
+  const buildTwoMemberFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
+      },
+      tags: resultSetTags({
+        [PRED_TREATS]: 'treats',
+        [PRED_AFFECTS]: 'affects',
+        [PRED_UNRELATED]: 'unrelated',
+      }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    return { rs, result };
+  };
+
+  it('excludes only the matching member on predicate exclusion', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('keeps compressed path visible when excluding a predicate not present on any member', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_UNRELATED, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+    expect(results).toHaveLength(1);
+  });
+
+  it('keeps compressed path visible when including a predicate present on any member (OR)', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, false)]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('keeps compressed path visible when only the sibling member matches an included predicate', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_AFFECTS, false)]);
+
+    expect(updatedPathFilterState.P2).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('keeps compressed path visible when any of multiple included predicates matches (OR)', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_TREATS, false),
+      makePathFilter(PRED_AFFECTS, false),
+    ]);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('hides compressed path when an included predicate is absent from all members', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_UNRELATED, false),
+    ]);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(true);
+    expect(results).toHaveLength(0);
+  });
+
+  it('excludes only the matching member in a three-member compression group', () => {
+    const { rs } = buildCompressedFixture();
+    const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3'] });
+    const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
+      makePathFilter(PRED_CAUSES, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(updatedPathFilterState.P3).toBe(true);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2', 'P3']);
+    expect(compressedPath.compressedIDs?.length).toBeGreaterThan(1);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('does not filter paths with a different node sequence', () => {
+    const { rs, result } = buildCompressedFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(updatedPathFilterState.P4).toBe(false);
+
+    expect(getIsPathFiltered(getPathById(rs, 'P4')!, updatedPathFilterState)).toBe(false);
+  });
+
+  it('keeps the result when a non-compressed sibling path remains visible', () => {
+    const { rs, result } = buildCompressedFixture();
+    const { results } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
+
+    expect(results).toHaveLength(1);
+  });
+
+  it('keeps the result when a compressed sibling remains unfiltered', () => {
+    const { rs, result } = buildTwoMemberFixture();
+    const { results } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS, true)]);
+
+    expect(results).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — compressed path ARA exclusion (per-member)
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — compressed path ARA exclusion (per-member)', () => {
+  const buildAraCompressionFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], { tags: pathTags({ [ARA_EXCLUDE]: 'Agent A' }) }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
+      },
+      tags: resultSetTags({
+        [ARA_EXCLUDE]: 'Agent A',
+        [ARA_INCLUDE]: 'Agent B',
+        [PRED_AFFECTS]: 'affects',
+      }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    return { rs, result };
+  };
+
+  it('excludes only the matching member on ARA exclusion', () => {
+    const { rs, result } = buildAraCompressionFixture();
+    const { updatedPathFilterState } = runApplyFilters(rs, result, [makePathFilter(ARA_EXCLUDE, true)]);
+
+    expect(updatedPathFilterState.P1).toBe(true);
+    expect(updatedPathFilterState.P2).toBe(false);
+
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2']);
+    expect(getIsPathFiltered(compressedPath, updatedPathFilterState)).toBe(false);
+  });
+
+  it('does not propagate ARA exclusion when an ARA inclusion is active', () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], {
+          tags: pathTags({ [ARA_EXCLUDE]: 'Agent A', [ARA_INCLUDE]: 'Agent B' }),
+        }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], { tags: pathTags({ [ARA_INCLUDE]: 'Agent B' }) }),
+      },
+      tags: resultSetTags({
+        [ARA_EXCLUDE]: 'Agent A',
+        [ARA_INCLUDE]: 'Agent B',
+      }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(ARA_INCLUDE, false),
+      makePathFilter(ARA_EXCLUDE, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(results).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — per-member filter state consistency
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — per-member filter state consistency', () => {
+  it('marks only the matching member as filtered for per-member exclusions', () => {
+    const { rs } = buildCompressedFixture();
+    const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
+      makePathFilter(PRED_AFFECTS, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(true);
+  });
+
+  it('marks no members as filtered when the exclusion matches nothing', () => {
+    const { rs } = buildCompressedFixture();
+    const compressibleResult = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2'] });
+    const { updatedPathFilterState } = runApplyFilters(rs, compressibleResult, [
+      makePathFilter(PRED_UNRELATED, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getIsPathFiltered — compressed display semantics
+// ---------------------------------------------------------------------------
+
+describe('getIsPathFiltered — compressed display semantics', () => {
+  it('requires every compressed member to be filtered before hiding the display path', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], {
+      compressedIDs: ['P1', 'P2'],
+    });
+    const pathFilterState = { P1: true, P2: false };
+
+    expect(getIsPathFiltered(path, pathFilterState)).toBe(false);
+  });
+
+  it('hides the display path when every compressed member is filtered', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], {
+      compressedIDs: ['P1', 'P2'],
+    });
+    const pathFilterState = { P1: true, P2: true };
+
+    expect(getIsPathFiltered(path, pathFilterState)).toBe(true);
+  });
+
+  it('uses a single member state for uncompressed paths', () => {
+    const path = makePath('P1', ['n1', 'e1', 'n2'], { compressedIDs: ['P1'] });
+    const pathFilterState = { P1: true };
+
+    expect(getIsPathFiltered(path, pathFilterState)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getIsPathIdFiltered — evidence view lookup by member path ID
+// ---------------------------------------------------------------------------
+
+describe('getIsPathIdFiltered — evidence view lookup by member path ID', () => {
+  const buildTwoMemberFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:treats' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2']),
+        P2: makePath('P2', ['n1', 'e2', 'n2']),
+      },
+    });
+    return rs;
+  };
+
+  it('does not treat a compressed member as filtered when siblings remain visible', () => {
+    const rs = buildTwoMemberFixture();
+    const pathFilterState = { P1: true, P2: false };
+
+    expect(getIsPathIdFiltered(rs, 'P1', ['P1', 'P2'], pathFilterState)).toBe(false);
+    expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(false);
+  });
+
+  it('treats a compressed member as filtered when every member is filtered', () => {
+    const rs = buildTwoMemberFixture();
+    const pathFilterState = { P1: true, P2: true };
+
+    expect(getIsPathIdFiltered(rs, 'P1', ['P1', 'P2'], pathFilterState)).toBe(true);
+    expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(true);
+  });
+});

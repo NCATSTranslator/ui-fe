@@ -4,7 +4,7 @@ import { ResultSet, Result } from "@/features/ResultList/types/results.d";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { DownloadScope, ExportFormat, DownloadOptions } from "@/features/ResultDownload/types/download.d";
 import { downloadResults, getScopeCounts } from "@/features/ResultDownload/utils/downloadUtils";
-import Radio from "@/features/Common/components/Radio/Radio";
+import Radio from "@/features/Core/components/Radio/Radio";
 import Button from "@/features/Core/components/Button/Button";
 import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
 
@@ -48,7 +48,7 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
     };
 
     try {
-      downloadResults(resultSet, allResults, filteredResults, userSaves, options, queryTitle);
+      downloadResults(resultSet, { allResults, filteredResults, userSaves }, options, queryTitle);
     } catch (error) {
       console.error('Error downloading results:', error);
     } finally {

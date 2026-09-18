@@ -3,81 +3,81 @@ import { PublicationObject, PublicationSupport } from "@/features/Evidence/types
 import { ResultEdge, ResultSet } from "@/features/ResultList/types/results";
 import { getNodeById } from "@/features/ResultList/slices/resultsSlice";
 import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
-import EmphasizeWord from "@/features/Common/components/EmphasizeWord/EmphasizeWord";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
+import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWord";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
+import { findPublicationOnEdge } from "@/features/Evidence/utils/utilities";
+import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
+
+const buildSupportSnippet = (
+  resultSet: ResultSet | null,
+  selectedEdge: ResultEdge | null,
+  support: PublicationSupport,
+): ReactNode => {
+  if (!resultSet) return support.text;
+  const objectNode = getNodeById(resultSet, selectedEdge?.object);
+  const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
+  return (
+    <EmphasizeWord
+      text={support.text}
+      objectName={objectNode?.names[0] || ""}
+      objectPos={support.object || null}
+      subjectName={subjectNode?.names[0] || ""}
+      subjectPos={support.subject || null}
+    />
+  );
+};
 
 const PublicationRow: FC<{
   pub: PublicationObject;
-  resultSet: ResultSet;
+  resultSet: ResultSet | null;
   selectedEdge: ResultEdge | null;
 }> = ({ pub, resultSet, selectedEdge }) => {
   const getSupportTextOrSnippet = useCallback((): ReactNode | string => {
-    const checkEdgeForPub = (pubID: string, edge: ResultEdge): {id: string; support: PublicationSupport;} | false => {
-      for (const pubTypeArr of Object.values(edge.publications)) {
-        const match = pubTypeArr.find(publication => publication.id === pubID);
-        if (match) return match;
-      }
-      return false;
-    };
-
-    const matchingEdgePub = pub?.id && selectedEdge ? checkEdgeForPub(pub.id, selectedEdge) : false;
+    const matchingEdgePub = pub?.id && selectedEdge ? findPublicationOnEdge(pub.id, selectedEdge) : false;
 
     if(!matchingEdgePub || matchingEdgePub.support === null)
       return pub.snippet ?? 'No snippet available.';
 
-    // early returns aren't combined in order to log a specific warning for null positions
-    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null) {
+    // Just log a warning if no object or subject positions are found for the publication, 
+    // we still want to use the provided support text if it's available.
+    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null)
       console.warn('No object or subject positions found for publication:', pub, 'on edge:', selectedEdge, 'support:', matchingEdgePub.support);
-      return pub.snippet ?? 'No snippet available.';
-    }
-    
-    const objectNode = getNodeById(resultSet, selectedEdge?.object);
-    const objectName = objectNode?.names[0] || "";
-    const subjectNode = getNodeById(resultSet, selectedEdge?.subject);
-    const subjectName = subjectNode?.names[0] || "";
-    
-    return (
-      <EmphasizeWord
-        text={matchingEdgePub.support.text}
-        objectName={objectName}
-        objectPos={matchingEdgePub.support.object}
-        subjectName={subjectName}
-        subjectPos={matchingEdgePub.support.subject}
-      />
-    );
-    
+
+    return buildSupportSnippet(resultSet, selectedEdge, matchingEdgePub.support);
   }, [pub, resultSet, selectedEdge]);
 
   return (
     <tr className="table-item" key={pub.id}>
-      <td className={`table-cell ${styles.tableCell} ${styles.title} title`}>
-        {pub.title && pub.url ? (
-          <a href={pub.url} target="_blank" rel="noreferrer">{pub.title}</a>
-        ) : pub.url ? (
-          <a href={pub.url} target="_blank" rel="noreferrer">No Title Available</a>
-        ) : null}
+      <td className={joinClasses('table-cell', styles.tableCell, styles.title, 'title')}>
+        {
+          pub.url && (
+            <a href={pub.url} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('publication', pub.url)}>
+              {pub.title ?? 'No Title Available'}
+            </a>
+          )
+        }
       </td>
-      <td className={`table-cell ${styles.tableCell} ${styles.pubdate} pubdate`}>
+      <td className={joinClasses('table-cell', styles.tableCell, styles.pubdate, 'pubdate')}>
         {pub.pubdate || 'N/A'}
       </td>
-      <td className={`table-cell ${styles.tableCell} ${styles.source} source`}>
+      <td className={joinClasses('table-cell', styles.tableCell, styles.source, 'source')}>
         <span>{pub.journal || "N/A"}</span>
       </td>
-      <td className={`table-cell ${styles.tableCell} ${styles.snippet}`}>
+      <td className={joinClasses('table-cell', styles.tableCell, styles.snippet, 'snippet')}>
         <span>{getSupportTextOrSnippet()}</span>
         {pub.url && (
-          <a href={pub.url} className={`url ${styles.url}`} target="_blank" rel="noreferrer">
-            Read More <ExternalLink/>
+          <a href={pub.url} className={joinClasses('url', styles.url)} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('publication', pub.url)}>
+            Read More
           </a>
         )}
       </td>
-      <td className={`table-cell ${styles.tableCell} ${styles.knowledgeLevel}`}>
+      <td className={joinClasses('table-cell', styles.tableCell, styles.knowledgeLevel, 'knowledgeLevel')}>
         {pub.source?.url ? (
-          <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer'>
+          <a className={styles.sourceName} href={pub.source.url} target="_blank" rel='noreferrer' {...getEvidenceLinkTrackingProps('source', pub.source.url)}>
             <span>{pub.source.name}</span>
           </a>
         ) : (
-          <span className={`${styles.noLink} ${styles.sourceName}`}>
+          <span className={joinClasses(styles.noLink, styles.sourceName)}>
             {pub.source?.name || "Unknown"}
           </span>
         )}

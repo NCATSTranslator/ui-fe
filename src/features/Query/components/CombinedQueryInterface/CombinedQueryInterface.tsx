@@ -1,50 +1,69 @@
-import { FC, Dispatch, SetStateAction, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import styles from './CombinedQueryInterface.module.scss';
-import Tabs from "@/features/Common/components/Tabs/Tabs";
-import Tab from "@/features/Common/components/Tabs/Tab";
+import Tabs from "@/features/Core/components/Tabs/Tabs";
+import Tab from "@/features/Core/components/Tabs/Tab";
 import Query from "@/features/Query/components/Query/Query";
 import QueryPathfinder from "@/features/Query/components/QueryPathfinder/QueryPathfinder";
-import BetaTag from "@/features/Common/components/BetaTag/BetaTag";
+import QueryLookup from "@/features/Query/components/QueryLookup/QueryLookup";
+import BetaTag from "@/features/Core/components/BetaTag/BetaTag";
 import Button from "@/features/Core/components/Button/Button";
 import { useSelector } from "react-redux";
 import { currentConfig, currentUser } from "@/features/UserAuth/slices/userSlice";
 import { QueryType } from "@/features/Query/types/querySubmission";
 import { ProjectRaw } from "@/features/Projects/types/projects.d";
-import { joinClasses } from "@/features/Common/utils/utilities";
-import Tooltip from "@/features/Common/components/Tooltip/Tooltip";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
+import Tooltip from "@/features/Core/components/Tooltip/Tooltip";
 import FolderIcon from '@/assets/icons/projects/folder.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
+import {
+  getHomeQueryTabHeading,
+  HOME_QUERY_NODE_ID_PARAM,
+  HOME_QUERY_NODE_LABEL_PARAM,
+  HOME_QUERY_NODE_CATEGORY_PARAM,
+  HOME_QUERY_TAB_HEADING,
+  HOME_QUERY_TAB_PARAM,
+  isHomeQueryTabEnabled,
+  homeQueryTabOptionsFromConfig,
+} from "@/features/Query/utils/homeQueryParams";
+import { noop } from "@/features/Core/utils/constants";
 
 interface CombinedQueryInterfaceProps {
   className?: string;
   defaultProject?: ProjectRaw | null;
   isResults?: boolean;
-  setShareModalFunction?: Dispatch<SetStateAction<boolean>>;
-  pk?: string;
-  projectPage?: boolean;  
+  projectPage?: boolean;
   // Query-specific props
   initPresetTypeObject?: QueryType | null;
   initNodeLabelParam?: string | null;
   initNodeIdParam?: string | null;
-  nodeDescription?: string | null;
+  initNodeCategoryParam?: string | null;
   submissionCallback?: () => void;
 }
+
+const getHomeQueryNodeParams = (
+  searchParams: URLSearchParams,
+  initNodeIdParam: string | null,
+  initNodeLabelParam: string | null,
+  initNodeCategoryParam: string | null,
+) => ({
+  nodeId: searchParams.get(HOME_QUERY_NODE_ID_PARAM) ?? initNodeIdParam,
+  nodeLabel: searchParams.get(HOME_QUERY_NODE_LABEL_PARAM) ?? initNodeLabelParam,
+  nodeCategory: searchParams.get(HOME_QUERY_NODE_CATEGORY_PARAM) ?? initNodeCategoryParam,
+});
 
 const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
   className = '',
   defaultProject = null,
   isResults = false,
-  setShareModalFunction = () => {},
-  pk = "",
   projectPage = false,
   // Query-specific props
   initPresetTypeObject = null,
   initNodeLabelParam = null,
   initNodeIdParam = null,
-  nodeDescription = null,
-  submissionCallback = () => {},
+  initNodeCategoryParam = null,
+  submissionCallback = noop,
 }) => {
   const config = useSelector(currentConfig);
   const user = useSelector(currentUser);
@@ -58,8 +77,20 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
     setSelectedProject,
     clearSelectedProject
   } = useSidebar();
-  const isPathfinderEnabled = config?.include_pathfinder;
+  const isPathfinderEnabled = isHomeQueryTabEnabled('pathfinder', homeQueryTabOptionsFromConfig(config));
+  const isLookupEnabled = isHomeQueryTabEnabled('lookup', homeQueryTabOptionsFromConfig(config));
   const showAddToProject = !!user && config?.include_projects;
+  const [searchParams] = useSearchParams();
+  const { nodeId, nodeLabel, nodeCategory } = getHomeQueryNodeParams(
+    searchParams, initNodeIdParam, initNodeLabelParam, initNodeCategoryParam,
+  );
+  const tabFromUrl = getHomeQueryTabHeading(searchParams.get(HOME_QUERY_TAB_PARAM), homeQueryTabOptionsFromConfig(config));
+  const fallbackTab = isLookupEnabled ? HOME_QUERY_TAB_HEADING.lookup : HOME_QUERY_TAB_HEADING.smart;
+  const [activeTab, setActiveTab] = useState(tabFromUrl ?? fallbackTab);
+
+  useEffect(() => {
+    if (tabFromUrl) setActiveTab(tabFromUrl);
+  }, [tabFromUrl]);
 
   const handleAddToProject = () => {
     if(activePanelId !== 'queries')
@@ -87,7 +118,8 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
       setSelectedProject(defaultProject);
     else
       clearSelectedProject();
-  }, [location.pathname, defaultProject?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on defaultProject's id; the object's identity can change every render
+  }, [location.pathname, defaultProject?.id, setSelectedProject, clearSelectedProject]);
 
   return (
     <div className={classNames}>
@@ -109,7 +141,7 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
                     handleClick={handleAddToProject}
                     iconLeft={<FolderIcon/>}
                   >
-                    <span className={styles.projectName}>{selectedProject?.data.title || 'Select Project'}</span>
+                    <span className={styles.projectName}>{selectedProject?.data.title || 'Project'}</span>
                   </Button>
                 </>
               )
@@ -130,43 +162,62 @@ const CombinedQueryInterface: FC<CombinedQueryInterfaceProps> = ({
         </div>
       )}
       <Tabs
-        defaultActiveTab="Smart Query"
+        controlled
+        activeTab={activeTab}
+        handleTabSelection={setActiveTab}
         className={styles.tabsContainer}
         tabListClassName={styles.tabList}
         tabListWrapperClassName={styles.tabListWrapper}
       >
-        <Tab heading="Smart Query" className={styles.queryTab}>
+        { isLookupEnabled ?
+          <Tab
+            heading={HOME_QUERY_TAB_HEADING.lookup}
+            className={styles.lookupTab}
+          >
+            <QueryLookup
+              isResults={isResults}
+              selectedProject={selectedProject}
+              user={user}
+              shouldNavigate={shouldNavigate}
+              submissionCallback={onSubmitCallback}
+              initNodeIdParam={nodeId}
+              initNodeLabelParam={nodeLabel}
+              initNodeCategoryParam={nodeCategory}
+            />
+          </Tab>
+          : null
+        }
+        <Tab heading={HOME_QUERY_TAB_HEADING.smart} className={styles.queryTab}>
           <Query
             isResults={isResults}
             initPresetTypeObject={initPresetTypeObject}
-            initNodeLabelParam={initNodeLabelParam}
-            initNodeIdParam={initNodeIdParam}
-            nodeDescription={nodeDescription}
-            setShareModalFunction={setShareModalFunction}
-            pk={pk}
+            initNodeLabelParam={nodeLabel}
+            initNodeIdParam={nodeId}
+            initNodeCategoryParam={nodeCategory}
             selectedProject={selectedProject}
             combinedStyles={styles}
             shouldNavigate={shouldNavigate}
             submissionCallback={onSubmitCallback}
           />
         </Tab>
-        { isPathfinderEnabled
-        ? 
+        { isPathfinderEnabled ? 
           <Tab
-            heading="Pathfinder Query"
-            headingOverride={<BetaTag heading="Pathfinder Query" tagClassName={projectPage ? styles.betaTag : ''} />}
+            heading={HOME_QUERY_TAB_HEADING.pathfinder}
+            headingOverride={<BetaTag heading={HOME_QUERY_TAB_HEADING.pathfinder} tagClassName={projectPage ? styles.betaTag : ''} />}
             className={styles.pathfinderTab}>
             <QueryPathfinder
               isResults={isResults}
-              setShareModalFunction={setShareModalFunction}
-              pk={pk}
               selectedProject={selectedProject}
               user={user}
               shouldNavigate={shouldNavigate}
               submissionCallback={onSubmitCallback}
+              initNodeIdParam={nodeId}
+              initNodeLabelParam={nodeLabel}
+              initNodeCategoryParam={nodeCategory}
             />
           </Tab>
-          : null}
+          : null
+        }
       </Tabs>
     </div>
   );

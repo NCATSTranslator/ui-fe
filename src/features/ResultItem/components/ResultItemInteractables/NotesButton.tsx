@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Link } from 'react-router-dom';
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
 import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '@/features/Common/components/Tooltip/Tooltip';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import Button from "@/features/Core/components/Button/Button";
 import styles from './ResultItemInteractables.module.scss';
 
@@ -45,7 +45,7 @@ const NotesButton: FC<NotesButtonProps> = ({
         <span className={styles.tooltip}>
           Add your own custom notes to this result. <br/> 
           (You can also view and edit notes on your<br/> 
-          bookmarked results in the <Link to="/workspace" target='_blank'>Workspace</Link>).
+          bookmarked results in your <Link to="/projects" target='_blank'>Projects</Link>).
         </span>
       </Tooltip>
       <span className={styles.label}>Notes</span>

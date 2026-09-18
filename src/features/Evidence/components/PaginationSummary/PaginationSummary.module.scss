@@ -1,0 +1,9 @@
+@use "@/assets/styles/variables" as *;
+
+.evidenceCount {
+  margin: $s $xs;
+  color: $darkGray;
+  font-size: $bodyTwoSize;
+  line-height: 1.25;
+  padding: 0;
+}

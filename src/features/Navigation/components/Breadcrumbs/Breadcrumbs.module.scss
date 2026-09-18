@@ -1,11 +1,14 @@
 @use "@/assets/styles/variables" as *;
 
 .breadcrumbs {
-  padding: $m $l $l;
-  font-size: $bodyTwoSize;
+  padding: $l 0;
   display: flex;
   align-items: center;
   gap: $m;
+  span {
+    font-size: $captionSize;
+    color: $darkGray;
+  }
 }
 
 .arrowLeftIcon {

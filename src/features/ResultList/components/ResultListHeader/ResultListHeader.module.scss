@@ -1,19 +1,12 @@
-   @use "@/assets/styles/variables" as *;
+@use "@/assets/styles/variables" as *;
 
 .resultsHeader {
-  margin-bottom: $s;
-  @media screen and (min-width: $large) {
-    grid-column: 2/3;
-  }
-  .top {
+  margin-bottom: 20px;
+  .bottom {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-  }
-  .heading {
-    color: $purpleOne;
-    margin-bottom: 0;
   }
   .resultsCount {
     margin: 0;

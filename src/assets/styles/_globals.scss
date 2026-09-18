@@ -26,6 +26,9 @@ body {
 .bold {
   font-weight: 800;
 }
+.inline {
+  display: inline;
+}
 
 // Colors
 .bg-red {
@@ -119,7 +122,7 @@ body {
 .container {
   padding: 64px 20px;
   margin: 0 auto;
-  max-width: $maxwidth;
+  max-width: $maxWidth;
   width: calc(100% - 40px);
 }
 
@@ -409,4 +412,9 @@ fieldset {
   border: none;
   padding: 0;
   margin: 0;
+}
+
+body .react-tooltip-content-wrapper {
+  display: flex;
+  padding: 0;
 }

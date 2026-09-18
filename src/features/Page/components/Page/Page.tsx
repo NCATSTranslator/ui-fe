@@ -1,8 +1,8 @@
 import { FC, ReactNode, useCallback } from "react";
-import DisclaimerModal from "@/features/Common/components/DisclaimerModal/DisclaimerModal";
-import { useDisclaimersApproved } from "@/features/Common/hooks/customHooks";
+import DisclaimerModal from "@/features/Core/components/DisclaimerModal/DisclaimerModal";
+import { useDisclaimersApproved } from "@/features/Core/hooks/useDisclaimersApproved";
 import { PageTitleProvider } from "@/features/Page/components/PageTitleProvider/PageTitleProvider";
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 export interface PageProps {
   title: string;

@@ -1,0 +1,11 @@
+@use '@/assets/styles/variables' as *;
+
+.activeCanvas {
+  background-color: $lightPurpleTwo;
+}
+
+.meta {
+  font-size: $captionSize;
+  font-weight: 400;
+  color: $darkGray;
+}

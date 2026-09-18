@@ -1,6 +1,6 @@
 import { FC } from "react";
 import styles from './DropLabel.module.scss';
-import { joinClasses } from "@/features/Common/utils/utilities";
+import { joinClasses } from "@/features/Core/utils/classHelpers";
 
 
 interface DropLabelProps {

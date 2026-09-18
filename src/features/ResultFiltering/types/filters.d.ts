@@ -1,5 +1,5 @@
-export type FilterType = 'p' | 'r' | 'g';
-export type FilterFamily = 'cc' | 'di' | 'pc' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev' | 'txt';
+export type FilterType = 'p' | 'r' | 'g' | 'e';
+export type FilterFamily = 'cc' | 'di' | 'pc' | 'pred' | 'pt' | 'role' | 'ara' | 'otc' | 'tdl' | 'str' | 'sv' | 'ev';
 
 export type Filter = {
   count?: number;
@@ -18,7 +18,9 @@ export type GroupedFilters = {
 }
 export type DynamicTag = {
   id: string;
-  name: string;
-  value: string;
+  description: {
+    name: string;
+    description: string;
+  };
 }
 

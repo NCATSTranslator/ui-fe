@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { ProjectRaw, UserQueryObject } from '@/features/Projects/types/projects';
 
-type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'filters' | 'queryStatus' 
-  | 'settings' | 'feedback' | 'help' | 'download';
+type SidebarItemId = 'newQuery' | 'queries' | 'projects' | 'canvases' | 'filters' | 'canvasFilters'
+  | 'queryStatus' | 'settings' | 'feedback' | 'help' | 'download';
 
 export type SidebarContextValue = {
   collapsed: boolean;
@@ -16,6 +16,7 @@ export type SidebarContextValue = {
   clearSelectedProject: () => void;
   setCollapsed: (v: boolean) => void;
   togglePanel: (id: SidebarItemId) => void;
+  openPanel: (id: SidebarItemId) => void;
   closePanel: () => void;
   setAddToProjectMode: (query: UserQueryObject) => void;
   clearAddToProjectMode: () => void;
@@ -58,7 +59,6 @@ export type SidebarRegistrationOptions = {
   tooltipText: string;
   title: string | ReactNode;
   ariaLabel?: string;
-  autoOpen?: boolean;
   dependencies?: readonly unknown[];
   reduceSpacing?: boolean;
 }

@@ -1,34 +1,45 @@
 import { useCallback, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
-import { formatBiolinkEntity, formatBiolinkNode, getPathCount } from '@/features/Common/utils/utilities';
-import { getARATagsFromResultTags, handleTagClick } from '@/features/ResultItem/utils/utilities';
+import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
+import { getPathCount } from '@/features/Core/utils/resultHelpers';
+import { getARATagsFromResultTags, getNodeDescription, handleTagClick } from '@/features/ResultItem/utils/utilities';
 import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
-import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
+import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
-import { currentUser, currentConfig } from '@/features/UserAuth/slices/userSlice';
-import { getResultSetById, getNodeById, getPathById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
-import { displayScore, generateScore, getPathfinderMetapathScore } from '@/features/ResultList/utils/scoring';
+import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { Result, ResultBookmark } from '@/features/ResultList/types/results';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import ResultItemTag from '@/features/ResultItem/components/ResultItemTag/ResultItemTag';
+import { joinClasses } from '@/features/Core/utils/classHelpers';
+import PathView from '@/features/ResultItem/components/PathView/PathView';
+import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
+import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
+import { isResultSummaryEnabled } from '@/features/ResultItem/utils/resultSummaryFunctions';
+import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
   isEven: boolean;
   isInUserSave?: boolean;
   result: Result | ResultBookmark;
+  /** 1-based position in the full result list; reported on result_opened. */
+  resultRank?: number;
 }
 
 const ResultItem: FC<ResultItemProps> = ({
     bookmarkItem,
     isEven = false,
     isInUserSave = false,
-    result
+    result,
+    resultRank
   }) => {
 
   const {
@@ -41,31 +52,27 @@ const ResultItem: FC<ResultItemProps> = ({
     bookmarkRemovedToast,
     handleBookmarkError,
     isPathfinder,
+    pathFilterState,
+    setShowHiddenPaths,
+    showHiddenPaths,
     pk,
     queryNodeID,
     queryNodeLabel,
     queryNodeDescription,
     queryType,
-    resultsComplete,
-    scoreWeights,
-    setShareModalOpen,
-    setShareResultID,
     resultsNavigate,
     shouldUpdateResultsAfterBookmark,
     updateUserSaves,
   } = useResultListContext();
   const currentQueryID = pk;
-
   const resultSet = useSelector(getResultSetById(pk));
-  const config = useSelector(currentConfig);
-  const {confidenceWeight, noveltyWeight, clinicalWeight} = scoreWeights;
-  const firstPath = (typeof result.paths[0] === 'string') ? getPathById(resultSet, result.paths[0] as string) : result.paths[0];
-  const score = (isPathfinder && firstPath) ? getPathfinderMetapathScore(firstPath) : generateScore(result.scores, confidenceWeight, noveltyWeight, clinicalWeight);
-
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
-
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const user = useSelector(currentUser);
+  const config = useSelector(currentConfig);
+  const decodedParams = useDecodedParams();
+  const isLookup = getDataFromQueryVar("t", decodedParams) === 'l';
+  const hasSummary = isResultSummaryEnabled(queryType, config);
 
   const {
     isBookmarked,
@@ -92,40 +99,68 @@ const ResultItem: FC<ResultItemProps> = ({
     shouldUpdateResultsAfterBookmark,
   });
 
-  const handleResultClick = useCallback(() => {
-    resultsNavigate(`/results/${result.id}`);
-  }, [resultsNavigate, result.id]);
-
   const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-  const pathCount: number = (result?.pathCount !== undefined) ? result.pathCount : (!!resultSet) ? getPathCount(resultSet, newPaths) : 0;
-  const subjectNode = (!!result) ? getNodeById(resultSet, result.subject) : undefined;
-  const objectNode = (!!result) ? getNodeById(resultSet, result.object) : undefined;
+  const pathCount: number = useMemo(() => {
+    if(result?.pathCount !== undefined) return result.pathCount;
+    if(!resultSet) return 0;
+    return getPathCount(resultSet, newPaths);
+  }, [result?.pathCount, resultSet, newPaths]);
+  const subjectNode = useMemo(() => getNodeById(resultSet, result.subject), [resultSet, result.subject]);
+  const objectNode = useMemo(() => getNodeById(resultSet, result.object), [resultSet, result.object]);
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
-  const resultDescription = subjectNode?.descriptions[0];
-  const hasSummary = (queryType?.id === 0 && config?.include_summarization) || false;
+  const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
+
+  // Declared after subjectNode so the event can carry the real CURIE rather
+  // than the internal result ID, which means nothing outside a single session.
+  const handleResultClick = useCallback(() => {
+    trackEvent('result_opened', {
+      result_curie: subjectNode?.curies?.[0],
+      result_rank: resultRank,
+      path_count: pathCount,
+    });
+    resultsNavigate(`/results/${result.id}`);
+  }, [resultsNavigate, result.id, subjectNode, pathCount, resultRank]);
+
+  const accordionPanelClass = joinClasses(styles.accordionPanel, roleCount > 0 && !isInUserSave && styles.hasTags, (!!resultDescription && !isPathfinder) && styles.hasDescription, !!isInUserSave && styles.inUserSave);
 
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
   }, [handleNotesClickHook, activateNotes, nameString]);
 
-  const handleOpenResultShare = () => {
-    setShareResultID(result.id);
-    setShareModalOpen(true);
-  }
+  const {
+    setNodeRef: setResultDragRef,
+    attributes: resultDragAttributes,
+    listeners: resultDragListeners,
+    isDragging: isResultDragging,
+    canDrag: canDragResult,
+    onContextMenu: handleResultContextMenu,
+  } = useResultCanvasDrag(result.id, pk);
 
   if(!resultSet)
     return null;
 
+
   return (
     <div
-      className={`${styles.result} result ${isPathfinder ? styles.pathfinder : ''}`}
+      ref={setResultDragRef}
+      className={joinClasses(
+        'result',
+        styles.result,
+        isPathfinder && styles.pathfinder,
+        canDragResult && dragStyles.draggable,
+        isResultDragging && dragStyles.dragging,
+      )}
       data-result-curie={result.subject}
       data-result-name={nameString}
       data-aras={result.tags ? getARATagsFromResultTags(result.tags).toString() : ''}
+      onClick={handleResultClick}
+      onContextMenu={handleResultContextMenu}
+      {...resultDragListeners}
+      {...resultDragAttributes}
     >
       <div className={styles.top}>
-        <div className={`${styles.nameContainer} ${styles.resultSub}`} onClick={handleResultClick}>
+        <div className={joinClasses(styles.nameContainer, styles.resultSub)}>
           <ResultItemName
             isPathfinder={isPathfinder}
             subjectNode={subjectNode}
@@ -138,7 +173,6 @@ const ResultItem: FC<ResultItemProps> = ({
         <ResultItemInteractables
           handleBookmarkClick={handleBookmarkClick}
           handleNotesClick={handleNotesClick}
-          handleOpenResultShare={handleOpenResultShare}
           hasNotes={itemHasNotes}
           hasUser={!!user}
           isBookmarked={isBookmarked}
@@ -152,7 +186,7 @@ const ResultItem: FC<ResultItemProps> = ({
           diseaseName={objectNode?.names[0] || ""}
           diseaseDescription={objectNode?.descriptions[0] || ""}
         />
-        <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
+        <div className={joinClasses(styles.evidenceContainer, styles.resultSub)}>
           <span className={styles.evidenceLink}>
             <div>
               {
@@ -174,21 +208,14 @@ const ResultItem: FC<ResultItemProps> = ({
             </div>
           </span>
         </div>
-        <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
+        <div className={joinClasses(styles.pathsContainer, styles.resultSub)}>
           <span className={styles.paths}>
             <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
           </span>
         </div>
-        <div className={`${styles.scoreContainer} ${styles.resultSub}`}>
-          <span className={styles.score}>
-            <span className={styles.scoreNum}>{resultsComplete ? score === null ? '0.00' : displayScore(score, 2) : "Processing..." }</span>
-          </span>
-        </div>
       </div>
       <div
-        className={`${styles.accordionPanel} ${(roleCount > 0 && !isInUserSave) ? styles.hasTags : ''}
-          ${(!!resultDescription && !isPathfinder) ? styles.hasDescription : '' } ${!!isInUserSave && styles.inUserSave}
-        `}
+        className={accordionPanelClass}
         >
         <div className={styles.container}>
           <div>
@@ -196,10 +223,10 @@ const ResultItem: FC<ResultItemProps> = ({
               result.tags && roleCount > 0 && availableFilters &&
               <div className={styles.tags}>
                 {
-                  // Object.keys(result.tags).toSorted((a, b)=>sortTagsBySelected(a, b, activeFilters)).map((fid) => {
                   Object.keys(result.tags).map((fid) => {
                     return(
                       <ResultItemTag
+                        key={fid}
                         activeFilters={activeFilters}
                         availableFilters={availableFilters}
                         fid={fid}
@@ -213,13 +240,29 @@ const ResultItem: FC<ResultItemProps> = ({
             }
             {
               !!resultDescription && !isPathfinder &&
-              <p className={styles.description}>
-                <SafeHtmlHighlighter
-                  htmlString={resultDescription}
-                  searchWords={activeEntityFilters}
-                  highlightClassName="highlight"
+              <ClampedDescription
+                description={resultDescription}
+                searchWords={activeEntityFilters}
+                className={styles.description}
+              />
+            }
+            {
+              isLookup &&
+              <div className={styles.lookupPathViewContainer}>
+                <PathView
+                  active
+                  activeEntityFilters={activeEntityFilters}
+                  activeFilters={activeFilters}
+                  isEven={isEven}
+                  isLookup
+                  pathArray={result.paths}
+                  pathFilterState={pathFilterState ?? {}}
+                  pk={pk ?? ''}
+                  resultId={result.id}
+                  setShowHiddenPaths={setShowHiddenPaths}
+                  showHiddenPaths={showHiddenPaths}
                 />
-              </p>
+              </div>
             }
           </div>
         </div>

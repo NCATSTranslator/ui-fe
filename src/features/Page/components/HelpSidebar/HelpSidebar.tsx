@@ -1,6 +1,6 @@
 import styles from './HelpSidebar.module.scss';
 import { NavLink, useLocation } from 'react-router-dom';
-import Accordion from '@/features/Common/components/Accordion/Accordion';
+import Accordion from '@/features/Core/components/Accordion/Accordion';
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { helpArticles } from "@/features/Page/utils/helpArticles";
 
