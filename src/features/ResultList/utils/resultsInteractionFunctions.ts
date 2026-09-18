@@ -9,6 +9,138 @@ import cloneDeep from "lodash/cloneDeep";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { isNotesEmpty, getNodeDescription } from "@/features/ResultItem/utils/utilities";
 import { FILTERING_CONSTANTS, makeFilter, applyPredicateFilterDisplayNames } from "@/features/ResultFiltering/utils/filterFunctions";
+import { createDebugToggle } from "@/features/Core/utils/debugToggle";
+
+export type StringMatchField =
+  | 'drug_name'
+  | 'subject_description'
+  | 'node_name'
+  | 'node_description'
+  | 'node_curie'
+  | 'edge_predicate';
+
+export type StringMatchLocation = {
+  field: StringMatchField;
+  value: string;
+  itemId?: string;
+};
+
+/**
+ * Returns a match location when `value` contains the normalized (lowercased) term, otherwise null.
+ */
+const matchAt = (
+  field: StringMatchField,
+  value: string | null | undefined,
+  term: string,
+  itemId?: string,
+): StringMatchLocation | null =>
+  value?.toLowerCase().includes(term) ? { field, value, itemId } : null;
+
+/**
+ * Returns the fields on a path node or edge that contain the search term.
+ * Pass `firstOnly` to stop at the first match when the caller only needs a yes/no.
+ */
+export const getItemStringMatchLocations = (
+  item: ResultNode | ResultEdge,
+  term: string,
+  firstOnly = false,
+): StringMatchLocation[] => {
+  const locations: StringMatchLocation[] = [];
+  if (!term) return locations;
+
+  // Records a match; returns true once no further fields need checking.
+  const record = (location: StringMatchLocation | null): boolean => {
+    if (location) locations.push(location);
+    return firstOnly && locations.length > 0;
+  };
+
+  if (isResultEdge(item)) {
+    record(matchAt('edge_predicate', item.predicate, term, item.id));
+    return locations;
+  }
+
+  if (record(matchAt('node_name', item.names?.[0], term, item.id))) return locations;
+  if (record(matchAt('node_description', getNodeDescription(item), term, item.id))) return locations;
+  for (const curie of item.curies ?? []) {
+    if (record(matchAt('node_curie', curie, term, item.id))) break;
+  }
+  return locations;
+};
+
+const stringMatchDebug = createDebugToggle('__textSearchDebug');
+
+/**
+ * Turn text-search match console logging on or off. Defaults to off, since it logs
+ * every matching field on every filter pass. Also exposed as `window.__textSearchDebug`;
+ * re-apply a filter after enabling it to see output.
+ */
+export const setStringMatchLogging = stringMatchDebug.set;
+
+/**
+ * Logs the field and value where a text-search term matched, plus enough
+ * result/path context to find it in the UI. No-ops unless logging is enabled.
+ */
+export const logStringMatch = (
+  term: string,
+  result: Result,
+  location: StringMatchLocation,
+  pathId?: string,
+): void => {
+  if (!stringMatchDebug.isEnabled()) return;
+  console.log('[text search] match found', {
+    term,
+    field: location.field,
+    value: location.value,
+    result: result.drug_name,
+    resultId: result.id,
+    pathId,
+    itemId: location.itemId,
+  });
+};
+
+const logAndHasMatch = (
+  term: string,
+  result: Result,
+  locations: StringMatchLocation[],
+  pathId?: string,
+): boolean => {
+  for (const location of locations) {
+    logStringMatch(term, result, location, pathId);
+  }
+  return locations.length > 0;
+};
+
+/**
+ * Checks a result's drug name and subject node description for the normalized search term.
+ */
+const matchesShallowProperties = (resultSet: ResultSet, result: Result, normalizedTerm: string): boolean => {
+  const subjectNode = getNodeById(resultSet, result.subject);
+  const locations = [
+    matchAt('drug_name', result.drug_name, normalizedTerm),
+    matchAt('subject_description', subjectNode ? getNodeDescription(subjectNode) : null, normalizedTerm, subjectNode?.id),
+  ].filter((location): location is StringMatchLocation => location !== null);
+
+  return logAndHasMatch(normalizedTerm, result, locations);
+};
+
+/**
+ * Re-ranks a result's paths against the path filters, then re-sorts its path ranks.
+ */
+const updateResultPathRanks = (
+  resultSet: ResultSet,
+  result: Result,
+  pathRanks: Map<string, PathRank> | undefined,
+  pathFilters: Filter[]
+): void => {
+  for (const p of result.paths) {
+    const path = typeof p === "string" ? getPathById(resultSet, p) : p;
+    const rank = path?.id && pathRanks?.get(path.id);
+    if (path && rank) {
+      updatePathRanks(resultSet, path, rank, pathFilters);
+    }
+  }
+  pathRankSort([...pathRanks?.values() || []]);
+};
 
 /**
  * Performs a case-insensitive string match against a result's name, description, and all associated paths.
@@ -36,11 +168,7 @@ export const findStringMatch = (
   const normalizedTerm = filtering.normalizeSearchTermForMatch(filter.value || '');
   const isExclusion = filtering.isExclusion(filter);
   // Shallow properties: drug name and subject node description
-  const nameMatch = result.drug_name?.toLowerCase().includes(normalizedTerm) ?? false;
-  const subjectNode = getNodeById(resultSet, result.subject);
-  const descriptionMatch = (subjectNode ? getNodeDescription(subjectNode) : null)
-    ?.toLowerCase().includes(normalizedTerm) ?? false;
-  let matched = !normalizedTerm || nameMatch || descriptionMatch;
+  let matched = !normalizedTerm || matchesShallowProperties(resultSet, result, normalizedTerm);
   if (isExclusion && matched) return true;
   for (let i = 0; i < result.paths.length; i++) {
     const path = isPath(result.paths[i])
@@ -57,18 +185,11 @@ export const findStringMatch = (
   }
   return matched;
 
-  function _checkItemForMatch(item?: ResultNode | ResultEdge): boolean {
+  function _checkItemForMatch(item?: ResultNode | ResultEdge, pathId?: string): boolean {
     if (!item) return false;
-
-    if (isResultEdge(item)) {
-      return !!item.predicate?.toLowerCase().includes(normalizedTerm);
-    }
-
-    return (item.names &&
-        item.names.length > 0 &&
-        item.names[0].toLowerCase().includes(normalizedTerm)) ||
-      (getNodeDescription(item)?.toLowerCase().includes(normalizedTerm) ?? false) ||
-      item.curies && item.curies.length > 0 && item.curies.some(curie => curie.toLowerCase().includes(normalizedTerm));
+    // Only collect every matching field when someone is reading the logs.
+    const firstOnly = !stringMatchDebug.isEnabled();
+    return logAndHasMatch(normalizedTerm, result, getItemStringMatchLocations(item, normalizedTerm, firstOnly), pathId);
   }
 
   function _checkPathForMatch(
@@ -82,7 +203,7 @@ export const findStringMatch = (
       const item = isNodeIndex(i)
         ? getNodeById(resultSet, path.subgraph[i])
         : getEdgeById(resultSet, path.subgraph[i]);
-      if (!_checkItemForMatch(item)) continue;
+      if (!_checkItemForMatch(item, path.id)) continue;
 
       if (isExclusion) {
         // rank this path heavily so it is filtered
@@ -297,16 +418,7 @@ export const applyFilters = (
 
       if (!include) continue;
 
-      const pathRanks = resultPathRanks.get(result.id);
-      for (const p of result.paths) {
-        const path = typeof p === "string" ? getPathById(resultSet, p) : p;
-        const rank = path?.id && pathRanks?.get(path.id);
-        if (path && rank) {
-          updatePathRanks(resultSet, path, rank, pathFilters);
-        }
-      }
-
-      pathRankSort([...pathRanks?.values() || []]);
+      updateResultPathRanks(resultSet, result, resultPathRanks.get(result.id), pathFilters);
       results.push(result);
     }
 
@@ -401,9 +513,9 @@ export const injectDynamicFilters = (
   for (const tagEntry of tagsAdded) {
     const tag = tagEntry.tag;
     const ridx = tagEntry.index;
-    modifiedSummary.data.tags[tag.id] = {name: tag.name, value: tag.value};
-    modifiedFormattedResults[ridx].tags[tag.id] = null;
-    modifiedOriginalResults[ridx].tags[tag.id] = null;
+    modifiedSummary.data.tags[tag.id] = tag.description;
+    modifiedFormattedResults[ridx].tags[tag.id] = tag;
+    modifiedOriginalResults[ridx].tags[tag.id] = tag;
   }
   return [modifiedSummary, modifiedFormattedResults, modifiedOriginalResults];
 }

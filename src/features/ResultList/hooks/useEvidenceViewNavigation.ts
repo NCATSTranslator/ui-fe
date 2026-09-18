@@ -23,7 +23,7 @@ const useEvidenceViewNavigation = (resultId?: string): UseEvidenceViewNavigation
       pathKey: options.pathKey,
       tab: options.tab,
     });
-    resultsNavigate(url, params);
+    resultsNavigate(url, { ...params, ...options.extraParams });
   }, [resultsNavigate, resultId]);
 
   return {

@@ -337,6 +337,47 @@ export const makeEdgeRank = (edgeID: string): EdgeRank => {
   return { rank: 0, edgeID: edgeID };
 }
 
+const applyNegatedEdgeFilters = (
+  edge: ResultEdge,
+  edgeFilters: Filter[],
+  edgeRank: EdgeRank,
+): boolean => {
+  for (const ftr of edgeFilters) {
+    if (ftr.negated && ftr.id && edge.tags[ftr.id] !== undefined) {
+      edgeRank.rank = EXCLUDE_RANK_BASE * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
+      return true;
+    }
+  }
+  return false;
+};
+
+const groupInclusionEdgeFiltersByFamily = (edgeFilters: Filter[]): Map<FilterFamily, Filter[]> => {
+  const inclusionsByFamily = new Map<FilterFamily, Filter[]>();
+  for (const ftr of edgeFilters) {
+    if (ftr.negated || !ftr.id) continue;
+    const family = getFilterFamily(ftr);
+    const group = inclusionsByFamily.get(family);
+    if (group) group.push(ftr);
+    else inclusionsByFamily.set(family, [ftr]);
+  }
+  return inclusionsByFamily;
+};
+
+const applyInclusionEdgeFilters = (
+  edge: ResultEdge,
+  inclusionsByFamily: Map<FilterFamily, Filter[]>,
+  edgeRank: EdgeRank,
+): void => {
+  for (const group of inclusionsByFamily.values()) {
+    const matchCount = group.filter((ftr) => edge.tags[ftr.id as string] !== undefined).length;
+    if (matchCount === 0) {
+      edgeRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+      return;
+    }
+    edgeRank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+  }
+};
+
 /**
  * Ranks a single edge against the active edge filters.
  *
@@ -346,31 +387,8 @@ export const makeEdgeRank = (edgeID: string): EdgeRank => {
  */
 export const updateEdgeRank = (edge: ResultEdge, edgeFilters: Filter[], edgeRank: EdgeRank) => {
   if (edgeFilters.length === 0) return;
-
-  for (const ftr of edgeFilters) {
-    if (ftr.negated && ftr.id && edge.tags[ftr.id] !== undefined) {
-      edgeRank.rank = EXCLUDE_RANK_BASE * (ftr.excludeWeight ? ftr.excludeWeight : FILTERING_CONSTANTS.WEIGHT.HEAVY);
-      return;
-    }
-  }
-
-  const inclusionsByFamily = new Map<FilterFamily, Filter[]>();
-  for (const ftr of edgeFilters) {
-    if (ftr.negated || !ftr.id) continue;
-    const family = getFilterFamily(ftr);
-    const group = inclusionsByFamily.get(family);
-    if (group) group.push(ftr);
-    else inclusionsByFamily.set(family, [ftr]);
-  }
-
-  for (const group of inclusionsByFamily.values()) {
-    const matchCount = group.filter((ftr) => edge.tags[ftr.id as string] !== undefined).length;
-    if (matchCount === 0) {
-      edgeRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-      return;
-    }
-    edgeRank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-  }
+  if (applyNegatedEdgeFilters(edge, edgeFilters, edgeRank)) return;
+  applyInclusionEdgeFilters(edge, groupInclusionEdgeFiltersByFamily(edgeFilters), edgeRank);
 }
 
 const pathRankCompare = (a: PathRank, b: PathRank) => {

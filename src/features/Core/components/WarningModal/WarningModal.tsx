@@ -58,14 +58,16 @@ const WarningModal: FC<WarningModalProps> = ({
         <Button handleClick={handleCancel} variant="secondary" className={styles.button}>{cancelButtonText}</Button>
         <Button handleClick={handleConfirm} className={`${styles.button} ${styles.confirmButton}`}>{confirmButtonText}</Button>
       </div>
-      <div className="bottom">
-        <Checkbox
-          label="Don't show this again"
-          checked={dontShowAgain}
-          handleClick={() => setDontShowAgain(prev => !prev)}
-          className={styles.checkbox}
-        />
-      </div>
+      {setStorageKeyFn && (
+        <div className="bottom">
+          <Checkbox
+            label="Don't show this again"
+            checked={dontShowAgain}
+            handleClick={() => setDontShowAgain(prev => !prev)}
+            className={styles.checkbox}
+          />
+        </div>
+      )}
     </Modal>
   );
 };

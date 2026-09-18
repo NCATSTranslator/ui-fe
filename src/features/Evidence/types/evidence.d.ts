@@ -35,19 +35,15 @@ export type EvidenceCountsContainer = {
   sourceCount: number;
 }
 
-export type Provenance = {
-  infores: string;
+export type ProvenanceCatalogEntry = {
   knowledge_level: KnowledgeLevel;
   name: string | null;
   url: string | null;
   wiki: string | null;
 }
 
-export type ProvenanceCatalogEntry = {
-  knowledge_level: KnowledgeLevel;
-  name: string | null;
-  url: string | null;
-  wiki: string | null;
+export type Provenance = ProvenanceCatalogEntry & {
+  infores: string;
 }
 
 export type EdgeProvenance = {
@@ -75,7 +71,7 @@ export type TrialObject = {
   phase: number;
   size: number;
   start_date: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'WITHDRAWN' | 'UNKNOWN';
+  status: string;
   title?: string;
   type?: 'enrolled' | 'anticipated';
   url: string;

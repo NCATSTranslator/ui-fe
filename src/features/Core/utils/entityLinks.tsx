@@ -15,40 +15,32 @@ import BiologicalProcess from '@/assets/icons/queries/Biological Process.svg?rea
 import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import BlankIcon from '@/assets/icons/blank.svg?react';
 import { QueryType } from '@/features/Query/types/querySubmission';
+import { getRegistryEntry, type NodeIconKey } from '@/features/Core/utils/biolinkTypeRegistry';
 
-const NODE_ICON_MAP: Record<string, FC<SVGProps<SVGSVGElement>>> = {
-  'biolink:ChemicalEntity': Chemical,
-  'biolink:ChemicalMixture': Chemical,
-  'biolink:MolecularMixture': Chemical,
-  'biolink:ComplexMolecularMixture': Chemical,
-  'biolink:Gene': Gene,
-  'phenotype': Phenotype,
-  'biolink:PhenotypicFeature': Phenotype,
-  'biolink:Protein': Protein,
-  'biolink:Polypeptide': Protein,
-  'biolink:Drug': Drug,
-  'biolink:Disease': Disease,
-  'biolink:SmallMolecule': SmallMolecule,
-  'biolink:Small_Molecule': SmallMolecule,
-  'biolink:MolecularEntity': SmallMolecule,
-  'biolink:MolecularActivity': SmallMolecule,
-  'biolink:OrganismTaxon': Taxon,
-  'biolink:PathologicalProcess': PathologicalProcess,
-  'biolink:BiologicalProcess': BiologicalProcess,
-  'biolink:BiologicalProcessOrActivity': BiologicalProcess,
-  'biolink:Pathway': BiologicalProcess,
-  'biolink:PhysiologicalProcess': PhysiologicalProcess,
-  'biolink:BiologicalEntity': BiologicalEntity,
-  'biolink:CellLine': BiologicalEntity,
-  'biolink:CellularComponent': BiologicalEntity,
-  'biolink:Cell': BiologicalEntity,
-  'biolink:AnatomicalEntity': AnatomicalEntity,
-  'biolink:GrossAnatomicalStructure': AnatomicalEntity,
+const ICON_BY_KEY: Record<NodeIconKey, FC<SVGProps<SVGSVGElement>>> = {
+  anatomicalEntity: AnatomicalEntity,
+  biologicalEntity: BiologicalEntity,
+  biologicalProcess: BiologicalProcess,
+  chemical: Chemical,
+  disease: Disease,
+  drug: Drug,
+  gene: Gene,
+  pathologicalProcess: PathologicalProcess,
+  phenotype: Phenotype,
+  physiologicalProcess: PhysiologicalProcess,
+  protein: Protein,
+  smallMolecule: SmallMolecule,
+  taxon: Taxon,
 };
 
-export const getNodeIcon = (category: string): ReactNode => {
-  const IconComponent = NODE_ICON_MAP[category];
-  return IconComponent ? <IconComponent /> : <BlankIcon />;
+export const getNodeIconComponent = (category: string): FC<SVGProps<SVGSVGElement>> | null => {
+  const entry = getRegistryEntry(category);
+  return entry ? ICON_BY_KEY[entry.icon] : null;
+};
+
+export const getNodeIcon = (category: string, fallback: ReactNode = <BlankIcon />): ReactNode => {
+  const IconComponent = getNodeIconComponent(category);
+  return IconComponent ? <IconComponent /> : fallback;
 };
 
 interface EntityUrlConfig {

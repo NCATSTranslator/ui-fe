@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useMemo, Dispatch, SetStateAction, RefObject } from 'react';
 import { Result } from '@/features/ResultList/types/results.d';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export interface UseResultPaginationReturn {
   itemOffset: number;
@@ -12,6 +13,7 @@ export interface UseResultPaginationReturn {
   displayedResults: Result[];
   pageCount: number;
   handlePageClick: (event: { selected: number }, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
+  handlePageChange: (event: { selected: number }, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   handlePageReset: (newItemsPerPage: number | false, resultsLength: number) => void;
   calculateItemsPerPage: (prefValue: string | number) => number;
 }
@@ -21,9 +23,14 @@ interface UseResultPaginationArgs {
   initialItemsPerPage: number;
 }
 
+export const parseItemsPerPage = (prefValue: string | number): number => {
+  if (!prefValue) return 10;
+  return typeof prefValue === "string" ? parseInt(prefValue) : prefValue;
+};
+
 /**
  * Custom hook to handle pagination of a list of results.
- * 
+ *
  * @param {Result[]} formattedResults - The list of results to paginate.
  * @param {number} initialItemsPerPage - The number of items per page to display.
  * @returns {UseResultPaginationReturn} The pagination return object.
@@ -45,10 +52,14 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
   );
 
   const calculateItemsPerPage = useCallback((prefValue: string | number): number => {
-    return ((!!prefValue) ? (typeof prefValue === "string") ? parseInt(prefValue) : prefValue : 10) as number;
+    return parseItemsPerPage(prefValue);
   }, []);
 
-  const handlePageClick = useCallback((
+  // Untracked page change, for anything other than a user paging through
+  // results: resets after filtering or a per-page change, and jumping to a
+  // shared result's page. Counting those would inflate results_paginated, so
+  // handlePageClick wraps this and is the only path that reports.
+  const handlePageChange = useCallback((
     event: { selected: number },
     newItemsPerPage: number | false = false,
     resultsLength = formattedResults.length,
@@ -62,11 +73,26 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
       : newOffset + perPageNum;
     setItemOffset(newOffset);
     setEndResultIndex(endOffset);
+    return perPageNum;
   }, [formattedResults.length, itemsPerPage]);
 
+  const handlePageClick = useCallback((
+    event: { selected: number },
+    newItemsPerPage: number | false = false,
+    resultsLength = formattedResults.length,
+    currentNumItemsPerPage = itemsPerPage
+  ) => {
+    const perPageNum = handlePageChange(event, newItemsPerPage, resultsLength, currentNumItemsPerPage);
+    trackEvent('results_paginated', {
+      // GA4 reports read better 1-indexed; react-paginate is 0-indexed.
+      page_number: event.selected + 1,
+      items_per_page: perPageNum,
+    });
+  }, [handlePageChange, formattedResults.length, itemsPerPage]);
+
   const handlePageReset = useCallback((newItemsPerPage: number | false, resultsLength: number) => {
-    handlePageClick({ selected: 0 }, newItemsPerPage, resultsLength);
-  }, [handlePageClick]);
+    handlePageChange({ selected: 0 }, newItemsPerPage, resultsLength);
+  }, [handlePageChange]);
 
   return {
     itemOffset,
@@ -79,6 +105,7 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
     displayedResults,
     pageCount,
     handlePageClick,
+    handlePageChange,
     handlePageReset,
     calculateItemsPerPage,
   };

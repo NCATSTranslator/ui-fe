@@ -5,6 +5,7 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
 .nodeInformationView {
   background-color: $white;
   max-width: $maxWidth;
+  width: 100%;
   margin: 0 auto;
   padding: 0 $l;
   .top, .tabs {
@@ -88,18 +89,20 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
       font-weight: 400;
     }
   }
-  .nodeTitleWithFullName {
-    margin-bottom: $xxs;
-  }
   .nodeFullName {
     font-size: 14px;
     line-height: 1.25;
     color: $darkGray;
-    margin-bottom: $s;
+    margin: $xxs 0 0;
   }
-  .nodeTypeIcon {
+  .nodeName {
     display: flex;
-    gap: $xxs;
     align-items: center;
+    gap: $xxs;
+  }
+  .nodeTitle {
+    font-size: $h6Size;
+    color: $black;
+    margin: 0;
   }
 }

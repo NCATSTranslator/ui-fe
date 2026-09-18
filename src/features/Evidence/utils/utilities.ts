@@ -1,6 +1,6 @@
 //  Focus: General evidence processing and data analysis
 
-import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport } from "@/features/Evidence/types/evidence";
+import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry } from "@/features/Evidence/types/evidence";
 import { isPublication } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
@@ -223,6 +223,16 @@ export const getUrlByType = (publicationID: string, type: string): string => {
  * @returns {string} - A label containing the subject node name, predicate, and object node name
  * separated by pipe characters. 
  */
+export const getEvidenceCountsFromCanvasEdge = (
+  edge: { publications?: Record<string, unknown[]>; trials?: unknown[] },
+): { pubCount: number; ctCount: number } => {
+  let pubCount = 0;
+  for (const entries of Object.values(edge.publications ?? {})) {
+    pubCount += entries.length;
+  }
+  return { pubCount, ctCount: edge.trials?.length ?? 0 };
+};
+
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
@@ -231,6 +241,26 @@ export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): s
 
   return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
 }
+
+export const getFormattedEdgeLabelWithNames = (
+  edge: ResultEdge,
+  nodeNames: Record<string, string>,
+): string => {
+  const subjectNodeName = nodeNames[edge.subject] ?? edge.subject;
+  const objectNodeName = nodeNames[edge.object] ?? edge.object;
+  return `${capitalizeAllWords(subjectNodeName)}|${edge.predicate.toLowerCase()}|${capitalizeAllWords(objectNodeName)}`;
+};
+
+export const formatEvidenceEdgeLabel = (
+  edge: ResultEdge,
+  resultSet: ResultSet | null,
+  nodeNameLookup: Record<string, string> = {},
+): string => {
+  const raw = resultSet
+    ? getFormattedEdgeLabel(resultSet, edge)
+    : getFormattedEdgeLabelWithNames(edge, nodeNameLookup);
+  return raw.replaceAll('|', ' ');
+};
 
 /**
  * Finds the publication entry (with its support data) matching a given publication ID on an edge.
@@ -405,6 +435,41 @@ export const generatePubmedURL = (id: string): string => {
   return "";
 }
 
+const buildTrialUrl = (id: string): string => {
+  const nctMatch = id.match(/NCT\d+/i);
+  if (nctMatch) {
+    return `https://clinicaltrials.gov/study/${nctMatch[0].toUpperCase()}`;
+  }
+  return getUrlByType(id, getTypeFromPub(id));
+};
+
+const publicationObjectFromRef = (
+  pubEntry: { id: string; support: PublicationSupport | null; infores: string },
+  knowledgeLevel: string,
+  edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): PublicationObject => {
+  const type = getTypeFromPub(pubEntry.id);
+  return {
+    knowledgeLevel,
+    id: pubEntry.id,
+    source: getPublicationSource(null, pubEntry.infores, edge, provenanceCatalog),
+    support: pubEntry.support || null,
+    type,
+    url: getUrlByType(pubEntry.id, type),
+  };
+};
+
+const trialObjectFromRef = (id: string): TrialObject => ({
+  child: false,
+  id,
+  phase: 0,
+  size: 0,
+  start_date: '',
+  status: 'UNKNOWN',
+  url: buildTrialUrl(id),
+});
+
 /**
  * Retrieves and flattens publication objects from a structured publication list.
  *
@@ -414,18 +479,22 @@ export const generatePubmedURL = (id: string): string => {
  * @param {ResultSet | null} resultSet - The dataset containing publication information.
  * @param {RawPublicationList} pubs - A structured object mapping knowledge levels to publication entries.
  * @param {ResultEdge} [edge] - The edge the publications belong to, used to resolve per source record links.
+ * @param {Record<string, ProvenanceCatalogEntry>} [provenanceCatalog] - Infores catalog entries used to name sources when there is no result set.
  * @returns {PublicationObject[]} - An array of publication objects with relevant metadata.
  */
-export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawPublicationList, edge?: ResultEdge): PublicationObject[] => {
+export const flattenPublicationObject = (
+  resultSet: ResultSet | null,
+  pubs: RawPublicationList,
+  edge?: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): PublicationObject[] => {
   const pubArray: PublicationObject[] = [];
-  if(!resultSet)
-    return pubArray;
 
   for (const kl in pubs) {
     const pubEntries = pubs[kl];
     for (const pubEntry of pubEntries) {
-      const pub = getPubById(resultSet, pubEntry.id);
-      if (!!pub) {
+      const pub = resultSet ? getPubById(resultSet, pubEntry.id) : undefined;
+      if (pub) {
         pubArray.push({
           knowledgeLevel: kl,
           id: pubEntry.id,
@@ -434,6 +503,8 @@ export const flattenPublicationObject = (resultSet: ResultSet | null, pubs: RawP
           type: pub.type,
           url: pub.url
         });
+      } else {
+        pubArray.push(publicationObjectFromRef(pubEntry, kl, edge, provenanceCatalog));
       }
     }
   }
@@ -456,9 +527,8 @@ export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string
   if(!trialIDs)
     return trialArray;
   for (const id of trialIDs) {
-    const trial = getTrialById(resultSet, id);
-    if(!!trial) 
-      trialArray.push(trial);
+    const trial = resultSet ? getTrialById(resultSet, id) : undefined;
+    trialArray.push(trial ?? trialObjectFromRef(id));
   }
 
   return trialArray;

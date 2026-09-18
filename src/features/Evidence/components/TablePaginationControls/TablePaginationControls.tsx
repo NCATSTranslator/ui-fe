@@ -4,9 +4,13 @@ import Select from "@/features/Core/components/Select/Select";
 import ReactPaginate from "react-paginate";
 import NextIcon from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import PreviousIcon from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
+import { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface TablePaginationControlsProps {
   label: string;
+  /** The evidence tab this table belongs to, reported as tab_name so it matches evidence_tab_changed. */
+  tabName: EvidenceTabName;
   itemsPerPage: number;
   currentPage: number;
   pageCount: number;
@@ -16,12 +20,22 @@ interface TablePaginationControlsProps {
 
 const TablePaginationControls: FC<TablePaginationControlsProps> = ({
   label,
+  tabName,
   itemsPerPage,
   currentPage,
   pageCount,
   onItemsPerPageChange,
   onPageChange,
-}) => (
+}) => {
+  const handlePageChange = (event: { selected: number }) => {
+    trackEvent('evidence_paginated', {
+      tab_name: tabName,
+      page_number: event.selected + 1,
+    });
+    onPageChange(event);
+  };
+
+  return (
   <div className={styles.tablePagination}>
     <div className={styles.perPage}>
       <p className={styles.label}>{label}</p>
@@ -41,7 +55,7 @@ const TablePaginationControls: FC<TablePaginationControlsProps> = ({
         breakLabel="..."
         nextLabel={<NextIcon />}
         previousLabel={<PreviousIcon />}
-        onPageChange={onPageChange}
+        onPageChange={handlePageChange}
         pageRangeDisplayed={2}
         marginPagesDisplayed={2}
         pageCount={pageCount}
@@ -56,6 +70,7 @@ const TablePaginationControls: FC<TablePaginationControlsProps> = ({
       />
     </div>
   </div>
-);
+  );
+};
 
 export default TablePaginationControls;

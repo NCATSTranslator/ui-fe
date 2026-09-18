@@ -11,11 +11,12 @@ const QueryBreadcrumbLabel: FC = () => {
     ? getDataFromQueryVar("lone", decodedParams)
     : getDataFromQueryVar("l", decodedParams) || '';
   const nodeTwoLabel = queryType === "p" ? getDataFromQueryVar("ltwo", decodedParams) : '';
-  const constraint = queryType === "p"
-    ? getDataFromQueryVar("c", decodedParams)
-    : queryType === "l"
-      ? getDataFromQueryVar("cat", decodedParams)
-      : null;
+  let constraint = null;
+  if (queryType === "p") {
+    constraint = getDataFromQueryVar("c", decodedParams);
+  } else if (queryType === "l") {
+    constraint = getDataFromQueryVar("cat", decodedParams);
+  }
 
   const queryTitle = generateQueryTitle(queryType, nodeOneLabel || '', nodeTwoLabel || '', constraint);
 

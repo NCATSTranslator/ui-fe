@@ -1,7 +1,8 @@
-import { createContext, Dispatch, SetStateAction, useContext, useMemo } from "react";
+import { createContext, Dispatch, SetStateAction, useCallback, useContext } from "react";
 import { ResultItemIdContext } from "@/features/ResultItem/components/PathView/PathView";
 import { markEdgeSeen, markEdgeUnseen, resetSeenStatus } from "@/features/ResultList/slices/seenStatusSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { selectSeenEdgeSetByPk } from "@/redux/seenStatusSelectors";
 import { AppDispatch, RootState } from "@/redux/store";
 
 export type LastViewedPathIDContextType = {
@@ -33,20 +34,21 @@ export const useResultItemId = (): string | undefined => {
 export const useSeenStatus = (pk: string) => {
   const dispatch: AppDispatch = useDispatch();
 
-  const seenStatus = useSelector((state: RootState) =>
-    state.seenStatus[pk] || { seenEdges: [], seenPaths: [] }
-  );
+  // A path list calls this hook once per row, so it subscribes to the shared Set
+  // rather than the id list, which would add a store subscription per row for a
+  // value no caller reads.
+  const seenEdgeSet = useSelector((state: RootState) => selectSeenEdgeSetByPk(state, pk));
 
-  const isEdgeSeen = (edgeId: string): boolean => seenStatus.seenEdges.includes(edgeId);
-  const seenEdges = useSelector((state: RootState) => state.seenStatus[pk]?.seenEdges || []);
-  const seenEdgeSet = useMemo(() => new Set(seenEdges), [seenEdges]);
-  const isPathSeen = (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id));
-  const handleMarkEdgeSeen = (edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId }));
-  const handleMarkEdgeUnseen = (edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId }));
-  const resetStatus = () => dispatch(resetSeenStatus({ pk }));
+  const isEdgeSeen = useCallback((edgeId: string): boolean => seenEdgeSet.has(edgeId), [seenEdgeSet]);
+  const isPathSeen = useCallback(
+    (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id)),
+    [seenEdgeSet]
+  );
+  const handleMarkEdgeSeen = useCallback((edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId })), [dispatch, pk]);
+  const handleMarkEdgeUnseen = useCallback((edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId })), [dispatch, pk]);
+  const resetStatus = useCallback(() => dispatch(resetSeenStatus({ pk })), [dispatch, pk]);
 
   return {
-    seenEdges: seenStatus.seenEdges,
     isEdgeSeen,
     isPathSeen,
     markEdgeSeen: handleMarkEdgeSeen,

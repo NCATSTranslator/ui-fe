@@ -98,3 +98,8 @@
     }
   }
 }
+
+// tooltips render in a portal, so this lives outside .labelContainer
+.tooltipBold {
+  font-weight: 800 !important;
+}

@@ -5,6 +5,7 @@ import TextEditor from "@/features/Core/components/TextEditor/TextEditor";
 import Button from "@/features/Core/components/Button/Button";
 import { getUserSave, Save, SaveGroup, updateUserSave } from "@/features/UserAuth/utils/userApi";
 import { updateUserSavesState } from "@/features/ResultItem/utils/bookmarkFunctions";
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface NotesModalProps {
   currentBookmarkID: string | null;
@@ -31,8 +32,13 @@ const NotesModal: FC<NotesModalProps> = ({
   const localBookmarkItem = useRef<Save | null>(null);
   const saveNowRef = useRef<(() => Promise<void>) | null>(null);
   const isClosing = useRef(false);
+  // The editor autosaves on a debounce, so onNoteSaved can fire many times for
+  // one piece of writing. Collapse that into a single event when the modal
+  // closes, otherwise the count measures keystroke cadence, not note-taking.
+  const noteSavedThisSession = useRef(false);
 
   const onNoteSaved = useCallback((save: Save) => {
+    noteSavedThisSession.current = true;
     localBookmarkItem.current = save;
     updateUserSavesState('updateNote', updateUserSaves, save.object_ref, save);
     if (shouldUpdateResultsAfterBookmark)
@@ -53,6 +59,11 @@ const NotesModal: FC<NotesModalProps> = ({
         .finally(() => { isClosing.current = false; });
     } else {
       isClosing.current = false;
+    }
+
+    if (noteSavedThisSession.current) {
+      trackEvent('result_note_saved');
+      noteSavedThisSession.current = false;
     }
 
     // Close immediately for responsive UX

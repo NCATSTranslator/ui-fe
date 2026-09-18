@@ -1,19 +1,21 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { EMPTY_STRING_ARRAY } from '@/features/Core/utils/constants';
 import type { RootState } from './store';
 
-export const selectSeenEdgesByPk = (pk: string) =>
-  (state: RootState) => state.seenStatus[pk]?.seenEdges || [];
+/**
+ * Returns the seen edge ids for a query. The shared empty fallback keeps the
+ * reference stable for queries with nothing seen yet, so subscribers don't
+ * re-render on every dispatched action.
+ */
+export const selectSeenEdgesByPk = (state: RootState, pk: string): string[] =>
+  state.seenStatus[pk]?.seenEdges ?? EMPTY_STRING_ARRAY;
 
 /**
- * Creates a memoized selector to check if all edges in a path are seen.
- *
- * @param {string} pk - The primary key of the result set.
- * @param {string[]} edgeIds - An array of edge IDs that make up the path.
- * @returns {boolean} - True if all edge IDs are marked as seen.
+ * Lookup Set for the seen edge ids of a query. Memoized here rather than in the
+ * consuming hook because a path list calls that hook once per row, and each call
+ * would otherwise rebuild the same Set.
  */
-export const createIsPathSeenSelector = (pk: string, edgeIds: string[]) => {
-  return createSelector([selectSeenEdgesByPk(pk)], (seenEdges) => {
-    const seenSet = new Set(seenEdges);
-    return edgeIds.every((id) => seenSet.has(id));
-  });
-}
+export const selectSeenEdgeSetByPk = createSelector(
+  [selectSeenEdgesByPk],
+  (seenEdges) => new Set(seenEdges)
+);

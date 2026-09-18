@@ -90,47 +90,23 @@ export const filterAndSortProjects = (projects: Project[], queries: UserQueryObj
  * @returns {UserQueryObject[]} The sorted queries
 */
 export const sortQueries = (queries: UserQueryObject[], sortField: SortField, sortDirection: SortDirection): UserQueryObject[] => {
-  return [...queries].sort((a, b) => {
-    let aValue: SortValue;
-    let bValue: SortValue;
-
+  const getSortValue = (query: UserQueryObject): SortValue => {
     switch (sortField) {
-      case 'name':
-        aValue = a.data.title?.toLowerCase() || '';
-        bValue = b.data.title?.toLowerCase() || '';
-        break;
-      case 'created':
-        aValue = a.data.time_created;
-        bValue = b.data.time_created;
-        break;
-      case 'lastSeen':
-        aValue = a.data.time_updated;
-        bValue = b.data.time_updated;
-        break;
-      case 'queries':
-        aValue = 0;
-        bValue = 0;
-        break;
-      case 'bookmarks':
-        aValue = a.data.bookmark_ids.length;
-        bValue = b.data.bookmark_ids.length;
-        break;
-      case 'notes':
-        aValue = a.data.note_count;
-        bValue = b.data.note_count;
-        break;
-      case 'queryType':
-        aValue = a.data.query.type;
-        bValue = b.data.query.type;
-        break;
-      case 'status':
-        aValue = a.status;
-        bValue = b.status;
-        break;
-      default:
-        return 0;
+      case 'name': return query.data.title?.toLowerCase() || '';
+      case 'created': return query.data.time_created;
+      case 'lastSeen': return query.data.time_updated;
+      case 'queries': return 0;
+      case 'bookmarks': return query.data.bookmark_ids.length;
+      case 'notes': return query.data.note_count;
+      case 'queryType': return query.data.query.type;
+      case 'status': return query.status;
+      default: return 0;
     }
+  };
 
+  return [...queries].sort((a, b) => {
+    const aValue = getSortValue(a);
+    const bValue = getSortValue(b);
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;

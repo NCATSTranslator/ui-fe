@@ -40,6 +40,23 @@ export type User = {
   time_updated: string;
 }
 
+// API keys. The key itself is only ever returned by the create endpoint; everything else
+// carries key_display, a truncated form safe to show.
+export type ApiKey = {
+  id: string;
+  user_id: string;
+  name: string;
+  key_display: string;
+  time_created: string;
+  time_last_used: string | null;
+  time_revoked: string | null;
+}
+
+export type CreateApiKeyResponse = {
+  api_key: ApiKey;
+  key: string;
+}
+
 export type Session = {
   auth_provider: string;
   id: number;
@@ -60,6 +77,8 @@ export type SessionStatus = {
 export type Config = {
   cached_queries: Example[];
   gaID: string;
+  gtmID?: string;
+  include_canvas?: boolean;
   include_hashed_parameters: boolean;
   include_lookup: boolean;
   include_pathfinder: boolean;

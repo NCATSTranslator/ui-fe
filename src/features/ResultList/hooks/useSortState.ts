@@ -58,6 +58,34 @@ function createSortState(sortString: string): SortState {
   };
 }
 
+interface SortContext {
+  summary: ResultSet;
+  isPathfinder: boolean;
+  scoreWeights: ScoreWeights;
+  activeEntityFilters: string[];
+}
+
+type ResultSorter = (results: Result[], ctx: SortContext) => Result[];
+
+const RESULT_SORTERS = new Map<string, ResultSorter>([
+  ['nameLowHigh', (results, { isPathfinder }) =>
+    isPathfinder ? sortByNamePathfinderLowHigh(results) as Result[] : sortNameLowHigh(results) as Result[]],
+  ['nameHighLow', (results, { isPathfinder }) =>
+    isPathfinder ? sortByNamePathfinderHighLow(results) as Result[] : sortNameHighLow(results) as Result[]],
+  ['evidenceLowHigh', (results, { summary }) => sortEvidenceLowHigh(summary, results)],
+  ['evidenceHighLow', (results, { summary }) => sortEvidenceHighLow(summary, results)],
+  ['scoreLowHigh', (results, { summary, isPathfinder, scoreWeights }) =>
+    isPathfinder ? sortScorePathfinderLowHigh(summary, results) : sortScoreLowHigh(results, scoreWeights)],
+  ['scoreHighLow', (results, { summary, isPathfinder, scoreWeights }) =>
+    isPathfinder ? sortScorePathfinderHighLow(summary, results) : sortScoreHighLow(results, scoreWeights)],
+  // pref values used to use 'path' instead of 'paths', so we need to handle both
+  ['pathsLowHigh', (results, { summary }) => sortPathsLowHigh(summary, results)],
+  ['pathLowHigh', (results, { summary }) => sortPathsLowHigh(summary, results)],
+  ['pathsHighLow', (results, { summary }) => sortPathsHighLow(summary, results)],
+  ['pathHighLow', (results, { summary }) => sortPathsHighLow(summary, results)],
+  ['entityString', (results, { activeEntityFilters }) => sortByEntityStrings(results, activeEntityFilters)],
+]);
+
 export interface UseSortStateReturn {
   isSortedByName: boolean | null;
   isSortedByEvidence: boolean | null;
@@ -93,44 +121,16 @@ const useSortState = ({ scoreWeights, initSortString }: UseSortStateArgs): UseSo
       return resultsToSort;
     }
 
-    let newSortedResults = [...resultsToSort];
     const { column, direction } = getSortColumnAndDirection(sortName);
-
-    switch (sortName) {
-      case 'nameLowHigh':
-        newSortedResults = (isPathfinderArg) ? sortByNamePathfinderLowHigh(newSortedResults) as Result[] : sortNameLowHigh(newSortedResults) as Result[];
-        break;
-      case 'nameHighLow':
-        newSortedResults = (isPathfinderArg) ? sortByNamePathfinderHighLow(newSortedResults) as Result[] : sortNameHighLow(newSortedResults) as Result[];
-        break;
-      case 'evidenceLowHigh':
-        newSortedResults = sortEvidenceLowHigh(summary, newSortedResults);
-        break;
-      case 'evidenceHighLow':
-        newSortedResults = sortEvidenceHighLow(summary, newSortedResults);
-        break;
-      case 'scoreLowHigh':
-        newSortedResults = (isPathfinderArg) ? sortScorePathfinderLowHigh(summary, newSortedResults) : sortScoreLowHigh(newSortedResults, scoreWeights);
-        break;
-      case 'scoreHighLow':
-        newSortedResults = (isPathfinderArg) ? sortScorePathfinderHighLow(summary, newSortedResults) : sortScoreHighLow(newSortedResults, scoreWeights);
-        break;
-      // pref values used to use 'path' instead of 'paths', so we need to handle both
-      case 'pathsLowHigh':
-      case 'pathLowHigh':
-        newSortedResults = sortPathsLowHigh(summary, newSortedResults);
-        break;
-      // pref values used to use 'path' instead of 'paths', so we need to handle both
-      case 'pathsHighLow':
-      case 'pathHighLow':
-        newSortedResults = sortPathsHighLow(summary, newSortedResults);
-        break;
-      case 'entityString':
-        newSortedResults = sortByEntityStrings(newSortedResults, activeEntityFiltersRef.current);
-        break;
-      default:
-        break;
-    }
+    const sorter = RESULT_SORTERS.get(sortName);
+    const newSortedResults = sorter
+      ? sorter([...resultsToSort], {
+        summary,
+        isPathfinder: isPathfinderArg,
+        scoreWeights,
+        activeEntityFilters: activeEntityFiltersRef.current,
+      })
+      : [...resultsToSort];
 
     dispatch({ type: 'SET_SORT', column, direction, sortString: sortName });
 

@@ -18,6 +18,37 @@ interface SidebarCardTitleProps {
   title: string;
 }
 
+interface SidebarCardTitleTextProps {
+  ignoreTitleMatch: boolean;
+  searchTerm?: string;
+  title: string;
+}
+
+const SidebarCardTitleText: FC<SidebarCardTitleTextProps> = ({ ignoreTitleMatch, searchTerm, title }) => {
+  const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
+  return (
+    <>
+      <Highlighter
+        highlightClassName="highlight"
+        searchWords={searchTerm ? [searchTerm] : []}
+        autoEscape={true}
+        textToHighlight={title}
+      />
+      {
+        searchTerm && !titleMatches && !ignoreTitleMatch && (
+          <Highlighter
+            highlightClassName="highlight"
+            searchWords={['*']}
+            autoEscape={true}
+            textToHighlight=" *"
+            className={styles.titleMatch}
+          />
+        )
+      }
+    </>
+  );
+};
+
 const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   ignoreTitleMatch = false,
   isRenaming,
@@ -32,44 +63,26 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
 }) => {
   const { addToProjectQuery, isSelectedProjectMode } = useSidebar();
   const isAddToProjectMode = !!addToProjectQuery || isSelectedProjectMode;
-  const titleMatches = title.toLowerCase().includes(searchTerm?.toLowerCase() || '');
   const titleContent = (
     isRenaming && onTitleChange && onFormSubmit ? (
       <form onSubmit={onFormSubmit}>
         <TextInput value={title} handleChange={onTitleChange} iconRightClickToReset ref={textInputRef} className={styles.titleInput}/>
       </form>
     ) : (
-      <>
-        <Highlighter
-          highlightClassName="highlight"
-          searchWords={searchTerm ? [searchTerm] : []}
-          autoEscape={true}
-          textToHighlight={title}
-        />
-        {
-          searchTerm && !titleMatches && !ignoreTitleMatch && (
-            <Highlighter
-              highlightClassName="highlight"
-              searchWords={['*']}
-              autoEscape={true}
-              textToHighlight=" *"
-              className={styles.titleMatch}
-            />
-          )
-        }
-      </>
+      <SidebarCardTitleText ignoreTitleMatch={ignoreTitleMatch} searchTerm={searchTerm} title={title} />
     )
   );
+  const rightIconElement = rightIcon && <div className={styles.rightIcon}>{rightIcon}</div>;
 
   if (linkTo && !isRenaming && !isAddToProjectMode) {
     return (
-      <Link 
-        className={styles.title} 
+      <Link
+        className={styles.title}
         to={linkTo}
         target={linkTarget}
       >
         {titleContent}
-        {rightIcon && <div className={styles.rightIcon}>{rightIcon}</div>}
+        {rightIconElement}
       </Link>
     );
   }
@@ -77,7 +90,7 @@ const SidebarCardTitle: FC<SidebarCardTitleProps> = ({
   return (
     <div className={styles.title}>
       {titleContent}
-      {rightIcon && <div className={styles.rightIcon}>{rightIcon}</div>}
+      {rightIconElement}
     </div>
   );
 };

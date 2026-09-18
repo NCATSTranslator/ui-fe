@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const GTM_ID_REGEX = /^GTM-\w+$/;
-const isValidGTMID = (gtmID: string): boolean => {
+export const isValidGTMID = (gtmID: string): boolean => {
   return GTM_ID_REGEX.test(gtmID);
 };
 

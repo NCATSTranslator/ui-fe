@@ -1,0 +1,41 @@
+@use "@/assets/styles/variables" as *;
+
+.canvasGraph {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.graphArea {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  // The pane's white background sits several ancestors up, behind the pane's
+  // rounded overflow clip. Panning moves the React Flow viewport on the
+  // compositor, and any region the compositor exposes before the main thread
+  // rasters it falls through to the page underneath. An opaque backdrop in its
+  // own stacking context keeps those regions white.
+  background: $white;
+  isolation: isolate;
+
+  // The viewport already carries an inline transform, so this only pins it to a
+  // composited layer instead of letting the browser promote and demote it on
+  // every pan gesture.
+  :global(.react-flow__viewport) {
+    will-change: transform;
+  }
+}
+
+.graphLoading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $s;
+  color: $darkGray;
+  font-size: $captionSize;
+}

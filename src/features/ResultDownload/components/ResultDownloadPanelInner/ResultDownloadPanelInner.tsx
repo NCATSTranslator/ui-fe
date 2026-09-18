@@ -48,7 +48,7 @@ const ResultDownloadPanelInner: FC<ResultDownloadPanelInnerProps> = ({
     };
 
     try {
-      downloadResults(resultSet, allResults, filteredResults, userSaves, options, queryTitle);
+      downloadResults(resultSet, { allResults, filteredResults, userSaves }, options, queryTitle);
     } catch (error) {
       console.error('Error downloading results:', error);
     } finally {

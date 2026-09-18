@@ -9,6 +9,39 @@ import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useFeedbackForm } from "@/features/Core/hooks/useFeedbackForm";
 import Feedback from "@/assets/icons/navigation/Feedback.svg?react";
 
+const ERROR_MESSAGES = {
+  category: "Please select a category.",
+  comments: "Please provide a comment.",
+  steps: "Please detail the steps you took to produce the error.",
+};
+
+type FeedbackErrors = { category: boolean; comments: boolean; steps: boolean };
+
+const ErrorDisplay = ({ errors }: { errors: FeedbackErrors }) => (
+  <div>
+    {errors.category && <p className={styles.errorText} role="alert">{ERROR_MESSAGES.category}</p>}
+    {errors.comments && <p className={styles.errorText} role="alert">{ERROR_MESSAGES.comments}</p>}
+    {errors.steps && <p className={styles.errorText} role="alert">{ERROR_MESSAGES.steps}</p>}
+  </div>
+);
+
+const FeedbackSuccess = ({ onSendMore }: { onSendMore: () => void }) => (
+  <div className={styles.issueCreatedContainer}>
+    <h5 className={styles.title}>Thanks for helping us improve Translator!</h5>
+    <p>We really appreciate you sharing your valuable feedback with our team.</p>
+    <div className={styles.buttonContainer}>
+      <Button
+        variant="secondary"
+        handleClick={onSendMore}
+        className={styles.newIssue}
+        iconLeft={<Feedback/>}
+      >
+        Send More Feedback
+      </Button>
+    </div>
+  </div>
+);
+
 const SendFeedbackForm = () => {
   const {
     form,
@@ -29,19 +62,11 @@ const SendFeedbackForm = () => {
   const currentARSpk = getDataFromQueryVar('q', window.location.search) ?? '';
   const feedbackLink = getDataFromQueryVar('link', window.location.search);
   const feedbackUrl = feedbackLink ? encodeURI(decodeURIComponent(feedbackLink)) : '';
-
-  const errorMessages = {
-    category: "Please select a category.",
-    comments: "Please provide a comment.",
-    steps: "Please detail the steps you took to produce the error.",
-  };
+  const fileInputLabel: ReactNode = <>Add Files <span className="fw-normal">- Optional</span></>;
 
   const handleSubmission = async (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -75,150 +100,128 @@ const SendFeedbackForm = () => {
     }
   };
 
-  const ErrorDisplay = ({ errors, errorMessages }: { 
-    errors: { category: boolean; comments: boolean; steps: boolean }; 
-    errorMessages: Record<string, string> 
-  }) => (
-    <div>
-      {errors.category && <p className={styles.errorText} role="alert">{errorMessages.category}</p>}
-      {errors.comments && <p className={styles.errorText} role="alert">{errorMessages.comments}</p>}
-      {errors.steps && <p className={styles.errorText} role="alert">{errorMessages.steps}</p>}
-    </div>
-  );
-
-  const fileInputLabel: ReactNode = <>Add Files <span className="fw-normal">- Optional</span></> as ReactNode;
+  if (createdIssueURL) {
+    return (
+      <div className={styles.sendFeedbackFormContainer}>
+        <FeedbackSuccess onSendMore={() => setCreatedIssueURL(null)} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.sendFeedbackFormContainer}>
-      {createdIssueURL ? (
-        <div className={styles.issueCreatedContainer}>
-          <h5 className={styles.title}>Thanks for helping us improve Translator!</h5>
-          <p>We really appreciate you sharing your valuable feedback with our team.</p>
-          <div className={styles.buttonContainer}>
-            <Button 
-              variant="secondary" 
-              handleClick={() => setCreatedIssueURL(null)} 
-              className={styles.newIssue}
-              iconLeft={<Feedback/>}
+      <Fade>
+        <form
+          onSubmit={handleSubmission}
+          name="send feedback form"
+          aria-label="Feedback submission form"
+          noValidate
+        >
+          <fieldset>
+            {submitError && (
+              <div className={styles.errorContainer}>
+                <p className={styles.errorText} role="alert">{submitError}</p>
+              </div>
+            )}
+
+            <ErrorDisplay errors={errors} />
+
+            <Select
+              label="Category *"
+              name="category"
+              handleChange={(value) => {
+                updateField('category', value.toString());
+                handleFieldBlur('category');
+              }}
+              value={form.category}
+              error={showFieldError('category')}
+              errorText={ERROR_MESSAGES.category}
+              testId="category-select"
+              noanimate
             >
-              Send More Feedback
+              <option value="Suggestion" key="0">Suggestion</option>
+              <option value="Bug Report" key="1">Bug Report</option>
+              <option value="Other Comment" key="2">Other Comment</option>
+            </Select>
+
+            {showFieldError('category') && (
+              <div id="category-error" className={styles.errorText} role="alert">
+                {ERROR_MESSAGES.category}
+              </div>
+            )}
+
+            {form.category === 'Bug Report' && (
+              <>
+                <TextInput
+                  label="Steps to Reproduce *"
+                  subtitle="Please be as detailed as you can to help us identify this bug and avoid sharing personal information."
+                  rows={3}
+                  maxLength={1500}
+                  handleChange={(value) => {
+                    updateField('steps', value);
+                    handleFieldBlur('steps');
+                  }}
+                  value={form.steps}
+                  error={showFieldError('steps')}
+                  errorText={ERROR_MESSAGES.steps}
+                  testId="steps"
+                />
+                {showFieldError('steps') && (
+                  <div id="steps-error" className={styles.errorText} role="alert">
+                    {ERROR_MESSAGES.steps}
+                  </div>
+                )}
+              </>
+            )}
+
+            <TextInput
+              label="Comments *"
+              subtitle="Please avoid sharing personal information."
+              rows={5}
+              maxLength={1500}
+              handleChange={(value) => {
+                updateField('comments', value);
+                handleFieldBlur('comments');
+              }}
+              value={form.comments}
+              error={showFieldError('comments')}
+              errorText={ERROR_MESSAGES.comments}
+              testId="comments"
+            />
+
+            {showFieldError('comments') && (
+              <div id="comments-error" className={styles.errorText} role="alert">
+                {ERROR_MESSAGES.comments}
+              </div>
+            )}
+
+            <FileInput
+              label={fileInputLabel}
+              buttonLabel="Browse Files"
+              fileTypes=".png,.jpg,.jpeg"
+              handleChange={handleFileChange}
+              multiple
+            />
+
+            <p className="caption">Your anonymous feedback will be stored for the sole use of improving Translator.</p>
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className={styles.submitButton}
+              aria-describedby={isSubmitting ? 'submitting-status' : undefined}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </Button>
-          </div>
-        </div>
-      ) : (
-        <Fade>
-          <form 
-            onSubmit={handleSubmission} 
-            name="send feedback form"
-            aria-label="Feedback submission form"
-            noValidate
-          >
-            <fieldset>
-              {submitError && (
-                <div className={styles.errorContainer}>
-                  <p className={styles.errorText} role="alert">{submitError}</p>
-                </div>
-              )}
 
-              <ErrorDisplay errors={errors} errorMessages={errorMessages} />
-
-              <Select
-                label="Category *"
-                name="category"
-                handleChange={(value) => {
-                  updateField('category', value.toString());
-                  handleFieldBlur('category');
-                }}
-                value={form.category}
-                error={showFieldError('category')}
-                errorText={errorMessages.category}
-                testId="category-select"
-                noanimate
-              >
-                <option value="Suggestion" key="0">Suggestion</option>
-                <option value="Bug Report" key="1">Bug Report</option>
-                <option value="Other Comment" key="2">Other Comment</option>
-              </Select>
-
-              {showFieldError('category') && (
-                <div id="category-error" className={styles.errorText} role="alert">
-                  {errorMessages.category}
-                </div>
-              )}
-
-              {form.category === 'Bug Report' && (
-                <>
-                  <TextInput
-                    label="Steps to Reproduce *"
-                    subtitle="Please be as detailed as you can to help us identify this bug and avoid sharing personal information."
-                    rows={3}
-                    maxLength={1500}
-                    handleChange={(value) => {
-                      updateField('steps', value);
-                      handleFieldBlur('steps');
-                    }}
-                    value={form.steps}
-                    error={showFieldError('steps')}
-                    errorText={errorMessages.steps}
-                    testId="steps"
-                  />
-                  {showFieldError('steps') && (
-                    <div id="steps-error" className={styles.errorText} role="alert">
-                      {errorMessages.steps}
-                    </div>
-                  )}
-                </>
-              )}
-
-              <TextInput
-                label="Comments *"
-                subtitle="Please avoid sharing personal information."
-                rows={5}
-                maxLength={1500}
-                handleChange={(value) => {
-                  updateField('comments', value);
-                  handleFieldBlur('comments');
-                }}
-                value={form.comments}
-                error={showFieldError('comments')}
-                errorText={errorMessages.comments}
-                testId="comments"
-              />
-
-              {showFieldError('comments') && (
-                <div id="comments-error" className={styles.errorText} role="alert">
-                  {errorMessages.comments}
-                </div>
-              )}
-
-              <FileInput
-                label={fileInputLabel}
-                buttonLabel="Browse Files"
-                fileTypes=".png,.jpg,.jpeg"
-                handleChange={handleFileChange}
-                multiple
-              />
-
-              <p className="caption">Your anonymous feedback will be stored for the sole use of improving Translator.</p>
-
-              <Button 
-                type="submit"
-                disabled={isSubmitting}
-                className={styles.submitButton}
-                aria-describedby={isSubmitting ? 'submitting-status' : undefined}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-              </Button>
-              
-              {isSubmitting && (
-                <div id="submitting-status" className="sr-only" aria-live="polite">
-                  Submitting feedback, please wait...
-                </div>
-              )}
-            </fieldset>
-          </form>
-        </Fade>
-      )}
+            {isSubmitting && (
+              <div id="submitting-status" className="sr-only" aria-live="polite">
+                Submitting feedback, please wait...
+              </div>
+            )}
+          </fieldset>
+        </form>
+      </Fade>
     </div>
   );
 };

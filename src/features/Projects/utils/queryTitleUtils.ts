@@ -95,7 +95,7 @@ export const extractAllCuriesFromTitles = (titles: string[]): string[] => {
  * @returns {string[]} Array of all curies found in the title
  */
 export const findAllCuriesInTitle = (title: string): string[] => {
-  const curieRegex = /\b[A-Za-z][A-Za-z0-9_]*:[A-Za-z0-9_-]+\b/g;
+  const curieRegex = /\b[A-Za-z]\w*:[A-Za-z0-9_-]+\b/g;
   const matches = title.match(curieRegex);
   return matches || [];
 }

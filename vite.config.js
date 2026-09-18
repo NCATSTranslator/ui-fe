@@ -55,7 +55,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': '/src',
-        'translator-graph-view/styles.css': resolve(dirname(fileURLToPath(import.meta.url)), 'node_modules/translator-graph-view/dist/translator-graph-view.css')
+        'translator-graph-view/styles.css': resolve(dirname(fileURLToPath(import.meta.url)), 'node_modules/translator-graph-view/dist/styles.css')
       }
     }
   };

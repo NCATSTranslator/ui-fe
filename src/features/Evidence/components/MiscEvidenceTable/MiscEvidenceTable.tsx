@@ -87,6 +87,7 @@ const MiscEvidenceTable: FC<MiscEvidenceTableProps> = ({ miscEvidence, prefs }) 
       </div>
       <TablePaginationControls
         label="Links per Page"
+        tabName="Miscellaneous"
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         pageCount={pageCount}

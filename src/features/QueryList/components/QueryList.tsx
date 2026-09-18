@@ -12,7 +12,7 @@ import { useFilteredQueries, useSidebar } from "@/features/Sidebar/hooks/sidebar
 import ListHeader from "@/features/Core/components/ListHeader/ListHeader";
 import Tabs from "@/features/Core/components/Tabs/Tabs";
 import Tab from "@/features/Core/components/Tabs/Tab";
-import CardList from "@/features/Projects/components/CardList/CardList";
+import CardList from "@/features/Core/components/CardList/CardList";
 import Button from "@/features/Core/components/Button/Button";
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
@@ -109,34 +109,19 @@ const QueryList = () => {
                         sortDirection={sortSearchState.sortDirection}
                         onSort={sortSearchState.handleSort}
                       />
-                      {
-                        (searchTerm.length === 0 && filteredQueries.length === 0)
-                        ? (
-                          <EmptyArea heading="No Queries">
-                            {
-                              <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
-                            }
-                          </EmptyArea>
-                          ) 
-                        : 
-                          (
-                            filteredQueries.length === 0 ? (
-                              <EmptyArea>
-                                <p>No queries found matching your search.</p>
-                              </EmptyArea>
-                            ) : (
-                              <>
-                                {
-                                  filteredQueries.map((query) => {
-                                    return (
-                                      <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
-                                    )
-                                  })
-                                }
-                              </>
-                            )
-                          )
-                      }
+                      {searchTerm.length === 0 && filteredQueries.length === 0 && (
+                        <EmptyArea heading="No Queries">
+                          <p>Your bookmarks and notes are saved here when you run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.</p>
+                        </EmptyArea>
+                      )}
+                      {searchTerm.length > 0 && filteredQueries.length === 0 && (
+                        <EmptyArea>
+                          <p>No queries found matching your search.</p>
+                        </EmptyArea>
+                      )}
+                      {filteredQueries.map((query) => (
+                        <QueryCard key={query.data.qid} query={query} searchTerm={searchTerm} />
+                      ))}
                     </CardList>
                   </Tab>
                 ]}

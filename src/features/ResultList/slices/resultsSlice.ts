@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 import { ResultNode, ResultEdge, Path, ResultSet, Result, Species } from "@/features/ResultList/types/results.d";
-import { PublicationObject, Provenance, SourceObject, TrialObject } from "@/features/Evidence/types/evidence";
+import { PublicationObject, Provenance, ProvenanceCatalogEntry, SourceObject, TrialObject } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
 import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 
@@ -54,12 +54,19 @@ export const getNodeById = (resultSet: ResultSet | null, id?: string): ResultNod
 export const getNodeSpecies = (node: ResultNode): Species => {
   return node.annotations?.gene?.species?.value ?? null;
 }
-export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
-  let edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
+export const getRawEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
+  const edge: ResultEdge | undefined = (resultSet === null || !id) ? undefined : resultSet.data.edges[id];
   if(!edge) {
     console.warn(`Unable to find edge with id: ${id} within result set.`);
     return undefined;
   }
+  return edge;
+};
+
+export const getEdgeById = (resultSet: ResultSet | null, id?: string): ResultEdge | undefined => {
+  const edge = getRawEdgeById(resultSet, id);
+  if(!edge)
+    return undefined;
 
   // Temporary fix to not display the "treats" predicate in the UI
   if(edge.predicate.includes("treat")) {
@@ -85,36 +92,78 @@ export const getEdgesByIds = (resultSet: ResultSet | null, ids:string[]): Result
 export const getPubById = (resultSet: ResultSet | null, id:string): PublicationObject | undefined => (resultSet === null) ? undefined : resultSet.data.publications[id];
 
 /**
+ * Resolves a catalog entry from the result set when present, otherwise from an explicit catalog
+ * (used for canvas-only evidence that has no result set).
+ */
+export const resolveProvenanceCatalogEntry = (
+  resultSet: ResultSet | null,
+  infores: string,
+  provenanceCatalog: Record<string, ProvenanceCatalogEntry> = {},
+): ProvenanceCatalogEntry | undefined =>
+  resultSet
+    ? resultSet.data.provenance?.[infores]
+    : provenanceCatalog[infores];
+
+/** Prefers an edge-specific record URL, then the catalog URL, then `emptyFallback`. */
+const resolveProvenanceUrl = <T extends string | null>(
+  recordUrl: string | null | undefined,
+  catalogUrl: string | null | undefined,
+  emptyFallback: T,
+): string | T => recordUrl ?? catalogUrl ?? emptyFallback;
+
+/**
  * Resolves an edge's provenance by prioritizing edge specific provenance information
  * over generic provenance information.
  */
-export const getEdgeProvenance = (resultSet: ResultSet | null, edge: ResultEdge | undefined): Provenance[] => {
-  if (!resultSet || !edge?.provenance) return [];
+export const getEdgeProvenance = (
+  resultSet: ResultSet | null,
+  edge: ResultEdge | undefined,
+  provenanceCatalog: Record<string, ProvenanceCatalogEntry> = {},
+): Provenance[] => {
+  if (!edge?.provenance) return [];
   return edge.provenance.map((source): Provenance => {
-    const provenance = resultSet.data.provenance?.[source.infores];
-    const sourceRecord = (source.records && source.records.length > 0) ? source.records[0] : null;
+    const catalogEntry = resolveProvenanceCatalogEntry(resultSet, source.infores, provenanceCatalog);
+    const sourceRecord = source.records?.length > 0 ? source.records[0] : null;
     return {
       infores: source.infores,
-      knowledge_level: provenance?.knowledge_level ?? "",
-      name: provenance?.name ?? null,
-      url: (null !== sourceRecord) ? sourceRecord : provenance?.url ?? null,
-      wiki: provenance?.wiki ?? null,
+      knowledge_level: catalogEntry?.knowledge_level ?? "",
+      name: catalogEntry?.name ?? source.infores,
+      url: resolveProvenanceUrl(sourceRecord, catalogEntry?.url, null),
+      wiki: catalogEntry?.wiki ?? null,
     };
   });
 }
 
+// Builds a publication source without a result set: catalog details when available, else the raw infores id.
+const getCatalogPublicationSource = (
+  infores: string,
+  recordUrl: string | undefined,
+  catalogEntry: ProvenanceCatalogEntry | undefined,
+): SourceObject => ({
+  knowledge_level: catalogEntry?.knowledge_level ?? "",
+  name: catalogEntry?.name ?? infores,
+  url: resolveProvenanceUrl(recordUrl, catalogEntry?.url, ""),
+});
+
 /**
  * Resolves the display source for a publication from an infores id.
+ * Without a result set (canvas-only evidence), catalog details come from `provenanceCatalog`.
  */
-export const getPublicationSource = (resultSet: ResultSet | null, infores: string | undefined, edge?: ResultEdge): SourceObject | undefined => {
-  if (!resultSet || !infores) return undefined;
-  const provenance = resultSet.data.provenance?.[infores];
-  if (!provenance) return undefined;
-  const recordUrl = edge?.provenance.find(source => source.infores === infores)?.records[0];
+export const getPublicationSource = (
+  resultSet: ResultSet | null,
+  infores: string | undefined,
+  edge?: ResultEdge,
+  provenanceCatalog: Record<string, ProvenanceCatalogEntry> = {},
+): SourceObject | undefined => {
+  if (!infores) return undefined;
+  const recordUrl = edge?.provenance.find(source => source.infores === infores)?.records?.[0];
+  const catalogEntry = resolveProvenanceCatalogEntry(resultSet, infores, provenanceCatalog);
+  if (!resultSet) return getCatalogPublicationSource(infores, recordUrl, catalogEntry);
+  if (!catalogEntry) return undefined;
   return {
-    knowledge_level: provenance.knowledge_level,
-    name: provenance.name ?? "",
-    url: recordUrl || provenance.url || "",
+    knowledge_level: catalogEntry.knowledge_level,
+    name: catalogEntry.name ?? "",
+    url: resolveProvenanceUrl(recordUrl, catalogEntry.url, ""),
   };
 }
 export const getTrialById = (resultSet: ResultSet | null, id:string): TrialObject | undefined => (resultSet === null) ? undefined : resultSet.data.trials[id];
@@ -136,5 +185,11 @@ export const getResultSetById = (id: string | null | undefined) => (state: {resu
   }
   return state.resultSets[id];
 }
+
+export const selectResultSets = (state: { resultSets: ResultState }) => state.resultSets;
+export const selectResultSetKeys = createSelector(
+  selectResultSets,
+  (resultSets) => Object.keys(resultSets),
+);
 
 export default resultSetsSlice.reducer;

@@ -4,7 +4,7 @@ Simple, React-idiomatic drag and drop components built on `@dnd-kit/core`.
 
 ## Overview
 
-This feature provides reusable drag-and-drop functionality for the application, currently used for dragging queries into projects. The implementation is built on dnd-kit and follows React best practices with full TypeScript support.
+This feature provides reusable drag-and-drop functionality for the application. It is used for dragging queries into projects and for dragging result nodes, edges, and paths onto an active canvas. The implementation is built on dnd-kit and follows React best practices with full TypeScript support.
 
 ## Components
 
@@ -125,6 +125,27 @@ Creates a drop zone for draggable items using dnd-kit's `useDroppable` hook with
 </DroppableArea>
 ```
 
+## Hooks
+
+### useResultEntityDraggable
+
+Located in: `hooks/useResultEntityDraggable.ts`
+
+Applies `useDraggable` to result path/node/edge UI without wrapping in an extra DOM node (needed for inline path layout). Disabled when there is no active canvas.
+
+```tsx
+const { attributes, listeners, setNodeRef, isDragging, canDrag } = useResultEntityDraggable({
+  type: 'node',
+  data: { id: node.id, pk },
+});
+```
+
+### ResultEntityDragOverlay
+
+Located in: `components/ResultEntityDragOverlay/ResultEntityDragOverlay.tsx`
+
+Floating chip shown in `DragOverlay` while dragging a result node, edge, or path (resolved from the result set: node icon + name, predicate label, or path first→last).
+
 ## Types
 
 ### Shared Data Types
@@ -133,17 +154,19 @@ Located in: `types/types.ts`
 
 #### DraggableData
 ```typescript
-type DraggableData = {
-  type: DraggableType;  // 'query' | 'project'
-  data: any;
-}
+type DraggableData =
+  | { type: 'query'; data: UserQueryObject }
+  | { type: 'project'; data: Project }
+  | { type: 'node'; data: { id: string; pk: string } }
+  | { type: 'edge'; data: { id: string; pk: string } }
+  | { type: 'path'; data: { id: string; pk: string; path: Path } };
 ```
 Data structure passed from draggable items to drop handlers.
 
 #### DroppableAreaData
 ```typescript
 type DroppableAreaData = {
-  type: DroppableAreaType;  // 'project'
+  type: DroppableAreaType;  // 'project' | 'canvas'
   id?: string;
   onDrop?: (draggedData: DraggableData) => void;
 }
@@ -152,12 +175,12 @@ Data structure for droppable areas, including optional drop handler callback.
 
 #### DraggableType
 ```typescript
-type DraggableType = 'query' | 'project';
+type DraggableType = 'query' | 'project' | 'node' | 'edge' | 'path';
 ```
 
 #### DroppableAreaType
 ```typescript
-type DroppableAreaType = 'project';
+type DroppableAreaType = 'project' | 'canvas';
 ```
 
 ### Component Prop Interfaces
@@ -221,13 +244,18 @@ DragAndDrop/
 │   ├── DraggableCard/
 │   │   ├── DraggableCard.tsx
 │   │   └── DraggableCard.module.scss
-│   └── DroppableArea/
-│       ├── DroppableArea.tsx
-│       └── DroppableArea.module.scss
+│   ├── DroppableArea/
+│   │   ├── DroppableArea.tsx
+│   │   └── DroppableArea.module.scss
+│   └── ResultEntityDragOverlay/
+│       ├── ResultEntityDragOverlay.tsx
+│       └── ResultEntityDragOverlay.module.scss
+├── hooks/
+│   └── useResultEntityDraggable.ts
+├── styles/
+│   └── resultEntityDraggable.module.scss
 ├── types/
 │   └── types.ts
-├── hooks/          # Currently empty - reserved for future hooks
-├── utils/          # Currently empty - reserved for future utilities
 └── README.md
 ```
 

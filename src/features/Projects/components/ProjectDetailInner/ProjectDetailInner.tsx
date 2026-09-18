@@ -1,279 +1,143 @@
-import { useCallback, useMemo, useState, MouseEvent } from 'react';
+import { FC, MouseEvent, Dispatch, SetStateAction } from 'react';
 import styles from './ProjectDetailInner.module.scss';
-import QueryCard from '@/features/Projects/components/QueryCard/QueryCard';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
-import { useSortSearchState } from '@/features/Projects/hooks/customHooks';
 import Tabs from '@/features/Core/components/Tabs/Tabs';
 import Tab from '@/features/Core/components/Tabs/Tab';
-import { useEditProjectHandlers } from '@/features/Projects/utils/editUpdateFunctions';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
-import { useProjectDetailData } from '@/features/Projects/hooks/useProjectDetailData';
-import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProjectDetailSortedData';
-import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
-import { DraggableData } from '@/features/DragAndDrop/types/types';
-import { handleQueryDrop } from '@/features/Projects/utils/dragDropUtils';
-import { useDndContext } from '@dnd-kit/core';
-import { useProjectModals } from '@/features/Projects/hooks/useProjectModals';
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import OptionsPane from '@/features/Sidebar/components/OptionsPane/OptionsPane';
 import Button from '@/features/Core/components/Button/Button';
 import ListHeader from '@/features/Core/components/ListHeader/ListHeader';
-import QueriesTableHeader from '../TableHeader/QueriesTableHeader/QueriesTableHeader';
-import CardList from '@/features/Projects/components/CardList/CardList';
-import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
 import CirclePlusIcon from '@/assets/icons/queries/CirclePlus.svg?react';
 import ChevDownIcon from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
 import AnimateHeight from 'react-animate-height';
 import CombinedQueryInterface from '@/features/Query/components/CombinedQueryInterface/CombinedQueryInterface';
-import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
-import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
-import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
-import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
-import DropLabel from '@/features/Projects/components/DropLabel/DropLabel';
-  
+import ProjectDetailQueriesPanel from '@/features/Projects/components/ProjectDetailInner/ProjectDetailQueriesPanel';
+import { useProjectDetailViewModel } from '@/features/Projects/hooks/useProjectDetailViewModel';
+import type { Project } from '@/features/Projects/types/projects';
+
+interface ProjectDetailOptionsButtonProps {
+  optionsOpen: boolean;
+  setOptionsOpen: Dispatch<SetStateAction<boolean>>;
+  onRename: (e: MouseEvent<HTMLElement>) => void;
+  project?: Project;
+  onDelete: (project: Project) => void;
+}
+
+const ProjectDetailOptionsButton: FC<ProjectDetailOptionsButtonProps> = ({
+  optionsOpen,
+  setOptionsOpen,
+  onRename,
+  project,
+  onDelete,
+}) => (
+  <div onClick={(e) => { e.stopPropagation(); setOptionsOpen(prev => !prev); }}>
+    <OptionsIcon className={styles.optionsIcon} />
+    <OptionsPane open={optionsOpen}>
+      <Button handleClick={onRename} iconLeft={<EditIcon />}>Rename</Button>
+      <Button
+        handleClick={() => { if (project) onDelete(project); }}
+        iconLeft={<TrashIcon />}
+      >
+        Delete
+      </Button>
+    </OptionsPane>
+  </div>
+);
+
 const ProjectDetailInner = () => {
-  // Data management
-  const data = useProjectDetailData();
-  const [optionsOpen, setOptionsOpen] = useState(false);
-  const projectsLoading = data.loading.projectsLoading;
-  const queriesLoading = data.loading.queriesLoading;
+  const vm = useProjectDetailViewModel();
 
-  const shouldShowProjectErrorState = useMemo(() => {
-    return data.errors.projectsError && !data.project?.id;
-  }, [data.errors.projectsError, data.project?.id]);
-  const shouldShowQueriesErrorState = useMemo(() => {
-    return data.errors.queriesError && data.projectQueries.length === 0;
-  }, [data.errors.queriesError, data.projectQueries.length]);
-
-  useDynamicPageTitle(data.project?.data.title || "Project");
-
-  // drag and drop context
-  const { active } = useDndContext();
-
-  const isDraggedQueryInProject = useMemo(() => {
-    if(!active || !active.data.current) return false;
-    const draggedQid = active.data.current.data.data.qid;
-    const projectQids = data.project?.data.pks || [];
-    return active.data.current.type === 'query' && projectQids.includes(draggedQid);
-  }, [active, data.project]);
-
-  // State management hooks
-  const sortSearchState = useSortSearchState();
-  const { handleUpdateProject } = useEditProjectHandlers();
-  const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
-  const { togglePanel, activePanelId } = useSidebar();
-  // Global modals context
-  const {
-    openDeleteProjectModal,
-  } = useProjectModals();
-
-  // Sorted data
-  const sortedData = useProjectDetailSortedData({
-    rawQueries: data.raw.queries,
-    projectQueries: data.projectQueries,
-    sortField: sortSearchState.sortField,
-    sortDirection: sortSearchState.sortDirection,
-    searchTerm: sortSearchState.searchTerm
-  });
-
-  // Rename state management
-  const {
-    isRenaming,
-    localTitle,
-    startRenaming,
-    handleTitleChange,
-    handleFormSubmit,
-    handleOutsideClick,
-    textInputRef
-  } = useRenameProject({
-    project: data.project,
-    allProjects: data.formatted.projects,
-    startRenaming: false,
-    onRename: () => {}
-  });
-
-  const onQueryDrop = useCallback((draggedItem: DraggableData) => {
-    if(data.project)
-      handleQueryDrop(draggedItem, data.project, data.project?.data.pks, handleUpdateProject);
-    else
-      console.error('No project found');
-  }, [data.project, data.project?.data.pks, handleUpdateProject]);
-
-  const handleRenameClick = (e: MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    setOptionsOpen(false);
-    startRenaming();
+  if (vm.shouldShowProjectErrorState) {
+    return (
+      <div className={styles.projectDetail}>
+        <ProjectDetailErrorStates type="projects" styles={styles} />
+      </div>
+    );
   }
-
-  const handleRefetch = () => {
-    data.refetch.projects();
-    data.refetch.queries();
-  }
-
-  const options = (
-    <>
-      <Button handleClick={handleRenameClick} iconLeft={<EditIcon />}>Rename</Button>
-      <Button handleClick={() => {if(data.project) openDeleteProjectModal(data.project)}} iconLeft={<TrashIcon />}>Delete</Button>
-    </>
-  );
-  
-  const handleOutsideTabListClick = useCallback(() => {
-    setOptionsOpen(false);
-  }, [optionsOpen]);
-
-  const OptionsButton = () => (
-    <div onClick={(e) => {e.stopPropagation(); setOptionsOpen(prev=>!prev); }}>
-      <OptionsIcon className={styles.optionsIcon} />
-      <OptionsPane open={optionsOpen}>
-        {options}
-      </OptionsPane>
-    </div>
-  )
-
-  const queriesTabHeading = useMemo(() => {
-    return `${queriesLoading ? '-' : sortedData.sortedQueries.length} Quer${sortedData.sortedQueries.length === 1 ? 'y' : 'ies'}`;
-  }, [sortedData.sortedQueries]);
-
-  const showDropLabel = useMemo(() => {
-    return activePanelId === 'projects' && sortedData.sortedQueries.length > 0 && !queriesLoading;
-  }, [activePanelId, sortedData.sortedQueries.length, queriesLoading]);
 
   return (
     <div className={styles.projectDetail}>
-      {
-        shouldShowProjectErrorState
-        ? 
-          (
-            <ProjectDetailErrorStates
-              type="projects"
-              styles={styles}
+      <div className={styles.projectHeaderContainer}>
+        <LoadingWrapper loading={vm.projectsLoading}>
+          <ListHeader
+            heading={vm.rename.localTitle}
+            searchPlaceholder="Search Queries"
+            searchTerm={vm.sortSearchState.searchTerm}
+            handleSearch={vm.sortSearchState.handleSearch}
+            isRenaming={vm.rename.isRenaming}
+            onTitleChange={vm.rename.handleTitleChange}
+            onFormSubmit={vm.rename.handleFormSubmit}
+            textInputRef={vm.rename.textInputRef}
+            onOutsideClick={vm.rename.handleOutsideClick}
+            onTitleClick={vm.handleRenameClick}
+          />
+        </LoadingWrapper>
+      </div>
+      <div className={styles.projectTabsContainer}>
+        <Button
+          iconLeft={<CirclePlusIcon />}
+          iconRight={<ChevDownIcon className={styles.iconRight} />}
+          handleClick={vm.handleAddNewQueryClick}
+          title="Add New Query"
+          className={styles.addNewQueryButton}
+          variant="textOnly"
+        >
+          Add New Query
+        </Button>
+        <Tabs
+          handleOutsideTabListClick={vm.handleOutsideTabListClick}
+          defaultActiveTab={vm.queriesTabHeading}
+          className={styles.projectTabs}
+          tabListWrapperClassName={styles.projectTabsTabListWrapper}
+          activeTab={vm.queriesTabHeading}
+          controlled
+        >
+          <Tab key="queries" heading={vm.queriesTabHeading} className={styles.projectTabContent}>
+            <AnimateHeight
+              duration={500}
+              height={vm.height}
+              className={styles.combinedQueryInterfaceContainer}
+            >
+              <CombinedQueryInterface
+                projectPage
+                defaultProject={vm.data.project}
+                submissionCallback={vm.handleRefetch}
+              />
+            </AnimateHeight>
+            <ProjectDetailQueriesPanel
+              isDraggedQueryInProject={vm.isDraggedQueryInProject}
+              onQueryDrop={vm.onQueryDrop}
+              projectId={vm.data.project?.id}
+              queriesLoading={vm.queriesLoading}
+              searchTerm={vm.sortSearchState.searchTerm}
+              shouldShowQueriesErrorState={vm.shouldShowQueriesErrorState}
+              showDropLabel={vm.showDropLabel}
+              sortDirection={vm.sortSearchState.sortDirection}
+              sortField={vm.sortSearchState.sortField}
+              sortedQueries={vm.sortedData.sortedQueries}
+              onSort={vm.sortSearchState.handleSort}
+              onToggleQueriesPanel={() => vm.togglePanel('queries')}
+              onAddNewQuery={vm.handleAddNewQueryClick}
             />
-          ) 
-        :
-          (
-            <>
-              <div className={styles.projectHeaderContainer}>
-                <LoadingWrapper loading={projectsLoading} >
-                  <ListHeader
-                    heading={localTitle}
-                    searchPlaceholder="Search Queries"
-                    searchTerm={sortSearchState.searchTerm}
-                    handleSearch={sortSearchState.handleSearch}
-                    isRenaming={isRenaming}
-                    onTitleChange={handleTitleChange}
-                    onFormSubmit={handleFormSubmit}
-                    textInputRef={textInputRef}
-                    onOutsideClick={handleOutsideClick}
-                    onTitleClick={handleRenameClick}
-                  />
-                </LoadingWrapper>
-              </div>
-              <div className={styles.projectTabsContainer}>
-                <Button 
-                  iconLeft={<CirclePlusIcon />}
-                  iconRight={<ChevDownIcon className={styles.iconRight} />}
-                  handleClick={handleAddNewQueryClick}
-                  title="Add New Query"
-                  className={styles.addNewQueryButton}
-                  variant="textOnly"
-                >
-                  Add New Query
-                </Button>
-                <Tabs 
-                  handleOutsideTabListClick={handleOutsideTabListClick}
-                  defaultActiveTab={queriesTabHeading}
-                  className={styles.projectTabs}
-                  tabListWrapperClassName={styles.projectTabsTabListWrapper}
-                  activeTab={queriesTabHeading}
-                  controlled
-                >
-                  <Tab key="queries" heading={queriesTabHeading} className={styles.projectTabContent}>
-                    <AnimateHeight
-                      duration={500}
-                      height={height}
-                      className={styles.combinedQueryInterfaceContainer}
-                    >
-                      <CombinedQueryInterface
-                        projectPage
-                        defaultProject={data.project}
-                        submissionCallback={handleRefetch}
-                      />
-                    </AnimateHeight>
-                    <DroppableArea 
-                      id="project-zone"
-                      canAccept={(draggedData) => draggedData.type === 'query'}
-                      data={{ 
-                        id: data.project?.id?.toString(),
-                        type: 'project',
-                        onDrop: onQueryDrop
-                      }}
-                      indicatorText={`${isDraggedQueryInProject ? 'Already in Project' : 'Add to Project'}`}
-                      indicatorStatus={isDraggedQueryInProject ? 'error' : 'default'}
-                      className={styles.droppableArea}
-                    >
-                      <DropLabel
-                        show={showDropLabel}
-                        label="Drag to drop queries into projects."
-                      />
-                      <LoadingWrapper loading={queriesLoading}>
-                        <CardList className={styles.cardList}>
-                          {sortedData.sortedQueries.length > 0 && (
-                            <QueriesTableHeader
-                              sortField={sortSearchState.sortField}
-                              sortDirection={sortSearchState.sortDirection}
-                              onSort={sortSearchState.handleSort}
-                            />
-                          )}
-                          {
-                            shouldShowQueriesErrorState
-                            ?
-                              (
-                                <ProjectDetailErrorStates
-                                  type="queries"
-                                  styles={styles}
-                                />
-                              )
-                            : 
-                              (
-                                <>
-                                  {sortedData.sortedQueries.length === 0 ? (
-                                      <EmptyArea heading={sortSearchState.searchTerm  ? "" : "No Queries"}>
-                                        {
-                                          sortSearchState.searchTerm ? (
-                                            <p>No matches found.</p>
-                                          ) : (
-                                            <p>
-                                              You can add queries to this project from the <Button handleClick={() => togglePanel('queries')} title="Queries" variant="textOnly" inline>Queries</Button> tab or run a <Button handleClick={handleAddNewQueryClick} title="New Query" variant="textOnly" inline>New Query</Button>.
-                                            </p>
-                                          )
-                                        }
-                                      </EmptyArea>
-                                    ) : (
-                                      sortedData.sortedQueries.map((query) => (
-                                        <QueryCard
-                                          key={query.data.qid}
-                                          query={query}
-                                          searchTerm={sortSearchState.searchTerm}
-                                          projectId={data.project?.id}
-                                        />
-                                      ))
-                                    )}
-                                </>
-                              )
-                          }
-                        </CardList>
-                      </LoadingWrapper>
-                    </DroppableArea>
-                  </Tab>
-                  <Tab key="options" heading="Options" headingOverride={<OptionsButton />}>
-                  </Tab>
-                </Tabs>
-              </div>
-            </>
-          )
-      }
+          </Tab>
+          <Tab
+            key="options"
+            heading="Options"
+            headingOverride={(
+              <ProjectDetailOptionsButton
+                optionsOpen={vm.optionsOpen}
+                setOptionsOpen={vm.setOptionsOpen}
+                onRename={vm.handleRenameClick}
+                project={vm.data.project}
+                onDelete={vm.openDeleteProjectModal}
+              />
+            )}
+          />
+        </Tabs>
+      </div>
     </div>
   );
 };

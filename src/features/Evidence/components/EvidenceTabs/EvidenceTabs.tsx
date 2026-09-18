@@ -11,6 +11,7 @@ import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { Preferences } from '@/features/UserAuth/types/user';
 import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
+import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
@@ -25,18 +26,20 @@ interface EvidenceTabsProps {
   initialTab?: EvidenceTabName;
 }
 
-const tabHasData = (
-  tab: EvidenceTabName,
-  counts: { pubs: number; cts: number; misc: number; sources: number },
-): boolean => {
+type EvidenceCounts = { pubs: number; cts: number; misc: number; sources: number };
+
+const getTabCount = (tab: EvidenceTabName, counts: EvidenceCounts): number => {
   switch (tab) {
-    case 'Publications': return counts.pubs > 0;
-    case 'Clinical Trials': return counts.cts > 0;
-    case 'Miscellaneous': return counts.misc > 0;
-    case 'Knowledge Sources': return counts.sources > 0;
-    default: return false;
+    case 'Publications': return counts.pubs;
+    case 'Clinical Trials': return counts.cts;
+    case 'Miscellaneous': return counts.misc;
+    case 'Knowledge Sources': return counts.sources;
+    default: return 0;
   }
 };
+
+const tabHasData = (tab: EvidenceTabName, counts: EvidenceCounts): boolean =>
+  getTabCount(tab, counts) > 0;
 
 const getFirstTabHeading = (publicationsLength: number, clinicalTrialsLength: number, miscEvidenceLength: number): EvidenceTabName => {
   if (publicationsLength > 0) return 'Publications';
@@ -85,6 +88,15 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
   const dataCountsRef = useRef(dataCounts);
   dataCountsRef.current = dataCounts;
 
+  // Tracked on onTabClick rather than handleTabSelection: Tabs also calls the
+  // latter when it resets an invalid active tab, which is not a user choice.
+  const handleTabClick = (tabName: string) => {
+    trackEvent('evidence_tab_changed', {
+      tab_name: tabName,
+      item_count: getTabCount(tabName as EvidenceTabName, dataCounts),
+    });
+  };
+
   // reset active tab when component is closed
   useEffect(() => {
     if (!isOpen)
@@ -109,6 +121,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       activeTab={activeTab}
       defaultActiveTab={firstTabHeading}
       handleTabSelection={handleTabSelection}
+      onTabClick={handleTabClick}
       fadeClassName={styles.fade}
     >
       {publications.length > 0 ? (

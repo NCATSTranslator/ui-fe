@@ -20,7 +20,10 @@ const fetchNodeTypeDefinition = async (nodeType: string): Promise<string | null>
 const useNodeTypeDefinition = (nodeType: string | null) => {
   return useQuery({
     queryKey: ["nodeTypeDefinition", nodeType],
-    queryFn: () => fetchNodeTypeDefinition(nodeType!),
+    queryFn: () => {
+      if (!nodeType) return Promise.resolve(null);
+      return fetchNodeTypeDefinition(nodeType);
+    },
     enabled: !!nodeType,
   });
 };

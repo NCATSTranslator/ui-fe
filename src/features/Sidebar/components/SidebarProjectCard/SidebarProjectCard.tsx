@@ -9,7 +9,7 @@ import Button from "@/features/Core/components/Button/Button";
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import { useProjectModals } from "@/features/Projects/hooks/useProjectModals";
-import { useEditProjectHandlers } from "@/features/Projects/utils/editUpdateFunctions";
+import { useEditProjectHandlers } from "@/features/Projects/hooks/useEditProjectHandlers";
 import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import { DroppableArea } from "@/features/DragAndDrop/components/DroppableArea/DroppableArea";
@@ -22,6 +22,7 @@ import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import { queryAlreadyInProjectToast } from "@/features/Core/utils/toastMessages";
 import { useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { getProjectQueryCount } from "@/features/Projects/utils/utilities";
+import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 
 interface SidebarProjectCardProps {
   activeQueries: UserQueryObject[];
@@ -114,7 +115,12 @@ const SidebarProjectCard: FC<SidebarProjectCardProps> = ({
     }
 
     // Add query to project, clear add to project mode on success
-    handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid], clearAddToProjectMode);
+    handleUpdateProject(project.id, undefined, [...project.data.pks, addToProjectQuery.data.qid], {
+      onSuccess: () => {
+        trackEvent('query_moved_to_project', { move_method: 'menu' });
+        clearAddToProjectMode();
+      },
+    });
   }, [addToProjectQuery, project, handleUpdateProject, clearAddToProjectMode, queryTitle]);
 
   const handleProjectClick = useMemo(() => {

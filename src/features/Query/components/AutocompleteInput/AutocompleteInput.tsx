@@ -36,6 +36,26 @@ interface AutocompleteInputProps {
   showDisclaimer?: boolean;
 }
 
+interface AutocompleteInputIconProps {
+  handleSwapTerms?: () => void;
+  selectedItem?: AutocompleteItem | null;
+}
+
+const AutocompleteInputIcon: FC<AutocompleteInputIconProps> = ({ handleSwapTerms, selectedItem }) => (
+  <>
+    {
+      handleSwapTerms &&
+      <>
+        <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" dataTooltipId="swap-terms-tooltip" />
+        <Tooltip id="swap-terms-tooltip">
+          <span>Swap Search Terms</span>
+        </Tooltip>
+      </>
+    }
+    {selectedItem?.types ? getNodeIcon(selectedItem.types[0]) : <QuestionIcon/>}
+  </>
+);
+
 const AutocompleteInput: FC<AutocompleteInputProps> = ({
   id,
   placeholder,
@@ -64,7 +84,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [scrollingIndex, setScrollingIndex] = useState<number>(-1);
   
-  useEffect(() => setAutocompleteVisibility(true), [loadingAutocomplete]);
+  useEffect(() => setAutocompleteVisibility(true), [loadingAutocomplete, setAutocompleteVisibility]);
 
   const handleAutocompleteScrolling = useCallback((index: number) => {
     const isValidIndex = index >= 0 && index < (autocompleteItems?.length || 0);
@@ -125,7 +145,7 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         }
         break;
     }
-  }, [autocompleteItems, scrollingIndex, loadingAutocomplete, onItemSelect, handleAutocompleteScrolling]);
+  }, [autocompleteItems, scrollingIndex, loadingAutocomplete, onItemSelect, handleAutocompleteScrolling, handleSelect, id, inputRef]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -157,21 +177,6 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
     className
   );
 
-  const IconLeft = (
-    <>
-      {
-        handleSwapTerms &&
-        <>
-          <Button iconOnly iconLeft={<SwapIcon/>} handleClick={handleSwapTerms} variant="secondary" dataTooltipId="swap-terms-tooltip" />
-          <Tooltip id="swap-terms-tooltip">
-            <span>Swap Search Terms</span>
-          </Tooltip>
-        </>
-      }
-      {!!selectedItem?.types ? getNodeIcon(selectedItem.types[0]) : <QuestionIcon/>}
-    </>
-  )
-
   return (
     <OutsideClickHandler
       onOutsideClick={handleOutsideClick}
@@ -190,10 +195,21 @@ const AutocompleteInput: FC<AutocompleteInputProps> = ({
         handleFocus={() => {setAutocompleteVisibility(true)}}
         className={`${styles.input} ${!!selectedItem && styles.selected} ${selectedClassName}`}
         value={value}
-        iconLeft={IconLeft}
+        iconLeft={<AutocompleteInputIcon handleSwapTerms={handleSwapTerms} selectedItem={selectedItem} />}
         iconLeftClassName={styles.iconLeft}
         iconRight={!!selectedItem && onClear ?
-          <button className={styles.close} onClick={onClear}><CloseIcon/></button> :
+          <button
+            type="button"
+            className={styles.close}
+            aria-label="Clear search term"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClear();
+            }}
+          >
+            <CloseIcon/>
+          </button> :
           false
         }
         disabled={disabled}

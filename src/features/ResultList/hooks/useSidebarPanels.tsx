@@ -101,14 +101,14 @@ const useSidebarPanels = ({
     setIsActive: setIsLoading
   }), [handleResultsRefresh, isFetchingARAStatus, isFetchingResults, isError, setIsLoading, hasFreshResults]);
 
-  const { status: statusIndicatorStatus } = getQueryStatusIndicatorStatus(
+  const { status: statusIndicatorStatus } = getQueryStatusIndicatorStatus({
     arsStatus,
-    isFetchingARAStatus || false,
+    isFetchingARAStatus: isFetchingARAStatus || false,
     hasFreshResults,
     isFetchingResults,
     resultStatus,
-    formattedResults.length || 0
-  );
+    resultCount: formattedResults.length || 0,
+  });
 
   useResultsCompleteToast(arsStatus, isFetchingResults);
 

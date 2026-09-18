@@ -89,22 +89,6 @@ export interface SortSearchState {
   searchTerm: string;
 }
 
-export type ProjectEditingItem = {
-  id: string;
-  name: string;
-  queryIds?: string[];
-  status?: 'new' | 'editing';
-  type: 'project';
-} | undefined;
-
-export type QueryEditingItem = {
-  pk: string;
-  name: string;
-  queryIds?: string[];
-  status?: 'new' | 'editing';
-  type: 'query';
-} | undefined;
-
 export type ModalType = 
   | 'deleteProjects'
   | 'deleteProject'

@@ -94,11 +94,6 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
     );
   }, [state.sortingState, publications, handlePageClick, updateState, setPublications]);
 
-  if (!resultSet) {
-    console.warn('Unable to display publications table, no result set available');
-    return null;
-  }
-
   return (
     <div className={styles.publicationsTableContainer}>
       <div className={styles.top}>
@@ -139,6 +134,7 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
 
       <TablePaginationControls
         label="Publications per Page"
+        tabName="Publications"
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         pageCount={pageCount}

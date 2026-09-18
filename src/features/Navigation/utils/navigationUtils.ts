@@ -5,6 +5,7 @@ import { Result, ResultEdge, ResultSet, Path } from '@/features/ResultList/types
 import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 
 export const MAIN_CONTENT_ELEMENT_ID = 'main';
+export const MAIN_SCROLL_ELEMENT_ID = 'main-scroll';
 
 /**
  * Derives the display key for a path (e.g. "2") from its position among the
@@ -167,9 +168,11 @@ export const resultsLoader = ({ request }: { request: Request }) => {
 
   // Current format: r= is a plain query param
   if (url.searchParams.has('r')) {
-    const resultId = url.searchParams.get('r')!;
-    url.searchParams.delete('r');
-    return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    const resultId = url.searchParams.get('r');
+    if (resultId) {
+      url.searchParams.delete('r');
+      return redirect(`/results/${resultId}?${url.searchParams.toString()}`);
+    }
   }
 
   // Legacy format: r= may be inside a base64-encoded segment

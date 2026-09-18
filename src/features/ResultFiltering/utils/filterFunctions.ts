@@ -13,13 +13,17 @@ export const FILTERING_CONSTANTS = {
   DYNAMIC_TAG: {
     BOOKMARK: {
       id: 'r/sv/bookmark',
-      name: 'Has Bookmark',
-      value: '',
+      description: {
+        name: 'Has Bookmark',
+        description: '',
+      },
     },
     NOTE: {
       id: 'r/sv/note',
-      name: 'Has Note',
-      value: '',
+      description: {
+        name: 'Has Note',
+        description: '',
+      },
     },
   },
   WEIGHT: {
@@ -189,6 +193,7 @@ export const isEvidenceFilter = (filter: Filter): boolean => {
  * Strict mode: uncomment a return in the function body (and remove `return false`)
  * to re-enable group-wide propagation for selected families.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used by the commented-out strict-mode returns below
 export const propagatesExclusionAcrossCompressionGroups = (filter: Filter): boolean => {
   // Permissive default: all path exclusions apply per compressed-path member.
   return false;

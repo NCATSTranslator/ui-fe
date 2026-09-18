@@ -25,36 +25,50 @@ export const SidebarContext = createContext<SidebarContextValue>({
   getButtonComponent: () => null,
 });
 
+const getButtonComponent = (sidebarItem: SidebarItem) => {
+  // If there's a factory function, call it to get the dynamic component
+  if (sidebarItem.buttonComponentFactory) {
+    return sidebarItem.buttonComponentFactory();
+  }
+  // Otherwise return the static component
+  return sidebarItem.buttonComponent || null;
+};
+
+const getContextPanel = (sidebarItem: SidebarItem) => {
+  // If there's a factory function, call it to get the dynamic component
+  if (sidebarItem.panelComponentFactory) {
+    return sidebarItem.panelComponentFactory();
+  }
+  // Otherwise return the static component
+  return sidebarItem.panelComponent || null;
+};
+
 const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
-  const [collapsed, setCollapsedState] = useState<boolean>(true);
+  const [collapsed, setCollapsed] = useState<boolean>(true);
   const [activePanelId, setActivePanelId] = useState<SidebarContextValue['activePanelId']>('none');
   const [dynamicSidebarItems, setDynamicSidebarItems] = useState<SidebarItem[]>([]);
   const [addToProjectQuery, setAddToProjectQuery] = useState<SidebarContextValue['addToProjectQuery']>(null);
   const [selectedProject, handleSetSelectedProject] = useState<SidebarContextValue['selectedProject']>(null);
   const [isSelectedProjectMode, setIsSelectedProjectMode] = useState<boolean>(false);
 
-  const setCollapsed = useCallback((v: boolean) => {
-    setCollapsedState(v);
-  }, []);
-
   const togglePanel = useCallback((id: SidebarItemId) => {
     setActivePanelId(prev => {
       const shouldCollapse = prev === id;
       const newActivePanelId = shouldCollapse? 'none' : id;
-      setCollapsedState(shouldCollapse);
+      setCollapsed(shouldCollapse);
       return newActivePanelId;
     });
   }, []);
 
   const openPanel = useCallback((id: SidebarItemId) => {
     setActivePanelId(id);
-    setCollapsedState(false);
+    setCollapsed(false);
   }, []);
 
   const closePanel = useCallback(() => {
     setActivePanelId('none');
-    setCollapsedState(true);
+    setCollapsed(true);
     setAddToProjectQuery(null);
   }, []);
 
@@ -79,12 +93,12 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const clearSelectedProject = useCallback(() => {
     setSelectedProject(null);
-  }, []);
+  }, [setSelectedProject]);
 
   const registerSidebarItem = useCallback((id: SidebarItemId, item: SidebarItem) => {
     setDynamicSidebarItems(prev => {
       const existingIndex = prev.findIndex(existingItem => existingItem.id === id);
-      
+
       if (existingIndex >= 0) {
         // Update existing item in place
         const newItems = [...prev];
@@ -104,24 +118,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const getSidebarItem = useCallback((id: SidebarItemId) => {
     return dynamicSidebarItems.find(item => item.id === id) ?? null;
   }, [dynamicSidebarItems]);
-
-  const getButtonComponent = useCallback((sidebarItem: SidebarItem) => {
-    // If there's a factory function, call it to get the dynamic component
-    if (sidebarItem.buttonComponentFactory) {
-      return sidebarItem.buttonComponentFactory();
-    }
-    // Otherwise return the static component
-    return sidebarItem.buttonComponent || null;
-  }, []);
-
-  const getContextPanel = useCallback((sidebarItem: SidebarItem) => {
-    // If there's a factory function, call it to get the dynamic component
-    if (sidebarItem.panelComponentFactory) {
-      return sidebarItem.panelComponentFactory();
-    }
-    // Otherwise return the static component
-    return sidebarItem.panelComponent || null;
-  }, []);
 
   // Listens for OPEN_FEEDBACK_PANEL — dispatched from toastMessages.tsx
   useEffect(() => {
@@ -161,7 +157,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setSelectedProjectMode,
     setSelectedProject,
     clearSelectedProject,
-    setCollapsed,
     togglePanel,
     openPanel,
     closePanel,
@@ -170,8 +165,6 @@ const SidebarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     registerSidebarItem,
     unregisterSidebarItem,
     getSidebarItem,
-    getContextPanel,
-    getButtonComponent,
   ]);
 
   return (

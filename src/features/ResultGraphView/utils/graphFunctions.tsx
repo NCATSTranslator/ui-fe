@@ -3,7 +3,7 @@ import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { Preferences } from '@/features/UserAuth/types/user';
-import { GraphHoverTarget } from '@/features/ResultGraphView/types/graphTypes';
+import { GraphHoverTarget, HoverAnchor } from '@/features/ResultGraphView/types/graphTypes';
 
 /**
  * Converts a result to a graph data object.
@@ -110,6 +110,19 @@ export const sameTarget = (a: GraphHoverTarget, b: GraphHoverTarget): boolean =>
   return a.kind === b.kind && a.id === b.id;
 };
 
+export const toGraphHoverTarget = (
+  kind: 'node' | 'edge',
+  id: string,
+  entity: ResultNode | ResultEdge,
+  anchor: HoverAnchor | undefined,
+): GraphHoverTarget => {
+  if (!anchor) return null;
+  if (kind === 'node') {
+    return { kind: 'node', id, node: entity as ResultNode, anchor };
+  }
+  return { kind: 'edge', id, edge: entity as ResultEdge, anchor };
+};
+
 /**
  * Converts a node to a hover target.
  * @param node - The node to convert.
@@ -125,7 +138,7 @@ export const resolveNodeTarget = (
   if (!node || !resultSet) return null;
   const resultNode = resultSet.data.nodes[node.id];
   if (!resultNode) return null;
-  return { kind: 'node', id: node.id, node: resultNode, anchor: geometry?.anchor };
+  return toGraphHoverTarget('node', node.id, resultNode, geometry?.anchor);
 };
 
 /**
@@ -143,5 +156,5 @@ export const resolveEdgeTarget = (
   if (!edge || !resultSet) return null;
   const resultEdge = resultSet.data.edges[edge.id];
   if (!resultEdge) return null;
-  return { kind: 'edge', id: edge.id, edge: resultEdge, anchor: geometry?.anchor };
+  return toGraphHoverTarget('edge', edge.id, resultEdge, geometry?.anchor);
 };
