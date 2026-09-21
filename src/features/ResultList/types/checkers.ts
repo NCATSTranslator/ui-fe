@@ -8,7 +8,8 @@ const _isTdl = tc.makeIsOneOf(["Tclin", "Tchem", "Tbio", "Tdark"] as const);
 const _isTdlArray = tc.makeIsHomogeneousArray(_isTdl);
 
 const _isAnnotationSource = (e: unknown): boolean =>
-  tc.isObject(e) && tc.isString(e.name) && tc.isString(e.url);
+  tc.isObject(e) && tc.isString(e.id) && tc.isString(e.url)
+  && (e.name === undefined || tc.isString(e.name));
 
 const _isAnnotationSection = (isValue: (v: unknown) => boolean) => (e: unknown): boolean =>
   tc.isObject(e)

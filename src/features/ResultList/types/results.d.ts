@@ -102,8 +102,10 @@ export interface ResultEdge {
 export type Species = "Zebrafish" | "Mouse" | "Rat" | null;
 export type Tdl = "Tclin" | "Tchem" | "Tbio" | "Tdark" | null;
 
+// A source for an annotation section
 export type AnnotationSource = {
-  name: string;
+  id: string;
+  name?: string;
   url: string;
 }
 

@@ -10,6 +10,7 @@ import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/
 import ViewTopBar from "@/features/Navigation/components/ViewTopBar/ViewTopBar";
 import useNodeInformationView from "@/features/NodeInformationView/hooks/useNodeInformationView";
 import { AnnotationSource } from "@/features/ResultList/types/results";
+import { getAnnotationSourceLabel, getBiolinkSource } from "@/features/NodeInformationView/utils/utilities";
 import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
 
 /**
@@ -31,9 +32,9 @@ const SourceLinks: FC<{ sources: AnnotationSource[] | undefined }> = ({ sources 
   return (
     <div className={styles.sourceLinks}>
       {
-        links.map(({ name, url }) => (
-          <a key={url} href={url} target="_blank" rel="noreferrer" className={styles.sourceLink}>
-            {name || url}<ExternalLink/>
+        links.map(source => (
+          <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className={styles.sourceLink}>
+            {getAnnotationSourceLabel(source)}<ExternalLink/>
           </a>
         ))
       }
@@ -97,11 +98,7 @@ const NodeInformationView: FC = () => {
                   <div className={styles.section}>
                     <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
                     <p className={styles.description}>{nodeTypeDefinition}</p>
-                    <div className={styles.sourceLinks}>
-                      <a href={nodeBiolinkLink} target="_blank" rel="noreferrer" className={styles.sourceLink}>
-                        Learn More About the Biolink Model<ExternalLink/>
-                      </a>
-                    </div>
+                    <SourceLinks sources={[getBiolinkSource(nodeBiolinkLink)]} />
                   </div>
                 }
                 {

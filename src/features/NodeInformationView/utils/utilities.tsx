@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ResultNode } from "@/features/ResultList/types/results";
+import { AnnotationSource, ResultNode } from "@/features/ResultList/types/results";
 
 export const formatLabel = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
@@ -49,6 +49,34 @@ export const renderValue = (value: unknown): ReactNode => {
   return null;
 };
 
+const getHostname = (url: string): string | null => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Frontend overrides for annotation source link labels. Keyed by the source id
+ * the backend emits.
+ */
+export const ANNOTATION_SOURCE_LABEL_OVERRIDES: Record<string, string> = {
+  biolink: "Learn more about the Biolink Model",
+  tdl: "Learn more about Target Development Levels",
+};
+
+// Builds the user-facing label for an annotation source linkout.
+export const getAnnotationSourceLabel = (
+  source: AnnotationSource,
+  overrides: Record<string, string> = ANNOTATION_SOURCE_LABEL_OVERRIDES,
+): string => {
+  const override = overrides[source.id];
+  if (override) return override;
+  const name = source.name || getHostname(source.url);
+  return name ? `Learn more on ${name}` : source.url;
+};
+
 /**
  * Get the Biolink Model link for a node
  * @param node - The node to get the link for
@@ -58,3 +86,13 @@ export const getNodeBiolinkLink = (node: ResultNode): string => {
   const nodeType = node.types[0].replace('biolink:', '');
   return `https://biolink.github.io/biolink-model/${nodeType}`;
 };
+
+/**
+ * The Biolink Model source for the Object Type section. It is built on the
+ * frontend since it is not constructed directly from the annotations. 
+ */
+export const getBiolinkSource = (url: string): AnnotationSource => ({
+  id: "biolink",
+  name: "Biolink Model",
+  url
+});
