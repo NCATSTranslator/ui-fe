@@ -98,17 +98,51 @@ export const sortAnnotationFields = <T extends { key: string }>(
  * Frontend overrides for annotation source link labels. Keyed by the source id
  * the backend emits.
  */
-const _ANNOTATION_SOURCE_LABEL_OVERRIDES: Record<string, string> = {
-  biolink: "Learn more about the Biolink Model",
-  tdl: "Learn more about Target Development Levels",
+export interface AnnotationSectionOverride {
+  heading?: string;
+  sourceLabel?: string;
+}
+
+/** Key of the frontend-built Object Type section, which is not an annotation. */
+export const OBJECT_TYPE_SECTION_KEY = "object_type";
+
+/**
+ * Allows for per-section annotation heading and source label injection.
+ */
+export const _ANNOTATION_SECTION_OVERRIDES: Record<string, AnnotationSectionOverride> = {
+  "chemical.otc_status": {
+    heading: "Over the Counter Status"
+  },
+  "disease.curies": {
+    heading: "IDs"
+  },
+  "gene.tdl": {
+    heading: "Target Development Level",
+    sourceLabel: "Learn more about Target Development Levels"
+  },
+  [OBJECT_TYPE_SECTION_KEY]: {
+    sourceLabel: "Learn more about the Biolink Model"
+  },
 };
 
-// Builds the user-facing label for an annotation source linkout.
+/**
+ * The heading for an annotation section.
+ */
+export const getAnnotationSectionHeading = (
+  sectionKey: string,
+  key: string,
+  overrides: Record<string, AnnotationSectionOverride> = _ANNOTATION_SECTION_OVERRIDES,
+): string => overrides[sectionKey]?.heading ?? formatLabel(key);
+
+/**
+ * The user-facing label for an annotation source linkout.
+ */
 export const getAnnotationSourceLabel = (
   source: AnnotationSource,
-  overrides: Record<string, string> = _ANNOTATION_SOURCE_LABEL_OVERRIDES,
+  sectionKey?: string,
+  overrides: Record<string, AnnotationSectionOverride> = _ANNOTATION_SECTION_OVERRIDES,
 ): string => {
-  const override = overrides[source.id];
+  const override = sectionKey ? overrides[sectionKey]?.sourceLabel : undefined;
   if (override) return override;
   const name = source.name || getHostname(source.url);
   return name ? `Learn more on ${name}` : source.url;
@@ -126,10 +160,10 @@ export const getNodeBiolinkLink = (node: ResultNode): string => {
 
 /**
  * The Biolink Model source for the Object Type section. It is built on the
- * frontend since it is not constructed directly from the annotations. 
+ * frontend since it is not constructed directly from the annotations.
  */
 export const getBiolinkSource = (url: string): AnnotationSource => ({
   id: "biolink",
   name: "Biolink Model",
-  url
+  url,
 });

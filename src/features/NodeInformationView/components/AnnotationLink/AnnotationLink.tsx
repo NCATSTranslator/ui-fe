@@ -1,6 +1,4 @@
 import { FC, ReactNode } from "react";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
-import styles from "./AnnotationLink.module.scss";
 
 interface AnnotationLinkProps {
   href: string;
@@ -8,12 +6,10 @@ interface AnnotationLinkProps {
 }
 
 /**
- * An external link inside an annotation section, with the external link icon.
+ * An external link inside an annotation section.
  */
 const AnnotationLink: FC<AnnotationLinkProps> = ({ href, children }) => (
-  <a href={href} target="_blank" rel="noreferrer" className={styles.annotationLink}>
-    {children}<ExternalLink/>
-  </a>
+  <a href={href} target="_blank" rel="noreferrer">{children}</a>
 );
 
 export default AnnotationLink;

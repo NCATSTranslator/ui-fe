@@ -10,14 +10,20 @@ import SafeHtmlHighlighter from "@/features/Core/components/SafeHtmlHighlighter/
 import ViewTopBar from "@/features/Navigation/components/ViewTopBar/ViewTopBar";
 import useNodeInformationView from "@/features/NodeInformationView/hooks/useNodeInformationView";
 import { AnnotationSource } from "@/features/ResultList/types/results";
-import { getAnnotationSourceLabel, getBiolinkSource } from "@/features/NodeInformationView/utils/utilities";
+import { getAnnotationSourceLabel, getBiolinkSource, OBJECT_TYPE_SECTION_KEY } from "@/features/NodeInformationView/utils/utilities";
 import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
 
 /**
  * Renders the linkouts for an annotation section's sources. Duplicate and
  * url-less sources are dropped, and nothing is rendered when none remain.
  */
-const SourceLinks: FC<{ sources: AnnotationSource[] | undefined }> = ({ sources }) => {
+interface SourceLinksProps {
+  sources: AnnotationSource[] | undefined;
+  // Section key used to look up a sourceLabel override; omitted for sections without one.
+  sectionKey?: string;
+}
+
+const SourceLinks: FC<SourceLinksProps> = ({ sources, sectionKey }) => {
   const links = useMemo(() => {
     const seen = new Set<string>();
     return (sources ?? []).filter(source => {
@@ -33,7 +39,7 @@ const SourceLinks: FC<{ sources: AnnotationSource[] | undefined }> = ({ sources 
     <div className={styles.sourceLinks}>
       {
         links.map(source => (
-          <AnnotationLink key={source.url} href={source.url}>{getAnnotationSourceLabel(source)}</AnnotationLink>
+          <AnnotationLink key={source.url} href={source.url}>{getAnnotationSourceLabel(source, sectionKey)}</AnnotationLink>
         ))
       }
     </div>
@@ -96,15 +102,15 @@ const NodeInformationView: FC = () => {
                   <div className={styles.section}>
                     <p className={styles.sectionTitle}>{formatBiolinkEntity(nodeType)} <span className={styles.subtitle}>— Object Type</span></p>
                     <p className={styles.description}>{nodeTypeDefinition}</p>
-                    <SourceLinks sources={[getBiolinkSource(nodeBiolinkLink)]} />
+                    <SourceLinks sources={[getBiolinkSource(nodeBiolinkLink)]} sectionKey={OBJECT_TYPE_SECTION_KEY} />
                   </div>
                 }
                 {
-                  annotationFields.map(({ key, label, content, sources }) => (
+                  annotationFields.map(({ key, heading, content, sources }) => (
                     <div key={key} className={styles.section}>
-                      <p className={styles.sectionTitle}>{label}</p>
+                      <p className={styles.sectionTitle}>{heading}</p>
                       <div className={styles.sectionContent}>{content}</div>
-                      <SourceLinks sources={sources} />
+                      <SourceLinks sources={sources} sectionKey={key} />
                     </div>
                   ))
                 }

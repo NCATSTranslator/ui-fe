@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
 import { capitalizeAllWords, getFormattedNodeDisplayName } from "@/features/Core/utils/stringFormatters";
-import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, renderList, renderValue, sortAnnotationFields } from "@/features/NodeInformationView/utils/utilities";
+import { getAnnotationSectionHeading, getNodeBiolinkLink, isEmptyAnnotationValue, renderList, renderValue, sortAnnotationFields } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
@@ -121,7 +121,7 @@ const getNodeInformationViewState = (params: {
 
 interface AnnotationField {
   key: string;
-  label: string;
+  heading: string;
   content: ReactNode;
   sources: AnnotationSource[];
 }
@@ -134,15 +134,15 @@ const buildAnnotationField = (
   nodeType: string | null,
 ): AnnotationField | null => {
   const fieldKey = `${categoryKey}.${key}`;
-  const label = formatLabel(key);
+  const heading = getAnnotationSectionHeading(fieldKey, key);
   const { value } = section;
   const sources = section.metadata?.sources ?? [];
   const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
   if (Override) {
-    return { key: fieldKey, label, content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} />, sources };
+    return { key: fieldKey, heading, content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} />, sources };
   }
   const content = renderValue(value);
-  return content === null ? null : { key: fieldKey, label, content, sources };
+  return content === null ? null : { key: fieldKey, heading, content, sources };
 };
 
 const buildAnnotationFields = (

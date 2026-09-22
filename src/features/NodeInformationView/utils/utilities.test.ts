@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getAnnotationSourceLabel, getBiolinkSource, sortAnnotationFields } from "./utilities";
+import {
+  getAnnotationSectionHeading,
+  getAnnotationSourceLabel,
+  getBiolinkSource,
+  OBJECT_TYPE_SECTION_KEY,
+  sortAnnotationFields,
+} from "./utilities";
 
 describe("getAnnotationSourceLabel", () => {
   it("uses the backend-supplied name", () => {
@@ -21,26 +27,53 @@ describe("getAnnotationSourceLabel", () => {
     expect(getAnnotationSourceLabel({ id: "new_source", url: "not a url" })).toBe("not a url");
   });
 
-  it("prefers a frontend override for the source id over the backend name", () => {
-    const overrides = { tdl: "Custom label" };
-    expect(getAnnotationSourceLabel({ id: "tdl", name: "Pharos", url: "https://opendata.ncats.nih.gov/" }, overrides))
+  it("prefers the section's sourceLabel override over the backend name", () => {
+    const overrides = { "gene.tdl": { sourceLabel: "Custom label" } };
+    expect(getAnnotationSourceLabel({ id: "tdl", name: "Pharos", url: "https://opendata.ncats.nih.gov/" }, "gene.tdl", overrides))
       .toBe("Custom label");
   });
 
-  it("labels the frontend-built biolink source with the shipped override", () => {
-    expect(getAnnotationSourceLabel(getBiolinkSource("https://biolink.github.io/biolink-model/Gene")))
-      .toBe("Learn more about the Biolink Model");
+  it("ignores overrides for other sections", () => {
+    const overrides = { "gene.tdl": { sourceLabel: "Custom label" } };
+    expect(getAnnotationSourceLabel({ id: "chembl", name: "ChEMBL", url: "https://www.ebi.ac.uk/chembl/" }, "chemical.approval", overrides))
+      .toBe("Learn more on ChEMBL");
   });
 
-  it("labels the tdl source with the shipped override", () => {
+  it("uses the default label when no section key is given", () => {
     expect(getAnnotationSourceLabel({ id: "tdl", name: "Pharos", url: "https://opendata.ncats.nih.gov/" }))
+      .toBe("Learn more on Pharos");
+  });
+
+  it("labels the tdl section's source with the shipped override", () => {
+    expect(getAnnotationSourceLabel({ id: "tdl", name: "Pharos", url: "https://opendata.ncats.nih.gov/" }, "gene.tdl"))
       .toBe("Learn more about Target Development Levels");
   });
 
-  it("ignores overrides for other source ids", () => {
-    const overrides = { tdl: "Custom label" };
-    expect(getAnnotationSourceLabel({ id: "chembl", name: "ChEMBL", url: "https://www.ebi.ac.uk/chembl/" }, overrides))
-      .toBe("Learn more on ChEMBL");
+  it("labels the frontend-built biolink source with the shipped override", () => {
+    expect(getAnnotationSourceLabel(getBiolinkSource("https://biolink.github.io/biolink-model/Gene"), OBJECT_TYPE_SECTION_KEY))
+      .toBe("Learn more about the Biolink Model");
+  });
+});
+
+describe("getAnnotationSectionHeading", () => {
+  it("generates a heading from the backend key", () => {
+    expect(getAnnotationSectionHeading("chemical.clinical_trials", "clinical_trials", {})).toBe("Clinical Trials");
+  });
+
+  it("prefers the section's heading override", () => {
+    const overrides = { "gene.tdl": { heading: "Custom heading" } };
+    expect(getAnnotationSectionHeading("gene.tdl", "tdl", overrides)).toBe("Custom heading");
+  });
+
+  it("falls back to the generated heading when the section override has no heading", () => {
+    const overrides = { "gene.tdl": { sourceLabel: "Custom label" } };
+    expect(getAnnotationSectionHeading("gene.tdl", "tdl", overrides)).toBe("Tdl");
+  });
+
+  it("ships acronym headings for otc_status, curies, and tdl", () => {
+    expect(getAnnotationSectionHeading("chemical.otc_status", "otc_status")).toBe("OTC Status");
+    expect(getAnnotationSectionHeading("disease.curies", "curies")).toBe("CURIEs");
+    expect(getAnnotationSectionHeading("gene.tdl", "tdl")).toBe("TDL");
   });
 });
 
