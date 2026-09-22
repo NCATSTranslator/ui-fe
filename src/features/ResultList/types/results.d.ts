@@ -127,6 +127,13 @@ export type ChebiRole = {
   name: string;
 }
 
+// A node identifier and its resolved link. url is null when the backend's
+// prefix catalog has no entry for the CURIE's prefix.
+export type CurieEntry = {
+  curie: string;
+  url: string | null;
+}
+
 export type Indication = {
   name: string;
   ids: string[];
@@ -136,7 +143,7 @@ export type Indication = {
 export type ChemicalAnnotation = {
   approval: AnnotationSection<number> | null;
   clinical_trials: AnnotationSection<string[]> | null;
-  curies: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<CurieEntry[]> | null;
   descriptions: AnnotationSection<string[]> | null;
   indications: AnnotationSection<Indication[]> | null;
   otc_status: AnnotationSection<{code: number, label: string}> | null;
@@ -146,13 +153,13 @@ export type ChemicalAnnotation = {
 
 export type DiseaseAnnotation = {
   clinical_trials: AnnotationSection<string[]> | null;
-  curies: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<CurieEntry[]> | null;
   descriptions: AnnotationSection<string[]> | null;
   synonyms: AnnotationSection<string[]> | null;
 }
 
 export type GeneAnnotation = {
-  curies: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<CurieEntry[]> | null;
   descriptions: AnnotationSection<string[]> | null;
   name: AnnotationSection<string> | null;
   species: AnnotationSection<Species> | null;

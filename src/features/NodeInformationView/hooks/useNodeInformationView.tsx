@@ -9,7 +9,7 @@ import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/
 import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
 import useCanvasEntityViewState from "@/features/Canvas/hooks/useCanvasEntityViewState";
-import type { AnnotationSource, ChebiRole, Indication, ResultNode } from "@/features/ResultList/types/results.d";
+import type { AnnotationSource, ChebiRole, CurieEntry, Indication, ResultNode } from "@/features/ResultList/types/results.d";
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface AnnotationOverrideProps {
@@ -59,16 +59,35 @@ const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   </>
 );
 
+// Each identifier links out to its resolved url when the backend could
+// resolve one, and renders as plain text otherwise.
+const CurieList: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>
+    {renderList(
+      (value as CurieEntry[])
+        .filter(entry => isNonEmptyString(entry?.curie))
+        .map(entry => entry.url
+          ? <AnnotationLink key={entry.curie} href={entry.url}>{entry.curie}</AnnotationLink>
+          : <span key={entry.curie}>{entry.curie}</span>)
+    )}
+  </>
+);
+
 const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideProps>>> = {
   chemical: {
     clinical_trials: ClinicalTrials,
+    curies: CurieList,
     indications: Indications,
     roles: ChemicalRoleList,
     synonyms: ChemicalSynonymList,
   },
   disease: {
     clinical_trials: ClinicalTrials,
+    curies: CurieList,
     synonyms: SynonymList,
+  },
+  gene: {
+    curies: CurieList,
   },
 };
 
