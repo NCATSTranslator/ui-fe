@@ -1,0 +1,17 @@
+@use "@/assets/styles/variables" as *;
+
+// The one external link treatment for the node information window: used by
+// the section source links and by linked annotation values.
+.annotationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $xxs;
+  svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    path {
+      fill: $purpleOne;
+    }
+  }
+}

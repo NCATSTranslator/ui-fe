@@ -6,6 +6,7 @@ import { capitalizeAllWords, getFormattedNodeDisplayName } from "@/features/Core
 import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, renderList, renderValue, sortAnnotationFields } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
+import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
 import useCanvasEntityViewState from "@/features/Canvas/hooks/useCanvasEntityViewState";
 import type { AnnotationSource, ChebiRole, Indication, ResultNode } from "@/features/ResultList/types/results.d";
@@ -51,7 +52,7 @@ const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
           const url = indication.urls?.[0];
           const name = capitalizeAllWords(indication.name);
           return url
-            ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
+            ? <AnnotationLink key={i} href={url}>{name}</AnnotationLink>
             : <span key={i}>{name}</span>;
         })
     )}

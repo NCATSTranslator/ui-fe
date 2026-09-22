@@ -81,19 +81,8 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
     column-gap: $s;
     row-gap: $xxs;
   }
-  .sourceLink {
-    display: inline-flex;
-    align-items: center;
-    gap: $xxs;
+  .sourceLinks a {
     font-size: $bodyTwoSize;
-    svg {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-      path {
-        fill: $purpleOne;
-      }
-    }
   }
   .sectionTitle {
     font-size: $subOneSize;

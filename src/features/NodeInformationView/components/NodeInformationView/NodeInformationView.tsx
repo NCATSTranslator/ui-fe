@@ -11,7 +11,7 @@ import ViewTopBar from "@/features/Navigation/components/ViewTopBar/ViewTopBar";
 import useNodeInformationView from "@/features/NodeInformationView/hooks/useNodeInformationView";
 import { AnnotationSource } from "@/features/ResultList/types/results";
 import { getAnnotationSourceLabel, getBiolinkSource } from "@/features/NodeInformationView/utils/utilities";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
+import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
 
 /**
  * Renders the linkouts for an annotation section's sources. Duplicate and
@@ -33,9 +33,7 @@ const SourceLinks: FC<{ sources: AnnotationSource[] | undefined }> = ({ sources 
     <div className={styles.sourceLinks}>
       {
         links.map(source => (
-          <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className={styles.sourceLink}>
-            {getAnnotationSourceLabel(source)}<ExternalLink/>
-          </a>
+          <AnnotationLink key={source.url} href={source.url}>{getAnnotationSourceLabel(source)}</AnnotationLink>
         ))
       }
     </div>
