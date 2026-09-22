@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getAnnotationSourceLabel, getBiolinkSource } from "./utilities";
+import { getAnnotationSourceLabel, getBiolinkSource, sortAnnotationFields } from "./utilities";
 
 describe("getAnnotationSourceLabel", () => {
   it("uses the backend-supplied name", () => {
@@ -41,5 +41,30 @@ describe("getAnnotationSourceLabel", () => {
     const overrides = { tdl: "Custom label" };
     expect(getAnnotationSourceLabel({ id: "chembl", name: "ChEMBL", url: "https://www.ebi.ac.uk/chembl/" }, overrides))
       .toBe("Learn more on ChEMBL");
+  });
+});
+
+describe("sortAnnotationFields", () => {
+  const field = (key: string) => ({ key });
+
+  it("orders listed sections by their position in the order list", () => {
+    const order = ["chemical.roles", "chemical.synonyms"];
+    const sorted = sortAnnotationFields([field("chemical.synonyms"), field("chemical.roles")], order);
+    expect(sorted.map(f => f.key)).toEqual(["chemical.roles", "chemical.synonyms"]);
+  });
+
+  it("places unlisted sections after listed ones, keeping their arrival order", () => {
+    const order = ["chemical.roles"];
+    const sorted = sortAnnotationFields(
+      [field("chemical.new_b"), field("chemical.roles"), field("chemical.new_a")],
+      order,
+    );
+    expect(sorted.map(f => f.key)).toEqual(["chemical.roles", "chemical.new_b", "chemical.new_a"]);
+  });
+
+  it("does not mutate the input", () => {
+    const input = [field("b"), field("a")];
+    sortAnnotationFields(input, ["a", "b"]);
+    expect(input.map(f => f.key)).toEqual(["b", "a"]);
   });
 });

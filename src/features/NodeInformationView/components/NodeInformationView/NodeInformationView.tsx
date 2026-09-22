@@ -102,8 +102,8 @@ const NodeInformationView: FC = () => {
                   </div>
                 }
                 {
-                  annotationFields.map(({ label, content, sources }) => (
-                    <div key={label} className={styles.section}>
+                  annotationFields.map(({ key, label, content, sources }) => (
+                    <div key={key} className={styles.section}>
                       <p className={styles.sectionTitle}>{label}</p>
                       <div className={styles.sectionContent}>{content}</div>
                       <SourceLinks sources={sources} />

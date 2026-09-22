@@ -59,10 +59,46 @@ const getHostname = (url: string): string | null => {
 };
 
 /**
+ * Display order for annotation sections, as "category.key" using the keys the
+ * backend emits.
+ */
+const _ANNOTATION_SECTION_ORDER: string[] = [
+  "chemical.roles",
+  "chemical.approval",
+  "chemical.indications",
+  "chemical.synonyms",
+  "chemical.otc_status",
+  "chemical.clinical_trials",
+  "gene.species",
+  "gene.tdl",
+  "disease.synonyms",
+  "disease.clinical_trials",
+  "disease.curies",
+];
+
+/**
+ * Orders annotation fields by _ANNOTATION_SECTION_ORDER. Fields whose key is
+ * not listed keep their relative order and follow the listed ones.
+ */
+export const sortAnnotationFields = <T extends { key: string }>(
+  fields: T[],
+  order: string[] = _ANNOTATION_SECTION_ORDER,
+): T[] => {
+  const rank = (field: T): number => {
+    const index = order.indexOf(field.key);
+    return index === -1 ? order.length : index;
+  };
+  return fields
+    .map((field, i) => ({ field, i }))
+    .sort((a, b) => rank(a.field) - rank(b.field) || a.i - b.i)
+    .map(({ field }) => field);
+};
+
+/**
  * Frontend overrides for annotation source link labels. Keyed by the source id
  * the backend emits.
  */
-export const ANNOTATION_SOURCE_LABEL_OVERRIDES: Record<string, string> = {
+const _ANNOTATION_SOURCE_LABEL_OVERRIDES: Record<string, string> = {
   biolink: "Learn more about the Biolink Model",
   tdl: "Learn more about Target Development Levels",
 };
@@ -70,7 +106,7 @@ export const ANNOTATION_SOURCE_LABEL_OVERRIDES: Record<string, string> = {
 // Builds the user-facing label for an annotation source linkout.
 export const getAnnotationSourceLabel = (
   source: AnnotationSource,
-  overrides: Record<string, string> = ANNOTATION_SOURCE_LABEL_OVERRIDES,
+  overrides: Record<string, string> = _ANNOTATION_SOURCE_LABEL_OVERRIDES,
 ): string => {
   const override = overrides[source.id];
   if (override) return override;
