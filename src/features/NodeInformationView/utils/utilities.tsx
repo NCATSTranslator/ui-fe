@@ -111,7 +111,7 @@ export const OBJECT_TYPE_SECTION_KEY = "object_type";
  */
 export const _ANNOTATION_SECTION_OVERRIDES: Record<string, AnnotationSectionOverride> = {
   "chemical.otc_status": {
-    heading: "Over the Counter Status"
+    heading: "Availability"
   },
   "disease.curies": {
     heading: "IDs"
