@@ -1,11 +1,8 @@
 @use "@/assets/styles/variables" as *;
 
-// Rows match the publications table in the evidence window: full width,
-// alternating white and light grey, no gaps. The list shows five and a half
-// rows so a cut-off row signals there is more to scroll.
 $listItemLineHeight: 1.5;
-// Mirrors the .table-cell padding in _globals.scss that the publication rows use.
-$listItemPaddingY: 12px;
+$listItemPaddingY: 8px;
+$listItemGap: $xxs;
 $listVisibleItems: 5.5;
 $listItemHeight: calc(#{$listItemLineHeight}em + #{$listItemPaddingY} * 2);
 
@@ -15,7 +12,8 @@ $listItemHeight: calc(#{$listItemLineHeight}em + #{$listItemPaddingY} * 2);
   padding: 0;
   display: flex;
   flex-direction: column;
-  max-height: calc(#{$listItemHeight} * #{$listVisibleItems});
+  gap: $listItemGap;
+  max-height: calc(#{$listItemHeight} * #{$listVisibleItems} + #{$listItemGap} * 5);
   overflow-y: auto;
   overflow-x: hidden;
   li {
@@ -25,11 +23,8 @@ $listItemHeight: calc(#{$listItemLineHeight}em + #{$listItemPaddingY} * 2);
     box-sizing: border-box;
     min-width: 0;
     padding: $listItemPaddingY;
-    overflow-wrap: anywhere;
     line-height: $listItemLineHeight;
-    background-color: $white;
-    &:nth-child(even) {
-      background-color: $lightGray;
-    }
+    overflow-wrap: anywhere;
+    background-color: $lightGray;
   }
 }
