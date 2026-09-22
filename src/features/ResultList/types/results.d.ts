@@ -112,7 +112,7 @@ export type AnnotationSource = {
 export type AnnotationSection<T> = {
   value: T;
   metadata: {
-    sources: AnnotationSource[];
+    sources: AnnotationSource[] | null;
   };
 }
 
@@ -136,6 +136,7 @@ export type Indication = {
 export type ChemicalAnnotation = {
   approval: AnnotationSection<number> | null;
   clinical_trials: AnnotationSection<string[]> | null;
+  curies: AnnotationSection<string[]> | null;
   descriptions: AnnotationSection<string[]> | null;
   indications: AnnotationSection<Indication[]> | null;
   otc_status: AnnotationSection<{code: number, label: string}> | null;
@@ -151,6 +152,7 @@ export type DiseaseAnnotation = {
 }
 
 export type GeneAnnotation = {
+  curies: AnnotationSection<string[]> | null;
   descriptions: AnnotationSection<string[]> | null;
   name: AnnotationSection<string> | null;
   species: AnnotationSection<Species> | null;

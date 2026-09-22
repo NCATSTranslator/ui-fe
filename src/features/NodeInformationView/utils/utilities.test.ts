@@ -70,10 +70,10 @@ describe("getAnnotationSectionHeading", () => {
     expect(getAnnotationSectionHeading("gene.tdl", "tdl", overrides)).toBe("Tdl");
   });
 
-  it("ships acronym headings for otc_status, curies, and tdl", () => {
-    expect(getAnnotationSectionHeading("chemical.otc_status", "otc_status")).toBe("OTC Status");
-    expect(getAnnotationSectionHeading("disease.curies", "curies")).toBe("CURIEs");
-    expect(getAnnotationSectionHeading("gene.tdl", "tdl")).toBe("TDL");
+  it("labels the curies section of every node type as IDs", () => {
+    expect(getAnnotationSectionHeading("chemical.curies", "curies")).toBe("IDs");
+    expect(getAnnotationSectionHeading("disease.curies", "curies")).toBe("IDs");
+    expect(getAnnotationSectionHeading("gene.curies", "curies")).toBe("IDs");
   });
 });
 
@@ -93,6 +93,13 @@ describe("sortAnnotationFields", () => {
       order,
     );
     expect(sorted.map(f => f.key)).toEqual(["chemical.roles", "chemical.new_b", "chemical.new_a"]);
+  });
+
+  it("places every node type's IDs section last by default", () => {
+    const sorted = sortAnnotationFields([
+      field("chemical.curies"), field("chemical.clinical_trials"), field("chemical.roles"),
+    ]);
+    expect(sorted.map(f => f.key)).toEqual(["chemical.roles", "chemical.clinical_trials", "chemical.curies"]);
   });
 
   it("does not mutate the input", () => {

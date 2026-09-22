@@ -15,7 +15,7 @@ const _isAnnotationSection = (isValue: (v: unknown) => boolean) => (e: unknown):
   tc.isObject(e)
   && isValue(e.value)
   && tc.isObject(e.metadata)
-  && tc.makeIsHomogeneousArray(_isAnnotationSource)(e.metadata.sources);
+  && tc.nullable(e.metadata.sources, tc.makeIsHomogeneousArray(_isAnnotationSource));
 
 
 /**

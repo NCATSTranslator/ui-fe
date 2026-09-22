@@ -73,6 +73,8 @@ const _ANNOTATION_SECTION_ORDER: string[] = [
   "gene.tdl",
   "disease.synonyms",
   "disease.clinical_trials",
+  "chemical.curies",
+  "gene.curies",
   "disease.curies",
 ];
 
@@ -113,7 +115,13 @@ export const _ANNOTATION_SECTION_OVERRIDES: Record<string, AnnotationSectionOver
   "chemical.otc_status": {
     heading: "Availability"
   },
+  "chemical.curies": {
+    heading: "IDs"
+  },
   "disease.curies": {
+    heading: "IDs"
+  },
+  "gene.curies": {
     heading: "IDs"
   },
   "gene.tdl": {
