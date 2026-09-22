@@ -59,6 +59,21 @@ $nodeInformationViewMaxWidth: calc(640px + ($m * 2));
       }
     }
   }
+
+  $descriptionLineHeight: 1.5;
+  $descriptionPadding: 12px;
+  $descriptionVisibleLines: 6.5;
+  .description {
+    box-sizing: border-box;
+    margin: 0;
+    padding: $descriptionPadding;
+    line-height: $descriptionLineHeight;
+    background-color: $lightGray;
+    max-height: calc(#{$descriptionVisibleLines} * #{$descriptionLineHeight}em + #{$descriptionPadding} * 2);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+  }
   .sourceLinks {
     display: flex;
     flex-wrap: wrap;

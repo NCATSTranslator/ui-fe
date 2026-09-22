@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
 import { capitalizeAllWords, getFormattedNodeDisplayName } from "@/features/Core/utils/stringFormatters";
-import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, joinNodes, renderValue } from "@/features/NodeInformationView/utils/utilities";
+import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, renderList, renderValue } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
@@ -26,8 +26,8 @@ const ClinicalTrials: FC<AnnotationOverrideProps> = ({ value, nodeName, nodeType
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim() !== "";
 
-const capitalizedList = (names: unknown[]): string =>
-  names.filter(isNonEmptyString).map(name => capitalizeAllWords(name)).join(", ");
+const capitalizedList = (names: unknown[]): ReactNode =>
+  renderList(names.filter(isNonEmptyString).map(name => capitalizeAllWords(name)));
 
 const SynonymList: FC<AnnotationOverrideProps> = ({ value }) => (
   <>{capitalizedList(value as string[])}</>
@@ -44,7 +44,7 @@ const ChemicalRoleList: FC<AnnotationOverrideProps> = ({ value }) => (
 
 const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   <>
-    {joinNodes(
+    {renderList(
       (value as Indication[])
         .filter(indication => isNonEmptyString(indication?.name))
         .map((indication, i) => {

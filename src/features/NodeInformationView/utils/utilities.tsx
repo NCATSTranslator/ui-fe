@@ -1,14 +1,15 @@
 import { ReactNode } from "react";
 import { AnnotationSource, ResultNode } from "@/features/ResultList/types/results";
+import AnnotationList from "@/features/NodeInformationView/components/AnnotationList/AnnotationList";
 
 export const formatLabel = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
 /**
- * Interleaves a separator between rendered nodes, keeping React keys intact.
+ * Renders a list of annotation items one per line. An empty list renders nothing.
  */
-export const joinNodes = (nodes: ReactNode[], separator = ", "): ReactNode[] =>
-  nodes.flatMap((node, i) => (i === 0 ? [node] : [separator, node]));
+export const renderList = (items: ReactNode[]): ReactNode =>
+  items.length === 0 ? null : <AnnotationList items={items} />;
 
 /**
  * Determines whether an annotation value has nothing worth displaying, so the
@@ -25,7 +26,7 @@ export const isEmptyAnnotationValue = (value: unknown): boolean => {
 
 const renderArrayValue = (value: unknown[]): ReactNode => {
   if (value.length === 0) return null;
-  if (typeof value[0] === "string") return value.join(", ");
+  if (typeof value[0] === "string") return renderList(value.filter(v => typeof v === "string"));
   if (typeof value[0] !== "object" || value[0] === null) return null;
   const nodes = value.map((raw, i) => {
     const item = raw as { url?: string; title?: ReactNode; name?: ReactNode };
@@ -35,7 +36,7 @@ const renderArrayValue = (value: unknown[]): ReactNode => {
     if ("name" in item) return item.name;
     return JSON.stringify(item);
   });
-  return joinNodes(nodes);
+  return renderList(nodes);
 };
 
 export const renderValue = (value: unknown): ReactNode => {
@@ -45,7 +46,7 @@ export const renderValue = (value: unknown): ReactNode => {
   if (typeof value !== "object" || value === null) return null;
   const entries = Object.values(value).flat().filter(Boolean);
   if (entries.length === 0) return null;
-  if (entries.every(e => typeof e === "string")) return (entries as string[]).join(", ");
+  if (entries.every(e => typeof e === "string")) return renderList(entries as string[]);
   return null;
 };
 
