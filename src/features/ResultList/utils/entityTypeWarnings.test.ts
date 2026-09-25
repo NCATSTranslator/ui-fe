@@ -3,11 +3,11 @@ import { warnOnceOnEntityTypeMismatch, resetEntityTypeWarnings } from './entityT
 
 const validAnnotations = {
   chemical: {
-    approval: null, clinical_trials: null, descriptions: null, indications: null,
+    approval: null, clinical_trials: null, curies: null, descriptions: null, indications: null,
     otc_status: null, roles: null, synonyms: null,
   },
   disease: { clinical_trials: null, curies: null, descriptions: null, synonyms: null },
-  gene: { descriptions: null, name: null, species: null, tdl: null },
+  gene: { curies: null, descriptions: null, name: null, species: null, tdl: null },
 };
 
 const makeNode = (id: string, annotations: unknown) => ({

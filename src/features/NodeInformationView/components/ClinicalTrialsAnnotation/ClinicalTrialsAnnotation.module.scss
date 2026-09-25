@@ -1,12 +1,9 @@
 @use "@/assets/styles/variables" as *;
 
-.trialList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.clinicalTrialsAnnotation {
   display: flex;
   flex-direction: column;
-  gap: $s;
+  gap: $xs;
 }
 
 .trialItem {

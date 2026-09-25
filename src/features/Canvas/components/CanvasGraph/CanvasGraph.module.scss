@@ -39,3 +39,12 @@
   color: $darkGray;
   font-size: $captionSize;
 }
+
+// Doubled selector beats translator-graph-view's `.link` / `.link:hover` and
+// the app-global `a` styles so links match surrounding annotation text
+.annotationLink.annotationLink {
+  color: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}

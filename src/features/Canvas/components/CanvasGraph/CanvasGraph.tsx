@@ -8,6 +8,7 @@ import {
   HoverGeometry,
   type GraphFocusRequest,
   type GraphAnnotation,
+  type GraphAnnotationStyles,
   type DeleteSelection,
   type NodePositionMap,
   type FitViewPadding,
@@ -30,6 +31,10 @@ const CANVAS_FIT_VIEW_PADDING: FitViewPadding = {
   right: 0.1,
   bottom: 0.1,
   left: 0.1,
+};
+
+const CANVAS_ANNOTATION_STYLES: GraphAnnotationStyles = {
+  linkClassName: styles.annotationLink,
 };
 
 interface CanvasGraphProps {
@@ -161,6 +166,7 @@ const CanvasGraph: FC<CanvasGraphProps> = ({
           focusRequest={focusRequest}
           annotations={annotations}
           onAnnotationsChange={onAnnotationsChange}
+          annotationStyles={CANVAS_ANNOTATION_STYLES}
         />
         {children}
       </>
