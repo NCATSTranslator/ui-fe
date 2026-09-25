@@ -1,10 +1,9 @@
-import { FC, ReactNode, MouseEvent, useState, FormEvent, RefObject } from "react";
+import { FC, ReactNode, MouseEvent, useState, useRef, FormEvent, RefObject } from "react";
 import styles from "./SidebarCard.module.scss";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import SidebarCardTitle from "@/features/Sidebar/components/SidebarCardTitle/SidebarCardTitle";
 import Button from "@/features/Core/components/Button/Button";
-import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
 
@@ -52,6 +51,7 @@ const SidebarCard: FC<SidebarCardProps> = ({
 
   const cardClassName = joinClasses(styles.sidebarCard, className, isRenaming && styles.isRenaming);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const optionsAnchorRef = useRef<HTMLButtonElement>(null);
   const onOptionsClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -99,12 +99,19 @@ const SidebarCard: FC<SidebarCardProps> = ({
           options &&
           (        
             <div className={styles.options}>
-              <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
-                <Button className={styles.optionsButton} handleClick={onOptionsClick}>
-                  <OptionsIcon />
-                </Button>
-              </OutsideClickHandler>
-              <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
+              <Button
+                className={styles.optionsButton}
+                handleClick={onOptionsClick}
+                ref={optionsAnchorRef}
+              >
+                <OptionsIcon />
+              </Button>
+              <OptionsPane
+                open={optionsOpen}
+                anchorRef={optionsAnchorRef}
+                onClose={() => setOptionsOpen(false)}
+                onOptionItemClick={onOptionItemClick}
+              >
                 {options}
               </OptionsPane>
             </div>
