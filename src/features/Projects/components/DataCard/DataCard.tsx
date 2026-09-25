@@ -1,4 +1,4 @@
-import { FC, ReactNode, MouseEvent, useState, useMemo, FormEvent, RefObject } from "react";
+import { FC, ReactNode, MouseEvent, useState, useMemo, useRef, FormEvent, RefObject } from "react";
 import styles from "./DataCard.module.scss";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
@@ -6,7 +6,6 @@ import BookmarkIcon from '@/assets/icons/navigation/Bookmark/Filled Bookmark.svg
 import NoteIcon from '@/assets/icons/buttons/Notes/Filled Notes.svg?react';
 import CardName from "@/features/Projects/components/CardName/CardName";
 import Button from "@/features/Core/components/Button/Button";
-import OutsideClickHandler from "@/features/Core/components/OutsideClickHandler/OutsideClickHandler";
 import OptionsPane from "@/features/Sidebar/components/OptionsPane/OptionsPane";
 import { QueryTypeString } from "@/features/Projects/types/projects";
 import CardWrapper from "@/features/Projects/components/CardWrapper/CardWrapper";
@@ -63,6 +62,7 @@ const DataCard: FC<DataCardProps> = ({
 
   const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const optionsAnchorRef = useRef<HTMLDivElement>(null);
 
   const queryTypeLabel = useMemo(() => {
     if(queryType === 'drug' || queryType === 'gene' || queryType === 'chemical') return 'Smart Query';
@@ -132,13 +132,16 @@ const DataCard: FC<DataCardProps> = ({
         {
           options &&
           (        
-            <div className={styles.optionsColumn}>
-              <OutsideClickHandler onOutsideClick={()=>setOptionsOpen(false)}>
-                <Button className={styles.optionsButton} handleClick={onOptionsClick}>
-                  <OptionsIcon />
-                </Button>
-              </OutsideClickHandler>
-              <OptionsPane open={optionsOpen} onOptionItemClick={onOptionItemClick}>
+            <div className={styles.optionsColumn} ref={optionsAnchorRef}>
+              <Button className={styles.optionsButton} handleClick={onOptionsClick}>
+                <OptionsIcon />
+              </Button>
+              <OptionsPane
+                open={optionsOpen}
+                anchorRef={optionsAnchorRef}
+                onClose={() => setOptionsOpen(false)}
+                onOptionItemClick={onOptionItemClick}
+              >
                 {options}
               </OptionsPane>
             </div>

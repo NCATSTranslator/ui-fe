@@ -1,4 +1,4 @@
-import { FC, MouseEvent, Dispatch, SetStateAction } from 'react';
+import { FC, MouseEvent, Dispatch, SetStateAction, useRef } from 'react';
 import styles from './ProjectDetailInner.module.scss';
 import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWrapper';
 import Tabs from '@/features/Core/components/Tabs/Tabs';
@@ -32,20 +32,31 @@ const ProjectDetailOptionsButton: FC<ProjectDetailOptionsButtonProps> = ({
   onRename,
   project,
   onDelete,
-}) => (
-  <div onClick={(e) => { e.stopPropagation(); setOptionsOpen(prev => !prev); }}>
-    <OptionsIcon className={styles.optionsIcon} />
-    <OptionsPane open={optionsOpen}>
-      <Button handleClick={onRename} iconLeft={<EditIcon />}>Rename</Button>
-      <Button
-        handleClick={() => { if (project) onDelete(project); }}
-        iconLeft={<TrashIcon />}
+}) => {
+  const optionsAnchorRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={optionsAnchorRef}
+      onClick={(e) => { e.stopPropagation(); setOptionsOpen(prev => !prev); }}
+    >
+      <OptionsIcon className={styles.optionsIcon} />
+      <OptionsPane
+        open={optionsOpen}
+        anchorRef={optionsAnchorRef}
+        onClose={() => setOptionsOpen(false)}
       >
-        Delete
-      </Button>
-    </OptionsPane>
-  </div>
-);
+        <Button handleClick={onRename} iconLeft={<EditIcon />}>Rename</Button>
+        <Button
+          handleClick={() => { if (project) onDelete(project); }}
+          iconLeft={<TrashIcon />}
+        >
+          Delete
+        </Button>
+      </OptionsPane>
+    </div>
+  );
+};
 
 const ProjectDetailInner = () => {
   const vm = useProjectDetailViewModel();
