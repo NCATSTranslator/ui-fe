@@ -1,20 +1,11 @@
 @use "@/assets/styles/variables" as *;
 
 .optionsPane {
-  position: absolute;
-  top: calc(100% + $xxxs);
-  right: -1px;
+  position: fixed;
   background-color: $white;
   border-radius: $defaultBorderRadius;
-  opacity: 0;
-  pointer-events: none;
-  transition: $defaultAnim;
-  z-index: 10;
+  z-index: 1000;
   box-shadow: $dropShadow;
-  &.open {
-    opacity: 1;
-    pointer-events: all;
-  }
   button {
     background-color: transparent;
     border: none;
