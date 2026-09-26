@@ -1,14 +1,17 @@
-import { FC, useCallback, useState } from "react";
+import { FC, MouseEvent, useCallback, useState, useMemo } from "react";
 import styles from './ResultItemInteractables.module.scss';
-import { Link } from 'react-router-dom';
-import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
-import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
-import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
-import NotesFilled from "@/assets/icons/buttons/Notes/Filled Notes.svg?react"
-import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import MenuIcon from '@/assets/icons/buttons/Dot Menu/Horizontal Dot Menu.svg?react';
-import { useWindowSize } from "@/features/Core/hooks/useWindowSize";
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
+import { Result } from "@/features/ResultList/types/results";
+import { useSelector } from "react-redux";
+import { getResultSetById } from "@/features/ResultList/slices/resultsSlice";
+import ResultItemSummaryModal from "@/features/ResultItem/components/ResultItemSummaryModal/ResultItemSummaryModal";
+import { sanitizeNameString } from "@/features/ResultItem/hooks/useResultItemInteractables";
+import { useResponsiveBreakpoint } from "@/features/Core/hooks/useResponsiveBreakpoint";
+import SummaryButton from "@/features/ResultItem/components/ResultItemInteractables/SummaryButton";
+import BookmarkButton from "@/features/ResultItem/components/ResultItemInteractables/BookmarkButton";
+import NotesButton from "@/features/ResultItem/components/ResultItemInteractables/NotesButton";
+import { useStreamingSummaryState } from "@/features/ResultItem/hooks/resultSummaryHooks";
 
 interface ResultItemInteractablesProps {
   handleBookmarkClick: () => Promise<string | number | false | null>;
@@ -19,6 +22,12 @@ interface ResultItemInteractablesProps {
   isEven: boolean;
   isPathfinder: boolean;
   nameString: string;
+  result: Result;
+  hasSummary: boolean;
+  pk: string | null;
+  diseaseId: string;
+  diseaseName: string;
+  diseaseDescription: string;
 }
 
 const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
@@ -30,85 +39,112 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   isEven,
   isPathfinder,
   nameString,
+  result,
+  hasSummary,
+  pk,
+  diseaseId,
+  diseaseName,
+  diseaseDescription,
 }) => {
+  const resultSet = useSelector(getResultSetById(pk));
+  const belowBreakpoint = useResponsiveBreakpoint();
+  const nameStringNoApostrophes = useMemo(() => sanitizeNameString(nameString), [nameString]);
 
-  const screenWidth = useWindowSize();
-  const breakpoint = 1240;
-  const belowBreakpoint = !!screenWidth?.width && screenWidth.width < breakpoint;
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [isOpen, setIsOpen] = useState(false); 
+  const {
+    summaryState,
+    isLoading,
+    isStreaming,
+    isError,
+    streamedText,
+    fetchAndUpdateSummary,
+    clearAndRefetchSummary,
+    cancelStream,
+  } = useStreamingSummaryState({ resultSet, result, diseaseId, diseaseName, diseaseDescription });
 
   const handleOutsideClick = useCallback(() => {
-    if(isOpen)
-      setIsOpen(false); 
+    if (isOpen) {
+      setIsOpen(false);
+    }
   }, [isOpen]);
 
-  return(
-    <OutsideClickHandler 
-      className={`${styles.interactables} ${!!isEven && styles.even}`}
-      onOutsideClick={handleOutsideClick}>
-      {
-        (!!belowBreakpoint && !isPathfinder) &&
-        <button className={`${styles.icon}`} onClick={(e)=>{e.stopPropagation(); setIsOpen(prev=>!prev)}}>
-          <MenuIcon/>
-        </button>
-      }
-      <div className={`${styles.interactablesContainer} ${!!belowBreakpoint && styles.belowBreakpoint} ${!!isOpen && styles.isOpen}`}>
-        {
-          (!!hasUser && !isPathfinder)
-            ? <>
-                <button 
-                  className={`${styles.icon} ${styles.bookmarkIcon} ${isBookmarked ? styles.filled : ''}`}
-                  onClick={(e)=>{e.stopPropagation(); handleBookmarkClick()}}
-                  data-tooltip-id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} 
-                  >
-                  <BookmarkFilled 
-                    className={styles.bookmarkFilledSVG}
-                    data-result-name={nameString}
-                    aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} 
-                  />
-                  <Bookmark 
-                    data-result-name={nameString}
-                    aria-describedby={`bookmark-tooltip-${nameString.replaceAll("'", "")}`} 
-                  />
-                  <Tooltip id={`bookmark-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>
-                      {
-                        isBookmarked
-                        ? <>Remove this result from your bookmarks.</>
-                        : <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects.</Link></>
-                      }
-                    </span>
-                  </Tooltip>
-                  <span className={styles.label}>Bookmark</span>
-                </button>
-                <button 
-                  className={`${styles.icon} ${styles.notesIcon} ${hasNotes ? styles.filled : ''}`}
-                  onClick={(e)=>{e.stopPropagation(); handleNotesClick()}}
-                  data-tooltip-id={`notes-tooltip-${nameString.replaceAll("'", "")}`}
-                  >
-                  <NotesFilled 
-                    className={styles.notesFilledSVG}
-                    data-result-name={nameString}
-                    aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`}
-                  />
-                  <Notes 
-                    className='note-icon'
-                    data-result-name={nameString}
-                    aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`}
-                  />
-                  <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. You can also view and edit notes on your bookmarked results in your <Link to="/projects" target='_blank'>Projects.</Link></span>
-                  </Tooltip>
-                  <span className={styles.label}>Notes</span>
-                </button>
-              </>
-            : <></>
-        }
-      </div>
-    </OutsideClickHandler>
+  const handleGenerateSummary = useCallback(() => {
+    setIsModalOpen(true);
 
-  )
-}
+    if (summaryState.content) {
+      return;
+    }
+
+    fetchAndUpdateSummary();
+  }, [summaryState.content, fetchAndUpdateSummary]);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    cancelStream();
+  }, [cancelStream]);
+
+  // The whole result row navigates on click, so every control here has to keep
+  // its own click from bubbling up to it.
+  const stopPropagation = useCallback((e: MouseEvent) => e.stopPropagation(), []);
+
+  return (
+    <>
+      <OutsideClickHandler
+        className={`${styles.interactables} ${!!isEven && styles.even}`}
+        onOutsideClick={handleOutsideClick}
+      >
+        {(belowBreakpoint && !isPathfinder) && (
+          <button
+            className={styles.icon}
+            onClick={(e) => { e.stopPropagation(); setIsOpen(prev => !prev); }}
+          >
+            <MenuIcon/>
+          </button>
+        )}
+
+        <div
+          className={`${styles.interactablesContainer} ${belowBreakpoint && styles.belowBreakpoint} ${isOpen && styles.isOpen}`}
+          onClick={stopPropagation}
+        >
+          <SummaryButton
+            hasSummary={hasSummary}
+            hasCachedSummary={summaryState.hasCached}
+            onGenerateSummary={handleGenerateSummary}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+
+          <BookmarkButton
+            hasUser={hasUser}
+            isPathfinder={isPathfinder}
+            isBookmarked={isBookmarked}
+            onBookmarkClick={handleBookmarkClick}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+
+          <NotesButton
+            hasUser={hasUser}
+            isPathfinder={isPathfinder}
+            hasNotes={hasNotes}
+            onNotesClick={handleNotesClick}
+            nameStringNoApostrophes={nameStringNoApostrophes}
+          />
+        </div>
+      </OutsideClickHandler>
+
+      <ResultItemSummaryModal
+        isOpen={isModalOpen}
+        isLoading={isLoading}
+        isStreaming={isStreaming}
+        isError={isError}
+        summary={isStreaming ? streamedText : summaryState.content}
+        onClose={handleCloseModal}
+        onClearAndRefetchSummary={clearAndRefetchSummary}
+        result={result}
+      />
+    </>
+  );
+};
 
 export default ResultItemInteractables;

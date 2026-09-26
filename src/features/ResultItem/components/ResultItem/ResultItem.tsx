@@ -10,7 +10,7 @@ import { Save } from '@/features/UserAuth/utils/userApi';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { Result, ResultBookmark } from '@/features/ResultList/types/results';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
@@ -22,6 +22,7 @@ import PathView from '@/features/ResultItem/components/PathView/PathView';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
+import { isResultSummaryEnabled } from '@/features/ResultItem/utils/resultSummaryFunctions';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 
 type ResultItemProps = {
@@ -68,8 +69,10 @@ const ResultItem: FC<ResultItemProps> = ({
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
   const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
   const user = useSelector(currentUser);
+  const config = useSelector(currentConfig);
   const decodedParams = useDecodedParams();
   const isLookup = getDataFromQueryVar("t", decodedParams) === 'l';
+  const hasSummary = isResultSummaryEnabled(queryType, config);
 
   const {
     isBookmarked,
@@ -176,6 +179,12 @@ const ResultItem: FC<ResultItemProps> = ({
           isEven={isEven}
           isPathfinder={isPathfinder}
           nameString={nameString}
+          result={result}
+          hasSummary={hasSummary}
+          pk={pk}
+          diseaseId={objectNode?.id || ""}
+          diseaseName={objectNode?.names[0] || ""}
+          diseaseDescription={objectNode?.descriptions[0] || ""}
         />
         <div className={joinClasses(styles.evidenceContainer, styles.resultSub)}>
           <span className={styles.evidenceLink}>

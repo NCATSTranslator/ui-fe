@@ -12,7 +12,7 @@ interface LoadingWrapperProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-const LoadingWrapper: FC<LoadingWrapperProps> = ({ 
+const LoadingWrapper: FC<LoadingWrapperProps> = ({
   loading = false,
   children,
   wrapperClassName = "",
@@ -28,6 +28,9 @@ const LoadingWrapper: FC<LoadingWrapperProps> = ({
     let timer: Timeout | null = null;
     if (!loading) {
       timer = setTimeout(() => {setShowContent(true); setIsLoading(false);}, showDelay);
+    } else {
+      setIsLoading(true);
+      setShowContent(false);
     }
     return () => {
       if(!!timer)

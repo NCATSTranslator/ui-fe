@@ -21,8 +21,9 @@ import styles from './ResultDetailView.module.scss';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
-import { currentUser } from '@/features/UserAuth/slices/userSlice';
+import { currentConfig, currentUser } from '@/features/UserAuth/slices/userSlice';
 import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
+import { isResultSummaryEnabled } from '@/features/ResultItem/utils/resultSummaryFunctions';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
@@ -69,6 +70,8 @@ const ResultDetailView: FC = () => {
   const [graphActive, setGraphActive] = useState(false);
 
   const user = useSelector(currentUser);
+  const config = useSelector(currentConfig);
+  const hasSummary = isResultSummaryEnabled(queryType, config);
   const evidenceCounts = useMemo(
     () => result ? (result.evidenceCount ?? getEvidenceCounts(resultSet, result)) : null,
     [resultSet, result]
@@ -208,6 +211,12 @@ const ResultDetailView: FC = () => {
               isEven={false}
               isPathfinder={isPathfinder}
               nameString={nameString}
+              result={result}
+              hasSummary={hasSummary}
+              pk={pk}
+              diseaseId={objectNode?.id || ""}
+              diseaseName={objectNode?.names[0] || ""}
+              diseaseDescription={objectNode?.descriptions[0] || ""}
             />
             <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
               <span className={styles.evidenceLink}>
