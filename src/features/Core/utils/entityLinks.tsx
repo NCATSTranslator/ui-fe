@@ -66,6 +66,14 @@ const ENTITY_URL_CONFIGS: EntityUrlConfig[] = [
   { pattern: 'UNII', urlTemplate: (id) => `https://precision.fda.gov/uniisearch/srs/unii/${id.replace('UNII:', '')}`, org: 'UNII' },
   { pattern: 'MESH', urlTemplate: (id) => `https://www.ncbi.nlm.nih.gov/mesh/?term=${id.replace('MESH:', '')}`, org: 'MeSH' },
   { pattern: 'GO', urlTemplate: (id) => `https://www.ebi.ac.uk/QuickGO/GTerm?id=${id}`, org: 'GO' },
+  {
+    pattern: 'UBERON:',
+    urlTemplate: (id: string) => {
+      const iri = `http://purl.obolibrary.org/obo/${id.toUpperCase().replace(':', '_')}`;
+      return `https://www.ebi.ac.uk/ols4/ontologies/uberon/classes/${encodeURIComponent(encodeURIComponent(iri))}`;
+    },
+    org: 'Uberon (EBI OLS)',
+  }
 ];
 
 export const getUrlAndOrg = (id: string): (string | null)[] => {
