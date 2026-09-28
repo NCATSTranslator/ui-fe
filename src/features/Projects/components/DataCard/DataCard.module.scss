@@ -147,28 +147,31 @@
     justify-content: center;
     position: relative;
   }
-  .addToProjectButton {
+}
+
+// Top-level so these apply inside the portaled OptionsPane
+.addToProjectButton {
+  svg path {
+    stroke: $white;
+    fill: $darkGray;
+  }
+  &:hover {
     svg path {
       stroke: $white;
-      fill: $darkGray;
-    }
-    &:hover {
-      svg path {
-        stroke: $white;
-        fill: $purpleOne;
-      }
+      fill: $purpleOne;
     }
   }
-  .removeFromProjectButton {
+}
+
+.removeFromProjectButton {
+  svg path {
+    stroke: $darkGray;
+    fill: $white;
+  }
+  &:hover {
     svg path {
-      stroke: $darkGray;
-      fill: $white;
-    }
-    &:hover {
-      svg path {
-        stroke: $purpleOne;
-        fill: $purpleOne;
-      }
+      stroke: $purpleOne;
+      fill: $purpleOne;
     }
   }
 }
