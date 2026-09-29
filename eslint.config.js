@@ -91,10 +91,13 @@ export default [
     }
   },
   {
-    // max lines per function for TSX files
+    // TSX overrides: hook calls and className/prop conditionals inflate these counts in components;
+    // sonarjs/cognitive-complexity and max-lines-per-function still bound component size
     files: ['**/*.tsx'],
     rules: {
       'max-lines-per-function': ['warn', { max: 180, skipBlankLines: true, skipComments: true }],
+      'complexity': 'off',
+      'max-statements': 'off',
     }
   },
   {

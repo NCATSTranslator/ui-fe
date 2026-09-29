@@ -58,7 +58,15 @@ const PathGroupConnectors: FC<PathGroupConnectorsProps> = ({
       {edges.map((edge, index) => (
         <path
           key={edge.id}
-          d={generatePathD(index, height, SVG_WIDTH, EDGE_HEIGHT, nodeToEdge, CURVE_OFFSET, STRAIGHT_SEGMENT_LENGTH)}
+          d={generatePathD({
+            index,
+            svgHeight: height,
+            svgWidth: SVG_WIDTH,
+            edgeHeight: EDGE_HEIGHT,
+            enter: nodeToEdge,
+            curveOffset: CURVE_OFFSET,
+            straightSegment: STRAIGHT_SEGMENT_LENGTH,
+          })}
           stroke={getStrokeColor(edge.id === hoveredEdgeId, edge.id === selectedEdgeId)}
           fill="transparent"
           strokeWidth={PATH_THICKNESS}

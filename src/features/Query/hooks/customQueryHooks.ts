@@ -352,26 +352,35 @@ export const useAutocomplete = (
   const configRef = useRef(config);
   configRef.current = config;
 
+  // Monotonic id so only the latest in-flight request may update state
+  const requestIdRef = useRef(0);
+
   const delayedQuery = useMemo(
     () => debounce(
       (inputText: string) => {
         if (inputText.length < 2) {
+          requestIdRef.current += 1;
           setAutoCompleteItems(null);
           setLoadingAutocomplete(false);
           return;
         }
-        const { functions, limitTypes, limitPrefixes, excludePrefixes } = configRef.current;
-        if (functions) {
-          getAutocompleteTerms(
-            inputText,
-            setLoadingAutocomplete,
-            setAutoCompleteItems,
-            functions,
-            limitTypes || [],
-            limitPrefixes || [],
-            excludePrefixes || [],
-            nameResolverEndpoint
-          );
+        const config = configRef.current;
+        if (config.functions) {
+          const requestId = ++requestIdRef.current;
+          setLoadingAutocomplete(true);
+          getAutocompleteTerms(inputText, config, nameResolverEndpoint)
+            .then((items) => {
+              if (requestId !== requestIdRef.current) return;
+              setAutoCompleteItems(items);
+            })
+            .catch((error) => {
+              if (requestId !== requestIdRef.current) return;
+              console.log(error);
+            })
+            .finally(() => {
+              if (requestId !== requestIdRef.current) return;
+              setLoadingAutocomplete(false);
+            });
         }
       },
       750
@@ -379,7 +388,19 @@ export const useAutocomplete = (
     [nameResolverEndpoint]
   );
 
-  const clearAutocompleteItems = useCallback(() => setAutoCompleteItems(null), []);
+  useEffect(() => {
+    return () => {
+      delayedQuery.cancel();
+      requestIdRef.current += 1;
+    };
+  }, [delayedQuery]);
+
+  const clearAutocompleteItems = useCallback(() => {
+    delayedQuery.cancel();
+    requestIdRef.current += 1;
+    setAutoCompleteItems(null);
+    setLoadingAutocomplete(false);
+  }, [delayedQuery]);
 
   return {
     autocompleteItems,
