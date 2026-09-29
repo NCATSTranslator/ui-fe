@@ -238,27 +238,38 @@ export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[
   return Array.from(groupedPaths.values());
 }
 
+interface GeneratePathDArgs {
+  /** The index of the path in the graph. */
+  index: number;
+  /** The height of the SVG container. */
+  svgHeight: number;
+  /** The width of the SVG container. */
+  svgWidth: number;
+  /** The height of each edge. */
+  edgeHeight: number;
+  /** Whether the path is entering the graph. */
+  enter: boolean;
+  /** The offset for the curve. */
+  curveOffset?: number;
+  /** The length of the straight segment. */
+  straightSegment?: number;
+}
+
 /**
  * Generates a path data string for a path in a graph visualization.
  *
- * @param {number} index - The index of the path in the graph.
- * @param {number} svgHeight - The height of the SVG container.
- * @param {number} svgWidth - The width of the SVG container.
- * @param {number} edgeHeight - The height of each edge.
- * @param {boolean} enter - Whether the path is entering the graph.
- * @param {number} curveOffset - The offset for the curve.
- * @param {number} straightSegment - The length of the straight segment.
+ * @param {GeneratePathDArgs} args - Path geometry; see GeneratePathDArgs for each field.
  * @returns {string} - The path data string.
  */
-export const generatePathD = (
-  index: number,
-  svgHeight: number,
-  svgWidth: number,
-  edgeHeight: number,
-  enter: boolean,
+export const generatePathD = ({
+  index,
+  svgHeight,
+  svgWidth,
+  edgeHeight,
+  enter,
   curveOffset = 50,
-  straightSegment = 10
-): string => {
+  straightSegment = 10,
+}: GeneratePathDArgs): string => {
   const startX = 0;
   const startY = svgHeight * 0.5;
   const endX = svgWidth;
