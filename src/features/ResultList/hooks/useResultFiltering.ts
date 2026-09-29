@@ -57,22 +57,15 @@ const useResultFiltering = ({
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
   const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
 
-  const handleApplyFilterAndCleanup = useCallback((
-    filtersToActivate: Filter[],
-    entityFilters: string[],
-    rawResultsVal: ResultSet | null,
-    originalResultsVal: Result[],
-    sortString: string,
-    isPathfinderVal: boolean = false,
-    userSavesVal: SaveGroup | null = null,
-  ) => {
+  const handleApplyFilterAndCleanup = useCallback((filtersToActivate: Filter[]) => {
+    const rawResultsVal = rawResults.current;
     if (!rawResultsVal || !handleUpdateResultsRef.current)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResultsRef.current(filtersToActivate, entityFilters, rawResultsVal, originalResultsVal, false, sortString, isPathfinderVal, userSavesVal);
+    let newFormattedResults = handleUpdateResultsRef.current(filtersToActivate, activeEntityFilters, rawResultsVal, originalResults.current, false, currentSortString.current, isPathfinder, userSavesRef.current);
     handlePageReset(false, newFormattedResults.length);
-  }, [handlePageReset, handleUpdateResultsRef]);
+  }, [handlePageReset, handleUpdateResultsRef, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
 
   const handleFilter = useCallback((filter: Filter) => {
     // Try to find a filter with same {id, value, negated} — for toggle-off
@@ -90,15 +83,7 @@ const useResultFiltering = ({
         filter_type: filter.id ?? filter.name,
         filter_count: updatedFilters.length,
       });
-      handleApplyFilterAndCleanup(
-        updatedFilters,
-        activeEntityFilters,
-        rawResults.current,
-        originalResults.current,
-        currentSortString.current,
-        isPathfinder,
-        userSavesRef.current
-      );
+      handleApplyFilterAndCleanup(updatedFilters);
       return;
     }
 
@@ -130,33 +115,17 @@ const useResultFiltering = ({
       filter_value: isEntityFilter(filter) ? 'string filter' : filter.value,
       filter_count: updatedFilters.length,
     });
-    handleApplyFilterAndCleanup(
-      updatedFilters,
-      activeEntityFilters,
-      rawResults.current,
-      originalResults.current,
-      currentSortString.current,
-      isPathfinder,
-      userSavesRef.current
-    );
-  }, [activeFilters, handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+    handleApplyFilterAndCleanup(updatedFilters);
+  }, [activeFilters, handleApplyFilterAndCleanup]);
 
   const handleSetFilters = useCallback((filters: Filter[]) => {
-    handleApplyFilterAndCleanup(
-      filters,
-      activeEntityFilters,
-      rawResults.current,
-      originalResults.current,
-      currentSortString.current,
-      isPathfinder,
-      userSavesRef.current
-    );
-  }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+    handleApplyFilterAndCleanup(filters);
+  }, [handleApplyFilterAndCleanup]);
 
   const handleClearAllFilters = useCallback(() => {
     trackEvent('filter_cleared', { filter_type: 'all', filter_count: 0 });
-    handleApplyFilterAndCleanup([], activeEntityFilters, rawResults.current, originalResults.current, currentSortString.current, isPathfinder, userSavesRef.current);
-  }, [handleApplyFilterAndCleanup, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+    handleApplyFilterAndCleanup([]);
+  }, [handleApplyFilterAndCleanup]);
 
   const resetFilters = useCallback(() => {
     setActiveFilters([]);

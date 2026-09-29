@@ -1,5 +1,5 @@
 import { defaultQueryFilterFactory, drugTreatsQueryFilterFactory } from '@/features/Query/utils/queryTypeFilters';
-import { queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
+import { nameResolverGeneAnnotator, queryTypeAnnotator } from '@/features/Query/utils/queryTypeAnnotators';
 import { combinedQueryFormatter } from '@/features/Query/utils/queryTypeFormatters';
 import { QueryType, AutocompleteItem } from '@/features/Query/types/querySubmission';
 import {
@@ -36,7 +36,7 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
-      annotate: queryTypeAnnotator,
+      annotate: nameResolverGeneAnnotator,
       format: combinedQueryFormatter
     },
     pathString: 'may increase the activity of',
@@ -53,7 +53,7 @@ export const queryTypes: QueryType[] = [
     limitPrefixes: [],
     functions: {
       filter: defaultQueryFilterFactory('Gene'),
-      annotate: queryTypeAnnotator,
+      annotate: nameResolverGeneAnnotator,
       format: combinedQueryFormatter
     },
     pathString: 'may decrease the activity of',

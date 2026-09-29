@@ -75,11 +75,6 @@
       display: none;
     }
   }
-  .folderPlusIcon {
-    path {
-      stroke: $white;
-    }
-  }
   .leftSection {
     display: flex;
     align-items: flex-start;
@@ -150,6 +145,13 @@
     align-items: center;
     margin-top: $xxxs;
     gap: $xs;
+  }
+}
+
+// Top-level so these apply inside the portaled OptionsPane
+.folderPlusIcon {
+  path {
+    stroke: $white;
   }
 }
 

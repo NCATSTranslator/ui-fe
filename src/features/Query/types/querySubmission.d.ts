@@ -77,6 +77,7 @@ export type NormalizedNode = {
   label: string;
   synonyms: string[];
   types: string[];
+  taxa?: string[];
 }
 
 export type FormatData = {
