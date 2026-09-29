@@ -2,6 +2,7 @@ import { closest as closestStrMatch, distance } from 'fastest-levenshtein';
 import { capitalizeAllWords } from "@/features/Core/utils/stringFormatters";
 import { removeDuplicateObjects } from "@/features/Core/utils/arrayHelpers";
 import { AutocompleteItem, FormatData, GenericItem, GeneItem } from '@/features/Query/types/querySubmission';
+import { isBiolinkDiseaseCategory, isBiolinkGeneCategory } from '@/features/Query/utils/biolinkCategories';
 
 /**
  * Default query formatter that processes generic items and formats them for autocomplete
@@ -31,7 +32,7 @@ const defaultQueryFormatter = async (
 
     const matchText = _genMatchText(item.label, input, bestMatch);
     const firstType = types[0];
-    const formattedLabel = firstType === "biolink:Gene" || firstType === "biolink:Protein"
+    const formattedLabel = isBiolinkGeneCategory(firstType)
       ? item.label.toUpperCase()
       : capitalizeAllWords(item.label);
 
@@ -153,16 +154,8 @@ export const combinedQueryFormatter = async (
   const otherItems: GenericItem[] = [];
 
   items.forEach((item) => {
-    const types = item.types;
-    const isDisease = types.some(type =>
-      type === "biolink:Disease" ||
-      type === "biolink:PhenotypicFeature" ||
-      type === "biolink:DiseaseOrPhenotypicFeature"
-    );
-    const isGene = types.some(type =>
-      type === "biolink:Gene" ||
-      type === "biolink:Protein"
-    );
+    const isDisease = item.types.some(isBiolinkDiseaseCategory);
+    const isGene = item.types.some(isBiolinkGeneCategory);
 
     if (isDisease) {
       diseases.push(item);
