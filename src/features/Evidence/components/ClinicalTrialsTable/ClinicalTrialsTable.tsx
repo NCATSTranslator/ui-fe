@@ -68,6 +68,12 @@ const getPhaseDisplay = (meta: ClinicalTrialMeta | undefined, phase: number): st
   return '';
 };
 
+const getTrialNumber = (id: string | undefined): string => {
+  if (!id) return '';
+  const nctIndex = id.toUpperCase().indexOf('NCT');
+  return nctIndex === -1 ? id : id.slice(nctIndex + 'NCT'.length);
+};
+
 const renderTitleCell = (showSkeleton: boolean, url: string, title: string | undefined): ReactNode => {
   if (!url && !showSkeleton) return null;
   return (
@@ -122,6 +128,9 @@ const ClinicalTrialTableRow: FC<ClinicalTrialTableRowProps> = ({
     <div className={styles.tableItem}>
       <div className={`table-cell ${styles.cell} ${styles.link} link`}>
         {renderTitleCell(isLoadingMetadata && !item.title, url, item.title)}
+      </div>
+      <div className={`table-cell ${styles.cell}`}>
+        {getTrialNumber(item.id)}
       </div>
       <div className={`table-cell ${styles.cell}`}>
         {renderStartDateCell(isLoadingMetadata && !item.start_date, item.start_date)}
@@ -182,6 +191,7 @@ const ClinicalTrialsTable: FC<ClinicalTrialsTableProps> = ({ clinicalTrials, pre
       <div className={`table-body ${styles.tableBody} ${styles.clinicalTrials}`}>
         <div className={`table-head ${styles.tableHead}`}>
           <div className={`head ${styles.head}`}>Title</div>
+          <div className={`head ${styles.head}`}>NCT ID</div>
           <div className={`head ${styles.head}`}>Start Date</div>
           <div className={`head ${styles.head}`}>Phase</div>
           <div className={`head ${styles.head}`}>Status</div>
