@@ -242,6 +242,7 @@ const ResultDetailView: FC = () => {
         <Tabs
           isOpen
           className={styles.tabs}
+          fadeClassName={styles.tabFade}
           handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
         >
           <Tab heading="Paths" className={styles.pathsTab}>
@@ -253,12 +254,13 @@ const ResultDetailView: FC = () => {
               pathArray={result.paths}
               pathFilterState={pathFilterState ?? {}}
               pk={pk ?? ''}
+              pathsWrapperClassName={styles.pathsScroll}
               resultId={result.id}
               setShowHiddenPaths={setShowHiddenPaths}
               showHiddenPaths={showHiddenPaths}
             />
           </Tab>
-          <Tab heading="Graph">
+          <Tab heading="Graph" className={styles.graphTab}>
             <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
               <GraphView
                 graph={graph}
