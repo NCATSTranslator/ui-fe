@@ -2,9 +2,9 @@
 
 .resultDetailView {
   padding: 0 $l $m;
+  min-width: 0;
   max-width: $maxWidth;
   margin: 0 auto;
-  overflow-x: auto;
 }
 
 .tableHeader, .top {
@@ -86,8 +86,28 @@
   margin-top: $xs;
 }
 
+// Only the content below the tab list scrolls horizontally; the header, the
+// excluded-paths toggle, and the path pagination stay put. The tab wrappers are
+// grids, so their single column is pinned to the available width instead of
+// growing to fit the widest path.
+.tabFade, .pathsTab, .graphTab {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .pathsTab {
   min-height: 200px;
+}
+
+.graphTab {
+  overflow-x: auto;
+}
+
+.pathsScroll {
+  overflow-x: auto;
+  // Room for the hover shadows of the edge paths, which would otherwise be clipped
+  // by the scroll container.
+  padding: $xs;
+  margin: -$xs;
 }
 
 .pathsNum, .info {
