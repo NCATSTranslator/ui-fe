@@ -42,6 +42,8 @@ interface PathViewProps {
   pathArray: string[] | Path[];
   pathFilterState?: PathFilterState;
   pk: string;
+  /** Applied to the wrapper around the paths, which excludes the pagination and the excluded-paths toggle, so callers can scroll the paths alone. */
+  pathsWrapperClassName?: string;
   resultId?: string;
   selectedEdge?: ResultEdge | null;
   selectedEdgeRef?: RefObject<HTMLElement | null>;
@@ -61,6 +63,7 @@ const PathView: FC<PathViewProps> = ({
   pathArray,
   pathFilterState = NO_PATH_FILTER_STATE,
   pk,
+  pathsWrapperClassName,
   resultId: resultItemId,
   selectedEdge,
   selectedEdgeRef,
@@ -156,6 +159,7 @@ const PathView: FC<PathViewProps> = ({
         :
         <ResultItemIdContext.Provider value={effectiveResultId}>
         <HoverContext.Provider value={hoverContextValue}>
+          <div className={pathsWrapperClassName}>
             <div className={joinClasses(styles.paths, inModal && styles.inModal)}>
               {
                 displayedPaths.map((path: Path, i: number)=> {
@@ -184,25 +188,27 @@ const PathView: FC<PathViewProps> = ({
                 })
               }
             </div>
-            {
-              Object.keys(activeFilters).length > 0 && hasFilteredPaths && 
-              <Button
-                handleClick={() => { setShowHiddenPaths(prev => !prev); setCurrentPage(0); setItemOffset(0); }}                variant="secondary"
-                small
-                dataTooltipId={`${effectiveResultId}-excluded-paths-toggle`}
-                className={joinClasses(isEven && styles.evenButton)}
-                iconRight={<Information/>}
-                >
-                {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
-                <Tooltip id={`${effectiveResultId}-excluded-paths-toggle`}>
-                  {
-                    showHiddenPaths 
-                    ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
-                    : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
-                  }
-                </Tooltip>
-              </Button>
-            }
+          </div>
+          {
+            Object.keys(activeFilters).length > 0 && hasFilteredPaths && 
+            <Button
+              handleClick={() => { setShowHiddenPaths(prev => !prev); setCurrentPage(0); setItemOffset(0); }}
+              variant="secondary"
+              small
+              dataTooltipId={`${effectiveResultId}-excluded-paths-toggle`}
+              className={joinClasses(isEven && styles.evenButton, styles.excludedPathsToggle )}
+              iconRight={<Information/>}
+              >
+              {showHiddenPaths ? `Hide ${filteredPathCount} Excluded Paths` : `Show ${filteredPathCount} Excluded Paths`}
+              <Tooltip id={`${effectiveResultId}-excluded-paths-toggle`}>
+                {
+                  showHiddenPaths 
+                  ? <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to hide these excluded paths.</span>
+                  : <span>Some paths that are a part of this result are excluded from this list due to applied filters. Click to view these excluded paths.</span>
+                }
+              </Tooltip>
+            </Button>
+          }
         </HoverContext.Provider>
         </ResultItemIdContext.Provider>
       }
