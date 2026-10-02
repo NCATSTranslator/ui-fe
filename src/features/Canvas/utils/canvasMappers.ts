@@ -25,7 +25,7 @@ import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils'
 
 const backendNodeToCanvasNode = (node: BackendCanvasNode): CanvasNode => ({
   id: node.ref,
-  dataId: node.data_id,
+  dataId: node.id,
   ref: node.ref,
   names: [node.label],
   types: [node.type],
@@ -41,7 +41,7 @@ const backendEdgeToCanvasEdge = (
   dataIdToRef: Map<number, string>,
 ): CanvasEdge => ({
   id: edge.ref,
-  dataId: edge.data_id,
+  dataId: edge.id,
   ref: edge.ref,
   subject: dataIdToRef.get(edge.subject_id) ?? String(edge.subject_id),
   object: dataIdToRef.get(edge.object_id) ?? String(edge.object_id),
@@ -59,7 +59,7 @@ export const backendGraphToInternal = (
 ): { nodes: Record<string, CanvasNode>; edges: Record<string, CanvasEdge> } => {
   const dataIdToRef = new Map<number, string>();
   for (const node of graph.nodes) {
-    dataIdToRef.set(node.data_id, node.ref);
+    dataIdToRef.set(node.id, node.ref);
   }
 
   const nodes: Record<string, CanvasNode> = {};

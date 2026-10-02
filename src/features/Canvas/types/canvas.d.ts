@@ -27,8 +27,10 @@ export type BackendUserCanvas = {
 };
 
 export type BackendCanvasNode = {
+  id: number;
   canvas_id: number;
-  data_id: number;
+  data_id: number | null;
+  user_data_id: number | null;
   ref: string;
   label: string;
   type: string;
@@ -42,8 +44,10 @@ export type BackendCanvasNode = {
 };
 
 export type BackendCanvasEdge = {
+  id: number;
   canvas_id: number;
-  data_id: number;
+  data_id: number | null;
+  user_data_id: number | null;
   subject_id: number;
   object_id: number;
   ref: string;
@@ -137,7 +141,7 @@ export type GraphSelection = {
 
 export type GraphGeometry = {
   nodes?: Array<{
-    data_id: number;
+    id: number;
     x: number;
     y: number;
   }>;
@@ -157,7 +161,7 @@ export type SaveGeometryOptions = {
 /** @deprecated Use GraphGeometry */
 export type GraphMove = GraphGeometry & {
   nodes: Array<{
-    data_id: number;
+    id: number;
     x: number;
     y: number;
   }>;

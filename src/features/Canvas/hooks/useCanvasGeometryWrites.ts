@@ -31,7 +31,7 @@ const mergeGeometryIntoPending = (
   pending: PendingGeometry,
   geometry: GraphGeometry,
 ): PendingGeometry => {
-  for (const node of geometry.nodes ?? []) pending.nodes.set(node.data_id, node);
+  for (const node of geometry.nodes ?? []) pending.nodes.set(node.id, node);
   for (const annotation of geometry.annotations ?? []) {
     pending.annotations.set(annotation.id, annotation);
   }

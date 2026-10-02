@@ -63,7 +63,7 @@ describe('diffCanvasForHistory', () => {
 
     expect(diff.layout).toBe('custom');
     expect(diff.geometry).toEqual({
-      nodes: [{ data_id: 11, x: 40, y: 50 }],
+      nodes: [{ id: 11, x: 40, y: 50 }],
     });
   });
 

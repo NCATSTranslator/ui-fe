@@ -74,7 +74,7 @@ const diffNodeGeometry = (from: Canvas, to: Canvas): NonNullable<GraphGeometry['
     if (node.dataId <= 0) return [];
     const previous = fromNodesByDataId.get(node.dataId);
     if (!previous || (previous.x === node.x && previous.y === node.y)) return [];
-    return [{ data_id: node.dataId, x: node.x, y: node.y }];
+    return [{ id: node.dataId, x: node.x, y: node.y }];
   });
 };
 

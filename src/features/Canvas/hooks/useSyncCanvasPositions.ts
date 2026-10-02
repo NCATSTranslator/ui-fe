@@ -15,7 +15,7 @@ const buildPositionPersistence = (canvas: Canvas, positions: NodePositionMap) =>
   const positionUpdates = nodePositionMapToStoreUpdates(positions);
   const moves = positionUpdates.flatMap(({ nodeId, x, y }) => {
     const node = canvas.nodes[nodeId];
-    return node?.dataId ? [{ data_id: node.dataId, x, y }] : [];
+    return node?.dataId ? [{ id: node.dataId, x, y }] : [];
   });
   return { positionUpdates, moves };
 };

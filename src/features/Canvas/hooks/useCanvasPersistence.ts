@@ -33,10 +33,10 @@ const selectionFromSubmission = (
   const edgeRefs = new Set(Object.keys(submission.edges ?? {}));
   const nodes = graph.nodes
     .filter(node => !node.time_deleted && nodeRefs.has(node.ref))
-    .map(node => node.data_id);
+    .map(node => node.id);
   const edges = graph.edges
     .filter(edge => !edge.time_deleted && edgeRefs.has(edge.ref))
-    .map(edge => edge.data_id);
+    .map(edge => edge.id);
   if (nodes.length === 0 && edges.length === 0) return null;
   return {
     ...(nodes.length > 0 && { nodes }),

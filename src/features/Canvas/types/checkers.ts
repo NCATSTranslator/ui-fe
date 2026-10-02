@@ -21,7 +21,7 @@ export const isBackendUserCanvasArray = (obj: unknown): obj is BackendUserCanvas
 export const isBackendCanvasNode = (obj: unknown): obj is BackendCanvasNode => {
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
-  return typeof o.data_id === 'number' && typeof o.ref === 'string' && typeof o.label === 'string';
+  return typeof o.id === 'number' && typeof o.ref === 'string' && typeof o.label === 'string';
 };
 
 export const isBackendCanvasNodeArray = (obj: unknown): obj is BackendCanvasNode[] =>
