@@ -1,15 +1,16 @@
 import { FC, FormEvent, RefObject } from 'react';
-import styles from './CanvasSidebarCard.module.scss';
-import SidebarCard from '@/features/Sidebar/components/SidebarCard/SidebarCard';
+import styles from '@/features/Projects/components/DataCard/DataCard.module.scss';
+import DataCard from '@/features/Projects/components/DataCard/DataCard';
 import Button from '@/features/Core/components/Button/Button';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
-import { getCanvasObjectCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
+import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
+import { getCanvasObjectCountDisplay, getCanvasRelationshipCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 
-interface CanvasSidebarCardProps {
+interface CanvasCardProps {
   canvas: Canvas;
   isActive: boolean;
   isRenaming: boolean;
@@ -23,7 +24,7 @@ interface CanvasSidebarCardProps {
   onSubmitRename: (e?: FormEvent<HTMLFormElement>) => void;
 }
 
-const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
+const CanvasCard: FC<CanvasCardProps> = ({
   canvas,
   isActive,
   isRenaming,
@@ -36,6 +37,8 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
   onRenameValueChange,
   onSubmitRename,
 }) => {
+  const createdTime = getTimeRelativeDate(new Date(canvas.timeCreated));
+  const updatedTime = getTimeRelativeDate(new Date(canvas.timeUpdated));
   const options = (
     <>
       <Button handleClick={() => onStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
@@ -49,25 +52,25 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
         if (isRenaming) onSubmitRename();
       }}
     >
-      <SidebarCard
-        className={isActive ? styles.activeCanvas : ''}
-        leftIcon={<CanvasIcon />}
+      <DataCard
+        icon={<CanvasIcon />}
         title={isRenaming ? renameValue : canvas.label}
         searchTerm={searchTerm}
         onClick={() => onSelect(canvas)}
-        bottomLeft={
-          <span className={styles.meta}>
-            {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
-          </span>
-        }
+        className={isActive ? styles.activeCanvas : undefined}
         options={options}
         isRenaming={isRenaming}
         onTitleChange={onRenameValueChange}
         onFormSubmit={onSubmitRename}
         textInputRef={renameInputRef}
+        type="canvas"
+        objectCountLabel={getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
+        relationshipCountLabel={getCanvasRelationshipCountDisplay(canvas, { singular: 'Relationship', plural: 'Relationships' })}
+        createdTime={createdTime}
+        lastSeenTime={updatedTime}
       />
     </OutsideClickHandler>
   );
 };
 
-export default CanvasSidebarCard;
+export default CanvasCard;

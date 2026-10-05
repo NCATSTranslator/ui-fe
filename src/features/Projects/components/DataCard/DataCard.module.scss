@@ -26,6 +26,15 @@
       grid-template-columns: $queryCardColumns;
     }
   }
+  &.canvasCard {
+    background: $lightGray;
+    .container {
+      grid-template-columns: $canvasCardColumns;
+    }
+    &.activeCanvas, &:hover {
+      background: $lightPurpleTwo;
+    }
+  }
   &:hover {
     background-color: $whiteHover;
     cursor: pointer;

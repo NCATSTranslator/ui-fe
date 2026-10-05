@@ -1,5 +1,6 @@
 import type { Canvas, CanvasNode, CanvasEdge, CanvasAnnotation } from '@/features/Canvas/types/canvas';
 import type { ResultSet } from '@/features/ResultList/types/results.d';
+import type { SortField, SortDirection } from '@/features/Projects/types/projects';
 
 export type CanvasSortMode = 'date' | 'name';
 export type ObjectSortMode = 'relationships' | 'alphabetical' | 'type';
@@ -124,21 +125,27 @@ export const sortCanvasAnnotations = (
 
 export const getCanvasNodeCount = (canvas: Canvas): number => Object.keys(canvas.nodes).length;
 
+export const getCanvasEdgeCount = (canvas: Canvas): number => Object.keys(canvas.edges).length;
+
 /** True when the canvas has nodes or annotations that can appear on the graph. */
 export const canvasHasExportableGraph = (canvas: {
   nodes: Record<string, unknown>;
   annotations: readonly unknown[];
 }): boolean => Object.keys(canvas.nodes).length > 0 || canvas.annotations.length > 0;
 
-export const getCanvasObjectCountDisplay = (
-  canvas: Canvas,
-  labels?: { singular: string; plural: string },
-): string => {
+type CountLabels = { singular: string; plural: string };
+
+const getCanvasCountDisplay = (canvas: Canvas, count: number, labels?: CountLabels): string => {
   if (!canvas.graphLoaded) return '-';
-  const count = getCanvasNodeCount(canvas);
   if (!labels) return String(count);
   return `${count} ${count === 1 ? labels.singular : labels.plural}`;
 };
+
+export const getCanvasObjectCountDisplay = (canvas: Canvas, labels?: CountLabels): string =>
+  getCanvasCountDisplay(canvas, getCanvasNodeCount(canvas), labels);
+
+export const getCanvasRelationshipCountDisplay = (canvas: Canvas, labels?: CountLabels): string =>
+  getCanvasCountDisplay(canvas, getCanvasEdgeCount(canvas), labels);
 
 const countEdgesPerNode = (edges: Record<string, CanvasEdge>): Map<string, number> => {
   const counts = new Map<string, number>();
@@ -191,12 +198,25 @@ export const filterCanvasesBySearch = (canvases: Canvas[], searchTerm: string): 
   return canvases.filter(c => c.label.toLowerCase().includes(lower));
 };
 
-export const sortCanvases = (canvases: Canvas[], mode: CanvasSortMode = 'date'): Canvas[] =>
-  [...canvases].sort((a, b) =>
-    mode === 'name'
-      ? a.label.localeCompare(b.label)
-      : new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
-  );
+const compareCanvases = (a: Canvas, b: Canvas, sortField: SortField): number => {
+  switch (sortField) {
+    case 'name': return a.label.localeCompare(b.label);
+    case 'objects': return getCanvasNodeCount(a) - getCanvasNodeCount(b);
+    case 'relationships': return getCanvasEdgeCount(a) - getCanvasEdgeCount(b);
+    case 'created': return new Date(a.timeCreated).getTime() - new Date(b.timeCreated).getTime();
+    case 'lastSeen': return new Date(a.timeUpdated).getTime() - new Date(b.timeUpdated).getTime();
+    default: return 0;
+  }
+};
+
+export const sortCanvases = (
+  canvases: Canvas[],
+  sortField: SortField = 'created',
+  sortDirection: SortDirection = 'desc',
+): Canvas[] => {
+  const direction = sortDirection === 'asc' ? 1 : -1;
+  return [...canvases].sort((a, b) => direction * compareCanvases(a, b, sortField));
+};
 
 const LARGE_RESULT_THRESHOLD = 50;
 
