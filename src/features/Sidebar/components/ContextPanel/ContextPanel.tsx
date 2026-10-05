@@ -37,16 +37,16 @@ const ContextPanel: FC<ContextPanelProps> = ({
   return (
     <div className={joinClasses(styles.contextPanel, reduceSpacing && styles.reduceSpacing)}>
       <div className={styles.header}>
-        <h6 className={styles.title}>{title}</h6>
-        <div className={styles.buttonContainer}>
-          {!buttonComponent ? null : buttonComponent}
-          <Button
-            handleClick={handleClosePanel}
-            iconLeft={<CloseIcon />}
-            iconOnly
-            variant="secondary"
-          />
+        <div className={styles.titleRow}>
+          <h6 className={styles.title}>{title}</h6>
+          {buttonComponent}
         </div>
+        <Button
+          handleClick={handleClosePanel}
+          iconLeft={<CloseIcon />}
+          iconOnly
+          variant="secondary"
+        />
       </div>
       <div className={`${styles.content} scrollable`}>
         {panel}

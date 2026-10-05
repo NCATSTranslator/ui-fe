@@ -6,7 +6,7 @@ import HistoryIcon from '@/assets/icons/navigation/History.svg?react';
 import UserIcon from '@/assets/icons/projects/user.svg?react';
 import Feedback from '@/assets/icons/navigation/Feedback.svg?react';
 import Question from '@/assets/icons/navigation/Help.svg?react';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
+import FullScreen from '@/assets/icons/buttons/Full Screen.svg?react';
 import Button from "@/features/Core/components/Button/Button";
 import ProjectsPanel from "@/features/Sidebar/components/Panels/ProjectsPanel/ProjectsPanel";
 import QueriesPanel from "@/features/Sidebar/components/Panels/QueriesPanel/QueriesPanel";
@@ -20,15 +20,15 @@ import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 const CanvasPanel = lazy(() => import('@/features/Sidebar/components/Panels/CanvasPanel/CanvasPanel'));
 
 const ViewProjectsButton = () => {
-  return <Button iconLeft={<ExternalLink />} iconOnly href="/projects" link small variant="textOnly" title="View All Projects" />;
+  return <Button iconLeft={<FullScreen />} iconOnly href="/projects" link small variant="textOnly" title="View All Projects" />;
 };
 
 const ViewAllQueriesButton = () => {
-  return <Button iconLeft={<ExternalLink />} iconOnly href="/query-history" link small variant="textOnly" title="View All Queries" />;
+  return <Button iconLeft={<FullScreen />} iconOnly href="/query-history" link small variant="textOnly" title="View All Queries" />;
 };
 
 const ViewCanvasesButton = () => {
-  return <Button iconLeft={<ExternalLink />} iconOnly href="/canvases" link small variant="textOnly" title="View All Canvases" />;
+  return <Button iconLeft={<FullScreen />} iconOnly href="/canvases" link small variant="textOnly" title="View All Canvases" />;
 };
 
 export const topItems: SidebarItem[] = [
