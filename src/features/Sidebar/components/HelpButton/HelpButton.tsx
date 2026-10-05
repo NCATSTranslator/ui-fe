@@ -1,7 +1,7 @@
 import { useActiveHelpItem } from "@/features/Sidebar/hooks/useActiveHelpItem";
 import { useSidebar } from "@/features/Sidebar/hooks/sidebarHooks";
 import Button from "@/features/Core/components/Button/Button";
-import ExternalLink from "@/assets/icons/buttons/External Link.svg?react";
+import FullScreen from "@/assets/icons/buttons/Full Screen.svg?react";
 
 const HelpButton = () => {
   const activeHelpItemId = useActiveHelpItem();
@@ -9,7 +9,9 @@ const HelpButton = () => {
   const href = activeHelpItemId ? `/${activeHelpItemId}` : '/frequently-asked-questions';
   return (
     <Button
-      iconRight={<ExternalLink />}
+      iconLeft={<FullScreen />}
+      iconOnly
+      small
       href={href}
       handleClick={closePanel}
       link

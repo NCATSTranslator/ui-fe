@@ -12,21 +12,24 @@
     padding: $s;
     // border bottom, but inset
     box-shadow: inset 0px -1px 0 0 $midGray;
+    .titleRow {
+      display: flex;
+      align-items: center;
+      gap: $xxs;
+      min-width: 0;
+      button, a {
+        margin: 0;
+      }
+      &:hover .title a {
+        text-decoration: underline;
+      }
+    }
     .title, .title a {
       font-size: $h6Size;
       margin-bottom: 0;
       white-space: nowrap;
       color: $black;
       font-weight: 800;
-    }
-  }
-  .buttonContainer {
-    display: flex;
-    align-items: center;
-    gap: $s;
-    max-height: $l;
-    button, a {
-      margin: 0;
     }
   }
   .content {
