@@ -83,7 +83,7 @@ export type BackendCanvasGraph = {
 // Submission types (sent to backend for create/merge)
 // ---------------------------------------------------------------------------
 
-export type GraphSubmissionNode = {
+export type GraphSubmissionNodeData = {
   id: string;
   aras: string[];
   descriptions: string[];
@@ -95,14 +95,18 @@ export type GraphSubmissionNode = {
   tags: EntityTags;
   source_time: string;
   annotations?: unknown;
+  signature: string;
+};
+
+export type GraphSubmissionNode = {
   x: number;
   y: number;
   hidden?: boolean;
   label?: string;
-  signature: string;
+  data: GraphSubmissionNodeData;
 };
 
-export type GraphSubmissionEdge = {
+export type GraphSubmissionEdgeData = {
   id: string;
   subject: string;
   object: string;
@@ -118,14 +122,18 @@ export type GraphSubmissionEdge = {
   trials: unknown[];
   tags: EntityTags;
   source_time: string;
-  hidden?: boolean;
-  label?: string;
   signature: string;
 };
 
+export type GraphSubmissionEdge = {
+  hidden?: boolean;
+  label?: string;
+  data: GraphSubmissionEdgeData;
+};
+
 export type GraphSubmission = {
-  nodes: Record<string, GraphSubmissionNode>;
-  edges: Record<string, GraphSubmissionEdge>;
+  nodes: GraphSubmissionNode[];
+  edges: GraphSubmissionEdge[];
   tag_descriptions?: ResultSetTags;
   source?: {
     query_ref: string;

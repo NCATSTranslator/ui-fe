@@ -126,8 +126,8 @@ export const backendCanvasListToCanvasList = (
 // ---------------------------------------------------------------------------
 
 export const buildGraphSubmission = (
-  signedNodes: Record<string, GraphSubmissionNode>,
-  signedEdges: Record<string, GraphSubmissionEdge>,
+  signedNodes: GraphSubmissionNode[],
+  signedEdges: GraphSubmissionEdge[],
   tagDescriptions?: ResultSetTags,
   source?: { query_ref: string; result_ref: string },
 ): GraphSubmission => ({
@@ -142,56 +142,53 @@ export const buildGraphSubmission = (
 // ---------------------------------------------------------------------------
 
 const canvasNodeToSubmissionNode = (node: CanvasNode): GraphSubmissionNode => ({
-  id: node.id,
-  aras: [],
-  descriptions: [],
-  names: [...node.names],
-  types: [...node.types],
-  synonyms: [],
-  curies: [...node.curies],
-  provenance: [],
-  tags: node.tags,
-  source_time: new Date().toISOString(),
   x: node.x,
   y: node.y,
   hidden: node.hidden,
-  signature: node.id,
+  data: {
+    id: node.id,
+    aras: [],
+    descriptions: [],
+    names: [...node.names],
+    types: [...node.types],
+    synonyms: [],
+    curies: [...node.curies],
+    provenance: [],
+    tags: node.tags,
+    source_time: new Date().toISOString(),
+    signature: node.id,
+  },
 });
 
 const canvasEdgeToSubmissionEdge = (edge: CanvasEdge): GraphSubmissionEdge => ({
-  id: edge.id,
-  subject: edge.subject,
-  object: edge.object,
-  predicate: edge.predicate,
-  aras: [...(edge.aras ?? [])],
-  is_root: edge.is_root ?? false,
-  knowledge_level: edge.knowledge_level ?? '',
-  description: edge.description ?? null,
-  predicate_url: edge.predicate_url ?? '',
-  provenance: [...(edge.provenance ?? [])],
-  publications: { ...(edge.publications ?? {}) },
-  metadata: edge.metadata ?? null,
-  trials: [...(edge.trials ?? [])],
-  tags: edge.tags,
-  source_time: edge.source_time ?? new Date().toISOString(),
   hidden: edge.hidden,
-  signature: edge.signature ?? edge.id,
+  data: {
+    id: edge.id,
+    subject: edge.subject,
+    object: edge.object,
+    predicate: edge.predicate,
+    aras: [...(edge.aras ?? [])],
+    is_root: edge.is_root ?? false,
+    knowledge_level: edge.knowledge_level ?? '',
+    description: edge.description ?? null,
+    predicate_url: edge.predicate_url ?? '',
+    provenance: [...(edge.provenance ?? [])],
+    publications: { ...(edge.publications ?? {}) },
+    metadata: edge.metadata ?? null,
+    trials: [...(edge.trials ?? [])],
+    tags: edge.tags,
+    source_time: edge.source_time ?? new Date().toISOString(),
+    signature: edge.signature ?? edge.id,
+  },
 });
 
 export const canvasNodesToGraphSubmission = (
   nodes: CanvasNode[],
   edges: CanvasEdge[],
-): GraphSubmission => {
-  const subNodes: Record<string, GraphSubmissionNode> = {};
-  for (const node of nodes) {
-    subNodes[node.id] = canvasNodeToSubmissionNode(node);
-  }
-  const subEdges: Record<string, GraphSubmissionEdge> = {};
-  for (const edge of edges) {
-    subEdges[edge.id] = canvasEdgeToSubmissionEdge(edge);
-  }
-  return { nodes: subNodes, edges: subEdges };
-};
+): GraphSubmission => ({
+  nodes: nodes.map(canvasNodeToSubmissionNode),
+  edges: edges.map(canvasEdgeToSubmissionEdge),
+});
 
 // ---------------------------------------------------------------------------
 // ResultSet → GraphSubmission (rich, for result-based additions)
@@ -201,39 +198,43 @@ const resultNodeToSubmissionNode = (
   node: ResultNode,
   position?: { x: number; y: number },
 ): GraphSubmissionNode => ({
-  id: node.id,
-  aras: [...node.aras],
-  descriptions: [...node.descriptions],
-  names: [...node.names],
-  types: [...node.types],
-  synonyms: [...node.synonyms],
-  curies: [...node.curies],
-  provenance: [...node.provenance],
-  tags: node.tags,
-  source_time: node.source_time,
-  annotations: node.annotations,
   x: position?.x ?? 0,
   y: position?.y ?? 0,
-  signature: node.signature,
+  data: {
+    id: node.id,
+    aras: [...node.aras],
+    descriptions: [...node.descriptions],
+    names: [...node.names],
+    types: [...node.types],
+    synonyms: [...node.synonyms],
+    curies: [...node.curies],
+    provenance: [...node.provenance],
+    tags: node.tags,
+    source_time: node.source_time,
+    annotations: node.annotations,
+    signature: node.signature,
+  },
 });
 
 const resultEdgeToSubmissionEdge = (edge: ResultEdge): GraphSubmissionEdge => ({
-  id: edge.id,
-  subject: edge.subject,
-  object: edge.object,
-  predicate: edge.predicate,
-  aras: [...edge.aras],
-  is_root: edge.is_root,
-  knowledge_level: edge.knowledge_level,
-  description: edge.description ?? null,
-  predicate_url: edge.predicate_url,
-  provenance: [...edge.provenance],
-  publications: { ...edge.publications },
-  metadata: edge.metadata,
-  trials: [...edge.trials],
-  tags: edge.tags,
-  source_time: edge.source_time,
-  signature: edge.signature,
+  data: {
+    id: edge.id,
+    subject: edge.subject,
+    object: edge.object,
+    predicate: edge.predicate,
+    aras: [...edge.aras],
+    is_root: edge.is_root,
+    knowledge_level: edge.knowledge_level,
+    description: edge.description ?? null,
+    predicate_url: edge.predicate_url,
+    provenance: [...edge.provenance],
+    publications: { ...edge.publications },
+    metadata: edge.metadata,
+    trials: [...edge.trials],
+    tags: edge.tags,
+    source_time: edge.source_time,
+    signature: edge.signature,
+  },
 });
 
 export const resultDataToGraphSubmission = (
@@ -248,19 +249,19 @@ export const resultDataToGraphSubmission = (
 ): GraphSubmission => {
   const useCustomPlacement = options?.layout && isCustomCanvasLayout(options.layout);
   const existingNodes = options?.existingNodes ?? {};
-  const subNodes: Record<string, GraphSubmissionNode> = {};
+  const subNodes: GraphSubmissionNode[] = [];
   nodeIds.forEach((id, index) => {
     const node = getNodeById(resultSet, id);
     if (!node) return;
     const position = useCustomPlacement
       ? estimatePlacementNearNodes(existingNodes, index)
       : undefined;
-    subNodes[id] = resultNodeToSubmissionNode(node, position);
+    subNodes.push(resultNodeToSubmissionNode(node, position));
   });
-  const subEdges: Record<string, GraphSubmissionEdge> = {};
+  const subEdges: GraphSubmissionEdge[] = [];
   for (const id of edgeIds) {
     const edge = getRawEdgeById(resultSet, id);
-    if (edge) subEdges[id] = resultEdgeToSubmissionEdge(edge);
+    if (edge) subEdges.push(resultEdgeToSubmissionEdge(edge));
   }
   return buildGraphSubmission(subNodes, subEdges, undefined, source);
 };
