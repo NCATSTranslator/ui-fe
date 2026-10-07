@@ -79,8 +79,10 @@ const ResultsFilter: FC<ResultsFilterProps> = ({
               </SidebarTransitionButton>
               {
                 Object.keys(resultFilters).map((filterFamily) => {
+                  // 'sv' (Bookmarks & Notes) is pinned to the top of the list above
+                  if (filterFamily === 'sv') return null;
                   const family = resultFilters[filterFamily as FilterFamily];
-                  if(!family || Object.keys(family).length <= 0) 
+                  if(!family || Object.keys(family).length <= 0)
                     return null;
 
                   return (
