@@ -29,7 +29,8 @@ import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useNotesModal } from '@/features/ResultItem/hooks/useNotesModal';
-import { bookmarkAddedToast, bookmarkRemovedToast, bookmarkErrorToast } from "@/features/Core/utils/toastMessages";
+import { bookmarkErrorToast, bookmarkRemovalErrorToast } from "@/features/Core/utils/toastMessages";
+import { BookmarkOperation } from "@/features/ResultItem/utils/bookmarkFunctions";
 import useSidebarPanels from "@/features/ResultList/hooks/useSidebarPanels";
 import { useUserQueries, useGetQueryCardTitle } from "@/features/Projects/hooks/customHooks";
 import { UserQueryObject } from "@/features/Projects/types/projects";
@@ -42,6 +43,12 @@ interface ResultListProps {
   children?: ReactNode;
   hidden?: boolean;
 }
+
+// Bookmark saves are applied optimistically, so a toast only appears when one fails.
+const handleBookmarkError = (operation: BookmarkOperation) => {
+  if (operation === 'remove') bookmarkRemovalErrorToast();
+  else bookmarkErrorToast();
+};
 
 const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
@@ -448,9 +455,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handleFilter,
     handleClearAllFilters,
     visibleResultIds,
-    bookmarkAddedToast,
-    bookmarkRemovedToast,
-    handleBookmarkError: bookmarkErrorToast,
+    handleBookmarkError,
     isLookup,
     isPathfinder,
     lookupCategory,

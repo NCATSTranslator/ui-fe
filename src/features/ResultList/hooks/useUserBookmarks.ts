@@ -5,6 +5,7 @@ import { ResultSet } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { HandleUpdateResultsFn } from '@/features/ResultList/hooks/useResultFiltering';
 import { User } from '@/features/UserAuth/types/user';
+import { afterNextPaint } from '@/features/Core/utils/domHelpers';
 
 export interface UseUserBookmarksReturn {
   userSaves: SaveGroup | null;
@@ -64,14 +65,18 @@ const useUserBookmarks = ({
   const isPathfinderRef = useRef(isPathfinder);
   isPathfinderRef.current = isPathfinder;
 
-  // Update results after bookmark to reflect new user saves in bookmark/note filter
+  // Update results after bookmark to reflect new user saves in bookmark/note filter.
+  // Re-filtering walks the whole result set, and React flushes click-triggered
+  // effects before paint, so wait a frame to let the optimistic icon change show first.
   useEffect(() => {
     if (!shouldUpdateResultsAfterBookmark.current)
       return;
 
     shouldUpdateResultsAfterBookmark.current = false;
-    const tempUserSaves = cloneDeep(userSaves);
-    handleUpdateResultsRef.current?.(activeFiltersRef.current, activeEntityFiltersRef.current, prevRawResults.current, [], false, currentSortString.current, isPathfinderRef.current, tempUserSaves);
+    afterNextPaint().then(() => {
+      const tempUserSaves = cloneDeep(userSaves);
+      handleUpdateResultsRef.current?.(activeFiltersRef.current, activeEntityFiltersRef.current, prevRawResults.current, [], false, currentSortString.current, isPathfinderRef.current, tempUserSaves);
+    });
   }, [userSaves, prevRawResults, currentSortString, handleUpdateResultsRef]);
 
   const resetBookmarks = useCallback(() => {

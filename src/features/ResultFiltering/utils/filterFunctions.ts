@@ -269,11 +269,8 @@ const _splitTagID = (tagID: string): string[] => {
  */
 export const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
   const newGroupedFilters: GroupedFilters = {};
-  // Skip 'sv' since it's manually added to the top of the results filter list
   for (let family of getFamiliesByType(type)) {
-    if (family !== 'sv') {
-      newGroupedFilters[family] = {};
-    }
+    newGroupedFilters[family] = {};
   }
 
   for (let [id, description] of Object.entries(filters)) {

@@ -9,6 +9,7 @@ import {
   handleBookmarkClick as handleBookmarkClickUtil,
   handleNotesClick as handleNotesClickUtil,
   BookmarkFunctionParams,
+  BookmarkOperation,
 } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { getNodeById } from '@/features/ResultList/slices/resultsSlice';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
@@ -22,9 +23,7 @@ export interface UseBookmarkItemParams {
   queryNodeDescription: string | null;
   queryType: QueryType | null;
   currentQueryID: string | null;
-  bookmarkAddedToast: () => void;
-  bookmarkRemovedToast: () => void;
-  handleBookmarkError: () => void;
+  handleBookmarkError: (operation: BookmarkOperation) => void;
   updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
   shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
 }
@@ -60,8 +59,6 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
     queryNodeDescription,
     queryType,
     currentQueryID,
-    bookmarkAddedToast,
-    bookmarkRemovedToast,
     handleBookmarkError,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark,
@@ -69,9 +66,10 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
 
   const user = useSelector(currentUser);
 
-  // Derived state from bookmarkItem prop
+  // Derived state from bookmarkItem prop. A save whose create request is still
+  // in flight has no ID yet, so it reads as bookmarked with a null bookmarkId.
   const isBookmarked = !!bookmarkItem;
-  const bookmarkId = bookmarkItem?.id?.toString() ?? null;
+  const bookmarkId = bookmarkItem?.id ? bookmarkItem.id.toString() : null;
   const hasNotes = !isNotesEmpty(bookmarkItem?.notes || null);
 
   // Confirmation modal state
@@ -92,17 +90,15 @@ export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemR
     user: user || null,
     objectRef: result.id,
     bookmarkId,
-    bookmarkRemovedToast,
-    bookmarkAddedToast,
+    bookmarkItem,
     handleBookmarkError,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark,
   };
   }, [
     result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription,
-    queryType, currentQueryID, user, bookmarkId, bookmarkRemovedToast,
-    bookmarkAddedToast, handleBookmarkError, updateUserSaves,
-    shouldUpdateResultsAfterBookmark,
+    queryType, currentQueryID, user, bookmarkId, bookmarkItem,
+    handleBookmarkError, updateUserSaves, shouldUpdateResultsAfterBookmark,
   ]);
 
   // The CURIE, not the internal result ID, is what makes these events joinable
