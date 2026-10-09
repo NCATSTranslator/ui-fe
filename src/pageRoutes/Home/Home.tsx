@@ -89,7 +89,7 @@ const Home = () => {
                 <h5>Articles and News</h5>
                 <p>Learn how the Biomedical Data Translator program aims to help researchers access and connect diverse data.</p>
                 <a 
-                  href="https://tracs.unc.edu/index.php/news-articles/1947-use-cases-show-translators-potential-to-expedite-clinical-research" 
+                  href="https://renci.org/blog/use-cases-show-translators-potential-to-expedite-clinical-research/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   >
