@@ -65,6 +65,11 @@
     color: $midDarkGray;
     cursor: default;
     opacity: 0.4;
+    &:hover {
+      background-color: $lightGray;
+      color: $midDarkGray;
+      cursor: default;
+    }
     svg {
       path {
         stroke: $midDarkGray;
