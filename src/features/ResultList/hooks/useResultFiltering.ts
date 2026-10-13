@@ -3,20 +3,22 @@ import { filterCompare } from '@/features/Core/utils/sortingFunctions';
 import { isEntityFilter, isSameFilterValue } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
-export type HandleUpdateResultsFn = (
-  filters: Filter[],
-  asFilters: string[],
-  summary: ResultSet | null,
-  or: Result[] | undefined,
-  justSort: boolean | undefined,
-  sortType: string,
-  isPathfinder?: boolean,
-  userSavesGroup?: SaveGroup | null,
-  pfState?: PathFilterState | null,
-) => Result[];
+/**
+ * Describes why the result list needs recomputing. Anything not named here
+ * (active filters, sort, bookmarks, path filter state) is read from ResultList's
+ * own state by the handler.
+ * - rebuild: start over from a new result set (initial load, score change, bookmark change)
+ * - refilter: re-apply a new set of filters to the existing results
+ * - sort: re-order the currently visible results only
+ */
+export type ResultsUpdate =
+  | { mode: 'rebuild'; summary: ResultSet | null }
+  | { mode: 'refilter'; filters: Filter[] }
+  | { mode: 'sort' };
+
+export type HandleUpdateResultsFn = (update: ResultsUpdate) => Result[];
 
 export interface UseResultFilteringReturn {
   activeFilters: Filter[];
@@ -36,20 +38,12 @@ export interface UseResultFilteringReturn {
 interface UseResultFilteringArgs {
   handlePageReset: (newItemsPerPage: number | false, resultsLength: number) => void;
   rawResults: RefObject<ResultSet | null>;
-  originalResults: RefObject<Result[]>;
-  currentSortString: RefObject<string>;
-  isPathfinder: boolean;
-  userSavesRef: RefObject<SaveGroup | null>;
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
 const useResultFiltering = ({
   handlePageReset,
   rawResults,
-  originalResults,
-  currentSortString,
-  isPathfinder,
-  userSavesRef,
   handleUpdateResultsRef,
 }: UseResultFilteringArgs): UseResultFilteringReturn => {
   const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
@@ -58,14 +52,13 @@ const useResultFiltering = ({
   const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
 
   const handleApplyFilterAndCleanup = useCallback((filtersToActivate: Filter[]) => {
-    const rawResultsVal = rawResults.current;
-    if (!rawResultsVal || !handleUpdateResultsRef.current)
+    if (!rawResults.current || !handleUpdateResultsRef.current)
       return;
 
     setActiveFilters(filtersToActivate);
-    let newFormattedResults = handleUpdateResultsRef.current(filtersToActivate, activeEntityFilters, rawResultsVal, originalResults.current, false, currentSortString.current, isPathfinder, userSavesRef.current);
+    const newFormattedResults = handleUpdateResultsRef.current({ mode: 'refilter', filters: filtersToActivate });
     handlePageReset(false, newFormattedResults.length);
-  }, [handlePageReset, handleUpdateResultsRef, activeEntityFilters, rawResults, originalResults, currentSortString, isPathfinder, userSavesRef]);
+  }, [handlePageReset, handleUpdateResultsRef, rawResults]);
 
   const handleFilter = useCallback((filter: Filter) => {
     // Try to find a filter with same {id, value, negated} — for toggle-off
