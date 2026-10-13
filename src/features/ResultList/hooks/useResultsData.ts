@@ -9,8 +9,6 @@ import { generatePathfinderScore, generateScore, recalculateResultSetScores } fr
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
 import { trackEvent } from "@/features/Analytics/utils/dataLayer";
-import { Filter } from "@/features/ResultFiltering/types/filters";
-import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import { AppDispatch } from "@/redux/store";
 
@@ -23,10 +21,6 @@ interface UseResultsDataArgs {
   nodeIdParam: string | null;
   dispatch: AppDispatch;
   scoreWeights: ScoreWeights;
-  activeFiltersRef: RefObject<Filter[]>;
-  activeEntityFiltersRef: RefObject<string[]>;
-  currentSortString: RefObject<string>;
-  userSavesRef: RefObject<SaveGroup | null>;
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
@@ -99,10 +93,6 @@ const useResultsData = ({
   nodeIdParam,
   dispatch,
   scoreWeights,
-  activeFiltersRef,
-  activeEntityFiltersRef,
-  currentSortString,
-  userSavesRef,
   handleUpdateResultsRef,
 }: UseResultsDataArgs): UseResultsDataReturn => {
 
@@ -184,10 +174,7 @@ const useResultsData = ({
 
     if (!handleUpdateResultsRef.current) return;
 
-    const newFormattedResults = handleUpdateResultsRef.current(
-      activeFiltersRef.current, activeEntityFiltersRef.current, newResultSet,
-      [], false, currentSortString.current, currentIsPathfinder, userSavesRef.current
-    );
+    const newFormattedResults = handleUpdateResultsRef.current({ mode: 'rebuild', summary: newResultSet });
 
     // If the result set has results, set the loading state to false
     if (newFormattedResults.length > 0)
@@ -198,7 +185,7 @@ const useResultsData = ({
       setIsLoading(false);
 
     reportResultsLoaded(newResultSet, newFormattedResults.length);
-  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef, reportResultsLoaded]);
+  }, [dispatch, currentQueryID, handleUpdateResultsRef, reportResultsLoaded]);
 
   const recalculateScores = useCallback((newWeights: ScoreWeights) => {
     if (!rawResults.current || !rawResults.current.data?.results?.length) return;
@@ -209,17 +196,8 @@ const useResultsData = ({
 
     if (!handleUpdateResultsRef.current) return;
 
-    handleUpdateResultsRef.current(
-      activeFiltersRef.current,
-      activeEntityFiltersRef.current,
-      resultSetData,
-      [],
-      false,
-      currentSortString.current,
-      currentIsPathfinder,
-      userSavesRef.current
-    );
-  }, [activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef]);
+    handleUpdateResultsRef.current({ mode: 'rebuild', summary: resultSetData });
+  }, [handleUpdateResultsRef]);
 
   const handleResultsRefresh = useCallback(() => {
     if (!!freshRawResults)
