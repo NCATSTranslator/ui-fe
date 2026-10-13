@@ -1,8 +1,33 @@
 import { capitalizeAllWords, capitalizeFirstLetter } from '@/features/Core/utils/stringFormatters';
+import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { UserQueryObject } from '@/features/Projects/types/projects.d';
+import { getTypeIDFromType } from '@/features/Projects/utils/utilities';
 import { queryTypes } from '@/features/Query/utils/queryTypes';
 import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
 import { QueryType } from '@/features/Query/types/querySubmission';
+
+/**
+ * Generates the title of a query from decoded results URL params.
+ * Shared by breadcrumbs and the browser tab title so they stay in sync.
+ * @param {string} decodedParams - Decoded query string (e.g. from useDecodedParams)
+ * @returns {string} The title of the query
+ */
+export const getQueryTitleFromDecodedParams = (decodedParams: string): string => {
+  const queryType = getDataFromQueryVar("t", decodedParams);
+  const nodeOneLabel = (queryType === "p" || queryType === "l")
+    ? getDataFromQueryVar("lone", decodedParams)
+    : getDataFromQueryVar("l", decodedParams) || '';
+  const nodeTwoLabel = queryType === "p" ? getDataFromQueryVar("ltwo", decodedParams) : '';
+  let constraint = null;
+  if (queryType === "p") {
+    constraint = getDataFromQueryVar("c", decodedParams);
+  } else if (queryType === "l") {
+    constraint = getDataFromQueryVar("cat", decodedParams);
+  }
+
+  return generateQueryTitle(queryType, nodeOneLabel || '', nodeTwoLabel || '', constraint);
+};
+
 /**
  * Generates the title of a query based on the query object
  * @param {UserQueryObject} query - The query to generate the title for
@@ -19,7 +44,13 @@ export const generateQueryTitleFromQueryObject = (query: UserQueryObject): strin
     ? query.data.query.object?.category || null
     : query.data.query.constraint || null;
 
-  return generateQueryTitle(queryType, nodeOneLabel, nodeTwoLabel, constraint);
+  // Smart query types are stored as targetType strings ('chemical', 'gene', 'drug'),
+  // which are ambiguous without direction — resolve to the numeric query type ID.
+  const resolvedQueryType = (queryType === 'pathfinder' || queryType === 'lookup')
+    ? queryType
+    : getTypeIDFromType(queryType, query.data.query.direction ?? null).toString();
+
+  return generateQueryTitle(resolvedQueryType, nodeOneLabel, nodeTwoLabel, constraint);
 }
 
 /**

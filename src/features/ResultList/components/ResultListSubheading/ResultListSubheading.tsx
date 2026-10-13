@@ -5,9 +5,9 @@ import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { generateEntityLink, getEntityLink } from '@/features/Core/utils/entityLinks';
 import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
-import { useUserQueries } from '@/features/Projects/hooks/customHooks';
+import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
-import { generateQueryTitleFromQueryObject } from '@/features/Projects/utils/queryTitleUtils';
+import { getQueryTitleFromDecodedParams } from '@/features/Projects/utils/queryTitleUtils';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
 const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
@@ -24,13 +24,10 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
     pathfinderIdTwo,
     pathfinderLabelTwo,
     constraintText,
-    pk,
   } = useResultListContext();
 
-  const { data: queries = [] } = useUserQueries();
-  const query = useMemo(() => queries.find(q => q.data.qid === pk), [queries, pk]);
-
-  const queryTitle = query ? generateQueryTitleFromQueryObject(query) : '';
+  const decodedParams = useDecodedParams();
+  const queryTitle = getQueryTitleFromDecodedParams(decodedParams);
   useDynamicPageTitle(queryTitle);
 
   const subHeading = useMemo(() => {
