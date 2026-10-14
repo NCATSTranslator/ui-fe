@@ -143,6 +143,9 @@ const NotesModal: FC<NotesModalProps> = ({
           }
         </div>
       <TextEditor
+        // Remount when the bookmark changes so the prior note never paints
+        // while the next bookmark's content is still loading.
+        key={currentBookmarkID ?? 'closed'}
         bookmarkID={currentBookmarkID}
         isOpen={isOpen}
         handleSave={handleSave}
