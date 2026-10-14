@@ -154,15 +154,14 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Data lifecycle hook — state, refs, fetching, and data processing
   const {
     formattedResults, setFormattedResults,
-    isLoading, setIsLoading, isError, setIsError,
-    arsStatus, setArsStatus, resultStatus, setResultStatus,
-    setFreshRawResults,
-    nodeDescription, setNodeDescription,
+    isLoading, setIsLoading, isError,
+    arsStatus, resultStatus,
+    nodeDescription,
     hasFreshResults, resultsComplete,
     rawResults, originalResults, prevRawResults,
-    isFetchingARAStatus, setIsFetchingARAStatus, isFetchingResults, setIsFetchingResults,
-    numberOfStatusChecks, firstLoad,
-    recalculateScores, handleResultsRefresh
+    isFetchingARAStatus, isFetchingResults,
+    firstLoad,
+    recalculateScores, handleResultsRefresh, resetResultsData
   } = useResultsData({
     currentQueryID, currentQuerySid, isPathfinder,
     presetIsLoading, initialResultSet: resultSet, nodeIdParam,
@@ -178,7 +177,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const initialItemsPerPage = parseItemsPerPage(prefs.results_per_page.pref_value as string | number);
   const {
     itemOffset,
-    setItemOffset,
     itemsPerPage,
     setItemsPerPage,
     endResultIndex,
@@ -189,6 +187,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handlePageClick,
     handlePageChange,
     handlePageReset,
+    resetPagination,
     calculateItemsPerPage,
   } = useResultPagination({ formattedResults, initialItemsPerPage });
 
@@ -256,29 +255,13 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Reset state when the query ID changes (e.g., navigating to a different query)
   useQueryChangeReset({
     currentQueryID,
-    itemsPerPageRef,
     prevQueryID,
-    rawResults,
-    prevRawResults,
-    originalResults,
-    numberOfStatusChecks,
-    currentPage,
-    firstLoad,
-    setIsFetchingARAStatus,
-    setIsFetchingResults,
-    setIsLoading,
-    setIsError,
-    setFormattedResults,
-    setFreshRawResults,
+    resetResultsData,
     resetFilters,
-    setArsStatus,
-    setResultStatus,
-    setItemOffset,
-    setEndResultIndex,
+    resetPagination,
     closeNotesModal: closeNotes,
     resetShareState,
     resetBookmarks,
-    setNodeDescription,
   });
 
   // update defaults when prefs change

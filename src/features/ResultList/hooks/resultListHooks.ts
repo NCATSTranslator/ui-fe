@@ -338,36 +338,15 @@ export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isF
  * Configuration for the useQueryChangeReset hook
  */
 export interface QueryChangeResetConfig {
-  // Current state
   currentQueryID: string | null;
-  itemsPerPageRef: RefObject<number>;
-
-  // Refs to reset
   prevQueryID: RefObject<string | null>;
-  rawResults: RefObject<ResultSet | null>;
-  prevRawResults: RefObject<ResultSet | null>;
-  originalResults: RefObject<Result[]>;
-  numberOfStatusChecks: RefObject<number>;
-  currentPage: RefObject<number>;
-  firstLoad: RefObject<boolean>;
-  // Setters for fetching state
-  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
-  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
-
-  // State setters
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  setIsError: Dispatch<SetStateAction<boolean>>;
-  setFormattedResults: Dispatch<SetStateAction<Result[]>>;
-  setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
+  // Each owning hook resets its own state
+  resetResultsData: () => void;
   resetFilters: () => void;
-  setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
-  setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
-  setItemOffset: Dispatch<SetStateAction<number>>;
-  setEndResultIndex: Dispatch<SetStateAction<number>>;
+  resetPagination: () => void;
   closeNotesModal: () => void;
   resetShareState: () => void;
   resetBookmarks: () => void;
-  setNodeDescription: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -375,34 +354,18 @@ export interface QueryChangeResetConfig {
  * This ensures that when a user navigates to a new query via URL change, all state is properly
  * reset and new data is fetched.
  * 
- * @param config - Configuration object containing all refs and setters to reset
+ * @param config - The current query ID plus each owning hook's reset callback
  */
 export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
   const {
     currentQueryID,
-    itemsPerPageRef,
     prevQueryID,
-    rawResults,
-    prevRawResults,
-    originalResults,
-    numberOfStatusChecks,
-    currentPage,
-    firstLoad,
-    setIsFetchingARAStatus,
-    setIsFetchingResults,
-    setIsLoading,
-    setIsError,
-    setFormattedResults,
-    setFreshRawResults,
+    resetResultsData,
     resetFilters,
-    setArsStatus,
-    setResultStatus,
-    setItemOffset,
-    setEndResultIndex,
+    resetPagination,
     closeNotesModal,
     resetShareState,
     resetBookmarks,
-    setNodeDescription,
   } = config;
 
   useEffect(() => {
@@ -410,53 +373,13 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     if (prevQueryID.current === currentQueryID) {
       return;
     }
-    
-    // Update the previous query ID ref
     prevQueryID.current = currentQueryID;
-    
-    // Reset loading and error state
-    setIsLoading(true);
-    setIsError(false);
-    
-    // Reset results state
-    setFormattedResults([]);
-    setFreshRawResults(null);
-    rawResults.current = null;
-    prevRawResults.current = null;
-    originalResults.current = [];
-    
-    // Reset filter state
+
+    resetResultsData();
     resetFilters();
-    
-    // Reset fetching state
-    setIsFetchingARAStatus(true);
-    setIsFetchingResults(false);
-    numberOfStatusChecks.current = 0;
-    
-    // Reset ARA status
-    setArsStatus(null);
-    setResultStatus("unknown");
-    
-    // Reset pagination
-    currentPage.current = 0;
-    setItemOffset(0);
-    setEndResultIndex(itemsPerPageRef.current);
-    
-    // Reset first load flag to handle shared result modal
-    firstLoad.current = true;
-    
+    resetPagination();
     closeNotesModal();
     resetShareState();
-    
-    // Reset user saves for new query
     resetBookmarks();
-    
-    setNodeDescription("");
-  }, [
-    currentQueryID, itemsPerPageRef, prevQueryID, rawResults, prevRawResults, originalResults,
-    numberOfStatusChecks, currentPage, firstLoad, setIsFetchingARAStatus, setIsFetchingResults,
-    setIsLoading, setIsError, setFormattedResults, setFreshRawResults, resetFilters, setArsStatus,
-    setResultStatus, setItemOffset, setEndResultIndex, closeNotesModal, resetShareState,
-    resetBookmarks, setNodeDescription,
-  ]);
+  }, [currentQueryID, prevQueryID, resetResultsData, resetFilters, resetPagination, closeNotesModal, resetShareState, resetBookmarks]);
 };

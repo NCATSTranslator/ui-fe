@@ -58,6 +58,7 @@ interface UseResultsDataReturn {
   // Callbacks
   recalculateScores: (newWeights: ScoreWeights) => void;
   handleResultsRefresh: () => void;
+  resetResultsData: () => void;
 }
 
 /**
@@ -205,6 +206,25 @@ const useResultsData = ({
     setFreshRawResults(null);
   }, [freshRawResults, handleNewResults]);
 
+  // Clears everything this hook owns so a different query starts from a blank slate.
+  const resetResultsData = useCallback(() => {
+    setIsLoading(true);
+    setIsError(false);
+    setFormattedResults([]);
+    setFreshRawResults(null);
+    rawResults.current = null;
+    prevRawResults.current = null;
+    originalResults.current = [];
+    setIsFetchingARAStatus(true);
+    setIsFetchingResults(false);
+    numberOfStatusChecks.current = 0;
+    setArsStatus(null);
+    setResultStatus("unknown");
+    // Re-arm the shared-result modal for the new query
+    firstLoad.current = true;
+    setNodeDescription("");
+  }, []);
+
   // Dispatch loading status to Redux for sub-views (flattened to primitives)
   const araCount = arsStatus?.data?.aras?.length ?? 0;
   const prevStatusRef = useRef<QueryLoadingStatus | null>(null);
@@ -292,6 +312,7 @@ const useResultsData = ({
     firstLoad,
     recalculateScores,
     handleResultsRefresh,
+    resetResultsData,
   };
 };
 
