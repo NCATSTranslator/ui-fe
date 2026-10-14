@@ -1,6 +1,6 @@
 import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
 import { filterCompare } from '@/features/Core/utils/sortingFunctions';
-import { isEntityFilter, isSameFilterValue } from '@/features/ResultFiltering/utils/filterFunctions';
+import { isEntityFilter, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
@@ -61,53 +61,23 @@ const useResultFiltering = ({
   }, [handlePageReset, handleUpdateResultsRef, rawResults]);
 
   const handleFilter = useCallback((filter: Filter) => {
-    // Try to find a filter with same {id, value, negated} — for toggle-off
-    const exactMatchIndex = activeFilters.findIndex(
-      (f) =>
-        f.id === filter.id &&
-        isSameFilterValue(f.value, filter.value) &&
-        f.negated === filter.negated
-    );
+    const { filters: updatedFilters, action } = toggleFilter(activeFilters, filter);
 
-    if (exactMatchIndex !== -1) {
-      // Exact match found → toggle off by removing it
-      const updatedFilters = activeFilters.filter((_, i) => i !== exactMatchIndex);
+    if (action === 'cleared') {
       trackEvent('filter_cleared', {
         filter_type: filter.id ?? filter.name,
         filter_count: updatedFilters.length,
       });
-      handleApplyFilterAndCleanup(updatedFilters);
-      return;
-    }
-
-    // Try to find a filter with same {id, value} but different negated — for update
-    const sameIdValueIndex = activeFilters.findIndex(
-      (f) =>
-        f.id === filter.id &&
-        isSameFilterValue(f.value, filter.value) &&
-        f.negated !== filter.negated
-    );
-
-    let updatedFilters: Filter[];
-    if (sameIdValueIndex !== -1) {
-      // Replace old filter with new one (different negated)
-      updatedFilters = activeFilters.map((f, i) =>
-        i === sameIdValueIndex ? { ...filter } : f
-      );
     } else {
-      // Add new filter
-      updatedFilters = [...activeFilters, { ...filter }];
+      updatedFilters.sort(filterCompare);
+      trackEvent('filter_applied', {
+        filter_type: filter.id ?? filter.name,
+        // Facet values are labels and CURIEs, bounded enough to report on. A string
+        // filter's value is whatever the user typed, so only its use is recorded.
+        filter_value: isEntityFilter(filter) ? 'string filter' : filter.value,
+        filter_count: updatedFilters.length,
+      });
     }
-
-    updatedFilters.sort(filterCompare);
-
-    trackEvent('filter_applied', {
-      filter_type: filter.id ?? filter.name,
-      // Facet values are labels and CURIEs, bounded enough to report on. A string
-      // filter's value is whatever the user typed, so only its use is recorded.
-      filter_value: isEntityFilter(filter) ? 'string filter' : filter.value,
-      filter_count: updatedFilters.length,
-    });
     handleApplyFilterAndCleanup(updatedFilters);
   }, [activeFilters, handleApplyFilterAndCleanup]);
 
