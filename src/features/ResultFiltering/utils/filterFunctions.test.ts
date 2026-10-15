@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyPredicateFilterDisplayNames, formatPredicateFilterName, propagatesExclusionAcrossCompressionGroups } from '@/features/ResultFiltering/utils/filterFunctions';
+import { applyPredicateFilterDisplayNames, formatPredicateFilterName, propagatesExclusionAcrossCompressionGroups, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 
 // Permissive default: no families propagate. See commented strict-mode logic in
@@ -47,5 +47,42 @@ describe('applyPredicateFilterDisplayNames', () => {
       'impacts or applied or studied to impact'
     );
     expect(filters['p/pc/gene'].name).toBe('Gene');
+  });
+});
+
+describe('toggleFilter', () => {
+  const gene: Filter = { id: 'p/pc/gene', name: 'Gene', value: 'gene' };
+  const drug: Filter = { id: 'p/pc/drug', name: 'Drug', value: 'drug' };
+
+  it('appends a filter that is not yet active', () => {
+    const { filters, action } = toggleFilter([gene], drug);
+    expect(action).toBe('applied');
+    expect(filters).toEqual([gene, drug]);
+  });
+
+  it('removes an exact match (same id, value, and negation)', () => {
+    const { filters, action } = toggleFilter([gene, drug], { ...drug });
+    expect(action).toBe('cleared');
+    expect(filters).toEqual([gene]);
+  });
+
+  it('replaces a match that differs only in negation, keeping its position', () => {
+    const negatedGene = { ...gene, negated: true };
+    const { filters, action } = toggleFilter([gene, drug], negatedGene);
+    expect(action).toBe('applied');
+    expect(filters).toEqual([negatedGene, drug]);
+  });
+
+  it('matches values case- and whitespace-insensitively', () => {
+    const { filters, action } = toggleFilter([gene], { ...gene, value: '  GENE ' });
+    expect(action).toBe('cleared');
+    expect(filters).toEqual([]);
+  });
+
+  it('does not mutate the active filter list or the toggled filter', () => {
+    const active = [gene];
+    const { filters } = toggleFilter(active, drug);
+    expect(active).toEqual([gene]);
+    expect(filters[1]).not.toBe(drug);
   });
 });

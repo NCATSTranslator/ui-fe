@@ -17,14 +17,14 @@ import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { ResultSet, Result, PathFilterState, ScoreWeights } from "@/features/ResultList/types/results.d";
+import { Result, PathFilterState, ScoreWeights } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
 import useSortState from "@/features/ResultList/hooks/useSortState";
 import useResultPagination, { parseItemsPerPage } from "@/features/ResultList/hooks/useResultPagination";
 import useShareState from "@/features/ResultList/hooks/useShareState";
-import useResultFiltering, { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
+import useResultFiltering, { HandleUpdateResultsFn, ResultsUpdate } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -69,7 +69,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
 
-  const { data: queries = [] } = useUserQueries();
+  const { data: queries = [], isSuccess: areUserQueriesLoaded } = useUserQueries();
   const currentQuerySid: number | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
   const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
   const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
@@ -146,6 +146,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const handleUpdateResultsRef = useRef<HandleUpdateResultsFn | null>(null);
   const handleSortUpdateRef = useRef<(() => void) | null>(null);
   const activeFiltersRef = useRef<Filter[]>([]);
+  const pathFilterStateRef = useRef<PathFilterState | null>(null);
   const resultIdParamRef = useRef<string | null>(null);
   const itemsPerPageRef = useRef<number>(0);
   const visibleResultIdsRef = useRef<Set<string>>(new Set());
@@ -153,20 +154,18 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Data lifecycle hook — state, refs, fetching, and data processing
   const {
     formattedResults, setFormattedResults,
-    isLoading, setIsLoading, isError, setIsError,
-    arsStatus, setArsStatus, resultStatus, setResultStatus,
-    setFreshRawResults,
-    nodeDescription, setNodeDescription,
+    isLoading, setIsLoading, isError,
+    arsStatus, resultStatus,
+    nodeDescription,
     hasFreshResults, resultsComplete,
     rawResults, originalResults, prevRawResults,
-    isFetchingARAStatus, setIsFetchingARAStatus, isFetchingResults, setIsFetchingResults,
-    numberOfStatusChecks, firstLoad,
-    recalculateScores, handleResultsRefresh
+    isFetchingARAStatus, isFetchingResults,
+    firstLoad,
+    recalculateScores, handleResultsRefresh, resetResultsData
   } = useResultsData({
-    currentQueryID, currentQuerySid, isPathfinder,
+    currentQueryID, currentQuerySid, areUserQueriesLoaded, isPathfinder,
     presetIsLoading, initialResultSet: resultSet, nodeIdParam,
-    dispatch, scoreWeights, activeFiltersRef, activeEntityFiltersRef,
-    currentSortString, userSavesRef, handleUpdateResultsRef,
+    dispatch, scoreWeights, handleUpdateResultsRef,
   });
 
   const visibleResultIds = useMemo(
@@ -178,7 +177,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const initialItemsPerPage = parseItemsPerPage(prefs.results_per_page.pref_value as string | number);
   const {
     itemOffset,
-    setItemOffset,
     itemsPerPage,
     setItemsPerPage,
     endResultIndex,
@@ -189,6 +187,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     handlePageClick,
     handlePageChange,
     handlePageReset,
+    resetPagination,
     calculateItemsPerPage,
   } = useResultPagination({ formattedResults, initialItemsPerPage });
 
@@ -226,10 +225,6 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   } = useResultFiltering({
     handlePageReset,
     rawResults,
-    originalResults,
-    currentSortString,
-    isPathfinder,
-    userSavesRef,
     handleUpdateResultsRef,
   });
   // Keep the sort hook's entity filters ref in sync
@@ -246,16 +241,13 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   } = useUserBookmarks({
     user: user ?? null,
     currentQueryID,
-    activeFilters,
-    activeEntityFilters,
     prevRawResults,
-    currentSortString,
-    isPathfinder,
     handleUpdateResultsRef,
   });
   // Sync shared refs after hook calls
   userSavesRef.current = userSaves;
   activeFiltersRef.current = activeFilters;
+  pathFilterStateRef.current = pathFilterState;
   resultIdParamRef.current = resultIdParam;
   itemsPerPageRef.current = itemsPerPage;
   visibleResultIdsRef.current = visibleResultIds;
@@ -263,29 +255,13 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Reset state when the query ID changes (e.g., navigating to a different query)
   useQueryChangeReset({
     currentQueryID,
-    itemsPerPageRef,
     prevQueryID,
-    rawResults,
-    prevRawResults,
-    originalResults,
-    numberOfStatusChecks,
-    currentPage,
-    firstLoad,
-    setIsFetchingARAStatus,
-    setIsFetchingResults,
-    setIsLoading,
-    setIsError,
-    setFormattedResults,
-    setFreshRawResults,
+    resetResultsData,
     resetFilters,
-    setArsStatus,
-    setResultStatus,
-    setItemOffset,
-    setEndResultIndex,
+    resetPagination,
     closeNotesModal: closeNotes,
     resetShareState,
     resetBookmarks,
-    setNodeDescription,
   });
 
   // update defaults when prefs change
@@ -298,18 +274,19 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setEndResultIndex(tempItemsPerPage);
   }, [prefs, calculateItemsPerPage, currentSortString, setItemsPerPage, setEndResultIndex]);
 
-  const handleUpdateResults = useCallback((
-    filters: Filter[],
-    asFilters: string[],
-    summaryParam: ResultSet | null,
-    or: Result[] = [],
-    justSort = false,
-    sortType: string,
-    isPathfinder: boolean = false,
-    userSavesGroup: SaveGroup | null = null,
-    pfState: PathFilterState | null = null,
-  ): Result[] => {
+  // Recomputes the result list for a ResultsUpdate (see its doc for the modes).
+  // Reads filters, sort, bookmarks, and path filter state from refs rather than
+  // props so the hooks that trigger updates don't have to pass that state back in.
+  const handleUpdateResults = useCallback((update: ResultsUpdate): Result[] => {
+    const summaryParam = update.mode === 'rebuild' ? update.summary : rawResults.current;
     if (!summaryParam) return [];
+
+    const justSort = update.mode === 'sort';
+    const or: Result[] = update.mode === 'rebuild' ? [] : originalResults.current;
+    const filters = update.mode === 'refilter' ? update.filters : activeFiltersRef.current;
+    const sortType = currentSortString.current;
+    // Only a sort carries path filter state forward; filtering regenerates it.
+    const pfState = justSort ? pathFilterStateRef.current : null;
 
     let summary = summaryParam;
     let newFormattedResults: Result[] = [];
@@ -328,7 +305,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
     // Inject bookmark and note tag filters
     [summary, newFormattedResults, newOriginalResults] = injectDynamicFilters(summary,
-        newFormattedResults, newOriginalResults, userSavesGroup);
+        newFormattedResults, newOriginalResults, userSavesRef.current);
 
     // Filtering
     if (!justSort) {
@@ -350,7 +327,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       newPathFilterState = updatedPathFilterState;
 
       // Update entity filters if changed
-      if (!areEntityFiltersEqual(updatedEntityFilters, asFilters))
+      if (!areEntityFiltersEqual(updatedEntityFilters, activeEntityFiltersRef.current))
         setActiveEntityFilters(updatedEntityFilters);
 
       // Update available facet filters
@@ -400,7 +377,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
     rawResults.current = summary;
     return newFormattedResults;
-  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen, currentPage, firstLoad, originalResults, rawResults]);
+  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen, currentPage, firstLoad, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
 
   // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
   // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
@@ -421,12 +398,8 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   // Extracted callback for sort-triggered updates (avoids inline arrow in JSX)
   const handleSortUpdate = useCallback(() => {
-    handleUpdateResults(
-      activeFilters, activeEntityFilters, rawResults.current as ResultSet,
-      originalResults.current, true, currentSortString.current,
-      isPathfinder, userSaves, pathFilterState
-    );
-  }, [handleUpdateResults, activeFilters, activeEntityFilters, isPathfinder, userSaves, pathFilterState, currentSortString, originalResults, rawResults]);
+    handleUpdateResults({ mode: 'sort' });
+  }, [handleUpdateResults]);
   useLayoutEffect(() => { handleSortUpdateRef.current = handleSortUpdate; }); // see handleUpdateResultsRef comment
 
   // Memoized data prop for ResultListHeader
