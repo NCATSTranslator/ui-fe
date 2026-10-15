@@ -69,7 +69,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
     : null;
 
-  const { data: queries = [] } = useUserQueries();
+  const { data: queries = [], isSuccess: areUserQueriesLoaded } = useUserQueries();
   const currentQuerySid: number | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
   const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
   const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
@@ -163,7 +163,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     firstLoad,
     recalculateScores, handleResultsRefresh, resetResultsData
   } = useResultsData({
-    currentQueryID, currentQuerySid, isPathfinder,
+    currentQueryID, currentQuerySid, areUserQueriesLoaded, isPathfinder,
     presetIsLoading, initialResultSet: resultSet, nodeIdParam,
     dispatch, scoreWeights, handleUpdateResultsRef,
   });

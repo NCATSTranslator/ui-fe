@@ -15,6 +15,7 @@ import { AppDispatch } from "@/redux/store";
 interface UseResultsDataArgs {
   currentQueryID: string | null;
   currentQuerySid: number | undefined;
+  areUserQueriesLoaded: boolean;
   isPathfinder: boolean;
   presetIsLoading: boolean;
   initialResultSet: ResultSet | null;
@@ -88,6 +89,7 @@ const prepareResultSet = (resultSet: ResultSet, scoreWeights: ScoreWeights, isPa
 const useResultsData = ({
   currentQueryID,
   currentQuerySid,
+  areUserQueriesLoaded,
   isPathfinder,
   presetIsLoading,
   initialResultSet,
@@ -269,7 +271,8 @@ const useResultsData = ({
     setIsError,
     setIsLoading,
     setIsFetchingResults,
-    currentQuerySid
+    currentQuerySid,
+    areUserQueriesLoaded
   );
 
   // Node description effect
