@@ -185,7 +185,7 @@ const processResultsData = (
   numberOfStatusChecks: RefObject<number>,
   setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>,
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  updateQueryLastSeen: () => void
+  markQuerySeen: () => void
 ): void => {
   console.log('New results:', data);
   
@@ -204,8 +204,7 @@ const processResultsData = (
 
   setIsFetchingResults(false);
 
-  // call out to queries/touch endpoint to update the query last_seen timestamp
-  updateQueryLastSeen();
+  markQuerySeen();
 };
 
 /**
@@ -244,6 +243,8 @@ const handleResultsDataError = (error: unknown, context: ResultsDataErrorContext
  * @param setIsError - Function to set error state
  * @param setIsLoading - Function to set loading state
  * @param setIsFetchingResults - Setter for results fetching state
+ * @param sid - The save ID of the user's copy of the query, if one exists
+ * @param areUserQueriesLoaded - Whether the user's queries have loaded, so a missing sid means "not saved" rather than "unknown"
  */
 export const useResultsDataQuery = (
   currentQueryID: string | null,
@@ -257,21 +258,34 @@ export const useResultsDataQuery = (
   setIsError: (value: boolean) => void,
   setIsLoading: (value: boolean) => void,
   setIsFetchingResults: Dispatch<SetStateAction<boolean>>,
-  sid?: number
+  sid: number | undefined,
+  areUserQueriesLoaded: boolean
 ) => {
   const [user] = useUser();
   const { mutate: touchQueryLastSeen } = useUpdateQueryLastSeen(sid);
   const { mutate: copyQueryMutate } = useCopyQuery();
 
-  const handleQuerySeen = () => {
-    // if user isn't logged in, don't do anything
-    if (!user)
+  // A new object per results fetch, so each fetch is handled exactly once by the effect below
+  const [seenResults, setSeenResults] = useState<{ queryID: string } | null>(null);
+  const handledSeenResults = useRef<{ queryID: string } | null>(null);
+  const copiedQueryID = useRef<string | null>(null);
+
+  // Deferred until the user's queries have loaded; otherwise an unloaded list looks
+  // like an unsaved query and triggers a duplicate copy
+  useEffect(() => {
+    if (!user || !areUserQueriesLoaded || !seenResults)
       return;
-    if (sid !== undefined)
+    if (seenResults === handledSeenResults.current || seenResults.queryID !== currentQueryID)
+      return;
+    handledSeenResults.current = seenResults;
+
+    if (sid !== undefined) {
       touchQueryLastSeen();
-    else if (currentQueryID)
-      copyQueryMutate(currentQueryID);
-  };
+    } else if (copiedQueryID.current !== seenResults.queryID) {
+      copiedQueryID.current = seenResults.queryID;
+      copyQueryMutate(seenResults.queryID);
+    }
+  }, [user, areUserQueriesLoaded, seenResults, currentQueryID, sid, touchQueryLastSeen, copyQueryMutate]);
 
   // Polling side-effect query: refs/setters/callbacks are intentionally excluded from queryKey
   return useQuery({
@@ -300,7 +314,7 @@ export const useResultsDataQuery = (
           numberOfStatusChecks,
           setIsFetchingARAStatus,
           setIsFetchingResults,
-          handleQuerySeen
+          () => setSeenResults({ queryID: currentQueryID })
         );
       } catch (error) {
         handleResultsDataError(error, {
@@ -338,36 +352,15 @@ export const useResultsCompleteToast = (arsStatus: ARAStatusResponse | null, isF
  * Configuration for the useQueryChangeReset hook
  */
 export interface QueryChangeResetConfig {
-  // Current state
   currentQueryID: string | null;
-  itemsPerPageRef: RefObject<number>;
-
-  // Refs to reset
   prevQueryID: RefObject<string | null>;
-  rawResults: RefObject<ResultSet | null>;
-  prevRawResults: RefObject<ResultSet | null>;
-  originalResults: RefObject<Result[]>;
-  numberOfStatusChecks: RefObject<number>;
-  currentPage: RefObject<number>;
-  firstLoad: RefObject<boolean>;
-  // Setters for fetching state
-  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
-  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
-
-  // State setters
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  setIsError: Dispatch<SetStateAction<boolean>>;
-  setFormattedResults: Dispatch<SetStateAction<Result[]>>;
-  setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
+  // Each owning hook resets its own state
+  resetResultsData: () => void;
   resetFilters: () => void;
-  setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
-  setResultStatus: Dispatch<SetStateAction<"error" | "running" | "success" | "unknown">>;
-  setItemOffset: Dispatch<SetStateAction<number>>;
-  setEndResultIndex: Dispatch<SetStateAction<number>>;
+  resetPagination: () => void;
   closeNotesModal: () => void;
   resetShareState: () => void;
   resetBookmarks: () => void;
-  setNodeDescription: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -375,34 +368,18 @@ export interface QueryChangeResetConfig {
  * This ensures that when a user navigates to a new query via URL change, all state is properly
  * reset and new data is fetched.
  * 
- * @param config - Configuration object containing all refs and setters to reset
+ * @param config - The current query ID plus each owning hook's reset callback
  */
 export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
   const {
     currentQueryID,
-    itemsPerPageRef,
     prevQueryID,
-    rawResults,
-    prevRawResults,
-    originalResults,
-    numberOfStatusChecks,
-    currentPage,
-    firstLoad,
-    setIsFetchingARAStatus,
-    setIsFetchingResults,
-    setIsLoading,
-    setIsError,
-    setFormattedResults,
-    setFreshRawResults,
+    resetResultsData,
     resetFilters,
-    setArsStatus,
-    setResultStatus,
-    setItemOffset,
-    setEndResultIndex,
+    resetPagination,
     closeNotesModal,
     resetShareState,
     resetBookmarks,
-    setNodeDescription,
   } = config;
 
   useEffect(() => {
@@ -410,53 +387,13 @@ export const useQueryChangeReset = (config: QueryChangeResetConfig): void => {
     if (prevQueryID.current === currentQueryID) {
       return;
     }
-    
-    // Update the previous query ID ref
     prevQueryID.current = currentQueryID;
-    
-    // Reset loading and error state
-    setIsLoading(true);
-    setIsError(false);
-    
-    // Reset results state
-    setFormattedResults([]);
-    setFreshRawResults(null);
-    rawResults.current = null;
-    prevRawResults.current = null;
-    originalResults.current = [];
-    
-    // Reset filter state
+
+    resetResultsData();
     resetFilters();
-    
-    // Reset fetching state
-    setIsFetchingARAStatus(true);
-    setIsFetchingResults(false);
-    numberOfStatusChecks.current = 0;
-    
-    // Reset ARA status
-    setArsStatus(null);
-    setResultStatus("unknown");
-    
-    // Reset pagination
-    currentPage.current = 0;
-    setItemOffset(0);
-    setEndResultIndex(itemsPerPageRef.current);
-    
-    // Reset first load flag to handle shared result modal
-    firstLoad.current = true;
-    
+    resetPagination();
     closeNotesModal();
     resetShareState();
-    
-    // Reset user saves for new query
     resetBookmarks();
-    
-    setNodeDescription("");
-  }, [
-    currentQueryID, itemsPerPageRef, prevQueryID, rawResults, prevRawResults, originalResults,
-    numberOfStatusChecks, currentPage, firstLoad, setIsFetchingARAStatus, setIsFetchingResults,
-    setIsLoading, setIsError, setFormattedResults, setFreshRawResults, resetFilters, setArsStatus,
-    setResultStatus, setItemOffset, setEndResultIndex, closeNotesModal, resetShareState,
-    resetBookmarks, setNodeDescription,
-  ]);
+  }, [currentQueryID, prevQueryID, resetResultsData, resetFilters, resetPagination, closeNotesModal, resetShareState, resetBookmarks]);
 };

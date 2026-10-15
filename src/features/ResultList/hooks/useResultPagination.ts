@@ -15,6 +15,7 @@ export interface UseResultPaginationReturn {
   handlePageClick: (event: { selected: number }, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   handlePageChange: (event: { selected: number }, newItemsPerPage?: number | false, resultsLength?: number, currentNumItemsPerPage?: number) => void;
   handlePageReset: (newItemsPerPage: number | false, resultsLength: number) => void;
+  resetPagination: () => void;
   calculateItemsPerPage: (prefValue: string | number) => number;
 }
 
@@ -94,6 +95,13 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
     handlePageChange({ selected: 0 }, newItemsPerPage, resultsLength);
   }, [handlePageChange]);
 
+  // Back to the first page with a full page window, for when the result list is replaced.
+  const resetPagination = useCallback(() => {
+    currentPage.current = 0;
+    setItemOffset(0);
+    setEndResultIndex(itemsPerPage);
+  }, [itemsPerPage]);
+
   return {
     itemOffset,
     setItemOffset,
@@ -107,6 +115,7 @@ const useResultPagination = ({ formattedResults, initialItemsPerPage }: UseResul
     handlePageClick,
     handlePageChange,
     handlePageReset,
+    resetPagination,
     calculateItemsPerPage,
   };
 };

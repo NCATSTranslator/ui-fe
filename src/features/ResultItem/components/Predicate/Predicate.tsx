@@ -1,21 +1,17 @@
 import { FC, MouseEvent, memo, useCallback, useMemo, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
-import PubIcon from '@/assets/icons/status/HasPub.svg?react';
-import CTIcon from '@/assets/icons/status/HasCT.svg?react';
-import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
 import Highlighter from 'react-highlight-words';
 import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs } from '@/features/Evidence/utils/utilities';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import EdgeTooltipContent from '@/features/Core/components/Tooltips/EdgeTooltipContent';
-import { edgesToTooltipEntries } from '@/features/Core/components/Tooltips/tooltipMappers';
 import { Path, ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { useLastViewedPath, useResultItemId } from '@/features/ResultItem/hooks/resultHooks';
-import { isAcceptedOntologyEdge } from '@/features/ResultItem/utils/utilities';
+import { usePredicateEdgeMeta } from '@/features/ResultItem/hooks/usePredicateEdgeMeta';
+import PredicateBadges from '@/features/ResultItem/components/Predicate/PredicateBadges';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
@@ -75,7 +71,6 @@ const Predicate: FC<PredicateProps> = ({
     () => (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge,
     [resultSet, edgeIds, edge]
   );
-  const hasMore = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0);
 
   const {
     attributes: edgeDragAttributes,
@@ -99,24 +94,7 @@ const Predicate: FC<PredicateProps> = ({
   const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
 
-  const { hasPubs, hasCTs, isAcceptedOntology } = useMemo(() => {
-    const edgeArrayToCheck = (!!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0)
-      ? [...formattedEdge.compressed_edges, formattedEdge]
-      : [formattedEdge];
-    return {
-      hasPubs: checkEdgesForPubs(edgeArrayToCheck),
-      hasCTs: checkEdgesForClinicalTrials(edgeArrayToCheck),
-      isAcceptedOntology: isAcceptedOntologyEdge(formattedEdge),
-    };
-  }, [formattedEdge]);
-
-  const tooltipEdgeEntries = useMemo(() => {
-    if (!resultSet) return [];
-    const edgesToDisplay: ResultEdge[] = (!!formattedEdge?.compressed_edges)
-      ? [...formattedEdge.compressed_edges, formattedEdge]
-      : [formattedEdge];
-    return edgesToTooltipEntries(resultSet, edgesToDisplay.filter(Boolean) as ResultEdge[]);
-  }, [resultSet, formattedEdge]);
+  const { hasMore, hasPubs, hasCTs, isAcceptedOntology, tooltipEdgeEntries } = usePredicateEdgeMeta(resultSet, formattedEdge);
 
   const edgeClass = joinClasses(
     styles.edge,
@@ -167,10 +145,10 @@ const Predicate: FC<PredicateProps> = ({
       {...edgeDragListeners}
       {...edgeDragAttributes}
       >
-      <div className={`${parentStyles && parentStyles.nameShape} ${styles.nameShape}`}>
-        <div className={`${parentStyles && parentStyles.background} ${styles.background}`}></div>
+      <div className={`${parentStyles?.nameShape} ${styles.nameShape}`}>
+        <div className={`${parentStyles?.background} ${styles.background}`}></div>
       </div>
-      <PathArrow className={`${parentStyles && parentStyles.icon} ${pathViewStyles && pathViewStyles.icon}`}/>
+      <PathArrow className={`${parentStyles?.icon} ${pathViewStyles?.icon}`}/>
       <Tooltip
         id={`${formattedEdge.predicate}${uid}`}
         place={`${inModal ? 'left' : 'top' }`}
@@ -196,24 +174,11 @@ const Predicate: FC<PredicateProps> = ({
             textToHighlight={formattedEdge.predicate}
           />
           {
-            !!formattedEdge?.compressed_edges && formattedEdge.compressed_edges.length > 0 &&
-            <span className={styles.more}>+{formattedEdge.compressed_edges.length}</span>
+            hasMore &&
+            <span className={styles.more}>+{formattedEdge.compressed_edges?.length}</span>
           }
         </span>
-        {
-          (hasPubs || hasCTs || isAcceptedOntology) &&
-          <div className={styles.badges}>
-            {
-              hasCTs && <CTIcon/>
-            }
-            {
-              hasPubs && <PubIcon/>
-            }
-            {
-              isAcceptedOntology && <AcceptedOntologyIcon/>
-            }
-          </div>
-        }
+        <PredicateBadges hasPubs={hasPubs} hasCTs={hasCTs} isAcceptedOntology={isAcceptedOntology} />
       </span>
     </span>
   )

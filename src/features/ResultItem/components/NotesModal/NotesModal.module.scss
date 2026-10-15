@@ -92,19 +92,19 @@
     .saved {
       font-size: 14px;
       font-weight: 800;
-      transition: all .5s ease;
+      transition: opacity .5s ease, transform .5s ease;
       font-style: italic;
       color: $lightPurpleOne;
-      margin-left: -20px;
       position: absolute;
       bottom: 0;
       left: 0;
       &.show {
         opacity: 1;
-        margin-left: 0px;
+        transform: translateX(0);
       }
       &.hide {
         opacity: 0;
+        transform: translateX(-20px);
       }
     }
   }

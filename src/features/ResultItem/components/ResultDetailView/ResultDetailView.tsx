@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
-import { getPathCount } from '@/features/Core/utils/resultHelpers';
-import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
+import { useResultCounts } from '@/features/ResultItem/hooks/useResultCounts';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
@@ -28,6 +27,7 @@ import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/Fi
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
+import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
@@ -46,20 +46,13 @@ const ResultDetailView: FC = () => {
     activeEntityFilters,
     activeFilters,
     availableFilters,
-    handleBookmarkError,
     handleClearAllFilters,
     isPathfinder,
     pathFilterState,
     pk,
-    queryNodeDescription,
-    queryNodeID,
-    queryNodeLabel,
-    queryType,
     resultsLoading,
     setShowHiddenPaths,
     showHiddenPaths,
-    shouldUpdateResultsAfterBookmark,
-    updateUserSaves,
     userSaves,
     visibleResultIds,
   } = useResultListContext();
@@ -67,14 +60,7 @@ const ResultDetailView: FC = () => {
   const [graphActive, setGraphActive] = useState(false);
 
   const user = useSelector(currentUser);
-  const evidenceCounts = useMemo(
-    () => result ? (result.evidenceCount ?? getEvidenceCounts(resultSet, result)) : null,
-    [resultSet, result]
-  );
-  const pathCount = useMemo(
-    () => result && resultSet ? getPathCount(resultSet, result.paths) : 0,
-    [resultSet, result]
-  );
+  const { evidenceCounts, pathCount } = useResultCounts(resultSet, result);
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
@@ -94,19 +80,7 @@ const ResultDetailView: FC = () => {
     handleNotesClick: handleNotesClickHook,
     handleRemovalApproval: handleBookmarkRemovalApproval,
     resetRemovalApproval,
-  } = useBookmarkItem({
-    bookmarkItem,
-    result,
-    resultSet,
-    queryNodeID,
-    queryNodeLabel,
-    queryNodeDescription,
-    queryType,
-    currentQueryID: pk,
-    handleBookmarkError,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark,
-  });
+  } = useBookmarkItem({ bookmarkItem, result, resultSet });
 
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
@@ -205,33 +179,7 @@ const ResultDetailView: FC = () => {
               isPathfinder={isPathfinder}
               nameString={nameString}
             />
-            <div className={`${styles.evidenceContainer} ${styles.resultSub}`}>
-              <span className={styles.evidenceLink}>
-                <div>
-                  {
-                    evidenceCounts && evidenceCounts.publicationCount > 0  &&
-                    <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
-                  }
-                  {
-                    evidenceCounts && evidenceCounts.clinicalTrialCount > 0  &&
-                    <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-                  }
-                  {
-                    evidenceCounts && evidenceCounts.miscCount > 0  &&
-                    <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
-                  }
-                  {
-                    evidenceCounts && evidenceCounts.sourceCount > 0  &&
-                    <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
-                  }
-                </div>
-              </span>
-            </div>
-            <div className={`${styles.pathsContainer} ${styles.resultSub}`}>
-              <span className={styles.paths}>
-                <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
-              </span>
-            </div>
+            <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
           </div>
 
         </div>

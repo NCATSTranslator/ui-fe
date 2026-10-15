@@ -78,6 +78,30 @@ export const getScopeCounts = (
 };
 
 /**
+ * Adds the publications and trials an edge references to the given collections.
+ */
+const collectEdgeEvidence = (
+  edge: ResultEdge,
+  resultSet: ResultSet,
+  publications: { [key: string]: PublicationObject },
+  trials: { [key: string]: TrialObject }
+): void => {
+  // edge.publications structure: { [groupingKey]: Array<{id: string, support: ...}> }
+  // The actual publication IDs are in the nested array elements
+  for (const pubRef of Object.values(edge.publications ?? {}).flat()) {
+    if (pubRef.id && resultSet.data.publications[pubRef.id]) {
+      publications[pubRef.id] = resultSet.data.publications[pubRef.id];
+    }
+  }
+
+  for (const trialId of edge.trials ?? []) {
+    if (resultSet.data.trials[trialId]) {
+      trials[trialId] = resultSet.data.trials[trialId];
+    }
+  }
+};
+
+/**
  * Collects all related entities (nodes, edges, paths, publications, trials)
  * referenced by the selected results
  */
@@ -122,28 +146,7 @@ export const collectRelatedEntities = (
           processedEdgeIds.add(elementId);
           const edge = resultSet.data.edges[elementId];
           edges[elementId] = edge;
-
-          // Collect publications from edge
-          // edge.publications structure: { [groupingKey]: Array<{id: string, support: ...}> }
-          // The actual publication IDs are in the nested array elements
-          if (edge.publications) {
-            Object.values(edge.publications).forEach(pubArray => {
-              pubArray.forEach(pubRef => {
-                if (pubRef.id && resultSet.data.publications[pubRef.id]) {
-                  publications[pubRef.id] = resultSet.data.publications[pubRef.id];
-                }
-              });
-            });
-          }
-
-          // Collect trials from edge
-          if (edge.trials) {
-            edge.trials.forEach(trialId => {
-              if (resultSet.data.trials[trialId]) {
-                trials[trialId] = resultSet.data.trials[trialId];
-              }
-            });
-          }
+          collectEdgeEvidence(edge, resultSet, publications, trials);
         }
       }
     });
