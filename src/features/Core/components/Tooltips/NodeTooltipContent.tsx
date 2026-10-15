@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import styles from './Tooltips.module.scss';
 import SafeHtmlHighlighter from '@/features/Core/components/SafeHtmlHighlighter/SafeHtmlHighlighter';
 
@@ -33,7 +32,6 @@ const NodeTooltipContent: FC<NodeTooltipContentProps> = ({
       }
       {provenance && typeof provenance === 'string' &&
         <a href={provenance} target="_blank" rel="noreferrer" className={styles.provenance}>
-          <ExternalLink />
           <span>{provenance}</span>
         </a>
       }
