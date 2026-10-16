@@ -12,7 +12,9 @@ import EmptyArea from '@/features/Projects/components/EmptyArea/EmptyArea';
 import CardList from '@/features/Core/components/CardList/CardList';
 import { getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
-import CanvasSidebarCard from '@/features/Canvas/components/CanvasSidebarCard/CanvasSidebarCard';
+import CanvasCard from '@/features/Canvas/components/CanvasCard/CanvasCard';
+import CanvasesTableHeader from '@/features/Projects/components/TableHeader/CanvasesTableHeader/CanvasesTableHeader';
+import { useSortSearchState } from '@/features/Projects/hooks/customHooks';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
 import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 
@@ -37,6 +39,7 @@ const CanvasList = () => {
   const location = useLocation();
   const user = useSelector(currentUser);
   const { activePanelId, closePanel } = useSidebar();
+  const sortSearchState = useSortSearchState();
   const {
     canvases,
     sortedFilteredCanvases,
@@ -51,7 +54,7 @@ const CanvasList = () => {
     handleStartRename,
     handleSubmitRename,
     handleDeleteCanvas,
-  } = useCanvasList();
+  } = useCanvasList({ sortField: sortSearchState.sortField, sortDirection: sortSearchState.sortDirection });
   const { createCanvas } = useCreateCanvas();
 
   const canvasTabHeading = useMemo(() => {
@@ -103,11 +106,12 @@ const CanvasList = () => {
             {[
               <Tab key="canvases" heading={canvasTabHeading}>
                 <CardList>
+                  <CanvasesTableHeader sortSearchState={sortSearchState} />
                   {sortedFilteredCanvases.length === 0 ? (
                     <EmptyCanvasList searchTerm={searchTerm} createCanvas={createCanvas} />
                   ) : (
                     sortedFilteredCanvases.map(canvas => (
-                      <CanvasSidebarCard
+                      <CanvasCard
                         key={canvas.id}
                         canvas={canvas}
                         isActive={canvas.id === activeCanvasId}
@@ -120,7 +124,6 @@ const CanvasList = () => {
                         onDelete={handleDeleteCanvas}
                         onRenameValueChange={setRenameValue}
                         onSubmitRename={handleSubmitRename}
-                        showUpdatedTime
                       />
                     ))
                   )}

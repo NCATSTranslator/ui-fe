@@ -17,6 +17,9 @@
   &.queryCardRow {
     grid-template-columns: $queryCardColumns;
   }
+  &.canvasCardRow {
+    grid-template-columns: $canvasCardColumns;
+  }
   > div {
     font-size: 10px;
     text-transform: uppercase;

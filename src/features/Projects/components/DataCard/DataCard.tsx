@@ -25,9 +25,11 @@ interface DataCardProps {
   onTitleChange?: (value: string) => void;
   onFormSubmit?: (e: FormEvent<HTMLFormElement>) => void;
   textInputRef?: RefObject<HTMLInputElement | null>;
-  type: 'project' | 'query';
-  bookmarksCount: number;
-  notesCount: number;
+  type: 'project' | 'query' | 'canvas';
+  bookmarksCount?: number;
+  notesCount?: number;
+  objectCountLabel?: string;
+  relationshipCountLabel?: string;
   queryCount?: number;
   queryType?: QueryTypeString;
   queriesLoading?: boolean;
@@ -53,6 +55,8 @@ const DataCard: FC<DataCardProps> = ({
   type,
   bookmarksCount,
   notesCount,
+  objectCountLabel,
+  relationshipCountLabel,
   queryCount,
   queryType,
   queriesLoading,
@@ -60,7 +64,7 @@ const DataCard: FC<DataCardProps> = ({
   lastSeenTime
 }) => {
 
-  const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard);
+  const cardClassName = joinClasses(styles.dataCard, className, isRenaming && styles.isRenaming, type === 'project' && styles.projectCard, type === 'query' && styles.queryCard, type === 'canvas' && styles.canvasCard);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const optionsAnchorRef = useRef<HTMLDivElement>(null);
 
@@ -104,25 +108,32 @@ const DataCard: FC<DataCardProps> = ({
           textInputRef={textInputRef}
           icon={icon}
         />
-        <div className={styles.bookmarksColumn}>
-          <BookmarkIcon />
-          {bookmarksCount}
-        </div>
-        <div className={styles.notesColumn}>
-          <NoteIcon />
-          {notesCount}
-        </div>
+        {
+          type !== 'canvas' && (
+            <>
+              <div className={styles.bookmarksColumn}>
+                <BookmarkIcon />
+                {bookmarksCount}
+              </div>
+              <div className={styles.notesColumn}>
+                <NoteIcon />
+                {notesCount}
+              </div>
+            </>
+          )
+        }
         <div className={styles.queriesColumn}>
-          {
-            type === 'project' ? (
-              <>
-                {`${queriesLoading ? '-' : queryCount || '0'} Quer${queryCount === 1 ? 'y' : 'ies'}`}
-              </>
-            ) : (
-              !!queryType && queryTypeLabel
-            )
-          }
+          {type === 'project' && `${queriesLoading ? '-' : queryCount || '0'} Quer${queryCount === 1 ? 'y' : 'ies'}`}
+          {type === 'query' && !!queryType && queryTypeLabel}
+          {type === 'canvas' && objectCountLabel}
         </div>
+        {
+          type === 'canvas' && (
+            <div className={styles.queriesColumn}>
+              {relationshipCountLabel}
+            </div>
+          )
+        }
         <div className={styles.date}>
           {createdTime}
         </div>

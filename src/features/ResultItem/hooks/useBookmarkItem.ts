@@ -1,9 +1,8 @@
-import { useState, useRef, useMemo, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
+import { useState, useRef, useMemo, useCallback, Dispatch, SetStateAction } from 'react';
 import { useSelector } from 'react-redux';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { Save, SaveGroup } from '@/features/UserAuth/utils/userApi';
+import { Save } from '@/features/UserAuth/utils/userApi';
 import { Result, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
-import { QueryType } from '@/features/Query/types/querySubmission';
 import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
 import {
   handleBookmarkClick as handleBookmarkClickUtil,
@@ -12,22 +11,19 @@ import {
 } from '@/features/ResultItem/utils/bookmarkFunctions';
 import { getNodeById } from '@/features/ResultList/slices/resultsSlice';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+import { useResultListContext, ResultListContextValue } from '@/features/ResultList/context/ResultListContext';
 
 export interface UseBookmarkItemParams {
   bookmarkItem: Save | null;
   result: Result | ResultBookmark | undefined;
   resultSet: ResultSet | null;
-  queryNodeID: string | null;
-  queryNodeLabel: string | null;
-  queryNodeDescription: string | null;
-  queryType: QueryType | null;
-  currentQueryID: string | null;
-  bookmarkAddedToast: () => void;
-  bookmarkRemovedToast: () => void;
-  handleBookmarkError: () => void;
-  updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
-  shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
 }
+
+/** The query-level values the bookmark utilities need, read from ResultListContext. */
+type BookmarkQueryContext = Pick<ResultListContextValue,
+  | 'queryNodeID' | 'queryNodeLabel' | 'queryNodeDescription' | 'queryType' | 'pk'
+  | 'handleBookmarkError' | 'updateUserSaves' | 'shouldUpdateResultsAfterBookmark'
+>;
 
 export interface UseBookmarkItemReturn {
   // Derived state
@@ -47,63 +43,70 @@ export interface UseBookmarkItemReturn {
 }
 
 /**
- * Hook to encapsulate individual item bookmark state and actions.
- * Use in ResultItem and UserSave components to manage bookmark functionality.
+ * Builds the params the bookmark utilities take, memoized so the click handlers
+ * that depend on them stay stable between renders. Null until a result exists.
  */
-export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemReturn => {
-  const {
-    bookmarkItem,
-    result,
-    resultSet,
+const useBookmarkParams = (
+  { bookmarkItem, result, resultSet }: UseBookmarkItemParams,
+  {
     queryNodeID,
     queryNodeLabel,
     queryNodeDescription,
     queryType,
-    currentQueryID,
-    bookmarkAddedToast,
-    bookmarkRemovedToast,
+    pk: currentQueryID,
     handleBookmarkError,
     updateUserSaves,
     shouldUpdateResultsAfterBookmark,
-  } = params;
+  }: BookmarkQueryContext,
+  user: BookmarkFunctionParams['user'],
+  bookmarkId: string | null
+): BookmarkFunctionParams | null => {
+  return useMemo(() => {
+    if (!result) return null;
+    return {
+      result,
+      resultSet,
+      queryNodeID,
+      queryNodeLabel,
+      queryNodeDescription,
+      queryType,
+      currentQueryID,
+      user,
+      objectRef: result.id,
+      bookmarkId,
+      bookmarkItem,
+      handleBookmarkError,
+      updateUserSaves,
+      shouldUpdateResultsAfterBookmark,
+    };
+  }, [
+    result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription,
+    queryType, currentQueryID, user, bookmarkId, bookmarkItem,
+    handleBookmarkError, updateUserSaves, shouldUpdateResultsAfterBookmark,
+  ]);
+};
+
+/**
+ * Hook to encapsulate individual item bookmark state and actions.
+ * Must be used inside a ResultListProvider, which supplies the query-level context.
+ */
+export const useBookmarkItem = (params: UseBookmarkItemParams): UseBookmarkItemReturn => {
+  const { bookmarkItem, result, resultSet } = params;
+  const queryContext = useResultListContext();
 
   const user = useSelector(currentUser);
 
-  // Derived state from bookmarkItem prop
+  // Derived state from bookmarkItem prop. A save whose create request is still
+  // in flight has no ID yet, so it reads as bookmarked with a null bookmarkId.
   const isBookmarked = !!bookmarkItem;
-  const bookmarkId = bookmarkItem?.id?.toString() ?? null;
+  const bookmarkId = bookmarkItem?.id ? bookmarkItem.id.toString() : null;
   const hasNotes = !isNotesEmpty(bookmarkItem?.notes || null);
 
   // Confirmation modal state
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const bookmarkRemovalApproved = useRef(false);
 
-  // Memoized bookmark params
-  const bookmarkParams: BookmarkFunctionParams | null = useMemo(() => {
-    if (!result) return null;
-    return {
-    result,
-    resultSet,
-    queryNodeID,
-    queryNodeLabel,
-    queryNodeDescription,
-    queryType,
-    currentQueryID,
-    user: user || null,
-    objectRef: result.id,
-    bookmarkId,
-    bookmarkRemovedToast,
-    bookmarkAddedToast,
-    handleBookmarkError,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark,
-  };
-  }, [
-    result, resultSet, queryNodeID, queryNodeLabel, queryNodeDescription,
-    queryType, currentQueryID, user, bookmarkId, bookmarkRemovedToast,
-    bookmarkAddedToast, handleBookmarkError, updateUserSaves,
-    shouldUpdateResultsAfterBookmark,
-  ]);
+  const bookmarkParams = useBookmarkParams(params, queryContext, user || null, bookmarkId);
 
   // The CURIE, not the internal result ID, is what makes these events joinable
   // with anything outside a single session.

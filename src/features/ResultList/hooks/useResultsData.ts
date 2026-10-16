@@ -9,24 +9,19 @@ import { generatePathfinderScore, generateScore, recalculateResultSetScores } fr
 import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
 import { trackEvent } from "@/features/Analytics/utils/dataLayer";
-import { Filter } from "@/features/ResultFiltering/types/filters";
-import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import { AppDispatch } from "@/redux/store";
 
 interface UseResultsDataArgs {
   currentQueryID: string | null;
   currentQuerySid: number | undefined;
+  areUserQueriesLoaded: boolean;
   isPathfinder: boolean;
   presetIsLoading: boolean;
   initialResultSet: ResultSet | null;
   nodeIdParam: string | null;
   dispatch: AppDispatch;
   scoreWeights: ScoreWeights;
-  activeFiltersRef: RefObject<Filter[]>;
-  activeEntityFiltersRef: RefObject<string[]>;
-  currentSortString: RefObject<string>;
-  userSavesRef: RefObject<SaveGroup | null>;
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
@@ -64,6 +59,7 @@ interface UseResultsDataReturn {
   // Callbacks
   recalculateScores: (newWeights: ScoreWeights) => void;
   handleResultsRefresh: () => void;
+  resetResultsData: () => void;
 }
 
 /**
@@ -93,16 +89,13 @@ const prepareResultSet = (resultSet: ResultSet, scoreWeights: ScoreWeights, isPa
 const useResultsData = ({
   currentQueryID,
   currentQuerySid,
+  areUserQueriesLoaded,
   isPathfinder,
   presetIsLoading,
   initialResultSet,
   nodeIdParam,
   dispatch,
   scoreWeights,
-  activeFiltersRef,
-  activeEntityFiltersRef,
-  currentSortString,
-  userSavesRef,
   handleUpdateResultsRef,
 }: UseResultsDataArgs): UseResultsDataReturn => {
 
@@ -184,10 +177,7 @@ const useResultsData = ({
 
     if (!handleUpdateResultsRef.current) return;
 
-    const newFormattedResults = handleUpdateResultsRef.current(
-      activeFiltersRef.current, activeEntityFiltersRef.current, newResultSet,
-      [], false, currentSortString.current, currentIsPathfinder, userSavesRef.current
-    );
+    const newFormattedResults = handleUpdateResultsRef.current({ mode: 'rebuild', summary: newResultSet });
 
     // If the result set has results, set the loading state to false
     if (newFormattedResults.length > 0)
@@ -198,7 +188,7 @@ const useResultsData = ({
       setIsLoading(false);
 
     reportResultsLoaded(newResultSet, newFormattedResults.length);
-  }, [dispatch, currentQueryID, activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef, reportResultsLoaded]);
+  }, [dispatch, currentQueryID, handleUpdateResultsRef, reportResultsLoaded]);
 
   const recalculateScores = useCallback((newWeights: ScoreWeights) => {
     if (!rawResults.current || !rawResults.current.data?.results?.length) return;
@@ -209,23 +199,33 @@ const useResultsData = ({
 
     if (!handleUpdateResultsRef.current) return;
 
-    handleUpdateResultsRef.current(
-      activeFiltersRef.current,
-      activeEntityFiltersRef.current,
-      resultSetData,
-      [],
-      false,
-      currentSortString.current,
-      currentIsPathfinder,
-      userSavesRef.current
-    );
-  }, [activeFiltersRef, activeEntityFiltersRef, currentSortString, userSavesRef, handleUpdateResultsRef]);
+    handleUpdateResultsRef.current({ mode: 'rebuild', summary: resultSetData });
+  }, [handleUpdateResultsRef]);
 
   const handleResultsRefresh = useCallback(() => {
     if (!!freshRawResults)
       handleNewResults(freshRawResults);
     setFreshRawResults(null);
   }, [freshRawResults, handleNewResults]);
+
+  // Clears everything this hook owns so a different query starts from a blank slate.
+  const resetResultsData = useCallback(() => {
+    setIsLoading(true);
+    setIsError(false);
+    setFormattedResults([]);
+    setFreshRawResults(null);
+    rawResults.current = null;
+    prevRawResults.current = null;
+    originalResults.current = [];
+    setIsFetchingARAStatus(true);
+    setIsFetchingResults(false);
+    numberOfStatusChecks.current = 0;
+    setArsStatus(null);
+    setResultStatus("unknown");
+    // Re-arm the shared-result modal for the new query
+    firstLoad.current = true;
+    setNodeDescription("");
+  }, []);
 
   // Dispatch loading status to Redux for sub-views (flattened to primitives)
   const araCount = arsStatus?.data?.aras?.length ?? 0;
@@ -271,7 +271,8 @@ const useResultsData = ({
     setIsError,
     setIsLoading,
     setIsFetchingResults,
-    currentQuerySid
+    currentQuerySid,
+    areUserQueriesLoaded
   );
 
   // Node description effect
@@ -314,6 +315,7 @@ const useResultsData = ({
     firstLoad,
     recalculateScores,
     handleResultsRefresh,
+    resetResultsData,
   };
 };
 

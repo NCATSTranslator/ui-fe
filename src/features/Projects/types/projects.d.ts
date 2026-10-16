@@ -79,7 +79,7 @@ export interface UserQueryObject {
   status: QueryStatus,
 }
 
-export type SortField = 'name' | 'created' | 'lastSeen' | 'queries' | 'bookmarks' | 'notes' | 'status' | 'queryType';
+export type SortField = 'name' | 'created' | 'lastSeen' | 'queries' | 'bookmarks' | 'notes' | 'status' | 'queryType' | 'objects' | 'relationships';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortSearchState {

@@ -5,6 +5,7 @@ import { Result, ResultBookmark, ResultSet } from '@/features/ResultList/types/r
 import { QueryType } from '@/features/Query/types/querySubmission';
 import type { User } from '@/features/UserAuth/types/user.d.ts';
 import { isNotesEmpty } from '@/features/ResultItem/utils/utilities';
+import { afterNextPaint } from '@/features/Core/utils/domHelpers';
 
 export interface BookmarkFunctionParams {
   result: Result | ResultBookmark;
@@ -17,12 +18,20 @@ export interface BookmarkFunctionParams {
   user: User | null;
   objectRef: string;
   bookmarkId: string | null;
-  bookmarkRemovedToast: () => void;
-  bookmarkAddedToast: () => void;
-  handleBookmarkError: () => void;
+  /** The existing save, kept so a failed removal can put it back. */
+  bookmarkItem: Save | null;
+  handleBookmarkError: (operation: BookmarkOperation) => void;
   updateUserSaves?: Dispatch<SetStateAction<SaveGroup | null>>;
   shouldUpdateResultsAfterBookmark?: RefObject<boolean>;
 }
+
+export type BookmarkOperation = 'add' | 'remove';
+
+/**
+ * Lets the API wrappers' own failure throw reach our try/catch instead of the
+ * default handlers, which log a "no handler provided" line first.
+ */
+const rethrow = (error: Error): void => { throw error; };
 
 /**
  * Updates the user saves state by adding or removing a bookmark.
@@ -121,38 +130,86 @@ export const createBookmarkObject = (params: {
 };
 
 /**
- * Handles the removal of a bookmark
+ * Writes to the saves Map and flags the result list to re-run its bookmark/notes
+ * filters against the new saves. Every optimistic write and every revert goes
+ * through here so the filters always track what the icons show.
+ */
+const applySavesUpdate = (
+  params: BookmarkFunctionParams,
+  saveOperation: 'add' | 'remove',
+  saveItem?: Save
+) => {
+  if (params.shouldUpdateResultsAfterBookmark)
+    params.shouldUpdateResultsAfterBookmark.current = true;
+  updateUserSavesState(saveOperation, params.updateUserSaves, params.objectRef, saveItem);
+};
+
+/**
+ * A pending save that is cheap to put into state and cheap for `useUserBookmarks`
+ * to deep-clone. The real save carries a trimmed copy of the result set (paths,
+ * nodes, edges, publications), which is too slow to build or clone before the
+ * icon has had a chance to paint, so the placeholder holds an empty one.
+ */
+const createPlaceholderSave = (params: BookmarkFunctionParams, resultSet: ResultSet): Save => ({
+  id: null,
+  label: params.result.drug_name,
+  user_id: params.user?.id || null,
+  save_type: 'bookmark',
+  notes: '',
+  ars_pkey: params.currentQueryID || '',
+  object_ref: params.objectRef,
+  time_created: null,
+  time_updated: null,
+  data: {
+    type: 'result',
+    item: params.result,
+    query: {
+      type: params.queryType,
+      nodeId: params.queryNodeID || '',
+      nodeLabel: params.queryNodeLabel || '',
+      nodeDescription: params.queryNodeDescription || '',
+      pk: params.currentQueryID || '',
+      submitted_time: new Date().toString(),
+      resultSet: {
+        status: resultSet.status,
+        data: {
+          edges: {}, errors: resultSet.data.errors, meta: resultSet.data.meta, nodes: {}, paths: {},
+          provenance: {}, publications: {}, results: [], tags: {}, trials: {},
+        },
+      },
+    },
+  },
+});
+
+/**
+ * Handles the removal of a bookmark. The save is dropped from state before the
+ * request is sent so the icon empties immediately; it is restored if the delete fails.
  */
 export const handleBookmarkRemoval = async (params: BookmarkFunctionParams): Promise<string | false> => {
-  const {
-    objectRef,
-    bookmarkId,
-    bookmarkRemovedToast,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark
-  } = params;
+  const { bookmarkId, bookmarkItem, handleBookmarkError } = params;
 
-  if (!bookmarkId) return false;
-  
-  const deleted = await deleteUserSave(bookmarkId);
-  if (!deleted) {
-    console.warn("Unable to delete bookmark, unable to update userSaves");
+  if (!bookmarkId || !bookmarkItem) return false;
+
+  applySavesUpdate(params, 'remove');
+
+  try {
+    await deleteUserSave(bookmarkId, rethrow, rethrow);
+  } catch (error) {
+    console.warn("Unable to delete bookmark, restoring it", error);
+    applySavesUpdate(params, 'add', bookmarkItem);
+    handleBookmarkError('remove');
     return false;
   }
-  
-  bookmarkRemovedToast();
-  updateUserSavesState('remove', updateUserSaves, objectRef);
-  
-  if (shouldUpdateResultsAfterBookmark)
-    shouldUpdateResultsAfterBookmark.current = true;
-  
+
   // The removed bookmark's ID, so callers can tell a completed removal from one
   // that failed or is still waiting on the confirmation modal.
   return bookmarkId;
 };
 
 /**
- * Handles the creation of a new bookmark
+ * Handles the creation of a new bookmark. A placeholder save with no ID is put
+ * into state before the request is sent so the icon fills immediately; it is
+ * swapped for the server's save on success and removed on failure.
  */
 export const handleBookmarkCreation = async (params: BookmarkFunctionParams): Promise<string | false> => {
   const {
@@ -164,18 +221,22 @@ export const handleBookmarkCreation = async (params: BookmarkFunctionParams): Pr
     queryType,
     currentQueryID,
     user,
-    objectRef,
-    bookmarkAddedToast,
     handleBookmarkError,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark
   } = params;
 
   if (!resultSet) {
     console.warn("Unable to create bookmark, no resultSet available");
     return false;
   }
-  
+
+  // A null ID marks the save as pending: the icon shows it, but it can't be
+  // removed or have notes opened against it until the server assigns an ID.
+  applySavesUpdate(params, 'add', createPlaceholderSave(params, resultSet));
+
+  // Building the full save payload walks every path for the result; let the
+  // filled icon reach the screen first.
+  await afterNextPaint();
+
   const bookmarkObject = createBookmarkObject({
     result,
     resultSet,
@@ -187,17 +248,18 @@ export const handleBookmarkCreation = async (params: BookmarkFunctionParams): Pr
     user
   });
 
-  const bookmarkedItem = await createUserSave(bookmarkObject, handleBookmarkError, handleBookmarkError);
-  
-  if (!bookmarkedItem) return false;
-  
-  const newBookmarkedItem = bookmarkedItem as unknown as Save;
-  bookmarkAddedToast();
-  updateUserSavesState('add', updateUserSaves, objectRef, newBookmarkedItem);
-  
-  if (shouldUpdateResultsAfterBookmark)
-    shouldUpdateResultsAfterBookmark.current = true;
-  
+  let newBookmarkedItem: Save;
+  try {
+    newBookmarkedItem = await createUserSave(bookmarkObject, rethrow, rethrow) as unknown as Save;
+  } catch (error) {
+    console.warn("Unable to create bookmark, removing placeholder", error);
+    applySavesUpdate(params, 'remove');
+    handleBookmarkError('add');
+    return false;
+  }
+
+  applySavesUpdate(params, 'add', newBookmarkedItem);
+
   return newBookmarkedItem.id?.toString() || false;
 };
 
@@ -211,11 +273,14 @@ export const handleBookmarkClick = async (
   params: BookmarkFunctionParams
 ): Promise<string | false> => {
   if (isBookmarked) {
-    if (bookmarkRemovalApproved.current && params.bookmarkId) {
+    // A bookmarked item with no ID is a save still in flight; swallow the click
+    // rather than offering to remove something the server hasn't created yet.
+    if (!params.bookmarkId) return false;
+
+    if (bookmarkRemovalApproved.current) {
       return await handleBookmarkRemoval(params);
-    } else if (!bookmarkRemovalApproved.current) {
-      setBookmarkRemovalConfirmationModalOpen(true);
     }
+    setBookmarkRemovalConfirmationModalOpen(true);
     return false;
   }
   

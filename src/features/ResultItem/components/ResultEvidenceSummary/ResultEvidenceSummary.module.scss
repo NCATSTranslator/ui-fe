@@ -1,0 +1,18 @@
+@use "@/assets/styles/variables" as *;
+
+.evidenceContainer, .pathsContainer {
+  display: flex;
+  align-items: flex-start;
+}
+.evidenceLink {
+  font-size: $bodyTwoSize;
+}
+.pathsNum, .info {
+  font-size: $captionSize;
+  line-height: 1.25;
+  color: $darkGray;
+}
+.info {
+  display: block;
+  margin-bottom: 2px;
+}

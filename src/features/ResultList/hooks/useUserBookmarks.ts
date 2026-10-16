@@ -1,10 +1,9 @@
 import { useState, useRef, useCallback, useEffect, Dispatch, SetStateAction, RefObject } from 'react';
-import cloneDeep from 'lodash/cloneDeep';
 import { getSaves, SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { ResultSet } from '@/features/ResultList/types/results.d';
-import { Filter } from '@/features/ResultFiltering/types/filters';
 import { HandleUpdateResultsFn } from '@/features/ResultList/hooks/useResultFiltering';
 import { User } from '@/features/UserAuth/types/user';
+import { afterNextPaint } from '@/features/Core/utils/domHelpers';
 
 export interface UseUserBookmarksReturn {
   userSaves: SaveGroup | null;
@@ -18,22 +17,14 @@ export interface UseUserBookmarksReturn {
 interface UseUserBookmarksArgs {
   user: User | null;
   currentQueryID: string | null;
-  activeFilters: Filter[];
-  activeEntityFilters: string[];
   prevRawResults: RefObject<ResultSet | null>;
-  currentSortString: RefObject<string>;
-  isPathfinder: boolean;
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
 const useUserBookmarks = ({
   user,
   currentQueryID,
-  activeFilters,
-  activeEntityFilters,
   prevRawResults,
-  currentSortString,
-  isPathfinder,
   handleUpdateResultsRef,
 }: UseUserBookmarksArgs): UseUserBookmarksReturn => {
   const [userSaves, setUserSaves] = useState<SaveGroup | null>(null);
@@ -56,23 +47,21 @@ const useUserBookmarks = ({
     getUserSaves();
   }, [user, getUserSaves]);
 
-  // Keep refs for values needed in the bookmark update effect to avoid over-firing
-  const activeFiltersRef = useRef(activeFilters);
-  activeFiltersRef.current = activeFilters;
-  const activeEntityFiltersRef = useRef(activeEntityFilters);
-  activeEntityFiltersRef.current = activeEntityFilters;
-  const isPathfinderRef = useRef(isPathfinder);
-  isPathfinderRef.current = isPathfinder;
-
-  // Update results after bookmark to reflect new user saves in bookmark/note filter
+  // Update results after bookmark to reflect new user saves in bookmark/note filter.
+  // Rebuild from prevRawResults (the pristine prepared set) rather than rawResults,
+  // whose injected bookmark/note tags would otherwise linger after a bookmark is removed.
+  // Re-filtering walks the whole result set, and React flushes click-triggered
+  // effects before paint, so wait a frame to let the optimistic icon change show first.
+  // userSaves is the trigger; the handler reads the latest saves from ResultList's ref.
   useEffect(() => {
     if (!shouldUpdateResultsAfterBookmark.current)
       return;
 
     shouldUpdateResultsAfterBookmark.current = false;
-    const tempUserSaves = cloneDeep(userSaves);
-    handleUpdateResultsRef.current?.(activeFiltersRef.current, activeEntityFiltersRef.current, prevRawResults.current, [], false, currentSortString.current, isPathfinderRef.current, tempUserSaves);
-  }, [userSaves, prevRawResults, currentSortString, handleUpdateResultsRef]);
+    afterNextPaint().then(() => {
+      handleUpdateResultsRef.current?.({ mode: 'rebuild', summary: prevRawResults.current });
+    });
+  }, [userSaves, prevRawResults, handleUpdateResultsRef]);
 
   const resetBookmarks = useCallback(() => {
     setUserSaves(null);

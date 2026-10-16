@@ -139,28 +139,9 @@
       text-transform: none;
     }
   }
-  .pathsNum, .info {
-    font-size: 12px;
-    line-height: 1.25;
-    color: $darkGray;
-  }
   .fdaIcon {
     height: 24px;
     position: relative;
-  }
-  .evidenceContainer {    
-    .evidenceLink {
-      font-size: $bodyTwoSize;
-      .viewAll {
-        font-size: $bodyTwoSize;
-        font-weight: 800;
-        margin-bottom: 5px;
-      }
-      .info {
-        display: block;
-        margin-bottom: 2px;
-      }
-    }
   }
   .downloadButton {
     display: flex;

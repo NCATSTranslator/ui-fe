@@ -1,9 +1,8 @@
 import { useCallback, FC, useMemo, memo } from 'react';
 import styles from './ResultItem.module.scss';
 import { formatBiolinkEntity, formatBiolinkNode } from '@/features/Core/utils/stringFormatters';
-import { getPathCount } from '@/features/Core/utils/resultHelpers';
 import { getARATagsFromResultTags, getNodeDescription, handleTagClick } from '@/features/ResultItem/utils/utilities';
-import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
+import { useResultCounts } from '@/features/ResultItem/hooks/useResultCounts';
 import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { Save } from '@/features/UserAuth/utils/userApi';
@@ -23,6 +22,7 @@ import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
+import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
@@ -47,26 +47,16 @@ const ResultItem: FC<ResultItemProps> = ({
     activeFilters,
     availableFilters,
     handleFilter,
-    bookmarkAddedToast,
-    bookmarkRemovedToast,
-    handleBookmarkError,
     isPathfinder,
     pathFilterState,
     setShowHiddenPaths,
     showHiddenPaths,
     pk,
-    queryNodeID,
-    queryNodeLabel,
-    queryNodeDescription,
-    queryType,
     resultsNavigate,
-    shouldUpdateResultsAfterBookmark,
-    updateUserSaves,
   } = useResultListContext();
-  const currentQueryID = pk;
   const resultSet = useSelector(getResultSetById(pk));
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
-  const evidenceCounts = (!!result.evidenceCount) ? result.evidenceCount : getEvidenceCounts(resultSet, result);
+  const { evidenceCounts, pathCount } = useResultCounts(resultSet, result);
   const user = useSelector(currentUser);
   const decodedParams = useDecodedParams();
   const isLookup = getDataFromQueryVar("t", decodedParams) === 'l';
@@ -80,28 +70,8 @@ const ResultItem: FC<ResultItemProps> = ({
     handleNotesClick: handleNotesClickHook,
     handleRemovalApproval: handleBookmarkRemovalApproval,
     resetRemovalApproval,
-  } = useBookmarkItem({
-    bookmarkItem: bookmarkItem ?? null,
-    result,
-    resultSet,
-    queryNodeID,
-    queryNodeLabel,
-    queryNodeDescription,
-    queryType,
-    currentQueryID,
-    bookmarkAddedToast,
-    bookmarkRemovedToast,
-    handleBookmarkError,
-    updateUserSaves,
-    shouldUpdateResultsAfterBookmark,
-  });
+  } = useBookmarkItem({ bookmarkItem: bookmarkItem ?? null, result, resultSet });
 
-  const newPaths = useMemo(()=>(!!result) ? result.paths: [], [result]);
-  const pathCount: number = useMemo(() => {
-    if(result?.pathCount !== undefined) return result.pathCount;
-    if(!resultSet) return 0;
-    return getPathCount(resultSet, newPaths);
-  }, [result?.pathCount, resultSet, newPaths]);
   const subjectNode = useMemo(() => getNodeById(resultSet, result.subject), [resultSet, result.subject]);
   const objectNode = useMemo(() => getNodeById(resultSet, result.object), [resultSet, result.object]);
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
@@ -177,33 +147,7 @@ const ResultItem: FC<ResultItemProps> = ({
           isPathfinder={isPathfinder}
           nameString={nameString}
         />
-        <div className={joinClasses(styles.evidenceContainer, styles.resultSub)}>
-          <span className={styles.evidenceLink}>
-            <div>
-              {
-                evidenceCounts.publicationCount > 0  &&
-                <span className={styles.info}>Publications ({evidenceCounts.publicationCount})</span>
-              }
-              {
-                evidenceCounts.clinicalTrialCount > 0  &&
-                <span className={styles.info}>Clinical Trials ({evidenceCounts.clinicalTrialCount})</span>
-              }
-              {
-                evidenceCounts.miscCount > 0  &&
-                <span className={styles.info}>Misc ({evidenceCounts.miscCount})</span>
-              }
-              {
-                evidenceCounts.sourceCount > 0  &&
-                <span className={styles.info}>Sources ({evidenceCounts.sourceCount})</span>
-              }
-            </div>
-          </span>
-        </div>
-        <div className={joinClasses(styles.pathsContainer, styles.resultSub)}>
-          <span className={styles.paths}>
-            <span className={styles.pathsNum}>{ pathCount } {pathCount > 1 ? "Paths" : "Path"}</span>
-          </span>
-        </div>
+        <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
       </div>
       <div
         className={accordionPanelClass}

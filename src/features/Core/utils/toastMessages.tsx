@@ -96,15 +96,12 @@ export const preferencesSavedToast = () => {
   return toast(AppToast, { data: { topText: 'Preferences Saved' } });
 };
 
-// Bookmarks
-export const bookmarkAddedToast = () => {
-  return toast(AppToast, { data: { topText: 'Bookmark Added' } });
-};
-export const bookmarkRemovedToast = () => {
-  return toast(AppToast, { data: { topText: 'Bookmark Removed' } });
-}
+// Bookmarks (success is shown by the icon itself; only failures get a toast)
 export const bookmarkErrorToast = () => {
   return toast.error(AppToast, { data: { topText: 'Error Adding Bookmark', bottomText: 'We were unable to save this bookmark to your account.' } });
+};
+export const bookmarkRemovalErrorToast = () => {
+  return toast.error(AppToast, { data: { topText: 'Error Removing Bookmark', bottomText: 'We were unable to remove this bookmark from your account.' } });
 };
 
 // Query Status

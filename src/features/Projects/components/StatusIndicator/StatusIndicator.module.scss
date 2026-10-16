@@ -79,19 +79,26 @@ div.statusIndicator {
       z-index: 10;
     }
   }
-  .tooltip {
-    span.tooltipHeading, span {
-      color: $white !important;
-      text-decoration: none !important;
-    }
-    span.tooltipHeading {
-      font-size: $bodyTwoSize !important;
-      font-weight: 800 !important;
-      margin: 0 0 $xxs !important;
-    }
-    span {
-      font-weight: 400 !important;
-      font-size: $captionSize !important;
-    }
+}
+// Top level, not nested under .statusIndicator: the Tooltip component portals
+// its markup to <body>, so a descendant selector would never match.
+.tooltip {
+  // _globals.scss makes react-tooltip's content wrapper a flex row, which puts
+  // the heading and body spans side by side and lets the heading get clipped.
+  :global(.react-tooltip-content-wrapper) {
+    flex-direction: column;
+  }
+  span.tooltipHeading, span {
+    color: $white !important;
+    text-decoration: none !important;
+  }
+  span.tooltipHeading {
+    font-size: $bodyTwoSize !important;
+    font-weight: 800 !important;
+    margin: 0 0 $xxs !important;
+  }
+  span {
+    font-weight: 400 !important;
+    font-size: $captionSize !important;
   }
 }

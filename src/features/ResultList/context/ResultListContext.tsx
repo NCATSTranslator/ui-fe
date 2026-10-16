@@ -4,6 +4,7 @@ import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
 import { EvidenceNavigationOptions } from '@/features/Evidence/types/navigation';
+import { BookmarkOperation } from '@/features/ResultItem/utils/bookmarkFunctions';
 
 export interface ResultListContextValue {
   userSaves: SaveGroup | null;
@@ -14,9 +15,7 @@ export interface ResultListContextValue {
   handleFilter: (filter: Filter) => void;
   handleClearAllFilters: () => void;
   visibleResultIds: Set<string>;
-  bookmarkAddedToast: () => void;
-  bookmarkRemovedToast: () => void;
-  handleBookmarkError: () => void;
+  handleBookmarkError: (operation: BookmarkOperation) => void;
   isLookup: boolean;
   isPathfinder: boolean;
   navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;

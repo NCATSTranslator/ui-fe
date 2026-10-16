@@ -10,17 +10,19 @@ import {
 import type { AppDispatch } from '@/redux/store';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import { useSimpleSearch } from '@/features/Core/hooks/simpleSearchHook';
-import { filterCanvasesBySearch, sortCanvases, CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
+import type { SortField, SortDirection } from '@/features/Projects/types/projects';
+import { filterCanvasesBySearch, sortCanvases } from '@/features/Canvas/utils/canvasFunctions';
 import { updateCanvasMetadata } from '@/features/Canvas/utils/canvasApi';
 import { trackCanvasWrite } from '@/features/Canvas/utils/canvasSyncUtils';
 import { useCanvasDeleteConfirmation } from '@/features/Canvas/hooks/useCanvasDeleteConfirmation';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface UseCanvasListOptions {
-  sortMode?: CanvasSortMode;
+  sortField?: SortField;
+  sortDirection?: SortDirection;
 }
 
-const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
+const useCanvasList = ({ sortField = 'created', sortDirection = 'desc' }: UseCanvasListOptions = {}) => {
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const canvases = useSelector(selectCanvases);
@@ -66,8 +68,8 @@ const useCanvasList = ({ sortMode = 'date' }: UseCanvasListOptions = {}) => {
   }, [dispatch, queryClient, renamingId, renameValue, canvases]);
 
   const sortedFilteredCanvases = useMemo(
-    () => sortCanvases(filterCanvasesBySearch(canvases, searchTerm), sortMode),
-    [canvases, searchTerm, sortMode]
+    () => sortCanvases(filterCanvasesBySearch(canvases, searchTerm), sortField, sortDirection),
+    [canvases, searchTerm, sortField, sortDirection]
   );
 
   return {

@@ -6,7 +6,6 @@ import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
-import { getTimeRelativeDate } from '@/features/Core/utils/dateHelpers';
 import { getCanvasObjectCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 
@@ -22,7 +21,6 @@ interface CanvasSidebarCardProps {
   onDelete: (canvasId: number) => void;
   onRenameValueChange: (value: string) => void;
   onSubmitRename: (e?: FormEvent<HTMLFormElement>) => void;
-  showUpdatedTime?: boolean;
 }
 
 const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
@@ -37,9 +35,7 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
   onDelete,
   onRenameValueChange,
   onSubmitRename,
-  showUpdatedTime = false,
 }) => {
-  const updatedTime = getTimeRelativeDate(new Date(canvas.timeUpdated));
   const options = (
     <>
       <Button handleClick={() => onStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
@@ -64,7 +60,6 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
             {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
           </span>
         }
-        bottomRight={showUpdatedTime ? <span className={styles.meta}>{updatedTime}</span> : undefined}
         options={options}
         isRenaming={isRenaming}
         onTitleChange={onRenameValueChange}

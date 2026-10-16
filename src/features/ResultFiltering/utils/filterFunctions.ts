@@ -55,6 +55,31 @@ export const normalizeSearchTermForMatch = (value: string): string => {
 export const isSameFilterValue = (a?: string, b?: string): boolean =>
   normalizeSearchTermForMatch(a || '') === normalizeSearchTermForMatch(b || '');
 
+export type FilterToggleResult = {
+  filters: Filter[];
+  action: 'cleared' | 'applied';
+};
+
+/**
+ * Computes the active filter list after a filter is toggled. An exact match
+ * (same id, value, and negation) is removed; a match that differs only in
+ * negation is replaced; anything else is appended. Never mutates the inputs.
+ */
+export const toggleFilter = (activeFilters: Filter[], filter: Filter): FilterToggleResult => {
+  const matchesIdAndValue = (f: Filter) =>
+    f.id === filter.id && isSameFilterValue(f.value, filter.value);
+
+  const exactMatchIndex = activeFilters.findIndex((f) => matchesIdAndValue(f) && f.negated === filter.negated);
+  if (exactMatchIndex !== -1)
+    return { filters: activeFilters.filter((_, i) => i !== exactMatchIndex), action: 'cleared' };
+
+  const sameIdValueIndex = activeFilters.findIndex((f) => matchesIdAndValue(f) && f.negated !== filter.negated);
+  const filters = sameIdValueIndex !== -1
+    ? activeFilters.map((f, i) => (i === sameIdValueIndex ? { ...filter } : f))
+    : [...activeFilters, { ...filter }];
+  return { filters, action: 'applied' };
+};
+
 /**
  * Applies the same treat→impact display substitution used for edge predicates.
  */
@@ -269,11 +294,8 @@ const _splitTagID = (tagID: string): string[] => {
  */
 export const groupFilters = (filters: {[key: string]: Filter}, type: FilterType): GroupedFilters => {
   const newGroupedFilters: GroupedFilters = {};
-  // Skip 'sv' since it's manually added to the top of the results filter list
   for (let family of getFamiliesByType(type)) {
-    if (family !== 'sv') {
-      newGroupedFilters[family] = {};
-    }
+    newGroupedFilters[family] = {};
   }
 
   for (let [id, description] of Object.entries(filters)) {

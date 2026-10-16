@@ -30,7 +30,11 @@ const CanvasPanel: FC = () => {
     handleStartRename,
     handleSubmitRename,
     handleDeleteCanvas,
-  } = useCanvasList({ sortMode });
+  } = useCanvasList(
+    sortMode === 'name'
+      ? { sortField: 'name', sortDirection: 'asc' }
+      : { sortField: 'created', sortDirection: 'desc' }
+  );
   const { createCanvas } = useCreateCanvas();
 
   const toggleSort = () => {
