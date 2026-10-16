@@ -1,4 +1,4 @@
-import type { Path, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
+import type { Path, Result, ResultEdge, ResultNode, ResultSet } from '@/features/ResultList/types/results.d';
 
 export const makeTestNode = (id: string, name = id): ResultNode => ({
   id,
@@ -61,3 +61,14 @@ export const makeTestResultSet = (
     trials: {},
   },
 } as unknown as ResultSet);
+
+export const makeTestResult = (id: string, overrides: Partial<Result> = {}): Result => ({
+  id,
+  drug_name: id,
+  subject: 'n1',
+  object: 'n2',
+  paths: [],
+  scores: [],
+  tags: {},
+  ...overrides,
+} as Result);
