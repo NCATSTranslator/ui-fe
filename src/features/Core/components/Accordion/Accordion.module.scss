@@ -11,16 +11,6 @@
       stroke: $darkGray;
     }
   }
-  .extLinkIcon {
-    height: 20px;
-    min-width: 20px;
-    width: 20px;
-    margin-left: $xxs;
-    transform: none !important;
-    path {
-      stroke: transparent;
-    }
-  }
   &.open {
     svg {
       transform: rotate(180deg);

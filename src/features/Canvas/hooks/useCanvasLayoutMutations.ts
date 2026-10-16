@@ -90,7 +90,7 @@ const useCanvasLayoutMutations = ({
   ) => {
     if (!canvas) return;
     const node = canvas.nodes[nodeId];
-    if (!node?.dataId) return;
+    if (!node?.entityId) return;
     if (!isCustomCanvasLayout(canvas.layout)) {
       await enterCustomLayout(allPositions);
       return;

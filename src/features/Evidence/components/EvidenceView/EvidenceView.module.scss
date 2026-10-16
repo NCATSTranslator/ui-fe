@@ -109,7 +109,7 @@
   &.clinicalTrials {
     .tableHead, .tableItem {
       display: grid;
-      grid-template-columns: 1fr .5fr .5fr .5fr .5fr;
+      grid-template-columns: 1fr .5fr .5fr .25fr .5fr .5fr;
       .head, .link, .cell {
         justify-content: flex-start;
       }

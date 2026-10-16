@@ -10,10 +10,10 @@ const parseCanvasId = (value: string | null | undefined): number | undefined => 
 const useCanvasRouteParams = () => {
   const decodedParams = useDecodedParams();
   const canvasId = parseCanvasId(getDataFromQueryVar('canvas', decodedParams));
-  const dataId = parseCanvasId(getDataFromQueryVar('dataId', decodedParams));
-  const isCanvasMode = canvasId !== undefined && dataId !== undefined && dataId > 0;
+  const entityId = parseCanvasId(getDataFromQueryVar('entityId', decodedParams));
+  const isCanvasMode = canvasId !== undefined && entityId !== undefined && entityId > 0;
 
-  return { canvasId, dataId, isCanvasMode, decodedParams };
+  return { canvasId, entityId, isCanvasMode, decodedParams };
 };
 
 export default useCanvasRouteParams;

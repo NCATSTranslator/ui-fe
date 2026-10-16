@@ -31,13 +31,5 @@
   .nodeLinkAnchor {
     display: inline;
     font-size: 12px;
-    svg {
-      margin-left: 4px;
-      width: 14px;
-      height: 14px;
-      path {
-        fill: $white;
-      }
-    }
   }
 }

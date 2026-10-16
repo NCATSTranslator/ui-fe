@@ -5,7 +5,6 @@ import { getNodeById, getEdgeById, getPathById } from '@/features/ResultList/sli
 import { isPath } from '@/features/ResultList/types/checkers';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
 import { getDistinctResultEdges } from '@/features/Core/utils/resultHelpers';
-import { mergeCanvasNode } from '@/features/Canvas/utils/canvasFunctions';
 
 /** Edge ids whose subject or object is in `nodeIds`. */
 export const getIncidentEdgeIds = (
@@ -25,7 +24,7 @@ export const getIncidentEdgeIds = (
 
 /**
  * Build a trash/restore selection for the given nodes and edges, plus every edge
- * connected to a removed node. Ids the server has never seen (`dataId` 0) are dropped.
+ * connected to a removed node. Ids the server has never seen (`entityId` 0) are dropped.
  */
 export const selectionForRemovedElements = (
   canvas: Canvas,
@@ -33,16 +32,16 @@ export const selectionForRemovedElements = (
   edgeIds: string[] = [],
 ): GraphSelection | null => {
   const nodes = nodeIds
-    .map(nodeId => canvas.nodes[nodeId]?.dataId ?? 0)
-    .filter(dataId => dataId > 0);
+    .map(nodeId => canvas.nodes[nodeId]?.entityId ?? 0)
+    .filter(entityId => entityId > 0);
 
   const removedEdgeIds = new Set([
     ...edgeIds,
     ...getIncidentEdgeIds(canvas.edges, nodeIds),
   ]);
   const edges = [...removedEdgeIds]
-    .map(edgeId => canvas.edges[edgeId]?.dataId ?? 0)
-    .filter(dataId => dataId > 0);
+    .map(edgeId => canvas.edges[edgeId]?.entityId ?? 0)
+    .filter(entityId => entityId > 0);
 
   if (nodes.length === 0 && edges.length === 0) return null;
   return {
@@ -104,37 +103,9 @@ export const filteredCanvasToGraphData = (
   return { nodes, edges };
 };
 
-export const mergeEntityIntoCanvas = (
-  canvas: Canvas,
-  nodes: CanvasNode[],
-  edges: CanvasEdge[],
-): Canvas => {
-  const mergedNodes = { ...canvas.nodes };
-  const mergedEdges = { ...canvas.edges };
-
-  for (const node of nodes) {
-    const existing = mergedNodes[node.id];
-    mergedNodes[node.id] = existing ? mergeCanvasNode(existing, node) : node;
-  }
-
-  for (const edge of edges) {
-    if (!mergedEdges[edge.id]) {
-      mergedEdges[edge.id] = edge;
-    }
-  }
-
-  return {
-    ...canvas,
-    nodes: mergedNodes,
-    edges: mergedEdges,
-    timeUpdated: new Date().toISOString(),
-  };
-};
-
-
 const resultNodeToCanvasNode = (node: ResultNode): CanvasNode => ({
   id: node.id,
-  dataId: 0,
+  entityId: 0,
   ref: node.id,
   names: [...node.names],
   types: [...node.types],
@@ -147,10 +118,10 @@ const resultNodeToCanvasNode = (node: ResultNode): CanvasNode => ({
 
 export const resultEdgeToCanvasEdge = (edge: ResultEdge): CanvasEdge => ({
   ...edge,
-  dataId: 0,
+  entityId: 0,
   ref: edge.id,
-  subjectDataId: 0,
-  objectDataId: 0,
+  subjectEntityId: 0,
+  objectEntityId: 0,
   hidden: false,
 });
 

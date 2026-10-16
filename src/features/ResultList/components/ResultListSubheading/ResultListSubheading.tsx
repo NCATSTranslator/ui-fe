@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import styles from './ResultListSubheading.module.scss';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { generateEntityLink, getEntityLink } from '@/features/Core/utils/entityLinks';
 import { getBiolinkCategoryDisplay } from '@/features/Query/utils/biolinkCategories';
@@ -32,8 +31,8 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
 
   const subHeading = useMemo(() => {
     if (isPathfinder) {
-      const linkOne = generateEntityLink(pathfinderIdOne || '', styles.searchedTerm, () => pathfinderLabelOne || '', true);
-      const linkTwo = generateEntityLink(pathfinderIdTwo || '', styles.searchedTerm, () => pathfinderLabelTwo || '', true);
+      const linkOne = generateEntityLink(pathfinderIdOne || '', styles.searchedTerm, () => pathfinderLabelOne || '');
+      const linkTwo = generateEntityLink(pathfinderIdTwo || '', styles.searchedTerm, () => pathfinderLabelTwo || '');
       if (constraintText) {
         return <>What paths begin with {linkOne} and end with {linkTwo} and include a {constraintText}?</>;
       }
@@ -41,7 +40,7 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
     }
     if (isLookup) {
       const entityLink = queryNodeID && queryNodeLabel
-        ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel, false)
+        ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel)
         : null;
       const catDisplay = getBiolinkCategoryDisplay(lookupCategory || '', true);
       return <>What {catDisplay} are connected to {entityLink}?</>;
@@ -51,7 +50,7 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
       .replaceAll("a chemical?", "")
       .replaceAll("a gene?", "");
     const entityLink = queryNodeID && queryNodeLabel
-      ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel, false)
+      ? generateEntityLink(queryNodeID, styles.searchedTerm, () => queryNodeLabel)
       : null;
     return <>{questionText}{entityLink}?</>;
   }, [isPathfinder, isLookup, lookupCategory, pathfinderIdOne, pathfinderLabelOne, pathfinderIdTwo, pathfinderLabelTwo, constraintText, queryType, queryNodeID, queryNodeLabel]);
@@ -69,7 +68,6 @@ const ResultListSubheading: FC<{ isLoading: boolean }> = ({ isLoading }) => {
               {queryNodeID && queryType && (
                 <span className={styles.nodeLink}>
                   {getEntityLink(queryNodeID, styles.nodeLinkAnchor, queryType)}
-                  <ExternalLink/>
                 </span>
               )}
             </Tooltip>

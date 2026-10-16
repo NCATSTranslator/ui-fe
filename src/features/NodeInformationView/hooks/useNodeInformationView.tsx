@@ -3,12 +3,13 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQueryStatusById } from "@/features/ResultList/slices/queryStatusSlice";
 import { capitalizeAllWords, getFormattedNodeDisplayName } from "@/features/Core/utils/stringFormatters";
-import { formatLabel, getNodeBiolinkLink, isEmptyAnnotationValue, joinNodes, renderValue } from "@/features/NodeInformationView/utils/utilities";
+import { getAnnotationSectionHeading, getNodeBiolinkLink, isEmptyAnnotationValue, renderList, renderValue, sortAnnotationFields } from "@/features/NodeInformationView/utils/utilities";
 import useNodeTypeDefinition from "@/features/NodeInformationView/hooks/useNodeTypeDefinition";
 import ClinicalTrialsAnnotation from "@/features/NodeInformationView/components/ClinicalTrialsAnnotation/ClinicalTrialsAnnotation";
+import AnnotationLink from "@/features/NodeInformationView/components/AnnotationLink/AnnotationLink";
 import { useCanvasNodeEntity } from "@/features/Canvas/hooks/useCanvasEntityRoute";
 import useCanvasEntityViewState from "@/features/Canvas/hooks/useCanvasEntityViewState";
-import type { ChebiRole, Indication, ResultNode } from "@/features/ResultList/types/results.d";
+import type { AnnotationSource, ChebiRole, CurieEntry, Indication, ResultNode } from "@/features/ResultList/types/results.d";
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 interface AnnotationOverrideProps {
@@ -21,17 +22,13 @@ const ClinicalTrials: FC<AnnotationOverrideProps> = ({ value, nodeName, nodeType
   <ClinicalTrialsAnnotation nctIds={value as string[]} nodeName={nodeName} nodeType={nodeType ?? ""} />
 );
 
-const GeneName: FC<AnnotationOverrideProps> = ({ value }) => (
-  <>{typeof value === "string" ? capitalizeAllWords(value) : renderValue(value)}</>
-);
-
 // Annotation payloads come from external sources that can omit fields the types
 // promise, so entries without a usable name are dropped rather than rendered.
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim() !== "";
 
-const capitalizedList = (names: unknown[]): string =>
-  names.filter(isNonEmptyString).map(name => capitalizeAllWords(name)).join(", ");
+const capitalizedList = (names: unknown[]): ReactNode =>
+  renderList(names.filter(isNonEmptyString).map(name => capitalizeAllWords(name)));
 
 const SynonymList: FC<AnnotationOverrideProps> = ({ value }) => (
   <>{capitalizedList(value as string[])}</>
@@ -48,16 +45,30 @@ const ChemicalRoleList: FC<AnnotationOverrideProps> = ({ value }) => (
 
 const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
   <>
-    {joinNodes(
+    {renderList(
       (value as Indication[])
         .filter(indication => isNonEmptyString(indication?.name))
         .map((indication, i) => {
           const url = indication.urls?.[0];
           const name = capitalizeAllWords(indication.name);
           return url
-            ? <a key={i} href={url} target="_blank" rel="noreferrer">{name}</a>
+            ? <AnnotationLink key={i} href={url}>{name}</AnnotationLink>
             : <span key={i}>{name}</span>;
         })
+    )}
+  </>
+);
+
+// Each identifier links out to its resolved url when the backend could
+// resolve one, and renders as plain text otherwise.
+const CurieList: FC<AnnotationOverrideProps> = ({ value }) => (
+  <>
+    {renderList(
+      (value as CurieEntry[])
+        .filter(entry => isNonEmptyString(entry?.curie))
+        .map(entry => entry.url
+          ? <AnnotationLink key={entry.curie} href={entry.url}>{entry.curie}</AnnotationLink>
+          : <span key={entry.curie}>{entry.curie}</span>)
     )}
   </>
 );
@@ -65,17 +76,35 @@ const Indications: FC<AnnotationOverrideProps> = ({ value }) => (
 const ANNOTATION_OVERRIDES: Record<string, Record<string, FC<AnnotationOverrideProps>>> = {
   chemical: {
     clinical_trials: ClinicalTrials,
+    curies: CurieList,
     indications: Indications,
     roles: ChemicalRoleList,
     synonyms: ChemicalSynonymList,
   },
   disease: {
     clinical_trials: ClinicalTrials,
+    curies: CurieList,
     synonyms: SynonymList,
   },
   gene: {
-    name: GeneName,
+    curies: CurieList,
   },
+};
+
+// Annotations rendered outside the section list: descriptions at the top of the tab,
+// the gene's full name directly under the node title.
+const EXCLUDED_ANNOTATIONS = new Set(["descriptions", "gene.name"]);
+
+const isExcludedAnnotation = (categoryKey: string, key: string): boolean =>
+  EXCLUDED_ANNOTATIONS.has(key) || EXCLUDED_ANNOTATIONS.has(`${categoryKey}.${key}`);
+
+/**
+ * The gene's full name, which is displayed under the node title rather than as a section.
+ */
+const getGeneFullName = (node: ResultNode | null): string | null => {
+  const fullName = node?.annotations?.gene?.name?.value;
+  if (!isNonEmptyString(fullName)) return null;
+  return capitalizeAllWords(fullName);
 };
 
 type NodeInformationViewState =
@@ -110,24 +139,29 @@ const getNodeInformationViewState = (params: {
 };
 
 interface AnnotationField {
-  label: string;
+  key: string;
+  heading: string;
   content: ReactNode;
+  sources: AnnotationSource[];
 }
 
 const buildAnnotationField = (
   categoryKey: string,
   key: string,
-  value: unknown,
+  section: { value: unknown; metadata?: { sources?: AnnotationSource[] } },
   nodeName: string,
   nodeType: string | null,
 ): AnnotationField | null => {
-  const label = formatLabel(key);
+  const fieldKey = `${categoryKey}.${key}`;
+  const heading = getAnnotationSectionHeading(fieldKey, key);
+  const { value } = section;
+  const sources = section.metadata?.sources ?? [];
   const Override = ANNOTATION_OVERRIDES[categoryKey]?.[key];
   if (Override) {
-    return { label, content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} /> };
+    return { key: fieldKey, heading, content: <Override value={value} nodeName={nodeName} nodeType={nodeType ?? ""} />, sources };
   }
   const content = renderValue(value);
-  return content === null ? null : { label, content };
+  return content === null ? null : { key: fieldKey, heading, content, sources };
 };
 
 const buildAnnotationFields = (
@@ -139,23 +173,30 @@ const buildAnnotationFields = (
   const fields: AnnotationField[] = [];
   for (const [categoryKey, category] of Object.entries(node.annotations)) {
     for (const [key, section] of Object.entries(category)) {
-      if (key === "descriptions" || section === null || section === undefined) continue;
+      if (isExcludedAnnotation(categoryKey, key) || section === null || section === undefined) continue;
       if (isEmptyAnnotationValue(section.value)) continue;
-      const field = buildAnnotationField(categoryKey, key, section.value, nodeName, nodeType);
+      const field = buildAnnotationField(categoryKey, key, section, nodeName, nodeType);
       if (field) fields.push(field);
     }
   }
-  return fields;
+  return sortAnnotationFields(fields);
 };
 
-const getNodeDescription = (node: ResultNode | null) => {
+interface NodeDescription {
+  text: string;
+  sources: AnnotationSource[];
+}
+
+const getNodeDescription = (node: ResultNode | null): NodeDescription | null => {
   if (!node?.annotations) return null;
   for (const key in node.annotations) {
     const annotation = node.annotations[key as keyof typeof node.annotations];
-    const descriptions = annotation.descriptions?.value;
-    if (descriptions && descriptions.length > 0) return descriptions[0];
+    const section = annotation.descriptions;
+    const descriptions = section?.value;
+    if (descriptions && descriptions.length > 0)
+      return { text: descriptions[0], sources: section?.metadata?.sources ?? [] };
   }
-  if (node.descriptions.length > 0) return node.descriptions[0];
+  if (node.descriptions.length > 0) return { text: node.descriptions[0], sources: [] };
   return null;
 };
 
@@ -204,6 +245,7 @@ const useNodeInformationView = () => {
     }),
     nodeType,
     nodeName,
+    geneFullName: getGeneFullName(node),
     nodeBiolinkLink: node ? getNodeBiolinkLink(node) : "https://biolink.github.io/biolink-model/",
     nodeTypeDefinition,
     annotationFields: buildAnnotationFields(node, nodeName ?? "", nodeType),

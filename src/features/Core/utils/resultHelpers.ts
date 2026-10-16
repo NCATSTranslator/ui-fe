@@ -32,6 +32,7 @@ const EMPTY_ANNOTATIONS: ResultNode['annotations'] = {
   chemical: {
     approval: null,
     clinical_trials: null,
+    curies: null,
     descriptions: null,
     indications: null,
     otc_status: null,
@@ -45,6 +46,7 @@ const EMPTY_ANNOTATIONS: ResultNode['annotations'] = {
     synonyms: null,
   },
   gene: {
+    curies: null,
     descriptions: null,
     name: null,
     species: null,

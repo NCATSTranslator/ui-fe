@@ -1,6 +1,7 @@
 import { FC, useMemo } from "react";
 import useClinicalTrialMetadata from "@/features/NodeInformationView/hooks/useClinicalTrialMetadata";
 import ClinicalTrialTitleLink from "@/features/NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink";
+import AnnotationList from "@/features/NodeInformationView/components/AnnotationList/AnnotationList";
 import styles from "./ClinicalTrialsAnnotation.module.scss";
 
 const DISPLAY_LIMIT = 5;
@@ -29,9 +30,9 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
   return (
     <div className={styles.clinicalTrialsAnnotation}>
       <p className={styles.description}>These clinical trials are related to {nodeName} and may not directly correspond to your query.</p>
-      <ul className={styles.trialList}>
-        {trials.map((trial) => (
-          <li key={trial.nctId} className={styles.trialItem}>
+      <AnnotationList
+        items={trials.map((trial) => (
+          <div key={trial.nctId} className={styles.trialItem}>
             <ClinicalTrialTitleLink
               url={trial.url}
               title={trial.title}
@@ -41,14 +42,12 @@ const ClinicalTrialsAnnotation: FC<ClinicalTrialsAnnotationProps> = ({ nctIds, n
               year={trial.year}
               yearClassName={styles.trialYear}
             />
-          </li>
+          </div>
         ))}
-        <li>
-          <a className={styles.viewAllLink} href={searchUrl} target="_blank" rel="noreferrer">
-            View all on clinicaltrials.gov
-          </a>
-        </li>
-      </ul>
+      />
+      <a className={styles.viewAllLink} href={searchUrl} target="_blank" rel="noreferrer">
+        View all on clinicaltrials.gov
+      </a>
     </div>
   );
 };

@@ -1,4 +1,11 @@
-import type { BackendUserCanvas, Canvas, CanvasEdge, CanvasNode } from '@/features/Canvas/types/canvas';
+import type {
+  BackendCanvasEdge,
+  BackendCanvasNode,
+  BackendUserCanvas,
+  Canvas,
+  CanvasEdge,
+  CanvasNode,
+} from '@/features/Canvas/types/canvas';
 
 export const makeCanvas = (overrides: Partial<Canvas> = {}): Canvas => ({
   id: 1,
@@ -31,7 +38,7 @@ export const makeMeta = (overrides: Partial<BackendUserCanvas> = {}): BackendUse
 
 export const makeCanvasNode = (id: string, overrides: Partial<CanvasNode> = {}): CanvasNode => ({
   id,
-  dataId: 1,
+  entityId: 1,
   ref: id,
   names: [id],
   types: ['biolink:NamedThing'],
@@ -50,14 +57,59 @@ export const makeCanvasEdge = (
   overrides: Partial<CanvasEdge> = {},
 ): CanvasEdge => ({
   id,
-  dataId: 1,
+  entityId: 1,
   ref: id,
   subject,
   object,
-  subjectDataId: 0,
-  objectDataId: 0,
+  subjectEntityId: 0,
+  objectEntityId: 0,
   predicate: 'biolink:related_to',
   hidden: false,
   tags: {},
+  ...overrides,
+});
+
+export const makeBackendCanvasNode = (
+  id: number,
+  ref: string,
+  overrides: Partial<BackendCanvasNode> = {},
+): BackendCanvasNode => ({
+  id,
+  canvas_id: 1,
+  data_id: id + 1000,
+  user_data_id: null,
+  ref,
+  label: ref,
+  type: 'biolink:NamedThing',
+  x: 0,
+  y: 0,
+  hidden: false,
+  tags: {},
+  time_created: '2026-01-01T00:00:00.000Z',
+  time_updated: '2026-01-01T00:00:00.000Z',
+  time_deleted: null,
+  ...overrides,
+});
+
+export const makeBackendCanvasEdge = (
+  id: number,
+  ref: string,
+  subjectId: number,
+  objectId: number,
+  overrides: Partial<BackendCanvasEdge> = {},
+): BackendCanvasEdge => ({
+  id,
+  canvas_id: 1,
+  data_id: id + 1000,
+  user_data_id: null,
+  subject_id: subjectId,
+  object_id: objectId,
+  ref,
+  label: 'biolink:related_to',
+  hidden: false,
+  tags: {},
+  time_created: '2026-01-01T00:00:00.000Z',
+  time_updated: '2026-01-01T00:00:00.000Z',
+  time_deleted: null,
   ...overrides,
 });

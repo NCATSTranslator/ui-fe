@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
 
@@ -8,7 +7,6 @@ interface ClinicalTrialTitleLinkProps {
   title: string | null | undefined;
   fallbackId?: string;
   isLoading?: boolean;
-  showExternalIcon?: boolean;
   skeletonWidth?: string;
   className?: string;
   year?: string | null;
@@ -20,7 +18,6 @@ const ClinicalTrialTitleLink: FC<ClinicalTrialTitleLinkProps> = ({
   title,
   fallbackId,
   isLoading = false,
-  showExternalIcon = false,
   skeletonWidth = '70%',
   className,
   year,
@@ -47,7 +44,6 @@ const ClinicalTrialTitleLink: FC<ClinicalTrialTitleLinkProps> = ({
       {...getEvidenceLinkTrackingProps('clinical_trial', url)}
     >
       {displayTitle}
-      {showExternalIcon && <> <ExternalLink /></>}
     </a>
   );
 

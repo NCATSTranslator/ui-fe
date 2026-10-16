@@ -5,6 +5,7 @@ const EMPTY_ANNOTATIONS: Annotation = {
   chemical: {
     approval: null,
     clinical_trials: null,
+    curies: null,
     descriptions: null,
     indications: null,
     otc_status: null,
@@ -18,6 +19,7 @@ const EMPTY_ANNOTATIONS: Annotation = {
     synonyms: null,
   },
   gene: {
+    curies: null,
     descriptions: null,
     name: null,
     species: null,

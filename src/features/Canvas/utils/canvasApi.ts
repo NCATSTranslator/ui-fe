@@ -133,9 +133,6 @@ export const updateCanvasGeometry = async (
   );
 };
 
-/** @deprecated Use updateCanvasGeometry */
-export const moveCanvasNodes = updateCanvasGeometry;
-
 export const trashCanvasElements = async (
   saveId: number,
   selection: GraphSelection,
@@ -199,12 +196,12 @@ export const updateCanvasAnnotationText = async (
 
 export const getNodeDetail = async (
   saveId: number,
-  dataId: number,
+  entityId: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<CanvasNodeDetail> =>
   fetchWithErrorHandling<CanvasNodeDetail>(
-    () => get(`${BASE}/${saveId}/node/${dataId}`),
+    () => get(`${BASE}/${saveId}/node/${entityId}`),
     httpErrorHandler,
     fetchErrorHandler,
     isCanvasNodeDetail,
@@ -212,25 +209,25 @@ export const getNodeDetail = async (
 
 export const updateNodeDisplay = async (
   saveId: number,
-  dataId: number,
+  entityId: number,
   update: UpdateCanvasElementRequest,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<BackendCanvasNode> =>
   fetchWithErrorHandling<BackendCanvasNode>(
-    () => put(`${BASE}/${saveId}/node/${dataId}`, update),
+    () => put(`${BASE}/${saveId}/node/${entityId}`, update),
     httpErrorHandler,
     fetchErrorHandler,
   );
 
 export const getEdgeDetail = async (
   saveId: number,
-  dataId: number,
+  entityId: number,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<CanvasEdgeDetail> =>
   fetchWithErrorHandling<CanvasEdgeDetail>(
-    () => get(`${BASE}/${saveId}/edge/${dataId}`),
+    () => get(`${BASE}/${saveId}/edge/${entityId}`),
     httpErrorHandler,
     fetchErrorHandler,
     isCanvasEdgeDetail,
@@ -238,13 +235,13 @@ export const getEdgeDetail = async (
 
 export const updateEdgeDisplay = async (
   saveId: number,
-  dataId: number,
+  entityId: number,
   update: UpdateCanvasElementRequest,
   httpErrorHandler?: ErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<BackendCanvasNode> =>
   fetchWithErrorHandling<BackendCanvasNode>(
-    () => put(`${BASE}/${saveId}/edge/${dataId}`, update),
+    () => put(`${BASE}/${saveId}/edge/${entityId}`, update),
     httpErrorHandler,
     fetchErrorHandler,
   );
