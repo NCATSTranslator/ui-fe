@@ -8,13 +8,12 @@ import CloseIcon from "@/assets/icons/buttons/Close/Close.svg?react";
 interface SelectedFilterTagProps {
   filter: Filter;
   handleFilter: (filter: Filter) => void;
-  key: string;
 }
 
 const SelectedFilterTag: FC<SelectedFilterTagProps> = ({ 
   filter,
   handleFilter,
-  key }) => {
+}) => {
 
   let filterDisplay;
   if (isEntityFilter(filter)) {
@@ -28,7 +27,7 @@ const SelectedFilterTag: FC<SelectedFilterTagProps> = ({
   }
 
   return(
-    <span key={key} className={`${styles.filterTag} ${filter?.negated ? styles.negated : ''}`}>
+    <span className={`${styles.filterTag} ${filter?.negated ? styles.negated : ''}`}>
       {!!filter?.negated && <ExcludeIcon className={styles.excludeIcon}/>}
       { filterDisplay }
       <span className={styles.close} onClick={()=>{handleFilter(filter)}}><CloseIcon/></span>
