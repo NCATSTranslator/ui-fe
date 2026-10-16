@@ -7,6 +7,7 @@ import type {
   CanvasNode,
   CanvasEdge,
   CanvasLayout,
+  GraphSelection,
   GraphSubmission,
   GraphSubmissionNode,
   GraphSubmissionEdge,
@@ -23,43 +24,54 @@ import { isCustomCanvasLayout } from '@/features/Canvas/utils/canvasLayoutUtils'
 // Backend → Internal
 // ---------------------------------------------------------------------------
 
-const backendNodeToCanvasNode = (node: BackendCanvasNode): CanvasNode => ({
-  id: node.ref,
-  dataId: node.id,
-  ref: node.ref,
-  names: [node.label],
-  types: [node.type],
-  curies: [node.ref],
-  x: node.x,
-  y: node.y,
-  hidden: node.hidden,
-  tags: node.tags,
-});
+/**
+ * An entity with only user data has no Translator ref. Give it a stable synthetic one so it still
+ * gets a unique internal id and edges can resolve their endpoints through it.
+ */
+const backendEntityRef = (
+  entity: Pick<BackendCanvasNode, 'id' | 'ref' | 'user_data_id'>,
+): string => entity.ref ?? `user:${entity.user_data_id ?? entity.id}`;
+
+const backendNodeToCanvasNode = (node: BackendCanvasNode): CanvasNode => {
+  const ref = backendEntityRef(node);
+  return {
+    id: ref,
+    entityId: node.id,
+    ref,
+    names: [node.label],
+    types: [node.type],
+    curies: node.ref ? [node.ref] : [],
+    x: node.x,
+    y: node.y,
+    hidden: node.hidden,
+    tags: node.tags,
+  };
+};
 
 const backendEdgeToCanvasEdge = (
   edge: BackendCanvasEdge,
-  dataIdToRef: Map<number, string>,
+  entityIdToRef: Map<number, string>,
 ): CanvasEdge => ({
-  id: edge.ref,
-  dataId: edge.id,
-  ref: edge.ref,
-  subject: dataIdToRef.get(edge.subject_id) ?? String(edge.subject_id),
-  object: dataIdToRef.get(edge.object_id) ?? String(edge.object_id),
-  subjectDataId: edge.subject_id,
-  objectDataId: edge.object_id,
+  id: backendEntityRef(edge),
+  entityId: edge.id,
+  ref: backendEntityRef(edge),
+  subject: entityIdToRef.get(edge.subject_id) ?? String(edge.subject_id),
+  object: entityIdToRef.get(edge.object_id) ?? String(edge.object_id),
+  subjectEntityId: edge.subject_id,
+  objectEntityId: edge.object_id,
   predicate: edge.label,
   hidden: edge.hidden,
   tags: edge.tags,
-  signature: edge.ref,
+  signature: edge.ref ?? undefined,
   source_time: edge.time_created,
 });
 
 export const backendGraphToInternal = (
   graph: BackendCanvasGraph,
 ): { nodes: Record<string, CanvasNode>; edges: Record<string, CanvasEdge> } => {
-  const dataIdToRef = new Map<number, string>();
+  const entityIdToRef = new Map<number, string>();
   for (const node of graph.nodes) {
-    dataIdToRef.set(node.id, node.ref);
+    entityIdToRef.set(node.id, backendEntityRef(node));
   }
 
   const nodes: Record<string, CanvasNode> = {};
@@ -70,7 +82,7 @@ export const backendGraphToInternal = (
 
   const edges: Record<string, CanvasEdge> = {};
   for (const edge of graph.edges) {
-    const converted = backendEdgeToCanvasEdge(edge, dataIdToRef);
+    const converted = backendEdgeToCanvasEdge(edge, entityIdToRef);
     edges[converted.id] = converted;
   }
 
@@ -121,6 +133,30 @@ export const backendCanvasListToCanvasList = (
   metas: BackendUserCanvas[],
 ): Canvas[] => metas.filter(m => !m.time_deleted).map(backendMetaToCanvas);
 
+/**
+ * The canvas entities a merge created, resolved from the server's post-merge graph by the
+ * Translator ids the submission carried, so a merge that landed after the user moved on can be
+ * trashed again.
+ */
+export const selectionFromSubmission = (
+  submission: GraphSubmission,
+  graph: BackendCanvasGraph,
+): GraphSelection | null => {
+  const nodeRefs = new Set(submission.nodes.map(node => node.data.id));
+  const edgeRefs = new Set(submission.edges.map(edge => edge.data.id));
+  const nodes = graph.nodes
+    .filter(node => !node.time_deleted && node.ref !== null && nodeRefs.has(node.ref))
+    .map(node => node.id);
+  const edges = graph.edges
+    .filter(edge => !edge.time_deleted && edge.ref !== null && edgeRefs.has(edge.ref))
+    .map(edge => edge.id);
+  if (nodes.length === 0 && edges.length === 0) return null;
+  return {
+    ...(nodes.length > 0 && { nodes }),
+    ...(edges.length > 0 && { edges }),
+  };
+};
+
 // ---------------------------------------------------------------------------
 // Internal → Submission
 // ---------------------------------------------------------------------------
@@ -135,59 +171,6 @@ export const buildGraphSubmission = (
   edges: signedEdges,
   ...(tagDescriptions && { tag_descriptions: tagDescriptions }),
   ...(source && { source }),
-});
-
-// ---------------------------------------------------------------------------
-// CanvasNode/CanvasEdge → GraphSubmission (minimal, for manual additions)
-// ---------------------------------------------------------------------------
-
-const canvasNodeToSubmissionNode = (node: CanvasNode): GraphSubmissionNode => ({
-  x: node.x,
-  y: node.y,
-  hidden: node.hidden,
-  data: {
-    id: node.id,
-    aras: [],
-    descriptions: [],
-    names: [...node.names],
-    types: [...node.types],
-    synonyms: [],
-    curies: [...node.curies],
-    provenance: [],
-    tags: node.tags,
-    source_time: new Date().toISOString(),
-    signature: node.id,
-  },
-});
-
-const canvasEdgeToSubmissionEdge = (edge: CanvasEdge): GraphSubmissionEdge => ({
-  hidden: edge.hidden,
-  data: {
-    id: edge.id,
-    subject: edge.subject,
-    object: edge.object,
-    predicate: edge.predicate,
-    aras: [...(edge.aras ?? [])],
-    is_root: edge.is_root ?? false,
-    knowledge_level: edge.knowledge_level ?? '',
-    description: edge.description ?? null,
-    predicate_url: edge.predicate_url ?? '',
-    provenance: [...(edge.provenance ?? [])],
-    publications: { ...(edge.publications ?? {}) },
-    metadata: edge.metadata ?? null,
-    trials: [...(edge.trials ?? [])],
-    tags: edge.tags,
-    source_time: edge.source_time ?? new Date().toISOString(),
-    signature: edge.signature ?? edge.id,
-  },
-});
-
-export const canvasNodesToGraphSubmission = (
-  nodes: CanvasNode[],
-  edges: CanvasEdge[],
-): GraphSubmission => ({
-  nodes: nodes.map(canvasNodeToSubmissionNode),
-  edges: edges.map(canvasEdgeToSubmissionEdge),
 });
 
 // ---------------------------------------------------------------------------

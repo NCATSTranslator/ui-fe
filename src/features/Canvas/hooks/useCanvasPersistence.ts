@@ -19,30 +19,11 @@ import {
   restoreCanvasElements,
   createCanvasAnnotation,
 } from '@/features/Canvas/utils/canvasApi';
-import { backendCanvasToCanvas } from '@/features/Canvas/utils/canvasMappers';
+import { backendCanvasToCanvas, selectionFromSubmission } from '@/features/Canvas/utils/canvasMappers';
 import { trackCanvasWrite } from '@/features/Canvas/utils/canvasSyncUtils';
 import { canvasSaveErrorToast } from '@/features/Core/utils/toastMessages';
 import useCanvasGeometryWrites from '@/features/Canvas/hooks/useCanvasGeometryWrites';
 import useCanvasAnnotationTextWrites from '@/features/Canvas/hooks/useCanvasAnnotationTextWrites';
-
-const selectionFromSubmission = (
-  submission: GraphSubmission,
-  graph: BackendCanvasGraph,
-): GraphSelection | null => {
-  const nodeRefs = new Set(Object.keys(submission.nodes ?? {}));
-  const edgeRefs = new Set(Object.keys(submission.edges ?? {}));
-  const nodes = graph.nodes
-    .filter(node => !node.time_deleted && nodeRefs.has(node.ref))
-    .map(node => node.id);
-  const edges = graph.edges
-    .filter(edge => !edge.time_deleted && edgeRefs.has(edge.ref))
-    .map(edge => edge.id);
-  if (nodes.length === 0 && edges.length === 0) return null;
-  return {
-    ...(nodes.length > 0 && { nodes }),
-    ...(edges.length > 0 && { edges }),
-  };
-};
 
 const applyGraphChange = async (
   canvasId: number,
