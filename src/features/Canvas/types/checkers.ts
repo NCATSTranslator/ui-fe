@@ -3,6 +3,7 @@ import { isEdgeProvenance } from '@/features/Evidence/types/checkers';
 import type {
   BackendUserCanvas,
   BackendCanvasNode,
+  BackendCanvasEdge,
   BackendCanvasAnnotation,
   BackendCanvasGraph,
   CanvasNodeDetail,
@@ -18,14 +19,27 @@ export const isBackendUserCanvas = (obj: unknown): obj is BackendUserCanvas => {
 export const isBackendUserCanvasArray = (obj: unknown): obj is BackendUserCanvas[] =>
   Array.isArray(obj) && obj.every(isBackendUserCanvas);
 
+const isNullableString = (value: unknown): value is string | null =>
+  typeof value === 'string' || value === null;
+
 export const isBackendCanvasNode = (obj: unknown): obj is BackendCanvasNode => {
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
-  return typeof o.id === 'number' && typeof o.ref === 'string' && typeof o.label === 'string';
+  return typeof o.id === 'number' && isNullableString(o.ref) && typeof o.label === 'string';
 };
 
 export const isBackendCanvasNodeArray = (obj: unknown): obj is BackendCanvasNode[] =>
   Array.isArray(obj) && obj.every(isBackendCanvasNode);
+
+export const isBackendCanvasEdge = (obj: unknown): obj is BackendCanvasEdge => {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return typeof o.id === 'number' && typeof o.subject_id === 'number' && typeof o.object_id === 'number'
+    && isNullableString(o.ref) && typeof o.label === 'string';
+};
+
+export const isBackendCanvasEdgeArray = (obj: unknown): obj is BackendCanvasEdge[] =>
+  Array.isArray(obj) && obj.every(isBackendCanvasEdge);
 
 export const isBackendCanvasAnnotation = (obj: unknown): obj is BackendCanvasAnnotation => {
   if (!obj || typeof obj !== 'object') return false;
@@ -40,7 +54,7 @@ export const isBackendCanvasAnnotationArray = (obj: unknown): obj is BackendCanv
 export const isBackendCanvasGraph = (obj: unknown): obj is BackendCanvasGraph => {
   if (!obj || typeof obj !== 'object') return false;
   const o = obj as Record<string, unknown>;
-  if (!Array.isArray(o.nodes) || !Array.isArray(o.edges)) return false;
+  if (!isBackendCanvasNodeArray(o.nodes) || !isBackendCanvasEdgeArray(o.edges)) return false;
   if (o.annotations !== undefined && !isBackendCanvasAnnotationArray(o.annotations)) return false;
   return true;
 };

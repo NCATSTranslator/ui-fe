@@ -31,7 +31,8 @@ export type BackendCanvasNode = {
   canvas_id: number;
   data_id: number | null;
   user_data_id: number | null;
-  ref: string;
+  /** The Translator entity id (e.g. the node CURIE), or null for an entity with only user data. */
+  ref: string | null;
   label: string;
   type: string;
   x: number;
@@ -50,7 +51,8 @@ export type BackendCanvasEdge = {
   user_data_id: number | null;
   subject_id: number;
   object_id: number;
-  ref: string;
+  /** The Translator entity id (e.g. the node CURIE), or null for an entity with only user data. */
+  ref: string | null;
   label: string;
   hidden: boolean;
   tags: EntityTags;
@@ -166,15 +168,6 @@ export type SaveGeometryOptions = {
   immediate?: boolean;
 };
 
-/** @deprecated Use GraphGeometry */
-export type GraphMove = GraphGeometry & {
-  nodes: Array<{
-    id: number;
-    x: number;
-    y: number;
-  }>;
-};
-
 export type CreateCanvasAnnotationRequest = {
   content: string;
   x: number;
@@ -234,7 +227,8 @@ export type Canvas = {
 
 export type CanvasNode = {
   id: string;
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   ref: string;
   names: string[];
   types: string[];
@@ -247,16 +241,18 @@ export type CanvasNode = {
 
 export type CanvasEdge = Partial<ResultEdge> &
   Pick<ResultEdge, 'id' | 'subject' | 'object' | 'predicate' | 'tags'> & {
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   ref: string;
-  subjectDataId: number;
-  objectDataId: number;
+  subjectEntityId: number;
+  objectEntityId: number;
   hidden: boolean;
 };
 
 export type CanvasAnnotation = {
   id: string;
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   text: string;
   position: { x: number; y: number };
   width: number;
