@@ -27,9 +27,12 @@ export type BackendUserCanvas = {
 };
 
 export type BackendCanvasNode = {
+  id: number;
   canvas_id: number;
-  data_id: number;
-  ref: string;
+  data_id: number | null;
+  user_data_id: number | null;
+  /** The Translator entity id (e.g. the node CURIE), or null for an entity with only user data. */
+  ref: string | null;
   label: string;
   type: string;
   x: number;
@@ -42,11 +45,14 @@ export type BackendCanvasNode = {
 };
 
 export type BackendCanvasEdge = {
+  id: number;
   canvas_id: number;
-  data_id: number;
+  data_id: number | null;
+  user_data_id: number | null;
   subject_id: number;
   object_id: number;
-  ref: string;
+  /** The Translator entity id (e.g. the node CURIE), or null for an entity with only user data. */
+  ref: string | null;
   label: string;
   hidden: boolean;
   tags: EntityTags;
@@ -79,7 +85,7 @@ export type BackendCanvasGraph = {
 // Submission types (sent to backend for create/merge)
 // ---------------------------------------------------------------------------
 
-export type GraphSubmissionNode = {
+export type GraphSubmissionNodeData = {
   id: string;
   aras: string[];
   descriptions: string[];
@@ -91,14 +97,18 @@ export type GraphSubmissionNode = {
   tags: EntityTags;
   source_time: string;
   annotations?: unknown;
+  signature: string;
+};
+
+export type GraphSubmissionNode = {
   x: number;
   y: number;
   hidden?: boolean;
   label?: string;
-  signature: string;
+  data: GraphSubmissionNodeData;
 };
 
-export type GraphSubmissionEdge = {
+export type GraphSubmissionEdgeData = {
   id: string;
   subject: string;
   object: string;
@@ -114,14 +124,18 @@ export type GraphSubmissionEdge = {
   trials: unknown[];
   tags: EntityTags;
   source_time: string;
-  hidden?: boolean;
-  label?: string;
   signature: string;
 };
 
+export type GraphSubmissionEdge = {
+  hidden?: boolean;
+  label?: string;
+  data: GraphSubmissionEdgeData;
+};
+
 export type GraphSubmission = {
-  nodes: Record<string, GraphSubmissionNode>;
-  edges: Record<string, GraphSubmissionEdge>;
+  nodes: GraphSubmissionNode[];
+  edges: GraphSubmissionEdge[];
   tag_descriptions?: ResultSetTags;
   source?: {
     query_ref: string;
@@ -137,7 +151,7 @@ export type GraphSelection = {
 
 export type GraphGeometry = {
   nodes?: Array<{
-    data_id: number;
+    id: number;
     x: number;
     y: number;
   }>;
@@ -152,15 +166,6 @@ export type GraphGeometry = {
 
 export type SaveGeometryOptions = {
   immediate?: boolean;
-};
-
-/** @deprecated Use GraphGeometry */
-export type GraphMove = GraphGeometry & {
-  nodes: Array<{
-    data_id: number;
-    x: number;
-    y: number;
-  }>;
 };
 
 export type CreateCanvasAnnotationRequest = {
@@ -222,7 +227,8 @@ export type Canvas = {
 
 export type CanvasNode = {
   id: string;
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   ref: string;
   names: string[];
   types: string[];
@@ -235,16 +241,18 @@ export type CanvasNode = {
 
 export type CanvasEdge = Partial<ResultEdge> &
   Pick<ResultEdge, 'id' | 'subject' | 'object' | 'predicate' | 'tags'> & {
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   ref: string;
-  subjectDataId: number;
-  objectDataId: number;
+  subjectEntityId: number;
+  objectEntityId: number;
   hidden: boolean;
 };
 
 export type CanvasAnnotation = {
   id: string;
-  dataId: number;
+  /** The server's canvas entity id (the backend row's `id`), not its Translator data id. 0 until the server has seen it. */
+  entityId: number;
   text: string;
   position: { x: number; y: number };
   width: number;

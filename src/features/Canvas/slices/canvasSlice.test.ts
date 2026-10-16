@@ -28,7 +28,7 @@ describe('syncCanvasFromServer', () => {
   it('replaces the canvas and bumps syncGeneration when the graph really changed', () => {
     const local = makeCanvas();
     const incoming = makeCanvas({
-      nodes: { a: makeCanvasNode('a'), b: makeCanvasNode('b', { dataId: 2 }) },
+      nodes: { a: makeCanvasNode('a'), b: makeCanvasNode('b', { entityId: 2 }) },
       serverTimeUpdated: '2026-01-02T00:00:00.000Z',
     });
 
@@ -72,7 +72,7 @@ describe('syncCanvasFromServer', () => {
 
   it('notices an annotation whose text changed', () => {
     const annotation = {
-      id: 'note-1', dataId: 1, text: 'before',
+      id: 'note-1', entityId: 1, text: 'before',
       position: { x: 0, y: 0 }, width: 10, height: 10,
       timeCreated: '2026-01-01T00:00:00.000Z',
     };

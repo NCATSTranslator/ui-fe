@@ -24,7 +24,7 @@ import type { RootState } from '@/redux/store';
 
 interface HoveredEntity {
   id: string;
-  dataId: number;
+  entityId: number;
   geometry: HoverGeometry;
 }
 
@@ -73,8 +73,8 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
    */
   const hoverKeyRef = useRef<string | null>(null);
 
-  const nodeDetailQuery = useCanvasNodeDetail(canvas?.id, hoveredNode?.dataId, !!hoveredNode && !!canvas);
-  const edgeDetailQuery = useCanvasEdgeDetail(canvas?.id, hoveredEdge?.dataId, !!hoveredEdge && !!canvas);
+  const nodeDetailQuery = useCanvasNodeDetail(canvas?.id, hoveredNode?.entityId, !!hoveredNode && !!canvas);
+  const edgeDetailQuery = useCanvasEdgeDetail(canvas?.id, hoveredEdge?.entityId, !!hoveredEdge && !!canvas);
 
   const pending = useMemo(
     () => resolveHoverTarget(hoveredNode, hoveredEdge, nodeDetailQuery.data, edgeDetailQuery.data),
@@ -93,13 +93,13 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
     hoverKeyRef.current = hoverKey;
 
     const canvasNode = canvas.nodes[node.id];
-    if (!canvasNode?.dataId) {
+    if (!canvasNode?.entityId) {
       setHoveredNode(null);
       return;
     }
     setHoveredEdge(null);
-    prefetchCanvasNodeDetail(queryClient, canvas.id, canvasNode.dataId);
-    setHoveredNode({ id: node.id, dataId: canvasNode.dataId, geometry });
+    prefetchCanvasNodeDetail(queryClient, canvas.id, canvasNode.entityId);
+    setHoveredNode({ id: node.id, entityId: canvasNode.entityId, geometry });
   }, [canvas, queryClient]);
 
   const handleGraphEdgeHover = useCallback((edge: GraphEdgeType | null, geometry: HoverGeometry | null) => {
@@ -113,13 +113,13 @@ const useCanvasGraphHover = ({ canvas, navigateToEdge }: UseCanvasGraphHoverOpti
     hoverKeyRef.current = hoverKey;
 
     const canvasEdge = canvas.edges[edge.id];
-    if (!canvasEdge?.dataId) {
+    if (!canvasEdge?.entityId) {
       setHoveredEdge(null);
       return;
     }
     setHoveredNode(null);
-    prefetchCanvasEdgeDetail(queryClient, canvas.id, canvasEdge.dataId);
-    setHoveredEdge({ id: edge.id, dataId: canvasEdge.dataId, geometry });
+    prefetchCanvasEdgeDetail(queryClient, canvas.id, canvasEdge.entityId);
+    setHoveredEdge({ id: edge.id, entityId: canvasEdge.entityId, geometry });
   }, [canvas, queryClient]);
 
   const onPredicateClick = useCallback((

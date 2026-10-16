@@ -4,7 +4,7 @@ import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import useCanvasRouteParams from '@/features/Canvas/hooks/useCanvasRouteParams';
 
 const useCanvasOnlyMode = () => {
-  const { canvasId, dataId, isCanvasMode, decodedParams } = useCanvasRouteParams();
+  const { canvasId, entityId, isCanvasMode, decodedParams } = useCanvasRouteParams();
   const queryId = getDataFromQueryVar('q', decodedParams);
   const resultSet = useSelector(getResultSetById(queryId));
   const isCanvasOnlyMode = isCanvasMode && !resultSet;
@@ -14,7 +14,7 @@ const useCanvasOnlyMode = () => {
 
   return {
     canvasId,
-    dataId,
+    entityId,
     isCanvasMode,
     isCanvasOnlyMode,
     decodedParams,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  annotationIdFromDataId,
+  annotationIdFromEntityId,
   backendAnnotationToCanvasAnnotation,
   backendAnnotationsToCanvasAnnotations,
   canvasAnnotationsToGeometryPayload,
@@ -30,7 +30,7 @@ describe('canvasAnnotationUtils mapping', () => {
   it('maps backend annotations to canvas annotations', () => {
     expect(backendAnnotationToCanvasAnnotation(backendAnnotation())).toEqual({
       id: 'annotation-42',
-      dataId: 42,
+      entityId: 42,
       text: 'Note',
       position: { x: 100, y: 200 },
       width: 220,
@@ -46,7 +46,7 @@ describe('canvasAnnotationUtils mapping', () => {
     ]);
 
     expect(annotations).toHaveLength(1);
-    expect(annotations[0].dataId).toBe(1);
+    expect(annotations[0].entityId).toBe(1);
   });
 
   it('creates annotation drafts near graph nodes', () => {
@@ -64,8 +64,8 @@ describe('canvasAnnotationUtils mapping', () => {
   it('maps canvas annotations to graph annotations', () => {
     const graphAnnotations = canvasAnnotationsToGraphAnnotations([
       {
-        id: annotationIdFromDataId(1),
-        dataId: 1,
+        id: annotationIdFromEntityId(1),
+        entityId: 1,
         text: 'Note',
         position: { x: 10, y: 20 },
         width: DEFAULT_ANNOTATION_WIDTH,
@@ -84,7 +84,7 @@ describe('canvasAnnotationUtils sync and geometry', () => {
   it('preserves metadata when syncing graph annotation updates', () => {
     const previous: CanvasAnnotation[] = [{
       id: 'annotation-1',
-      dataId: 1,
+      entityId: 1,
       text: 'Old',
       position: { x: 1, y: 2 },
       width: 180,
@@ -98,7 +98,7 @@ describe('canvasAnnotationUtils sync and geometry', () => {
 
     expect(synced[0]).toEqual({
       id: 'annotation-1',
-      dataId: 1,
+      entityId: 1,
       text: 'New',
       position: { x: 10, y: 20 },
       width: 180,
@@ -111,7 +111,7 @@ describe('canvasAnnotationUtils sync and geometry', () => {
     expect(canvasAnnotationsToGeometryPayload([
       {
         id: 'annotation-5',
-        dataId: 5,
+        entityId: 5,
         text: 'Saved',
         position: { x: 4, y: 8 },
         width: 200,
@@ -131,7 +131,7 @@ describe('canvasAnnotationUtils sync and geometry', () => {
     expect(canvasAnnotationsToGeometryPayload([
       {
         id: 'annotation-pending',
-        dataId: 0,
+        entityId: 0,
         text: 'Draft',
         position: { x: 1, y: 2 },
         width: DEFAULT_ANNOTATION_WIDTH,

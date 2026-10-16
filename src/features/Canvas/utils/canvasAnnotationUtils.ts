@@ -14,8 +14,8 @@ export const DEFAULT_ANNOTATION_HEIGHT = 80;
 const BASE_POSITION = { x: 100, y: 100 };
 const POSITION_STAGGER = 40;
 
-export const annotationIdFromDataId = (dataId: number): string =>
-  `${ANNOTATION_ID_PREFIX}${dataId}`;
+export const annotationIdFromEntityId = (entityId: number): string =>
+  `${ANNOTATION_ID_PREFIX}${entityId}`;
 
 export const estimatePlacementNearNodes = (
   nodes: Record<string, CanvasNode>,
@@ -38,8 +38,8 @@ export const estimatePlacementNearNodes = (
 export const backendAnnotationToCanvasAnnotation = (
   annotation: BackendCanvasAnnotation,
 ): CanvasAnnotation => ({
-  id: annotationIdFromDataId(annotation.id),
-  dataId: annotation.id,
+  id: annotationIdFromEntityId(annotation.id),
+  entityId: annotation.id,
   text: annotation.content,
   position: { x: annotation.x, y: annotation.y },
   width: annotation.width,
@@ -84,9 +84,9 @@ export const canvasAnnotationsToGeometryPayload = (
   annotations: CanvasAnnotation[],
 ): NonNullable<GraphGeometry['annotations']> =>
   annotations
-    .filter(annotation => annotation.dataId > 0)
+    .filter(annotation => annotation.entityId > 0)
     .map(annotation => ({
-      id: annotation.dataId,
+      id: annotation.entityId,
       x: annotation.position.x,
       y: annotation.position.y,
       width: annotation.width,
@@ -102,7 +102,7 @@ export const syncGraphAnnotationsToCanvas = (
     const existing = previousById.get(annotation.id);
     return {
       id: annotation.id,
-      dataId: existing?.dataId ?? 0,
+      entityId: existing?.entityId ?? 0,
       text: annotation.text,
       position: annotation.position,
       width: existing?.width ?? DEFAULT_ANNOTATION_WIDTH,
