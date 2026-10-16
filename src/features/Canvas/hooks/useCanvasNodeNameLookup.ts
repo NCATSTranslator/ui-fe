@@ -49,7 +49,7 @@ const useCanvasNodeNameLookup = (
       }
     } else if (graphQuery.data) {
       for (const node of graphQuery.data.nodes) {
-        next[node.ref] = node.label;
+        if (node.ref) next[node.ref] = node.label;
       }
     }
     lookupRef.current = reuseRecordIfEqual(lookupRef.current, next);

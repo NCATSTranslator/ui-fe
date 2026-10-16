@@ -11,7 +11,7 @@ export const useCanvasEntityRoute = () => useCanvasOnlyMode();
 
 export const useCanvasNodeEntity = () => {
   const route = useCanvasOnlyMode();
-  const query = useCanvasNodeDetail(route.canvasId, route.dataId, route.isCanvasOnlyMode);
+  const query = useCanvasNodeDetail(route.canvasId, route.entityId, route.isCanvasOnlyMode);
   const resultNode = useMemo(
     () => (query.data ? canvasNodeDetailToResultNode(query.data) : null),
     [query.data],
@@ -31,7 +31,7 @@ export const useCanvasNodeEntity = () => {
 
 export const useCanvasEdgeEntity = () => {
   const route = useCanvasOnlyMode();
-  const query = useCanvasEdgeDetail(route.canvasId, route.dataId, route.isCanvasOnlyMode);
+  const query = useCanvasEdgeDetail(route.canvasId, route.entityId, route.isCanvasOnlyMode);
   const resultEdge = useMemo(
     () => (query.data ? canvasEdgeDetailToResultEdge(query.data) : null),
     [query.data],

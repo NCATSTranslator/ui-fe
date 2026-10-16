@@ -1,6 +1,5 @@
 import { FC, MouseEvent, useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
 import CTIcon from '@/assets/icons/status/HasCT.svg?react';
 import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
@@ -88,7 +87,6 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
               rel="noreferrer"
             >
               <span>Learn More on Biolink Model</span>
-              <ExternalLink />
             </a>
           }
           {(edge.pubCount > 0 || edge.ctCount > 0 || isAcceptedOntology) &&

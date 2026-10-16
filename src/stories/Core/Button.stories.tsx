@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import Button from '@/features/Core/components/Button/Button';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import ExternalLinkIcon from '@/assets/icons/buttons/External Link.svg?react';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
@@ -94,7 +93,6 @@ export const IconOnly: Story = {
 export const WithIcons: Story = {
   args: {
     iconLeft: <InfoIcon />,
-    iconRight: <ExternalLinkIcon />,
     children: 'Open Folder',
   },
 };
@@ -104,6 +102,5 @@ export const ExternalLink: Story = {
     href: 'https://example.com',
     _blank: true,
     children: 'External Link',
-    iconRight: <ExternalLinkIcon />,
   },
 };
