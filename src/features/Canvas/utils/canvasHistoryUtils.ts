@@ -46,13 +46,13 @@ const collectIds = (
   toIds: Set<number>,
 ): number[] => [...toIds].filter(id => !fromIds.has(id));
 
-const dataIdsFromRecords = (
-  records: Record<string, { dataId: number }>,
+const entityIdsFromRecords = (
+  records: Record<string, { entityId: number }>,
 ): Set<number> =>
-  new Set(Object.values(records).map(item => item.dataId).filter(id => id > 0));
+  new Set(Object.values(records).map(item => item.entityId).filter(id => id > 0));
 
-const dataIdsFromAnnotations = (annotations: CanvasAnnotation[]): Set<number> =>
-  new Set(annotations.map(annotation => annotation.dataId).filter(id => id > 0));
+const entityIdsFromAnnotations = (annotations: CanvasAnnotation[]): Set<number> =>
+  new Set(annotations.map(annotation => annotation.entityId).filter(id => id > 0));
 
 const buildSelection = (
   nodes: number[],
@@ -65,16 +65,16 @@ const buildSelection = (
 });
 
 const diffNodeGeometry = (from: Canvas, to: Canvas): NonNullable<GraphGeometry['nodes']> => {
-  const fromNodesByDataId = new Map(
+  const fromNodesByEntityId = new Map(
     Object.values(from.nodes)
-      .filter(node => node.dataId > 0)
-      .map(node => [node.dataId, node]),
+      .filter(node => node.entityId > 0)
+      .map(node => [node.entityId, node]),
   );
   return Object.values(to.nodes).flatMap(node => {
-    if (node.dataId <= 0) return [];
-    const previous = fromNodesByDataId.get(node.dataId);
+    if (node.entityId <= 0) return [];
+    const previous = fromNodesByEntityId.get(node.entityId);
     if (!previous || (previous.x === node.x && previous.y === node.y)) return [];
-    return [{ id: node.dataId, x: node.x, y: node.y }];
+    return [{ id: node.entityId, x: node.x, y: node.y }];
   });
 };
 
@@ -89,14 +89,14 @@ const annotationGeometryUnchanged = (
 );
 
 const diffAnnotationGeometry = (
-  fromByDataId: Map<number, CanvasAnnotation>,
+  fromByEntityId: Map<number, CanvasAnnotation>,
   to: Canvas,
 ): NonNullable<GraphGeometry['annotations']> => to.annotations.flatMap(annotation => {
-  if (annotation.dataId <= 0) return [];
-  const previous = fromByDataId.get(annotation.dataId);
+  if (annotation.entityId <= 0) return [];
+  const previous = fromByEntityId.get(annotation.entityId);
   if (!previous || annotationGeometryUnchanged(previous, annotation)) return [];
   return [{
-    id: annotation.dataId,
+    id: annotation.entityId,
     x: annotation.position.x,
     y: annotation.position.y,
     width: annotation.width,
@@ -105,13 +105,13 @@ const diffAnnotationGeometry = (
 });
 
 const diffAnnotationTexts = (
-  fromByDataId: Map<number, CanvasAnnotation>,
+  fromByEntityId: Map<number, CanvasAnnotation>,
   to: Canvas,
 ): CanvasHistoryAnnotationText[] => to.annotations.flatMap(annotation => {
-  if (annotation.dataId <= 0) return [];
-  const previous = fromByDataId.get(annotation.dataId);
+  if (annotation.entityId <= 0) return [];
+  const previous = fromByEntityId.get(annotation.entityId);
   if (!previous || previous.text === annotation.text) return [];
-  return [{ id: annotation.dataId, content: annotation.text }];
+  return [{ id: annotation.entityId, content: annotation.text }];
 });
 
 /**
@@ -119,12 +119,12 @@ const diffAnnotationTexts = (
  * Elements present only in `to` should be restored; only in `from` should be trashed.
  */
 export const diffCanvasForHistory = (from: Canvas, to: Canvas): CanvasHistoryDiff => {
-  const fromNodeIds = dataIdsFromRecords(from.nodes);
-  const toNodeIds = dataIdsFromRecords(to.nodes);
-  const fromEdgeIds = dataIdsFromRecords(from.edges);
-  const toEdgeIds = dataIdsFromRecords(to.edges);
-  const fromAnnotationIds = dataIdsFromAnnotations(from.annotations);
-  const toAnnotationIds = dataIdsFromAnnotations(to.annotations);
+  const fromNodeIds = entityIdsFromRecords(from.nodes);
+  const toNodeIds = entityIdsFromRecords(to.nodes);
+  const fromEdgeIds = entityIdsFromRecords(from.edges);
+  const toEdgeIds = entityIdsFromRecords(to.edges);
+  const fromAnnotationIds = entityIdsFromAnnotations(from.annotations);
+  const toAnnotationIds = entityIdsFromAnnotations(to.annotations);
 
   const restore = buildSelection(
     collectIds(fromNodeIds, toNodeIds),
@@ -137,13 +137,13 @@ export const diffCanvasForHistory = (from: Canvas, to: Canvas): CanvasHistoryDif
     collectIds(toAnnotationIds, fromAnnotationIds),
   );
 
-  const fromAnnotationsByDataId = new Map(
+  const fromAnnotationsByEntityId = new Map(
     from.annotations
-      .filter(annotation => annotation.dataId > 0)
-      .map(annotation => [annotation.dataId, annotation]),
+      .filter(annotation => annotation.entityId > 0)
+      .map(annotation => [annotation.entityId, annotation]),
   );
   const nodeMoves = diffNodeGeometry(from, to);
-  const annotationMoves = diffAnnotationGeometry(fromAnnotationsByDataId, to);
+  const annotationMoves = diffAnnotationGeometry(fromAnnotationsByEntityId, to);
   const geometry: GraphGeometry | null = (nodeMoves.length > 0 || annotationMoves.length > 0)
     ? {
       ...(nodeMoves.length > 0 && { nodes: nodeMoves }),
@@ -156,7 +156,7 @@ export const diffCanvasForHistory = (from: Canvas, to: Canvas): CanvasHistoryDif
     trash,
     geometry,
     layout: from.layout !== to.layout ? to.layout : null,
-    annotationTexts: diffAnnotationTexts(fromAnnotationsByDataId, to),
+    annotationTexts: diffAnnotationTexts(fromAnnotationsByEntityId, to),
   };
 };
 

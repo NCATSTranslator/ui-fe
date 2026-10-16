@@ -38,7 +38,7 @@ export const makeMeta = (overrides: Partial<BackendUserCanvas> = {}): BackendUse
 
 export const makeCanvasNode = (id: string, overrides: Partial<CanvasNode> = {}): CanvasNode => ({
   id,
-  dataId: 1,
+  entityId: 1,
   ref: id,
   names: [id],
   types: ['biolink:NamedThing'],
@@ -57,12 +57,12 @@ export const makeCanvasEdge = (
   overrides: Partial<CanvasEdge> = {},
 ): CanvasEdge => ({
   id,
-  dataId: 1,
+  entityId: 1,
   ref: id,
   subject,
   object,
-  subjectDataId: 0,
-  objectDataId: 0,
+  subjectEntityId: 0,
+  objectEntityId: 0,
   predicate: 'biolink:related_to',
   hidden: false,
   tags: {},

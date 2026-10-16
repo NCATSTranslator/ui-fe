@@ -178,13 +178,6 @@ export const filterCanvasNodes = (nodes: CanvasNode[], search: string): CanvasNo
   return nodes.filter(node => canvasNodeMatchesSearch(node, search));
 };
 
-export const mergeCanvasNode = (existing: CanvasNode, incoming: CanvasNode): CanvasNode => ({
-  ...existing,
-  names: Array.from(new Set([...existing.names, ...incoming.names])),
-  types: Array.from(new Set([...existing.types, ...incoming.types])),
-  curies: Array.from(new Set([...existing.curies, ...incoming.curies])),
-});
-
 export const filterCanvasesBySearch = (canvases: Canvas[], searchTerm: string): Canvas[] => {
   if (!searchTerm) return canvases;
   const lower = searchTerm.toLowerCase();

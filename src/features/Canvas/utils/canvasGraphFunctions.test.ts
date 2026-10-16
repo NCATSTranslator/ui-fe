@@ -91,13 +91,13 @@ describe('getIncidentEdgeIds', () => {
 describe('selectionForRemovedElements', () => {
   const canvas = makeCanvas({
     nodes: {
-      a: makeCanvasNode('a', { dataId: 10 }),
-      b: makeCanvasNode('b', { dataId: 11 }),
-      c: makeCanvasNode('c', { dataId: 12 }),
+      a: makeCanvasNode('a', { entityId: 10 }),
+      b: makeCanvasNode('b', { entityId: 11 }),
+      c: makeCanvasNode('c', { entityId: 12 }),
     },
     edges: {
-      ab: makeCanvasEdge('ab', 'a', 'b', { dataId: 20 }),
-      bc: makeCanvasEdge('bc', 'b', 'c', { dataId: 21 }),
+      ab: makeCanvasEdge('ab', 'a', 'b', { entityId: 20 }),
+      bc: makeCanvasEdge('bc', 'b', 'c', { entityId: 21 }),
     },
   });
 
@@ -128,8 +128,8 @@ describe('selectionForRemovedElements', () => {
 
   it('drops elements the server has never seen', () => {
     const local = makeCanvas({
-      nodes: { a: makeCanvasNode('a', { dataId: 0 }) },
-      edges: { ab: makeCanvasEdge('ab', 'a', 'b', { dataId: 0 }) },
+      nodes: { a: makeCanvasNode('a', { entityId: 0 }) },
+      edges: { ab: makeCanvasEdge('ab', 'a', 'b', { entityId: 0 }) },
     });
 
     expect(selectionForRemovedElements(local, ['a'])).toBeNull();

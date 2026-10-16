@@ -3,7 +3,7 @@ import type { CanvasAnnotation, CanvasNode } from '@/features/Canvas/types/canva
 import { diffCanvasForHistory } from '@/features/Canvas/utils/canvasHistoryUtils';
 import { makeCanvas } from '@/features/Canvas/utils/canvasTestFixtures';
 
-const makeNode = (overrides: Partial<CanvasNode> & Pick<CanvasNode, 'id' | 'dataId'>): CanvasNode => ({
+const makeNode = (overrides: Partial<CanvasNode> & Pick<CanvasNode, 'id' | 'entityId'>): CanvasNode => ({
   ref: overrides.id,
   names: [overrides.id],
   types: ['biolink:NamedThing'],
@@ -16,7 +16,7 @@ const makeNode = (overrides: Partial<CanvasNode> & Pick<CanvasNode, 'id' | 'data
 });
 
 const makeAnnotation = (
-  overrides: Partial<CanvasAnnotation> & Pick<CanvasAnnotation, 'id' | 'dataId'>,
+  overrides: Partial<CanvasAnnotation> & Pick<CanvasAnnotation, 'id' | 'entityId'>,
 ): CanvasAnnotation => ({
   text: 'note',
   position: { x: 0, y: 0 },
@@ -28,7 +28,7 @@ const makeAnnotation = (
 
 describe('diffCanvasForHistory', () => {
   it('marks deleted nodes for restore when undoing a delete', () => {
-    const node = makeNode({ id: 'n1', dataId: 11, x: 10, y: 20 });
+    const node = makeNode({ id: 'n1', entityId: 11, x: 10, y: 20 });
     const beforeDelete = makeCanvas({ nodes: { n1: node } });
     const afterDelete = makeCanvas({ nodes: {} });
 
@@ -39,7 +39,7 @@ describe('diffCanvasForHistory', () => {
   });
 
   it('marks added nodes for trash when undoing an add', () => {
-    const node = makeNode({ id: 'n1', dataId: 11 });
+    const node = makeNode({ id: 'n1', entityId: 11 });
     const beforeAdd = makeCanvas({ nodes: {} });
     const afterAdd = makeCanvas({ nodes: { n1: node } });
 
@@ -52,11 +52,11 @@ describe('diffCanvasForHistory', () => {
   it('captures node position and layout changes', () => {
     const before = makeCanvas({
       layout: 'horizontal',
-      nodes: { n1: makeNode({ id: 'n1', dataId: 11, x: 0, y: 0 }) },
+      nodes: { n1: makeNode({ id: 'n1', entityId: 11, x: 0, y: 0 }) },
     });
     const after = makeCanvas({
       layout: 'custom',
-      nodes: { n1: makeNode({ id: 'n1', dataId: 11, x: 40, y: 50 }) },
+      nodes: { n1: makeNode({ id: 'n1', entityId: 11, x: 40, y: 50 }) },
     });
 
     const diff = diffCanvasForHistory(before, after);
@@ -69,12 +69,12 @@ describe('diffCanvasForHistory', () => {
 
   it('captures annotation geometry changes', () => {
     const before = makeCanvas({
-      annotations: [makeAnnotation({ id: 'a1', dataId: 21, position: { x: 0, y: 0 } })],
+      annotations: [makeAnnotation({ id: 'a1', entityId: 21, position: { x: 0, y: 0 } })],
     });
     const after = makeCanvas({
       annotations: [makeAnnotation({
         id: 'a1',
-        dataId: 21,
+        entityId: 21,
         position: { x: 12, y: 34 },
         width: 200,
         height: 100,
@@ -90,10 +90,10 @@ describe('diffCanvasForHistory', () => {
 
   it('captures annotation text changes', () => {
     const before = makeCanvas({
-      annotations: [makeAnnotation({ id: 'a1', dataId: 21, text: 'before' })],
+      annotations: [makeAnnotation({ id: 'a1', entityId: 21, text: 'before' })],
     });
     const after = makeCanvas({
-      annotations: [makeAnnotation({ id: 'a1', dataId: 21, text: 'after' })],
+      annotations: [makeAnnotation({ id: 'a1', entityId: 21, text: 'after' })],
     });
 
     const diff = diffCanvasForHistory(before, after);
