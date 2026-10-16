@@ -1,5 +1,4 @@
 import { FC, useMemo } from 'react';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import { Provenance } from '@/features/Evidence/types/evidence.d';
@@ -63,7 +62,6 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                   <span className={evidenceStyles.tooltipSpan}>
                     <a href={src.wiki} target="_blank" rel="noreferrer" {...getEvidenceLinkTrackingProps('source', src.wiki)}>
                       Why do we use this source?
-                      <ExternalLink />
                     </a>
                   </span>
                 </Tooltip>
@@ -87,7 +85,6 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
                         className={joinClasses("url", evidenceStyles.edgeProvenanceLink)}
                       >
                         {url}
-                        <ExternalLink />
                       </a>
                     ))}
                   </div>

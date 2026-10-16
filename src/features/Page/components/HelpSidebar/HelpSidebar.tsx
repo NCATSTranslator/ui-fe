@@ -1,7 +1,6 @@
 import styles from './HelpSidebar.module.scss';
 import { NavLink, useLocation } from 'react-router-dom';
 import Accordion from '@/features/Core/components/Accordion/Accordion';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { helpArticles } from "@/features/Page/utils/helpArticles";
 
 const HelpSidebar = () => {
@@ -39,7 +38,6 @@ const HelpSidebar = () => {
                         rel="noreferrer"
                         >
                         {article.title}
-                        <ExternalLink />
                       </a>
                     }
                     {
@@ -69,7 +67,6 @@ const HelpSidebar = () => {
                                       rel="noreferrer"
                                       >
                                       {subArticle.title}
-                                      <ExternalLink />
                                     </a>
                                   }
                                   {

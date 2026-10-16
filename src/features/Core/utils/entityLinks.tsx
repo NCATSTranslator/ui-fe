@@ -97,10 +97,10 @@ export const getEntityLink = (id: string, className: string, queryType: QueryTyp
 };
 
 export const getMoreInfoLink = (id: string, className: string): ReactNode | null => {
-  return generateEntityLink(id, className, () => { return ' '});
+  return generateEntityLink(id, className, () => { return ' '}, true);
 };
 
-export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = true): ReactNode | null => {
+export const generateEntityLink = (id: string, className: string, linkTextGenerator: (org: string | null) => string, useIcon = false): ReactNode | null => {
   const [url, org] = getUrlAndOrg(id);
   const linkText = linkTextGenerator(org);
 

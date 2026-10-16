@@ -81,7 +81,6 @@ const renderTitleCell = (showSkeleton: boolean, url: string, title: string | und
       url={url}
       title={title}
       isLoading={showSkeleton}
-      showExternalIcon
       skeletonWidth="80%"
     />
   );

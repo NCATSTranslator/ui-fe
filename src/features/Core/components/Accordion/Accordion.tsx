@@ -3,7 +3,6 @@ import AnimateHeight from 'react-animate-height';
 import { NavLink } from 'react-router-dom';
 import styles from './Accordion.module.scss';
 import ChevDown from '@/assets/icons/directional/Chevron/Chevron Down.svg?react';
-import ExternalLink from '@/assets/icons/buttons/External Link.svg?react';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 
@@ -104,7 +103,6 @@ const Accordion: FC<AccordionProps> = ({
         >
           <span>
             {title}
-            <ExternalLink className={styles.extLinkIcon} />
           </span>
           <button
             id={buttonId}
