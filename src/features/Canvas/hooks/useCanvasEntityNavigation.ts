@@ -12,7 +12,7 @@ const useCanvasEntityNavigation = () => {
   const { navigateToEvidenceView } = useEvidenceViewNavigation();
 
   const navigateToNode = useCallback((canvas: Canvas, node: CanvasNode) => {
-    const params = canvasEntityParams(canvas, node.dataId);
+    const params = canvasEntityParams(canvas, node.entityId);
     if (canvas.resultRef && canvas.queryRef) {
       resultsNavigate(
         `/results/${canvas.resultRef}/node/${encodeURIComponent(node.ref)}`,
@@ -31,7 +31,7 @@ const useCanvasEntityNavigation = () => {
     edge: CanvasEdge,
     tab?: EvidenceTabName,
   ) => {
-    const params: Record<string, string> = canvasEntityParams(canvas, edge.dataId);
+    const params: Record<string, string> = canvasEntityParams(canvas, edge.entityId);
     if (canvas.queryRef) params.q = canvas.queryRef;
     if (tab) params.tab = tab;
     if (canvas.resultRef && canvas.queryRef) {

@@ -43,7 +43,7 @@ const withUpdatedHeights = (
   synced: CanvasAnnotation[],
 ): CanvasAnnotation[] => synced.map(annotation => {
   const prev = previousById.get(annotation.id);
-  if (!prev || prev.text === annotation.text || annotation.dataId <= 0) return annotation;
+  if (!prev || prev.text === annotation.text || annotation.entityId <= 0) return annotation;
   const height = estimateAnnotationHeightFromText(annotation.text);
   return height !== annotation.height ? { ...annotation, height } : annotation;
 });
@@ -55,7 +55,7 @@ const getMovedAnnotations = (
   const prev = previousById.get(annotation.id);
   return Boolean(
     prev
-    && annotation.dataId > 0
+    && annotation.entityId > 0
     && !positionsEqual(prev.position, annotation.position),
   );
 });
@@ -68,8 +68,8 @@ const persistAnnotationTextUpdates = (
 ) => {
   for (const annotation of annotations) {
     const prev = previousById.get(annotation.id);
-    if (!prev || prev.text === annotation.text || annotation.dataId <= 0) continue;
-    saveUpdateAnnotationText(canvasId, annotation.dataId, annotation.text);
+    if (!prev || prev.text === annotation.text || annotation.entityId <= 0) continue;
+    saveUpdateAnnotationText(canvasId, annotation.entityId, annotation.text);
   }
 };
 
@@ -99,7 +99,7 @@ const useCanvasAnnotations = ({
     const synced = syncGraphAnnotationsToCanvas(previous, next);
     const nextIds = new Set(synced.map(annotation => annotation.id));
     const deleted = previous.filter(
-      annotation => !nextIds.has(annotation.id) && annotation.dataId > 0,
+      annotation => !nextIds.has(annotation.id) && annotation.entityId > 0,
     );
     const withHeights = withUpdatedHeights(previousById, synced);
 
@@ -108,7 +108,7 @@ const useCanvasAnnotations = ({
 
     if (deleted.length > 0) {
       void saveTrashElements(canvas.id, {
-        annotations: deleted.map(annotation => annotation.dataId),
+        annotations: deleted.map(annotation => annotation.entityId),
       });
     }
 
@@ -152,8 +152,8 @@ const useCanvasAnnotations = ({
       annotations: canvas.annotations.filter(item => item.id !== annotationId),
     }));
 
-    if (annotation.dataId > 0) {
-      void saveTrashElements(canvas.id, { annotations: [annotation.dataId] });
+    if (annotation.entityId > 0) {
+      void saveTrashElements(canvas.id, { annotations: [annotation.entityId] });
     }
   }, [dispatch, pushUndo, saveTrashElements]);
 
