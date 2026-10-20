@@ -140,6 +140,39 @@ describe('ResultList polling', () => {
     expect(countCalls('Q1', 'result')).toBeGreaterThanOrEqual(1);
   });
 
+  it('keeps polling after a result fetch fails while the query is still running, and offers the next results', async () => {
+    const script: QueryFetchScript = { status: [runningStatus(['ara-a'])], result: [partialSet()] };
+    const { container, countCalls } = renderResultList({ scripts: { Q1: script } });
+    await waitForRows(container, ['Aspirin']);
+
+    // A new ARA prompts a result fetch that fails
+    script.status = [runningStatus(['ara-a', 'ara-b'])];
+    script.result = ['error'];
+    await waitFor(() => expect(countCalls('Q1', 'result')).toBeGreaterThanOrEqual(2), WAIT);
+    const statusCallsAtError = countCalls('Q1', 'status');
+
+    // Status polling must continue, and the results already shown must stay visible
+    await waitFor(() => expect(countCalls('Q1', 'status')).toBeGreaterThan(statusCallsAtError + 1), WAIT);
+    expect(getRowNames(container)).toEqual(['Aspirin']);
+    expect(screen.queryByText(ERROR_TEXT)).not.toBeInTheDocument();
+
+    // Completion fetches again and the full set is offered for sync
+    script.status = [completeStatus(['ara-a', 'ara-b'])];
+    script.result = [makeTestDiseaseSet()];
+    await findSyncButton();
+  });
+
+  it('replaces the error with results when a later fetch succeeds for a still-running query', async () => {
+    const script: QueryFetchScript = { status: [runningStatus(['ara-a'])], result: ['error'] };
+    const { container } = renderResultList({ scripts: { Q1: script } });
+    await screen.findByText(ERROR_TEXT, {}, WAIT);
+
+    script.status = [completeStatus(['ara-a', 'ara-b'])];
+    script.result = [makeTestDiseaseSet()];
+    await waitForRows(container, ['Zinc', 'Metformin', 'Aspirin']);
+    expect(screen.queryByText(ERROR_TEXT)).not.toBeInTheDocument();
+  });
+
   it('reports an error when the status fetch fails before any results are shown', async () => {
     const { countCalls } = renderResultList({ scripts: { Q1: { status: ['error'] } } });
     await screen.findByText(ERROR_TEXT, {}, WAIT);

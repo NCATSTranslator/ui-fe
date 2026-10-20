@@ -168,6 +168,8 @@ const useResultsData = ({
     const newResultSet = prepareResultSet(resultSet, scoreWeightsRef.current, currentIsPathfinder);
     prevRawResults.current = newResultSet;
 
+    // A usable result set clears any error left by an earlier failed fetch
+    setIsError(false);
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 
     if (!handleUpdateResultsRef.current) return;

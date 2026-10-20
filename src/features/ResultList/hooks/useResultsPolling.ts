@@ -141,9 +141,10 @@ export const useResultsPolling = ({
     finishResults();
   }, [callbacksRef, finishResults]);
 
+  // A failed result fetch doesn't stop status polling: while the query is still
+  // running, the next status tick (more ARAs, or completion) fetches results again.
   const handleResultsError = useCallback((error: Error) => {
     console.error('Results Data Error:', error);
-    setIsFetchingARAStatus(false);
     clearRequest();
     setIsFetchingResults(false);
     callbacksRef.current.onError();
