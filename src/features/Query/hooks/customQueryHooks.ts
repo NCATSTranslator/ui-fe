@@ -134,8 +134,6 @@ interface SubmissionOptions {
   requireAccepted?: boolean;
   /** From the results page, open the new query in a new tab instead of navigating. */
   openInNewTabFromResults?: boolean;
-  /** Re-throw after reporting so the caller can react. */
-  rethrow?: boolean;
 }
 
 /** POSTs a query request and returns the parsed response. */
@@ -232,26 +230,28 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
     navigate(`/${newQueryPath}`);
   }, [navigate, shouldNavigate, submissionCallback]);
 
-  // Posts a query, reports the outcome, and navigates to its results page
+  // Posts a query, reports the outcome, and navigates to its results page.
+  // Failures are reported here (toast + analytics) and never rethrown: no caller
+  // awaits these, so a rethrow would only surface as an unhandled rejection.
   const runSubmission = useCallback(async (
     type: QueryTypeName,
     projectId: string | undefined,
     { body, analytics }: SubmissionRequest,
     buildResultsPath: (data: QuerySubmissionResponse) => string,
-    { requireAccepted = false, openInNewTabFromResults = false, rethrow = false }: SubmissionOptions = {},
+    { requireAccepted = false, openInNewTabFromResults = false }: SubmissionOptions = {},
   ) => {
     setIsLoading(true);
     try {
       const data = await postQuery(body);
       trackAcceptedQuerySubmission(data, type, projectId, analytics);
-      if (requireAccepted && !isAcceptedSubmission(data)) return;
+      if (requireAccepted && !isAcceptedSubmission(data))
+        throw new Error(`Query submission not accepted (status: ${data.status ?? 'none'})`);
       completeSubmission(buildResultsPath(data), openInNewTabFromResults);
     } catch (error) {
       trackQuerySubmissionFailed(type, error);
       errorToast(SUBMISSION_ERROR_TEXT);
       setIsLoading(false);
       console.error(error);
-      if (rethrow) throw error;
     }
   }, [completeSubmission]);
 
@@ -276,15 +276,13 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
   const submitPathfinderQuery = useCallback(async (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, middleType?: string, projectId?: string) => {
     const { request, constraint } = pathfinderSubmission(itemOne, itemTwo, middleType, projectId);
     await runSubmission('pathfinder', projectId, request,
-      (data) => getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: '0', constraint, pk: data.data, shouldHash: config?.include_hashed_parameters }),
-      { rethrow: true });
+      (data) => getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: '0', constraint, pk: data.data, shouldHash: config?.include_hashed_parameters }));
   }, [config, runSubmission]);
 
   const submitLookupQuery = useCallback(async (item: AutocompleteItem, objectCategory: string, projectId?: string) => {
     const { request, rawCategory } = lookupSubmission(item, objectCategory, projectId);
     await runSubmission('lookup', projectId, request,
-      (data) => getLookupResultsShareURLPath(item, rawCategory, '0', data.data, config?.include_hashed_parameters),
-      { rethrow: true });
+      (data) => getLookupResultsShareURLPath(item, rawCategory, '0', data.data, config?.include_hashed_parameters));
   }, [config, runSubmission]);
 
   return {
