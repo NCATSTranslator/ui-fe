@@ -17,7 +17,7 @@ import SidebarProvider from '@/features/Sidebar/components/SidebarProvider/Sideb
 import { CanvasContextMenuProvider } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import ResultList from '@/features/ResultList/components/ResultList/ResultList';
-import { ResultSet } from '@/features/ResultList/types/results';
+import { ARAStatusResponse, ResultSet } from '@/features/ResultList/types/results';
 
 /**
  * Integration harness for ResultList. Mounts it with the same provider stack
@@ -25,15 +25,43 @@ import { ResultSet } from '@/features/ResultList/types/results';
  * status → result → handleNewResults pipeline runs against fixture data.
  */
 
-/** The filters panel registers into the sidebar rather than rendering inside ResultList; this mounts it alongside. */
-const FiltersProbe = () => {
+/**
+ * The filters and status panels register into the sidebar rather than rendering
+ * inside ResultList; this mounts whatever ResultList registered for each.
+ */
+const SidebarProbe = () => {
   const { getSidebarItem, getContextPanel } = useSidebar();
-  const item = getSidebarItem('filters');
-  return item ? <div data-testid="filters-probe">{getContextPanel(item)}</div> : null;
+  const filters = getSidebarItem('filters');
+  const status = getSidebarItem('queryStatus');
+  return (
+    <>
+      {filters && <div data-testid="filters-probe">{getContextPanel(filters)}</div>}
+      {status && <div data-testid="status-probe">{getContextPanel(status)}</div>}
+    </>
+  );
 };
 
 const jsonResponse = (body: unknown) =>
   new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
+const errorResponse = () => new Response('{}', { status: 500, statusText: 'Server Error', headers: { 'content-type': 'application/json' } });
+
+export const runningStatus = (aras: string[]): ARAStatusResponse => ({ status: 'running', data: { aras, status: 'running' } });
+export const completeStatus = (aras: string[]): ARAStatusResponse => ({ status: 'complete', data: { aras, status: 'complete' } });
+
+/** A scripted response that is held for `delayMs` before it resolves, to simulate a slow endpoint. */
+export interface DelayedResponse<T> {
+  response: T | 'error';
+  delayMs: number;
+}
+type ScriptEntry<T> = T | 'error' | DelayedResponse<T>;
+const isDelayed = <T,>(entry: ScriptEntry<T>): entry is DelayedResponse<T> =>
+  typeof entry === 'object' && entry !== null && 'delayMs' in entry;
+
+/** Responses for one query, in the order its endpoints are hit; the last entry repeats. */
+export interface QueryFetchScript {
+  status?: Array<ScriptEntry<ARAStatusResponse>>;
+  result?: Array<ScriptEntry<ResultSet>>;
+}
 
 const urlOf = (input: Parameters<typeof fetch>[0]): string => {
   if (typeof input === 'string') return input;
@@ -41,20 +69,29 @@ const urlOf = (input: Parameters<typeof fetch>[0]): string => {
   return input.url;
 };
 
-/** Routes /query/:id/status and /query/:id/result to the given sets; everything else gets an empty object. */
-export const stubResultsFetch = (resultSets: Record<string, ResultSet>) => {
+/** Routes /query/:id/status and /query/:id/result to each query's script; everything else gets an empty object. */
+export const stubResultsFetch = (scripts: Record<string, QueryFetchScript>) => {
+  const calls: Record<string, number> = {};
   const fetchMock = vi.fn(async (input: Parameters<typeof fetch>[0]) => {
     const url = urlOf(input);
     const match = url.match(/\/query\/([^/?]+)\/(status|result)/);
-    if (match) {
-      const [, qid, kind] = match;
-      if (kind === 'status') return jsonResponse({ status: 'complete', data: { aras: ['ara-test'], status: 'complete' } });
-      return jsonResponse(resultSets[qid] ?? { status: 'error', data: { results: [] } });
-    }
-    return jsonResponse({});
+    if (!match) return jsonResponse({});
+    const [, qid, kind] = match;
+    const key = `${qid}/${kind}`;
+    const index = calls[key] ?? 0;
+    calls[key] = index + 1;
+    const sequence = scripts[qid]?.[kind as 'status' | 'result'];
+    if (!sequence || sequence.length === 0)
+      return kind === 'status' ? jsonResponse(completeStatus(['ara-test'])) : jsonResponse({ status: 'error', data: { results: [] } });
+    const entry = sequence[Math.min(index, sequence.length - 1)];
+    const body = isDelayed(entry) ? entry.response : entry;
+    if (isDelayed(entry)) await new Promise(resolve => setTimeout(resolve, entry.delayMs));
+    return body === 'error' ? errorResponse() : jsonResponse(body);
   });
   vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
+  /** Number of fetches so far for one query's endpoint. */
+  const countCalls = (qid: string, kind: 'status' | 'result') => calls[`${qid}/${kind}`] ?? 0;
+  return { fetchMock, countCalls };
 };
 
 export const makeTestStore = () => configureStore({
@@ -71,20 +108,30 @@ export const makeTestStore = () => configureStore({
 });
 
 interface RenderResultListOptions {
-  resultSets: Record<string, ResultSet>;
+  /** Shorthand: each query completes on the first status check and serves this set. */
+  resultSets?: Record<string, ResultSet>;
+  /** Full control over the status/result responses per query; overrides resultSets for the same ID. */
+  scripts?: Record<string, QueryFetchScript>;
   initialUrl?: string;
 }
 
 export const renderResultList = ({
-  resultSets,
+  resultSets = {},
+  scripts = {},
   initialUrl = '/results?q=Q1&t=0&l=Type%202%20Diabetes&i=MONDO:0005148',
 }: RenderResultListOptions) => {
-  // ClampedDescription measures with ResizeObserver, which jsdom lacks
+  // ClampedDescription and the status panel observe layout with APIs jsdom lacks
   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
-  const fetchMock = stubResultsFetch(resultSets);
+  vi.stubGlobal('IntersectionObserver', class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } });
+  const allScripts: Record<string, QueryFetchScript> = {
+    ...Object.fromEntries(Object.entries(resultSets).map(([qid, set]) => [qid, { status: [completeStatus(['ara-test'])], result: [set] }])),
+    ...scripts,
+  };
+  const { fetchMock, countCalls } = stubResultsFetch(allScripts);
   const store = makeTestStore();
-  // staleTime 0: the result queries do their work as side effects and return void,
-  // so a cached "fresh" query would never re-run when navigating back to it
+  // The polled status/result queries pin staleTime/gcTime 0 themselves (see
+  // resultListHooks). This default covers the other queries (user queries, saves)
+  // so a test never serves cached data when navigating between query IDs.
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0, gcTime: 0 } } });
   const router = createMemoryRouter(
     [{
@@ -92,7 +139,7 @@ export const renderResultList = ({
       element: (
         <PageTitleProvider baseTitle="Results">
           <ResultList />
-          <FiltersProbe />
+          <SidebarProbe />
         </PageTitleProvider>
       ),
     }],
@@ -109,7 +156,7 @@ export const renderResultList = ({
       </QueryClientProvider>
     </Provider>
   );
-  return { ...render(ui), router, store, queryClient, fetchMock };
+  return { ...render(ui), router, store, queryClient, fetchMock, countCalls };
 };
 
 /** Result row names in display order. */
