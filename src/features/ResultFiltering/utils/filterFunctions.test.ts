@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyPredicateFilterDisplayNames, formatPredicateFilterName, propagatesExclusionAcrossCompressionGroups, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
+import { applyPredicateFilterDisplayNames, formatPredicateFilterName, getEdgeFamilies, getFilterLabel, getPathFamilies, getValidFamilies, groupFilters, isTagFilter, propagatesExclusionAcrossCompressionGroups, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 
 // Permissive default: no families propagate. See commented strict-mode logic in
@@ -84,5 +84,55 @@ describe('toggleFilter', () => {
     const { filters } = toggleFilter(active, drug);
     expect(active).toEqual([gene]);
     expect(filters[1]).not.toBe(drug);
+  });
+});
+
+// Edge qualifier families ('eff' = object aspect, 'dir' = object direction) are
+// decorated on edges by the backend and promoted to paths, so they must be
+// recognized as both path and edge families.
+describe('edge qualifier families (eff, dir)', () => {
+  const EFF_ACTIVITY = 'p/eff/activity';
+  const DIR_INCREASED = 'p/dir/increased';
+
+  it('are valid tag families', () => {
+    expect(getValidFamilies()).toContain('eff');
+    expect(getValidFamilies()).toContain('dir');
+    expect(isTagFilter({ id: EFF_ACTIVITY, name: 'Activity' })).toBe(true);
+    expect(isTagFilter({ id: DIR_INCREASED, name: 'Increased' })).toBe(true);
+  });
+
+  it('are listed as both path and edge families', () => {
+    expect(getPathFamilies()).toEqual(expect.arrayContaining(['eff', 'dir']));
+    expect(getEdgeFamilies()).toEqual(expect.arrayContaining(['eff', 'dir']));
+  });
+
+  it('have human readable labels', () => {
+    expect(getFilterLabel('eff')).toBe('Effect');
+    expect(getFilterLabel('dir')).toBe('Effect Direction');
+    expect(getFilterLabel({ id: EFF_ACTIVITY, name: 'Activity' })).toBe('Effect');
+    expect(getFilterLabel({ id: DIR_INCREASED, name: 'Increased' })).toBe('Effect Direction');
+  });
+
+  it('are grouped into their own path facet groups', () => {
+    const grouped = groupFilters({
+      [EFF_ACTIVITY]: { name: 'Activity' },
+      [DIR_INCREASED]: { name: 'Increased' },
+      'p/pred/affects': { name: 'affects' },
+    }, 'p');
+
+    expect(Object.keys(grouped.eff || {})).toEqual([EFF_ACTIVITY]);
+    expect(Object.keys(grouped.dir || {})).toEqual([DIR_INCREASED]);
+    expect(Object.keys(grouped.pred || {})).toEqual(['p/pred/affects']);
+  });
+
+  it('are grouped into edge facet groups when scoped to edges', () => {
+    const grouped = groupFilters({
+      'e/eff/activity': { name: 'Activity' },
+      'e/dir/decreased': { name: 'Decreased' },
+      [EFF_ACTIVITY]: { name: 'Activity' },
+    }, 'e');
+
+    expect(Object.keys(grouped.eff || {})).toEqual(['e/eff/activity']);
+    expect(Object.keys(grouped.dir || {})).toEqual(['e/dir/decreased']);
   });
 });

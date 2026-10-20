@@ -148,7 +148,7 @@ export const isPathEvidenceTag = (tagID: string): boolean => {
 }
 
 export const getValidFamilies = (): FilterFamily[] => {
-  return ['cc', 'di', 'pc', 'pred', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
+  return ['cc', 'di', 'pc', 'pred', 'eff', 'dir', 'pt', 'role', 'ara', 'otc', 'tdl', 'sv', 'ev'];
 }
 
 export const getResultFamilies = (): FilterFamily[] => {
@@ -156,11 +156,11 @@ export const getResultFamilies = (): FilterFamily[] => {
 }
 
 export const getPathFamilies = (): FilterFamily[] => {
-  return ['pc', 'pred', 'pt', 'ev', 'ara'];
+  return ['pc', 'pred', 'eff', 'dir', 'pt', 'ev', 'ara'];
 }
 
 export const getEdgeFamilies = (): FilterFamily[] => {
-  return ['pred', 'ev'];
+  return ['pred', 'eff', 'dir', 'ev'];
 }
 
 export const isTagFilter = (filter: Filter): boolean => {
@@ -254,24 +254,27 @@ export const hasFilterFamily = (filter: Filter, family: FilterFamily): boolean =
   return getFilterFamily(filter) === family;
 }
 
+const FILTER_FAMILY_LABELS: Record<FilterFamily, string> = {
+  cc:   "Development Stage",
+  pc:   "Objects within Paths",
+  pred: "Relationships",
+  eff:  "Effect",
+  dir:  "Effect Direction",
+  di:   "Clinical Trial Indications",
+  ara:  "Reasoning Agent",
+  role: "Chemical Classification",
+  pt:   "Path Length",
+  otc:  "Availability",
+  tdl:  "Target Development Level",
+  ev:   "Evidence Type",
+  str:  "Search",
+  sv:   "Bookmarks & Notes",
+};
+
 export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   const defaultLabel = "Tag";
-
-  switch(typeof filter === 'string' ? filter as FilterFamily : getFilterFamily(filter)) {
-    case "cc":   return "Development Stage";
-    case "pc":   return "Objects within Paths";
-    case "pred": return "Relationships";
-    case "di":   return "Clinical Trial Indications";
-    case "ara":  return "Reasoning Agent";
-    case "role": return "Chemical Classification";
-    case "pt":   return "Path Length";
-    case "otc":  return "Availability";
-    case "tdl":  return "Target Development Level";
-    case "ev":   return "Evidence Type";
-    case "str":  return "Search";
-    case "sv":   return "Bookmarks & Notes";
-    default: return defaultLabel;
-  }
+  const family = typeof filter === 'string' ? filter : getFilterFamily(filter);
+  return FILTER_FAMILY_LABELS[family] ?? defaultLabel;
 }
 
 export const getTagType = (tagID: string): FilterType => {

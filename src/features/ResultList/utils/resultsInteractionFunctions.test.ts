@@ -891,3 +891,110 @@ describe('getIsPathIdFiltered — evidence view lookup by member path ID', () =>
     expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// applyFilters — edge qualifier (effect / direction) path filtering
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — effect and direction qualifier filtering', () => {
+  const EFF_ACTIVITY = 'p/eff/activity';
+  const EFF_ABUNDANCE = 'p/eff/abundance';
+  const DIR_INCREASED = 'p/dir/increased';
+  const DIR_DECREASED = 'p/dir/decreased';
+
+  /**
+   * Three single-edge paths carrying different qualifier combinations:
+   *   P1: increased activity
+   *   P2: decreased activity
+   *   P3: increased abundance
+   */
+  const buildQualifierFixture = () => {
+    const rs = makeResultSet({
+      nodes: { n1: makeNode('n1'), n2: makeNode('n2') },
+      edges: {
+        e1: makeEdge('e1', { predicate: 'biolink:affects' }),
+        e2: makeEdge('e2', { predicate: 'biolink:affects' }),
+        e3: makeEdge('e3', { predicate: 'biolink:affects' }),
+      },
+      paths: {
+        P1: makePath('P1', ['n1', 'e1', 'n2'], {
+          tags: pathTags({ [EFF_ACTIVITY]: 'Activity', [DIR_INCREASED]: 'Increased' }),
+        }),
+        P2: makePath('P2', ['n1', 'e2', 'n2'], {
+          tags: pathTags({ [EFF_ACTIVITY]: 'Activity', [DIR_DECREASED]: 'Decreased' }),
+        }),
+        P3: makePath('P3', ['n1', 'e3', 'n2'], {
+          tags: pathTags({ [EFF_ABUNDANCE]: 'Abundance', [DIR_INCREASED]: 'Increased' }),
+        }),
+      },
+      tags: resultSetTags({
+        [EFF_ACTIVITY]: 'Activity',
+        [EFF_ABUNDANCE]: 'Abundance',
+        [DIR_INCREASED]: 'Increased',
+        [DIR_DECREASED]: 'Decreased',
+      }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['P1', 'P2', 'P3'] });
+    return { rs, result };
+  };
+
+  it('keeps only paths carrying an included effect', () => {
+    const { rs, result } = buildQualifierFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(EFF_ACTIVITY, false),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(updatedPathFilterState.P3).toBe(true);
+    expect(results).toHaveLength(1);
+  });
+
+  it('removes paths carrying an excluded direction', () => {
+    const { rs, result } = buildQualifierFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(DIR_DECREASED, true),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(true);
+    expect(updatedPathFilterState.P3).toBe(false);
+    expect(results).toHaveLength(1);
+  });
+
+  it('requires a match in both families when effect and direction are both included (AND across families)', () => {
+    const { rs, result } = buildQualifierFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(EFF_ACTIVITY, false),
+      makePathFilter(DIR_INCREASED, false),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(true);
+    expect(updatedPathFilterState.P3).toBe(true);
+    expect(results).toHaveLength(1);
+  });
+
+  it('matches any included value within a single family (OR within a family)', () => {
+    const { rs, result } = buildQualifierFixture();
+    const { updatedPathFilterState, results } = runApplyFilters(rs, result, [
+      makePathFilter(DIR_INCREASED, false),
+      makePathFilter(DIR_DECREASED, false),
+    ]);
+
+    expect(updatedPathFilterState.P1).toBe(false);
+    expect(updatedPathFilterState.P2).toBe(false);
+    expect(updatedPathFilterState.P3).toBe(false);
+    expect(results).toHaveLength(1);
+  });
+
+  it('drops the result when every path is filtered out', () => {
+    const { rs, result } = buildQualifierFixture();
+    const { results } = runApplyFilters(rs, result, [
+      makePathFilter(EFF_ABUNDANCE, false),
+      makePathFilter(DIR_DECREASED, false),
+    ]);
+
+    expect(results).toHaveLength(0);
+  });
+});

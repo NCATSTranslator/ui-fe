@@ -14,6 +14,8 @@ const tagCaptions: Record<string, string> = {
   cc: "Filter on different categories of chemicals.",
   pc: "Include or exclude paths from results that contain a particular type of object",
   pred: "Include or exclude paths from results based on the types of relationships within them",
+  eff: "Include or exclude paths from results based on which aspect of an object a relationship affects, such as its activity, abundance or expression",
+  dir: "Include or exclude paths from results based on the direction of a relationship's effect, such as increased or decreased",
   role: "Include or exclude results according to their biological or chemical role or application",
   ara: "Include or exclude paths from results based on which reasoning agents provided them",
   di: "Include or exclude results based on whether they have been tested in clinical trials for treatment of the indicated disease",
