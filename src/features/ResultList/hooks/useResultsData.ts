@@ -1,14 +1,19 @@
-import { useState, useRef, useCallback, useEffect, useMemo, RefObject, Dispatch, SetStateAction } from "react";
+import { useState, useRef, useCallback, RefObject, Dispatch, SetStateAction } from "react";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import { setResultSet } from "@/features/ResultList/slices/resultsSlice";
-import { setQueryStatus, QueryLoadingStatus } from "@/features/ResultList/slices/queryStatusSlice";
 import { getEvidenceCounts } from "@/features/Evidence/utils/utilities";
 import { getPathCount } from "@/features/Core/utils/resultHelpers";
 import { generatePathfinderScore, generateScore, recalculateResultSetScores } from "@/features/ResultList/utils/scoring";
-import { useResultsStatusQuery, useResultsDataQuery } from "@/features/ResultList/hooks/resultListHooks";
+import { useResultsPolling } from "@/features/ResultList/hooks/useResultsPolling";
+import { useQuerySeen } from "@/features/ResultList/hooks/useQuerySeen";
+import { useFreshResults } from "@/features/ResultList/hooks/useFreshResults";
+import { useResultsLoadedTracking } from "@/features/ResultList/hooks/useResultsLoadedTracking";
+import { useNodeDescription } from "@/features/ResultList/hooks/useNodeDescription";
+import { useQueryStatusDispatch } from "@/features/ResultList/hooks/useQueryStatusDispatch";
+import { useLatest } from "@/features/Core/hooks/useLatest";
+import { handleResultsError } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { ResultSet, Result, ARAStatusResponse, ScoreWeights } from "@/features/ResultList/types/results.d";
-import { trackEvent } from "@/features/Analytics/utils/dataLayer";
 import { HandleUpdateResultsFn } from "@/features/ResultList/hooks/useResultFiltering";
 import { AppDispatch } from "@/redux/store";
 
@@ -36,7 +41,6 @@ interface UseResultsDataReturn {
   isError: boolean;
   setIsError: Dispatch<SetStateAction<boolean>>;
   arsStatus: ARAStatusResponse | null;
-  setArsStatus: Dispatch<SetStateAction<ARAStatusResponse | null>>;
   resultStatus: ResultStatusString;
   setResultStatus: Dispatch<SetStateAction<ResultStatusString>>;
   setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
@@ -49,13 +53,10 @@ interface UseResultsDataReturn {
   rawResults: RefObject<ResultSet | null>;
   originalResults: RefObject<Result[]>;
   prevRawResults: RefObject<ResultSet | null>;
-  numberOfStatusChecks: RefObject<number>;
   firstLoad: RefObject<boolean>;
   // Fetching state (lifted from refs to ensure re-renders)
   isFetchingARAStatus: boolean | null;
-  setIsFetchingARAStatus: Dispatch<SetStateAction<boolean | null>>;
   isFetchingResults: boolean;
-  setIsFetchingResults: Dispatch<SetStateAction<boolean>>;
   // Callbacks
   recalculateScores: (newWeights: ScoreWeights) => void;
   handleResultsRefresh: () => void;
@@ -86,6 +87,10 @@ const prepareResultSet = (resultSet: ResultSet, scoreWeights: ScoreWeights, isPa
   return newResultSet;
 };
 
+// Composition root for result-list data: owns the result state and composes the
+// polling, seen-tracking, analytics, and status hooks. Splitting it further would
+// only relocate the wiring into ResultList.
+// eslint-disable-next-line max-lines-per-function, max-statements
 const useResultsData = ({
   currentQueryID,
   currentQuerySid,
@@ -98,65 +103,55 @@ const useResultsData = ({
   scoreWeights,
   handleUpdateResultsRef,
 }: UseResultsDataArgs): UseResultsDataReturn => {
-
   // State
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(presetIsLoading);
-  const [arsStatus, setArsStatus] = useState<ARAStatusResponse | null>(null);
   const [resultStatus, setResultStatus] = useState<ResultStatusString>("unknown");
-  const [freshRawResults, setFreshRawResults] = useState<ResultSet | null>(null);
   const [formattedResults, setFormattedResults] = useState<Result[]>([]);
-  const [nodeDescription, setNodeDescription] = useState("");
 
   // Refs
   const rawResults = useRef<ResultSet | null>(initialResultSet);
   const originalResults = useRef<Result[]>([]);
   const prevRawResults = useRef<ResultSet | null>(initialResultSet);
-  const numberOfStatusChecks = useRef(0);
   const firstLoad = useRef(true);
-  // results_loaded is a once-per-query event. The ARS streams partial result
-  // sets, so handleNewResults runs repeatedly for a single query; this tracks
-  // which query ID has already reported and when its wait started.
-  const resultsLoadedTrackedFor = useRef<string | null>(null);
-  const resultsWaitStartedAt = useRef<number>(Date.now());
 
-  // Fetching state (lifted from refs so updates trigger re-renders for sidebar/status)
-  const [isFetchingARAStatus, setIsFetchingARAStatus] = useState<boolean | null>(presetIsLoading ? true : null);
-  const [isFetchingResults, setIsFetchingResults] = useState(false);
+  // Latest values for the stable callbacks below
+  const formattedResultsRef = useLatest(formattedResults);
+  const scoreWeightsRef = useLatest(scoreWeights);
+  const isPathfinderRef = useLatest(isPathfinder);
 
-  // Refs for values read inside handleNewResults to keep the callback stable
-  const isFetchingARAStatusRef = useRef(isFetchingARAStatus);
-  isFetchingARAStatusRef.current = isFetchingARAStatus;
-  const scoreWeightsRef = useRef(scoreWeights);
-  scoreWeightsRef.current = scoreWeights;
-  const isPathfinderRef = useRef(isPathfinder);
-  isPathfinderRef.current = isPathfinder;
+  // --- Fetch pipeline ---
 
-  // Restart the results_loaded clock whenever a different query is opened, so
-  // load_ms measures this query's wait rather than time since the tab opened.
-  useEffect(() => {
-    resultsWaitStartedAt.current = Date.now();
-  }, [currentQueryID]);
+  // handleNewResults is declared below; the pipeline reaches it through this ref
+  const handleNewResultsRef = useRef<(resultSet: ResultSet) => void>(() => {});
+  const { freshRawResults, hasFreshResults, setFreshRawResults, receiveResults, handleResultsRefresh } =
+    useFreshResults(formattedResultsRef, handleNewResultsRef);
+  const markQuerySeen = useQuerySeen(currentQueryID, currentQuerySid, areUserQueriesLoaded);
 
-  // Derived
-  const hasFreshResults = useMemo(() => freshRawResults !== null, [freshRawResults]);
+  const handleResultsResponse = useCallback((data: ResultSet) => {
+    receiveResults(data);
+    markQuerySeen();
+  }, [receiveResults, markQuerySeen]);
+
+  // A failed fetch is only an error state if there is nothing on screen yet
+  const handlePollingError = useCallback(() => {
+    if (formattedResultsRef.current.length <= 0)
+      handleResultsError(true, setIsError, setIsLoading);
+  }, [formattedResultsRef]);
+
+  const {
+    arsStatus,
+    isFetchingARAStatus, isFetchingARAStatusRef,
+    isFetchingResults,
+    resetPolling,
+  } = useResultsPolling({ currentQueryID, presetIsLoading, onResults: handleResultsResponse, onError: handlePollingError });
+
   const resultsComplete = !isError && freshRawResults === null && !isFetchingARAStatus && !isFetchingResults;
+  const reportResultsLoaded = useResultsLoadedTracking(currentQueryID, isPathfinderRef, isFetchingARAStatusRef);
+  const [nodeDescription, setNodeDescription] = useNodeDescription(rawResults, nodeIdParam, formattedResults);
+  useQueryStatusDispatch(dispatch, currentQueryID, { isLoading, isError, araCount: arsStatus?.data?.aras?.length ?? 0, resultStatus });
 
   // --- Callbacks ---
-
-  // results_loaded fires once per query, on the first result set that either has
-  // results or arrives after the ARS has finished.
-  const reportResultsLoaded = useCallback((resultSet: ResultSet, resultCount: number) => {
-    const settled = resultCount > 0 || !isFetchingARAStatusRef.current;
-    if (!settled || resultsLoadedTrackedFor.current === currentQueryID) return;
-    resultsLoadedTrackedFor.current = currentQueryID;
-    trackEvent('results_loaded', {
-      query_type: isPathfinderRef.current ? 'pathfinder' : 'single',
-      query_status: resultSet.status,
-      result_count: resultCount,
-      load_ms: Date.now() - resultsWaitStartedAt.current,
-    });
-  }, [currentQueryID]);
 
   const handleNewResults = useCallback((resultSet: ResultSet) => {
     setResultStatus(resultSet.status);
@@ -173,6 +168,8 @@ const useResultsData = ({
     const newResultSet = prepareResultSet(resultSet, scoreWeightsRef.current, currentIsPathfinder);
     prevRawResults.current = newResultSet;
 
+    // A usable result set clears any error left by an earlier failed fetch
+    setIsError(false);
     dispatch(setResultSet({ pk: currentQueryID || "", resultSet: newResultSet }));
 
     if (!handleUpdateResultsRef.current) return;
@@ -188,7 +185,8 @@ const useResultsData = ({
       setIsLoading(false);
 
     reportResultsLoaded(newResultSet, newFormattedResults.length);
-  }, [dispatch, currentQueryID, handleUpdateResultsRef, reportResultsLoaded]);
+  }, [dispatch, currentQueryID, handleUpdateResultsRef, reportResultsLoaded, isFetchingARAStatusRef, isPathfinderRef, scoreWeightsRef]);
+  handleNewResultsRef.current = handleNewResults;
 
   const recalculateScores = useCallback((newWeights: ScoreWeights) => {
     if (!rawResults.current || !rawResults.current.data?.results?.length) return;
@@ -200,13 +198,7 @@ const useResultsData = ({
     if (!handleUpdateResultsRef.current) return;
 
     handleUpdateResultsRef.current({ mode: 'rebuild', summary: resultSetData });
-  }, [handleUpdateResultsRef]);
-
-  const handleResultsRefresh = useCallback(() => {
-    if (!!freshRawResults)
-      handleNewResults(freshRawResults);
-    setFreshRawResults(null);
-  }, [freshRawResults, handleNewResults]);
+  }, [handleUpdateResultsRef, isPathfinderRef]);
 
   // Clears everything this hook owns so a different query starts from a blank slate.
   const resetResultsData = useCallback(() => {
@@ -217,76 +209,12 @@ const useResultsData = ({
     rawResults.current = null;
     prevRawResults.current = null;
     originalResults.current = [];
-    setIsFetchingARAStatus(true);
-    setIsFetchingResults(false);
-    numberOfStatusChecks.current = 0;
-    setArsStatus(null);
+    resetPolling();
     setResultStatus("unknown");
     // Re-arm the shared-result modal for the new query
     firstLoad.current = true;
     setNodeDescription("");
-  }, []);
-
-  // Dispatch loading status to Redux for sub-views (flattened to primitives)
-  const araCount = arsStatus?.data?.aras?.length ?? 0;
-  const prevStatusRef = useRef<QueryLoadingStatus | null>(null);
-  useEffect(() => {
-    if (!currentQueryID)
-      return;
-    const next: QueryLoadingStatus = { isLoading, isError, araCount, resultStatus };
-    const prev = prevStatusRef.current;
-    // If the previous status is the same as the next status, don't dispatch
-    if (prev && isEqual(prev, next))
-      return;
-    prevStatusRef.current = next;
-    dispatch(setQueryStatus({ pk: currentQueryID, status: next }));
-  }, [dispatch, currentQueryID, isLoading, isError, araCount, resultStatus]);
-
-  // --- React Query calls ---
-
-  useResultsStatusQuery(
-    currentQueryID,
-    isFetchingARAStatus,
-    setIsFetchingARAStatus,
-    isFetchingARAStatusRef,
-    numberOfStatusChecks,
-    formattedResults,
-    setIsError,
-    setIsLoading,
-    isFetchingResults,
-    setIsFetchingResults,
-    arsStatus,
-    setArsStatus
-  );
-
-  useResultsDataQuery(
-    currentQueryID,
-    isFetchingResults,
-    formattedResults,
-    setFreshRawResults,
-    handleNewResults,
-    numberOfStatusChecks,
-    isFetchingARAStatus,
-    setIsFetchingARAStatus,
-    setIsError,
-    setIsLoading,
-    setIsFetchingResults,
-    currentQuerySid,
-    areUserQueriesLoaded
-  );
-
-  // Node description effect
-  useEffect(() => {
-    if (!nodeIdParam)
-      return;
-
-    let node = rawResults.current?.data?.nodes[nodeIdParam];
-    if (rawResults.current && node) {
-      if (node.descriptions.length > 0) {
-        setNodeDescription(node.descriptions[0].replaceAll('"', ''));
-      }
-    }
-  }, [formattedResults, nodeIdParam]);
+  }, [resetPolling, setFreshRawResults, setNodeDescription]);
 
   return {
     formattedResults,
@@ -296,7 +224,6 @@ const useResultsData = ({
     isError,
     setIsError,
     arsStatus,
-    setArsStatus,
     resultStatus,
     setResultStatus,
     setFreshRawResults,
@@ -308,10 +235,7 @@ const useResultsData = ({
     originalResults,
     prevRawResults,
     isFetchingARAStatus,
-    setIsFetchingARAStatus,
     isFetchingResults,
-    setIsFetchingResults,
-    numberOfStatusChecks,
     firstLoad,
     recalculateScores,
     handleResultsRefresh,

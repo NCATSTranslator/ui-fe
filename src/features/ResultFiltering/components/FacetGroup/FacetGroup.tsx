@@ -48,7 +48,7 @@ const FacetGroup: FC<FacetGroupProps> = ({ filterFamily, activeFilters, facetCom
               sortedFacets.map((tag: [string, Filter]) => {
                 return(
                   <FacetTag
-                    key={tag[1].id}
+                    key={tag[0]}
                     activeFilters={activeFilters}
                     family={filterFamily}
                     onFilter={onFilter}

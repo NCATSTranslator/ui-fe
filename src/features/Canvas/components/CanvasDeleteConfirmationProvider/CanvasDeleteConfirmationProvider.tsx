@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -27,6 +26,7 @@ import { trashCanvases } from '@/features/Canvas/utils/canvasApi';
 import { canvasDeleteErrorToast, canvasDeletedToast } from '@/features/Core/utils/toastMessages';
 import CanvasDeleteWarningModal from '@/features/Canvas/components/CanvasDeleteWarningModal/CanvasDeleteWarningModal';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+import { useLatest } from '@/features/Core/hooks/useLatest';
 
 const USER_CANVASES_QUERY_KEY = ['userCanvases'] as const;
 
@@ -53,12 +53,6 @@ type DeleteRollbackState = {
   wasActive: boolean;
   wasPaneOpen: boolean;
   wasPaneMaximized: boolean;
-};
-
-const useSyncedRef = <T,>(value: T) => {
-  const ref = useRef(value);
-  ref.current = value;
-  return ref;
 };
 
 const restoreMetaInQueryCache = (
@@ -108,10 +102,10 @@ export const CanvasDeleteConfirmationProvider: FC<CanvasDeleteConfirmationProvid
   const activeCanvasId = useSelector(selectActiveCanvasId);
   const paneOpen = useSelector(selectPaneOpen);
   const paneMaximized = useSelector(selectPaneMaximized);
-  const canvasesRef = useSyncedRef(canvases);
-  const activeCanvasIdRef = useSyncedRef(activeCanvasId);
-  const paneOpenRef = useSyncedRef(paneOpen);
-  const paneMaximizedRef = useSyncedRef(paneMaximized);
+  const canvasesRef = useLatest(canvases);
+  const activeCanvasIdRef = useLatest(activeCanvasId);
+  const paneOpenRef = useLatest(paneOpen);
+  const paneMaximizedRef = useLatest(paneMaximized);
 
   const [pendingDeleteCanvasId, setPendingDeleteCanvasId] = useState<number | null>(null);
 

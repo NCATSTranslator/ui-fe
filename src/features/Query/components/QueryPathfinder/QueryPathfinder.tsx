@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, FC } from 'react';
+import { useState, useRef, FC } from 'react';
 import styles from './QueryPathfinder.module.scss';
 import Button from '@/features/Core/components/Button/Button';
 import { AutocompleteItem, AutocompleteContext } from '@/features/Query/types/querySubmission';
@@ -9,9 +9,10 @@ import SubtractIcon from '@/assets/icons/buttons/Subtract/Subtract.svg?react';
 import loadingIcon from '@/assets/images/loading/loading-white.png';
 import Select from '@/features/Core/components/Select/Select';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import { useAutocomplete, useQuerySubmission, useNameResolverEndpoint, useSyncedAutocompleteFromNodeParams, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { useQuerySubmission, useNameResolverEndpoint, HOME_QUERY_AUTOCOMPLETE_CONFIG } from '@/features/Query/hooks/customQueryHooks';
+import { usePathfinderTerms, PathfinderTerm } from '@/features/Query/hooks/usePathfinderTerms';
+import { validatePathfinderTerms } from '@/features/Query/utils/pathfinderValidation';
 import { noop } from '@/features/Core/utils/constants';
-import { withGeneMatchLabel } from '@/features/Query/utils/autocompleteFunctions';
 import AutocompleteInput from '@/features/Query/components/AutocompleteInput/AutocompleteInput';
 import { ProjectRaw } from '@/features/Projects/types/projects';
 import { BIOLINK_CATEGORIES } from '@/features/Query/utils/biolinkCategories';
@@ -44,124 +45,33 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
   const disabled = user === null;
   const nameResolverEndpoint = useNameResolverEndpoint();
   const submitRef = useRef<HTMLButtonElement>(null);
-  const autocompleteInputRefOne = useRef<HTMLInputElement>(null);
-  const autocompleteInputRefTwo = useRef<HTMLInputElement>(null);
   const [isError, setIsError] = useState(false);
   const [errorText, setErrorText] = useState("");
-  const {
-    queryItem: queryItemOne,
-    setQueryItem: setQueryItemOne,
-    inputText: inputOneText,
-    setInputText: setInputOneText,
-    clear: clearSyncedItemOne,
-  } = useSyncedAutocompleteFromNodeParams(initNodeIdParam, initNodeLabelParam, initNodeCategoryParam);
-  const [inputTwoText, setInputTwoText] = useState("");
-  const [queryItemTwo, setQueryItemTwo] = useState<AutocompleteItem | null>(null);
   const [hasMiddleType, setHasMiddleType] = useState<boolean>(false);
   const [middleType, setMiddleType] = useState<string>("");
 
-  const autocompleteConfig = HOME_QUERY_AUTOCOMPLETE_CONFIG;
-
-  const {
-    autocompleteItems: autocompleteItemsOne,
-    loadingAutocomplete: autocompleteLoadingOne,
-    delayedQuery: delayedQueryOne,
-    autocompleteVisibility: autocompleteVisibilityOne,
-    setAutocompleteVisibility: setAutocompleteVisibilityOne,
-  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
-
-  const {
-    autocompleteItems: autocompleteItemsTwo,
-    loadingAutocomplete: autocompleteLoadingTwo,
-    delayedQuery: delayedQueryTwo,
-    autocompleteVisibility: autocompleteVisibilityTwo,
-    setAutocompleteVisibility: setAutocompleteVisibilityTwo,
-  } = useAutocomplete(autocompleteConfig, nameResolverEndpoint);
-
+  const { one, two, swapTerms } = usePathfinderTerms(
+    { nodeId: initNodeIdParam, nodeLabel: initNodeLabelParam, nodeCategory: initNodeCategoryParam },
+    HOME_QUERY_AUTOCOMPLETE_CONFIG,
+    nameResolverEndpoint,
+  );
   const { isLoading, submitPathfinderQuery } = useQuerySubmission('pathfinder', shouldNavigate, submissionCallback);
 
-  // Event handler called when search bar is updated by user
-  const handleQueryItemChange = useCallback((e: string, isFirstBar:boolean) => {
-    if(isFirstBar) {
-      setQueryItemOne(null);
-      setInputOneText(e);
-      delayedQueryOne(e);
-    } else {
-      setQueryItemTwo(null);
-      setInputTwoText(e);
-      delayedQueryTwo(e);
-    }
-  },[delayedQueryOne, delayedQueryTwo, setInputOneText, setQueryItemOne]);
-
-  const updateQueryItem = (node: AutocompleteItem, isFirstBar: boolean) => {
-    // add in match text for genes, which should be the species
-    const selectedNode = withGeneMatchLabel(node);
-
-    if(isFirstBar) {
-      setInputOneText(selectedNode.label);
-      setQueryItemOne(selectedNode);
-    } else {
-      setInputTwoText(selectedNode.label);
-      setQueryItemTwo(selectedNode);
-    }
-  }
-
-  const handleItemSelection = (item: AutocompleteItem, isFirstBar: boolean) => {
+  const selectTerm = (term: PathfinderTerm, item: AutocompleteItem) => {
     setIsError(false);
-    updateQueryItem(item, isFirstBar);
-
-    if(autocompleteItemsOne || autocompleteItemsTwo) {
-      if(isFirstBar) {
-        setAutocompleteVisibilityOne(false);
-      } else {
-        setAutocompleteVisibilityTwo(false);
-      }
-    }
-  }
-
-  const validateSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
-    if(!itemOne && !itemTwo) {
-      setIsError(true);
-      setErrorText("No terms selected, please select two search terms.");
-      return;
-    }
-    if(!itemOne || itemOne.id === "") {
-      setIsError(true);
-      setErrorText("First search term is not selected, please select a valid term.");
-      return;
-    }
-    if(!itemTwo || itemTwo.id === "") {
-      setIsError(true);
-      setErrorText("Second search term is not selected, please select a valid term.");
-      return;
-    }
-    submitPathfinderQuery?.(itemOne, itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
-  }
+    term.onItemSelect(item);
+  };
 
   // Event handler for form submission
-  const handleSubmission = (itemOne: AutocompleteItem | null, itemTwo: AutocompleteItem | null) => {
-    validateSubmission(itemOne, itemTwo);
-  }
-
-  const clearItem = (item: number) => {
-    if (item === 1) {
-      // First input is the one prefilled from canvas/node URL params.
-      clearSyncedItemOne();
-    } else if (item === 2) {
-      setQueryItemTwo(null);
-      setInputTwoText("");
+  const handleSubmission = () => {
+    const validation = validatePathfinderTerms(one.queryItem, two.queryItem);
+    if (!validation.ok) {
+      setIsError(true);
+      setErrorText(validation.error);
+      return;
     }
-  }
-
-  const swapTerms = () => {
-    const prevItemOne = queryItemOne;
-    setQueryItemOne(queryItemTwo);
-    setQueryItemTwo(prevItemOne);
-
-    const prevTextOne = inputOneText;
-    setInputOneText(inputTwoText);
-    setInputTwoText(prevTextOne);
-  }
+    submitPathfinderQuery?.(validation.itemOne, validation.itemTwo, hasMiddleType ? middleType : undefined, selectedProject?.id?.toString() || undefined);
+  };
 
   const handleMiddleTypeTrigger = () => {
     if(hasMiddleType) {
@@ -174,7 +84,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
 
   const handleAutocompleteSelect = (cxt: AutocompleteContext) => {
     if (cxt.id === autocompleteOneId) {
-      autocompleteInputRefTwo.current?.focus();
+      two.inputRef.current?.focus();
     } else if (cxt.id === autocompleteTwoId) {
       submitRef.current?.focus();
     } else {
@@ -188,7 +98,7 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
     }
     cxt.event.preventDefault();
     cxt.event.stopPropagation();
-    handleSubmission(queryItemOne, queryItemTwo);
+    handleSubmission();
   }
 
   return (
@@ -206,27 +116,27 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               className={`${styles.form} ${hasMiddleType && styles.hasMiddleType}`}
               onSubmit={(e) => {
                 e.preventDefault();
-                handleSubmission(queryItemOne, queryItemTwo);
+                handleSubmission();
               }}
             >
               <AutocompleteInput
                 id={autocompleteOneId}
-                value={inputOneText}
-                onChange={(e) => handleQueryItemChange(e, true)}
-                onItemSelect={(item) => handleItemSelection(item, true)}
-                autocompleteItems={autocompleteItemsOne}
-                loadingAutocomplete={autocompleteLoadingOne}
-                selectedItem={queryItemOne}
-                onClear={() => clearItem(1)}
+                value={one.inputText}
+                onChange={one.onChange}
+                onItemSelect={(item) => selectTerm(one, item)}
+                autocompleteItems={one.autocompleteItems}
+                loadingAutocomplete={one.loadingAutocomplete}
+                selectedItem={one.queryItem}
+                onClear={one.onClear}
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
-                autocompleteVisibility={autocompleteVisibilityOne}
-                setAutocompleteVisibility={setAutocompleteVisibilityOne}
+                autocompleteVisibility={one.autocompleteVisibility}
+                setAutocompleteVisibility={one.setAutocompleteVisibility}
                 disabled={disabled}
                 placeholder={user === null ? "Log In to Enter Search Terms" : "Enter First Search Term"}
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
-                inputRef={autocompleteInputRefOne}
+                inputRef={one.inputRef}
                 handleSwapTerms={swapTerms}
                 showDisclaimer
               />
@@ -257,22 +167,22 @@ const QueryPathfinder: FC<QueryPathfinderProps> = ({
               <PathfinderDivider className={styles.dividerIcon}/>
               <AutocompleteInput
                 id={autocompleteTwoId}
-                value={inputTwoText}
-                onChange={(e) => handleQueryItemChange(e, false)}
-                onItemSelect={(item) => handleItemSelection(item, false)}
-                autocompleteItems={autocompleteItemsTwo}
-                loadingAutocomplete={autocompleteLoadingTwo}
-                selectedItem={queryItemTwo}
-                onClear={() => clearItem(2)}
+                value={two.inputText}
+                onChange={two.onChange}
+                onItemSelect={(item) => selectTerm(two, item)}
+                autocompleteItems={two.autocompleteItems}
+                loadingAutocomplete={two.loadingAutocomplete}
+                selectedItem={two.queryItem}
+                onClear={two.onClear}
                 className={styles.inputContainer}
                 selectedClassName={styles.selected}
-                autocompleteVisibility={autocompleteVisibilityTwo}
-                setAutocompleteVisibility={setAutocompleteVisibilityTwo}
+                autocompleteVisibility={two.autocompleteVisibility}
+                setAutocompleteVisibility={two.setAutocompleteVisibility}
                 disabled={disabled}
                 placeholder={user === null ? "Log In to Enter Search Terms" : "Enter Second Search Term"}
                 handleSelect={handleAutocompleteSelect}
                 handleSubmit={handleInputSubmit}
-                inputRef={autocompleteInputRefTwo}
+                inputRef={two.inputRef}
                 showDisclaimer
               />
               <Button
