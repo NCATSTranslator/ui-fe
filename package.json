@@ -41,7 +41,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "lint": "eslint src",
+    "lint": "eslint src --max-warnings 0",
     "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
@@ -69,7 +69,7 @@
     ]
   },
   "engines": {
-    "node": "17.x"
+    "node": ">=22"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
