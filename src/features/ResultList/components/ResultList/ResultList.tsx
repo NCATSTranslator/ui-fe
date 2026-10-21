@@ -1,23 +1,20 @@
 import { useRef, useCallback, useEffect, useLayoutEffect, useMemo, FC, ReactNode } from "react";
 import styles from './ResultList.module.scss';
-import ResultItem from "@/features/ResultItem/components/ResultItem/ResultItem";
+import ResultListRows from "@/features/ResultList/components/ResultListRows/ResultListRows";
 import ResultListLoadingArea from "@/features/ResultList/components/ResultListLoadingArea/ResultListLoadingArea";
 import ResultListHeader from "@/features/ResultList/components/ResultListHeader/ResultListHeader";
 import ResultListSubheading from "@/features/ResultList/components/ResultListSubheading/ResultListSubheading";
-import cloneDeep from "lodash/cloneDeep";
 import { useSelector, useDispatch } from 'react-redux';
-import { getResultSetById, getResultById, getNodeById }from "@/features/ResultList/slices/resultsSlice";
+import { getResultSetById, getNodeById } from "@/features/ResultList/slices/resultsSlice";
 import { currentPrefs, currentUser }from "@/features/UserAuth/slices/userSlice";
-import { applyFilters, injectDynamicFilters, genPathFilterState, areEntityFiltersEqual, calculateFacetCounts } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { areEntityFiltersEqual } from "@/features/ResultList/utils/resultsInteractionFunctions";
+import { computeResultsUpdate } from "@/features/ResultList/utils/resultsUpdate";
 import { getDataFromQueryVar } from "@/features/Core/utils/urlHelpers";
-import { formatBiolinkTypeString } from "@/features/Core/utils/stringFormatters";
-import { queryTypes } from "@/features/Query/utils/queryTypes";
-import { getBiolinkCategoryDisplay } from "@/features/Query/utils/biolinkCategories";
 import { SaveGroup } from "@/features/UserAuth/utils/userApi";
 import ResultListTableHead from "@/features/ResultList/components/ResultListTableHead/ResultListTableHead";
 import ResultListModals from "@/features/ResultList/components/ResultListModals/ResultListModals";
 import ResultListBottomPagination from "@/features/ResultList/components/ResultListBottomPagination/ResultListBottomPagination";
-import { Result, PathFilterState, ScoreWeights } from "@/features/ResultList/types/results.d";
+import { Result, ResultSet, PathFilterState, ScoreWeights } from "@/features/ResultList/types/results.d";
 import { Filter } from "@/features/ResultFiltering/types/filters";
 import useScoreWeights from "@/features/ResultList/hooks/useScoreWeights";
 import { useQueryChangeReset } from "@/features/ResultList/hooks/resultListHooks";
@@ -27,6 +24,7 @@ import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn, ResultsUpdate } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
+import { useResultsUrlParams, useQueryTitle } from "@/features/ResultList/hooks/useResultsUrlParams";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useNotesModal } from '@/features/ResultItem/hooks/useNotesModal';
 import { bookmarkErrorToast, bookmarkRemovalErrorToast } from "@/features/Core/utils/toastMessages";
@@ -50,6 +48,9 @@ const handleBookmarkError = (operation: BookmarkOperation) => {
   else bookmarkErrorToast();
 };
 
+// Composition root for the results page: it wires ~12 hooks into one context and layout.
+// Everything separable has been extracted; what remains is the composition itself.
+// eslint-disable-next-line max-lines-per-function
 const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   const user = useSelector(currentUser);
@@ -58,50 +59,22 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
 
   // URL search params - reactive to URL changes
   const decodedParams = useDecodedParams();
-  const loadingParam = getDataFromQueryVar("loading", decodedParams);
-  const currentQueryID = getDataFromQueryVar("q", decodedParams);
+  const urlParams = useResultsUrlParams(decodedParams);
+  const {
+    currentQueryID, loading, presetTypeID, isPathfinder, isLookup, presetTypeObject,
+    nodeIdParam, pathfinderIdOne, pathfinderLabelOne, pathfinderIdTwo, pathfinderLabelTwo,
+    constraintText, lookupCategory, effectiveNodeLabel, effectiveNodeId,
+  } = urlParams;
   // Track previous query ID to detect changes
   const prevQueryID = useRef<string | null>(currentQueryID);
-  const presetTypeID = getDataFromQueryVar("t", decodedParams);
-  const isPathfinder = (presetTypeID === "p");
-  const isLookup = (presetTypeID === "l");
-  const presetTypeObject = (!!presetTypeID)
-    ? queryTypes.find(type => type.id === parseInt(presetTypeID)) ?? null
-    : null;
 
   const { data: queries = [], isSuccess: areUserQueriesLoaded } = useUserQueries();
   const currentQuerySid: number | undefined = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID)?.sid, [queries, currentQueryID]);
   const currentQueryObject = useMemo(() => queries.find((q: UserQueryObject) => q.data.qid === currentQueryID) || null, [queries, currentQueryID]);
   const { title: resolvedQueryTitle } = useGetQueryCardTitle(currentQueryObject);
-
-  const nodeLabelParam = getDataFromQueryVar("l", decodedParams);
-  const nodeIdParam = getDataFromQueryVar("i", decodedParams);
-  const pathfinderIdOne = getDataFromQueryVar("ione", decodedParams);
-  const pathfinderLabelOne = getDataFromQueryVar("lone", decodedParams);
-  const pathfinderIdTwo = getDataFromQueryVar("itwo", decodedParams);
-  const pathfinderLabelTwo = getDataFromQueryVar("ltwo", decodedParams);
-  const constraintText = formatBiolinkTypeString(getDataFromQueryVar("c", decodedParams) || "");
-  const lookupCategory = getDataFromQueryVar("cat", decodedParams);
-
-  const effectiveNodeLabel = isLookup ? pathfinderLabelOne : nodeLabelParam;
-  const effectiveNodeId = isLookup ? pathfinderIdOne : nodeIdParam;
-
   // Build query title for downloads - use resolved title if available, otherwise build from URL params
-  const queryTitle = useMemo(() => {
-    if (resolvedQueryTitle) return resolvedQueryTitle;
-    if (isLookup && pathfinderLabelOne) {
-      const catDisplay = getBiolinkCategoryDisplay(lookupCategory || '', true);
-      return `${pathfinderLabelOne} — ${catDisplay} Lookup`;
-    }
-    // Fallback: construct title from URL parameters
-    if (nodeLabelParam) {
-      const typeLabel = isPathfinder ? 'Pathfinder' : (presetTypeObject?.targetType || 'Query');
-      return `${nodeLabelParam} — ${typeLabel}s`;
-    }
-    return '';
-  }, [resolvedQueryTitle, nodeLabelParam, isPathfinder, isLookup, pathfinderLabelOne, lookupCategory, presetTypeObject]);
+  const queryTitle = useQueryTitle(resolvedQueryTitle, urlParams);
   const resultSet = useSelector(getResultSetById(currentQueryID));
-  const loading = (loadingParam === 'true') ? true : false;
   const presetIsLoading = (currentQueryID) ? true : loading;
 
   // start with user pref or default to score high low as default sort
@@ -274,110 +247,60 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setEndResultIndex(tempItemsPerPage);
   }, [prefs, calculateItemsPerPage, currentSortString, setItemsPerPage, setEndResultIndex]);
 
+  // Opens the shared-result modal once, on the first non-empty result list, when
+  // the URL named a result to focus.
+  const openSharedResultOnFirstLoad = useCallback((summary: ResultSet, results: Result[]) => {
+    if (!firstLoad.current || results.length === 0) return;
+    firstLoad.current = false;
+    const sharedId = resultIdParamRef.current;
+    if (!sharedId || sharedId === '0') return;
+    const sharedItemIndex = results.findIndex(result => result.id === sharedId);
+    if (sharedItemIndex === -1) return;
+    const sharedItemNode = getNodeById(summary, results[sharedItemIndex].subject);
+    setSharedItem({
+      index: sharedItemIndex,
+      page: Math.floor(sharedItemIndex / itemsPerPageRef.current),
+      name: results[sharedItemIndex].drug_name,
+      type: sharedItemNode ? sharedItemNode.types[0] : "",
+    });
+    setFocusModalOpen(true);
+  }, [firstLoad, setSharedItem, setFocusModalOpen]);
+
   // Recomputes the result list for a ResultsUpdate (see its doc for the modes).
   // Reads filters, sort, bookmarks, and path filter state from refs rather than
-  // props so the hooks that trigger updates don't have to pass that state back in.
+  // props so the hooks that trigger updates don't have to pass that state back in;
+  // computeResultsUpdate does the work and this applies the outcome to state.
   const handleUpdateResults = useCallback((update: ResultsUpdate): Result[] => {
-    const summaryParam = update.mode === 'rebuild' ? update.summary : rawResults.current;
-    if (!summaryParam) return [];
+    const outcome = computeResultsUpdate({
+      update,
+      rawResults: rawResults.current,
+      originalResults: originalResults.current,
+      activeFilters: activeFiltersRef.current,
+      sortType: currentSortString.current,
+      isPathfinder,
+      userSaves: userSavesRef.current,
+      pathFilterState: pathFilterStateRef.current,
+      visibleResultIds: visibleResultIdsRef.current,
+      sortResults: getSortedResults,
+    });
+    if (!outcome) return [];
+    const { summary, formattedResults: newFormattedResults, pathFilterState: newPathFilterState, filtering } = outcome;
 
-    const justSort = update.mode === 'sort';
-    const or: Result[] = update.mode === 'rebuild' ? [] : originalResults.current;
-    const filters = update.mode === 'refilter' ? update.filters : activeFiltersRef.current;
-    const sortType = currentSortString.current;
-    // Only a sort carries path filter state forward; filtering regenerates it.
-    const pfState = justSort ? pathFilterStateRef.current : null;
-
-    let summary = summaryParam;
-    let newFormattedResults: Result[] = [];
-    let newOriginalResults: Result[] = [];
-    let newPathFilterState = pfState ? cloneDeep(pfState) : {};
-
-    // Initial population of result state
-    if (or.length === 0) {
-      newFormattedResults = summary.data.results;
-      newOriginalResults = cloneDeep(newFormattedResults);
-      newPathFilterState = genPathFilterState(summary);
-    } else {
-      newFormattedResults = or;
-      newOriginalResults = or;
-    }
-
-    // Inject bookmark and note tag filters
-    [summary, newFormattedResults, newOriginalResults] = injectDynamicFilters(summary,
-        newFormattedResults, newOriginalResults, userSavesRef.current);
-
-    // Filtering
-    if (!justSort) {
-      const {
-        results,
-        updatedEntityFilters,
-        updatedPathFilterState,
-        facetCounts,
-        shouldResetPage
-      } = applyFilters(
-        filters,
-        newFormattedResults,
-        newOriginalResults,
-        summary,
-        newPathFilterState
-      );
-
-      newFormattedResults = results;
-      newPathFilterState = updatedPathFilterState;
-
-      // Update entity filters if changed
-      if (!areEntityFiltersEqual(updatedEntityFilters, activeEntityFiltersRef.current))
-        setActiveEntityFilters(updatedEntityFilters);
-
-      // Update available facet filters
-      const newFilters = calculateFacetCounts(
-        facetCounts.results,
-        summary,
-        facetCounts.negatedResults,
-        facetCounts.resultFacets,
-        facetCounts.negatedResultFacets
-      );
-      setAvailableFilters(newFilters);
-
-      // Reset pagination if needed
-      if (shouldResetPage && currentPage.current !== 0)
+    if (filtering) {
+      if (!areEntityFiltersEqual(filtering.entityFilters, activeEntityFiltersRef.current))
+        setActiveEntityFilters(filtering.entityFilters);
+      setAvailableFilters(filtering.availableFilters);
+      if (filtering.shouldResetPage && currentPage.current !== 0)
         handlePageReset(false, newFormattedResults.length);
-
-      originalResults.current = newOriginalResults;
-      newFormattedResults = getSortedResults(summary, newFormattedResults, sortType, isPathfinder);
-    } else {
-      // Sort canonical full list, then intersect with currently visible IDs (avoids re-running applyFilters)
-      const sortedOriginal = getSortedResults(summary, newOriginalResults, sortType, isPathfinder);
-      newFormattedResults = sortedOriginal.filter(r => visibleResultIdsRef.current.has(r.id));
+      originalResults.current = filtering.originalResults;
     }
 
-    // State assignment
     setFormattedResults(newFormattedResults);
     setPathFilterState(newPathFilterState);
-
-    // First-load modal setup
-    if (firstLoad.current && newFormattedResults.length > 0) {
-      firstLoad.current = false;
-      if (resultIdParamRef.current && resultIdParamRef.current !== '0') {
-        const sharedItemIndex = newFormattedResults.findIndex(result => result.id === resultIdParamRef.current);
-        if (sharedItemIndex !== -1) {
-          const sharedItemNode = getNodeById(summary, newFormattedResults[sharedItemIndex].subject);
-          const sharedItemType = sharedItemNode ? sharedItemNode.types[0] : "";
-          setSharedItem({
-            index: sharedItemIndex,
-            page: Math.floor(sharedItemIndex / itemsPerPageRef.current),
-            name: newFormattedResults[sharedItemIndex].drug_name,
-            type: sharedItemType
-          });
-          setFocusModalOpen(true);
-        }
-      }
-    }
-
+    openSharedResultOnFirstLoad(summary, newFormattedResults);
     rawResults.current = summary;
     return newFormattedResults;
-  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, setSharedItem, setFocusModalOpen, currentPage, firstLoad, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
+  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, openSharedResultOnFirstLoad, currentPage, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
 
   // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
   // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
@@ -515,50 +438,17 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                           isSortedByPaths={isSortedByPaths}
                           handleUpdateResults={handleSortUpdate}
                         />
-                        {
-                          isError &&
-                          <h5 className={styles.errorText}>There was an error when processing your query. Please try again.</h5>
-                        }
-                        {
-                          !isLoading &&
-                          !isError &&
-                          displayedResults.length === 0 &&
-                          !allResultsFilteredOut &&
-                          <h5 className={styles.errorText}>No results available.</h5>
-                        }
-                        {
-                          !isLoading &&
-                          !isError &&
-                          allResultsFilteredOut &&
-                          <div className={styles.errorText}>
-                            <h5 className={styles.noMatchTitle}>No Matching Results</h5>
-                            <p className={styles.noMatchSubtitle}>Try modifying or removing filters to broaden your search</p>
-                          </div>
-                        }
-                        {
-                          !isLoading &&
-                          !isError &&
-                          displayedResults.length > 0 &&
-                          displayedResults.map((item, i) => {
-                            const result = getResultById(resultSet, item.id);
-                            if(!result || !pathFilterState)
-                              return null;
-
-                            const bookmarkItem = userSaves?.saves.get(item.id) ?? null;
-                            return (
-                              <ResultItem
-                                key={item.id}
-                                result={result}
-                                isEven={i % 2 !== 0}
-                                bookmarkItem={bookmarkItem}
-                                // Rank across the whole list, not the page, so
-                                // analytics can tell "first result" from
-                                // "first result on page 4".
-                                resultRank={itemOffset + i + 1}
-                              />
-                            )
-                          })
-                        }
+                        <ResultListRows
+                          parentStyles={styles}
+                          resultSet={resultSet}
+                          displayedResults={displayedResults}
+                          pathFilterState={pathFilterState}
+                          userSaves={userSaves}
+                          itemOffset={itemOffset}
+                          isLoading={isLoading}
+                          isError={isError}
+                          allResultsFilteredOut={allResultsFilteredOut}
+                        />
                       </div>
                     </div>
                     {

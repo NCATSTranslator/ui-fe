@@ -138,6 +138,43 @@ export const getIsPathIdFiltered = (
   return getIsPathFiltered(displayPath, pathFilterState);
 };
 
+/** Merges two tag maps; on a shared key, the second map's tag wins unless both carry the same tag. */
+const mergeTags = (tags1: EntityTags, tags2: EntityTags): EntityTags => {
+  const mergedTags: EntityTags = { ...tags1 };
+  for (const key in tags2) {
+    const tag1 = tags1[key];
+    const tag2 = tags2[key];
+    mergedTags[key] = (tag1 && tag2 && tag1.id === tag2.id) ? tag1 : tag2;
+  }
+  return mergedTags;
+};
+
+/** A subgraph with each edge slot widened to an array, ready to take compressed edges. */
+const toCompressedSubgraph = (subgraph: string[]): (string | string[])[] =>
+  subgraph.map((id, index) => (isNodeIndex(index) ? id : [id]));
+
+/**
+ * Folds a path into the compressed path that shares its node sequence: its edges
+ * join the compressed edge arrays, and its tags, ARAs, and ID are merged in.
+ */
+const mergePathIntoCompressed = (existingPath: Path, path: Path): void => {
+  if (!existingPath.compressedSubgraph)
+    existingPath.compressedSubgraph = toCompressedSubgraph(existingPath.subgraph);
+
+  for (let i = 1; i < path.subgraph.length; i += 2) {
+    const edgeID = path.subgraph[i];
+    const compressedEdgeArray = existingPath.compressedSubgraph[i];
+    if (Array.isArray(compressedEdgeArray) && !compressedEdgeArray.includes(edgeID))
+      compressedEdgeArray.push(edgeID);
+  }
+
+  existingPath.tags = mergeTags(existingPath.tags, path.tags);
+  existingPath.aras = Array.from(new Set([...existingPath.aras, ...path.aras]));
+  existingPath.compressedIDs = Array.from(new Set(
+    [...(existingPath.compressedIDs || []), existingPath.id, path.id].filter((id): id is string => id !== undefined)
+  ));
+};
+
 /**
  * Takes a list of paths/path IDs and compresses them if any paths share the same node
  * sequence (provided by the getPathSequenceKey helper function).
@@ -147,83 +184,21 @@ export const getIsPathIdFiltered = (
  * @returns {Path[]} - The array of compressed paths.
  */
 export const getCompressedPaths = (resultSet: ResultSet, paths: (string | Path)[]): Path[] => {
-  const mergeTags = (tags1: EntityTags, tags2: EntityTags): EntityTags => {
-    const mergedTags: EntityTags = { ...tags1 };
-
-    for (const key in tags2) {
-      const tag1 = tags1[key];
-      const tag2 = tags2[key];
-
-      // If the tag exists in both tags1 and tags2, ensure no duplicates
-      if (tag1 && tag2) {
-        if (tag1.id === tag2.id) {
-          mergedTags[key] = tag1;
-        } else {
-          mergedTags[key] = tag2;
-        }
-      } else {
-        // Add the tag from tags2 if it doesn't exist in tags1
-        mergedTags[key] = tag2;
-      }
-    }
-
-    return mergedTags;
-  };
-
-  // Map to group paths by their node sequences
+  // Paths grouped by their node sequence
   const groupedPaths = new Map<string, Path>();
 
   for (const path of paths) {
     const checkedPath = (typeof path === "string") ? getPathById(resultSet, path) : path;
-    if(!checkedPath)
+    if (!checkedPath)
       continue;
     const pathSequence = getPathSequenceKey(resultSet, checkedPath);
-    if(!pathSequence)
+    if (!pathSequence)
       continue;
+
     const existingPath = groupedPaths.get(pathSequence);
-
-    // check for existing path in groupedPaths
     if (existingPath) {
-      // Create a compressedSubgraph if it doesn't exist yet
-      if (!existingPath.compressedSubgraph) {
-        existingPath.compressedSubgraph = existingPath.subgraph.map((id, index) => {
-          // Convert edge to array
-          if (!isNodeIndex(index))
-            return [id];
-          // Keep node as is
-          return id;
-        }) as (string | string[])[];
-      }
-
-      // Merge subgraphs into compressedSubgraph
-      for (let i = 1; i < checkedPath.subgraph.length; i += 2) {
-        const edgeID = checkedPath.subgraph[i];
-        const compressedEdgeArray = existingPath.compressedSubgraph[i] as string[];
-
-        if (Array.isArray(compressedEdgeArray) && !compressedEdgeArray.includes(edgeID)) {
-          // Add edge to existing array
-          compressedEdgeArray.push(edgeID);
-        }
-      }
-
-      // Merge tags
-      existingPath.tags = mergeTags(existingPath.tags, checkedPath.tags);
-
-      // Merge aras
-      existingPath.aras = Array.from(new Set([...existingPath.aras, ...checkedPath.aras]));
-
-      // Update compressedIDs with all IDs
-      existingPath.compressedIDs = Array.from(
-        new Set(
-          [
-            ...(existingPath.compressedIDs || []),
-            existingPath.id,
-            checkedPath.id
-          ].filter((id): id is string => id !== undefined)
-        )
-      );
+      mergePathIntoCompressed(existingPath, checkedPath);
     } else {
-      // Add the current path to the map
       groupedPaths.set(pathSequence, {
         ...checkedPath,
         // Initially no compressed subgraph
