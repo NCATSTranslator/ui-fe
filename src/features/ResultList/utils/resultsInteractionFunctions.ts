@@ -223,26 +223,7 @@ export const handleResultsError = (errorExists = true, setIsError: (value: boole
   setIsLoading(false);
 }
 
-/**
- * Applies all active filters (entity, result, facet, path) to the provided result set.
- * Separates results into included and excluded groups based on match criteria, then
- * re-evaluates available facet filters, path-based inclusion, and path rank states.
- *
- * @param {Filter[]} filters - The complete list of filters to apply.
- * @param {Result[]} filteredResults - The UI-visible list of results, possibly pre-filtered.
- * @param {Result[]} originalResults - The original, unfiltered list of results.
- * @param {ResultSet} summary - The complete context including path, node, and tag metadata.
- * @param {PathFilterState} pathFilterState - Current state of which paths are filtered out.
- * @returns {object} Filtering and facet metadata including final results, updated entity filters,
- * updated path filter state, grouped facet filters, and flags for UI reset logic.
- */
-export const applyFilters = (
-  filters: Filter[],
-  filteredResults: Result[],
-  originalResults: Result[],
-  summary: ResultSet,
-  pathFilterState: PathFilterState
-): {
+export interface ApplyFiltersOutcome {
   results: Result[];
   updatedEntityFilters: string[];
   updatedPathFilterState: PathFilterState;
@@ -255,7 +236,32 @@ export const applyFilters = (
   };
   unrankedIsFiltered: boolean;
   shouldResetPage: boolean;
-} => {
+}
+
+/** Resolves a path reference (ID or object) against the result set. */
+const _resolvePath = (resultSet: ResultSet, p: string | Path): Path | null =>
+  typeof p === "string" ? getPathById(resultSet, p) : p;
+
+/**
+ * Applies all active filters (entity, result, facet, path) to the provided result set.
+ * Separates results into included and excluded groups based on match criteria, then
+ * re-evaluates available facet filters, path-based inclusion, and path rank states.
+ *
+ * @param {Filter[]} filters - The complete list of filters to apply.
+ * @param {Result[]} filteredResults - The UI-visible list of results, possibly pre-filtered.
+ * @param {Result[]} originalResults - The original, unfiltered list of results.
+ * @param {ResultSet} summary - The complete context including path, node, and tag metadata.
+ * @param {PathFilterState} pathFilterState - Current state of which paths are filtered out.
+ * @returns {ApplyFiltersOutcome} Filtering and facet metadata including final results, updated entity filters,
+ * updated path filter state, grouped facet filters, and flags for UI reset logic.
+ */
+export const applyFilters = (
+  filters: Filter[],
+  filteredResults: Result[],
+  originalResults: Result[],
+  summary: ResultSet,
+  pathFilterState: PathFilterState
+): ApplyFiltersOutcome => {
   let [resultFilters, pathFilters, edgeFilters, globalFilters] = filtering.groupFilterByType(filters);
   const resultFacets = resultFilters.filter(f => !filtering.isExclusion(f));
   const negatedResultFacets = resultFilters.filter(f => filtering.isExclusion(f));
@@ -267,25 +273,14 @@ export const applyFilters = (
       updatedEntityFilters: [],
       updatedPathFilterState: genPathFilterState(summary),
       updatedEdgeFilterState: {},
-      facetCounts: {
-        resultFacets: resultFacets,
-        negatedResultFacets: negatedResultFacets,
-        results: filteredResults,
-        negatedResults: []
-      },
+      facetCounts: { resultFacets, negatedResultFacets, results: filteredResults, negatedResults: [] },
       unrankedIsFiltered: false,
       shouldResetPage: false
     };
   }
 
   const resultPathRanks = new Map<string, Map<string, PathRank>>();
-  let [results, negatedResults, updatedEntityFilters] = _filterResults(
-    summary,
-    resultFilters,
-    originalResults,
-    resultPathRanks
-  );
-
+  const [results, negatedResults, updatedEntityFilters] = _filterResults(summary, resultFilters, originalResults, resultPathRanks);
   const resultsAfterFacets = _facetResults(summary, resultFacets, pathFilters, results, resultPathRanks);
   const unrankedIsFiltered = [...resultPathRanks.values()].some(rankMap =>
     [...rankMap.values()].some(rank => rank.rank < 0)
@@ -294,7 +289,6 @@ export const applyFilters = (
   for (const pathRanks of resultPathRanks.values()) {
     _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
   }
-
   _propagateExclusionAcrossCompressionGroups(summary, resultsAfterFacets, pathFilters, pathFilterState);
 
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
@@ -305,146 +299,146 @@ export const applyFilters = (
     updatedEntityFilters,
     updatedEdgeFilterState,
     updatedPathFilterState: pathFilterState,
-    facetCounts: {
-      resultFacets,
-      negatedResultFacets,
-      results,
-      negatedResults
-    },
+    facetCounts: { resultFacets, negatedResultFacets, results, negatedResults },
     unrankedIsFiltered,
     shouldResetPage: finalResults.length > 0
   };
+};
 
-  /**
-   * Applies entity and result-level filters to the result set.
-   * Separates matched and negated results based on exclusion logic, while constructing
-   * per-result path rank maps for downstream facet filtering and path state updates.
-   *
-   * @param {ResultSet} resultSet - The full dataset used for path lookup and context.
-   * @param {Filter[]} filters - The filters to apply (entity or result type).
-   * @param {Result[]} originalResults - The unfiltered list of results to be evaluated.
-   * @param {Map<string, Map<string, PathRank>>} resultPathRanks - Output container mapping result IDs to their computed path ranks.
-   * @returns {[Result[], Result[], string[]]} A tuple containing:
-   *  - the filtered results,
-   *  - the negated (excluded) results,
-   *  - the updated list of active entity filter values.
-   */
-  function _filterResults(
-    resultSet: ResultSet,
-    filters: Filter[],
-    originalResults: Result[],
-    resultPathRanks: Map<string, Map<string, PathRank>>
-  ): [Result[], Result[], string[]] {
-    const filtered: Result[] = [];
-    const negated: Result[] = [];
-    const newEntityFilters: string[] = [];
-
-    for (const result of originalResults) {
-      const pathRanks = new Map<string, PathRank>();
-      for (const p of result.paths) {
-        const path: Path | null = typeof p === "string" ? getPathById(resultSet, p) : p as Path;
-        if (path?.id) {
-          pathRanks.set(path.id, makePathRank(path));
-        }
-      }
-
-      let include = true;
-      for (const filter of filters) {
-        if (
-          filtering.isEntityFilter(filter) &&
-          filtering.isExclusion(filter) === findStringMatch(resultSet, result, filter || "", pathRanks)
-        ) {
-          include = false;
-          negated.push(result);
-          break;
-        }
-
-        if (
-          filtering.isResultFilter(filter) &&
-          filtering.isExclusion(filter) === Object.keys(result.tags).some(tag => tag === filter.id)
-        ) {
-          include = false;
-          negated.push(result);
-          break;
-        }
-      }
-
-      if (include) {
-        filtered.push(result);
-        resultPathRanks.set(result.id, pathRanks);
-      }
-    }
-
-    for (const f of filters) {
-      if (filtering.isEntityFilter(f) && typeof f.value === "string")
-        newEntityFilters.push(f.value);
-    }
-
-    return [filtered, negated, newEntityFilters];
-  };
-
-  /**
-   * Applies facet-based filters to an already filtered list of results.
-   * Enforces AND logic between facet families and OR logic within each family.
-   * Updates and sorts per-path ranks for each retained result.
-   *
-   * @param {ResultSet} resultSet - The full dataset used for path and tag metadata.
-   * @param {Filter[]} resultFacets - The set of active facet filters to apply.
-   * @param {Filter[]} pathFilters - Filters applied to individual paths (e.g., to update ranks).
-   * @param {Result[]} filteredResults - The results that passed base filtering.
-   * @param {Map<string, Map<string, PathRank>>} resultPathRanks - A map of result IDs to their path rank structures.
-   * @returns {Result[]} A filtered list of results that satisfy the facet filtering logic.
-   */
-  function _facetResults(
-    resultSet: ResultSet,
-    resultFacets: Filter[],
-    pathFilters: Filter[],
-    filteredResults: Result[],
-    resultPathRanks: Map<string, Map<string, PathRank>>
-  ): Result[] {
-    const facetsByFamily: Record<string, Filter[]> = {};
-    for (const facet of resultFacets) {
-      const family = filtering.getFilterFamily(facet);
-      if (!facetsByFamily[family]) facetsByFamily[family] = [];
-      facetsByFamily[family].push(facet);
-    }
-
-    const results: Result[] = [];
-
-    for (const result of filteredResults) {
-      const include = Object.values(facetsByFamily).every(filters =>
-        filters.some(facet => facet.id && Object.prototype.hasOwnProperty.call(result.tags, facet.id))
-      );
-
-      if (!include) continue;
-
-      updateResultPathRanks(resultSet, result, resultPathRanks.get(result.id), pathFilters);
-      results.push(result);
-    }
-
-    return results;
-  };
-
-  /**
-   * Removes results whose paths are fully excluded by the current path filter state.
-   * A result is retained if at least one of its paths is not explicitly filtered out.
-   *
-   * @param {Result[]} results - The list of results to evaluate.
-   * @param {PathFilterState} pathFilterState - A map of path IDs to boolean values indicating exclusion.
-   * @returns {Result[]} The list of results that have at least one unfiltered path.
-   */
-  function _filterResultsByPathFilterState(
-    results: Result[],
-    pathFilterState: PathFilterState
-  ): Result[] {
-    return results.filter((result) =>
-      result.paths.some((p) => {
-        const pid = typeof p === "string" ? p : p.id;
-        return pid && !pathFilterState[pid];
-      })
-    );
+/** Ranks each of a result's paths, keyed by path ID, as the starting point for filter evaluation. */
+const _makeResultPathRanks = (resultSet: ResultSet, result: Result): Map<string, PathRank> => {
+  const pathRanks = new Map<string, PathRank>();
+  for (const p of result.paths) {
+    const path = _resolvePath(resultSet, p);
+    if (path?.id) pathRanks.set(path.id, makePathRank(path));
   }
-}
+  return pathRanks;
+};
+
+/**
+ * Whether a filter excludes a result: an inclusion filter the result fails to match,
+ * or an exclusion filter it does match. Filters of other types never exclude here.
+ */
+const _filterExcludesResult = (
+  resultSet: ResultSet,
+  result: Result,
+  filter: Filter,
+  pathRanks: Map<string, PathRank>
+): boolean => {
+  if (filtering.isEntityFilter(filter))
+    return filtering.isExclusion(filter) === findStringMatch(resultSet, result, filter, pathRanks);
+  if (filtering.isResultFilter(filter))
+    return filtering.isExclusion(filter) === Object.keys(result.tags).some(tag => tag === filter.id);
+  return false;
+};
+
+/**
+ * Applies entity and result-level filters to the result set.
+ * Separates matched and negated results based on exclusion logic, while constructing
+ * per-result path rank maps for downstream facet filtering and path state updates.
+ *
+ * @param {ResultSet} resultSet - The full dataset used for path lookup and context.
+ * @param {Filter[]} filters - The filters to apply (entity or result type).
+ * @param {Result[]} originalResults - The unfiltered list of results to be evaluated.
+ * @param {Map<string, Map<string, PathRank>>} resultPathRanks - Output container mapping result IDs to their computed path ranks.
+ * @returns {[Result[], Result[], string[]]} A tuple containing:
+ *  - the filtered results,
+ *  - the negated (excluded) results,
+ *  - the updated list of active entity filter values.
+ */
+const _filterResults = (
+  resultSet: ResultSet,
+  filters: Filter[],
+  originalResults: Result[],
+  resultPathRanks: Map<string, Map<string, PathRank>>
+): [Result[], Result[], string[]] => {
+  const filtered: Result[] = [];
+  const negated: Result[] = [];
+
+  for (const result of originalResults) {
+    const pathRanks = _makeResultPathRanks(resultSet, result);
+    if (filters.some(filter => _filterExcludesResult(resultSet, result, filter, pathRanks))) {
+      negated.push(result);
+    } else {
+      filtered.push(result);
+      resultPathRanks.set(result.id, pathRanks);
+    }
+  }
+
+  const newEntityFilters = filters
+    .filter(f => filtering.isEntityFilter(f) && typeof f.value === "string")
+    .map(f => f.value as string);
+
+  return [filtered, negated, newEntityFilters];
+};
+
+/**
+ * Applies facet-based filters to an already filtered list of results.
+ * Enforces AND logic between facet families and OR logic within each family.
+ * Updates and sorts per-path ranks for each retained result.
+ *
+ * @param {ResultSet} resultSet - The full dataset used for path and tag metadata.
+ * @param {Filter[]} resultFacets - The set of active facet filters to apply.
+ * @param {Filter[]} pathFilters - Filters applied to individual paths (e.g., to update ranks).
+ * @param {Result[]} filteredResults - The results that passed base filtering.
+ * @param {Map<string, Map<string, PathRank>>} resultPathRanks - A map of result IDs to their path rank structures.
+ * @returns {Result[]} A filtered list of results that satisfy the facet filtering logic.
+ */
+const _facetResults = (
+  resultSet: ResultSet,
+  resultFacets: Filter[],
+  pathFilters: Filter[],
+  filteredResults: Result[],
+  resultPathRanks: Map<string, Map<string, PathRank>>
+): Result[] => {
+  const facetsByFamily: Record<string, Filter[]> = {};
+  for (const facet of resultFacets) {
+    const family = filtering.getFilterFamily(facet);
+    if (!facetsByFamily[family]) facetsByFamily[family] = [];
+    facetsByFamily[family].push(facet);
+  }
+
+  const results: Result[] = [];
+  for (const result of filteredResults) {
+    const include = Object.values(facetsByFamily).every(filters =>
+      filters.some(facet => facet.id && Object.prototype.hasOwnProperty.call(result.tags, facet.id))
+    );
+    if (!include) continue;
+
+    updateResultPathRanks(resultSet, result, resultPathRanks.get(result.id), pathFilters);
+    results.push(result);
+  }
+  return results;
+};
+
+/**
+ * Removes results whose paths are fully excluded by the current path filter state.
+ * A result is retained if at least one of its paths is not explicitly filtered out.
+ *
+ * @param {Result[]} results - The list of results to evaluate.
+ * @param {PathFilterState} pathFilterState - A map of path IDs to boolean values indicating exclusion.
+ * @returns {Result[]} The list of results that have at least one unfiltered path.
+ */
+const _filterResultsByPathFilterState = (results: Result[], pathFilterState: PathFilterState): Result[] =>
+  results.filter((result) =>
+    result.paths.some((p) => {
+      const pid = typeof p === "string" ? p : p.id;
+      return pid && !pathFilterState[pid];
+    })
+  );
+
+/** Ranks a path's edges against the edge filters, skipping edges already ranked via another path. */
+const _rankPathEdges = (resultSet: ResultSet, path: Path, edgeFilters: Filter[], edgeFilterState: EdgeFilterState): void => {
+  for (const [i, elementID] of path.subgraph.entries()) {
+    // An edge shared across paths only needs ranking once.
+    if (isNodeIndex(i) || elementID in edgeFilterState) continue;
+    const edge = getEdgeById(resultSet, elementID);
+    if (!edge) continue;
+    const edgeRank = makeEdgeRank(elementID);
+    updateEdgeRank(edge, edgeFilters, edgeRank);
+    edgeFilterState[elementID] = edgeRank.rank > 0;
+  }
+};
 
 /**
  * Ranks every edge reachable from the given results against the active edge
@@ -461,20 +455,10 @@ function _genEdgeFilterState(resultSet: ResultSet, results: Result[], edgeFilter
 
   for (const result of results) {
     for (const p of result.paths) {
-      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
-      if (!path) continue;
-      for (const [i, elementID] of path.subgraph.entries()) {
-        // An edge shared across paths only needs ranking once.
-        if (isNodeIndex(i) || elementID in edgeFilterState) continue;
-        const edge = getEdgeById(resultSet, elementID);
-        if (!edge) continue;
-        const edgeRank = makeEdgeRank(elementID);
-        updateEdgeRank(edge, edgeFilters, edgeRank);
-        edgeFilterState[elementID] = edgeRank.rank > 0;
-      }
+      const path = _resolvePath(resultSet, p);
+      if (path) _rankPathEdges(resultSet, path, edgeFilters, edgeFilterState);
     }
   }
-
   return edgeFilterState;
 }
 
@@ -635,6 +619,28 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
   }
 }
 
+/** Groups a result's paths by node sequence; paths sharing a sequence form a compression group. */
+const _groupPathsBySequence = (resultSet: ResultSet, result: Result): Path[][] => {
+  const groups = new Map<string, Path[]>();
+  for (const p of result.paths) {
+    const path = _resolvePath(resultSet, p);
+    if (!path?.id) continue;
+    const key = getPathSequenceKey(resultSet, path);
+    if (!key) continue;
+    const group = groups.get(key);
+    if (group) group.push(path);
+    else groups.set(key, [path]);
+  }
+  return [...groups.values()];
+};
+
+/** Marks every path in a compression group as filtered out. */
+const _excludeGroup = (members: Path[], pathFilterState: PathFilterState): void => {
+  for (const path of members) {
+    if (path.id) pathFilterState[path.id] = true;
+  }
+};
+
 /**
  * Scaffolding for strict-mode compression-group exclusion propagation.
  *
@@ -667,27 +673,10 @@ function _propagateExclusionAcrossCompressionGroups(
   );
 
   for (const result of results) {
-    const groups = new Map<string, Path[]>();
-    for (const p of result.paths) {
-      const path = typeof p === "string" ? getPathById(resultSet, p) : p;
-      if (!path?.id) continue;
-      const key = getPathSequenceKey(resultSet, path);
-      if (!key) continue;
-      const group = groups.get(key);
-      if (group) group.push(path);
-      else groups.set(key, [path]);
-    }
-
-    for (const members of groups.values()) {
+    for (const members of _groupPathsBySequence(resultSet, result)) {
       if (members.length <= 1) continue;
-      const anyExcluded = members.some((path) =>
-        getExcludingFilter(path, negatedPathFilters, hasAraInclusion) !== null
-      );
-      if (anyExcluded) {
-        for (const path of members) {
-          if (path.id) pathFilterState[path.id] = true;
-        }
-      }
+      const anyExcluded = members.some((path) => getExcludingFilter(path, negatedPathFilters, hasAraInclusion) !== null);
+      if (anyExcluded) _excludeGroup(members, pathFilterState);
     }
   }
 }

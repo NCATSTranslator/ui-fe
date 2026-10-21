@@ -119,6 +119,84 @@ export const useExampleQueries = (cachedQueries: Example[] | undefined): Example
   }, [cachedQueries]);
 };
 
+const SUBMISSION_ERROR_TEXT = "We were unable to submit your query at this time. Please attempt to submit it again or try again later.";
+
+type QuerySubmissionResponse = { data: string; status?: string };
+
+/** The request body for a query plus the analytics attributes describing it. */
+interface SubmissionRequest {
+  body: object;
+  analytics: QuerySubmittedParams;
+}
+
+interface SubmissionOptions {
+  /** Only navigate when the backend accepted the query (single queries); others navigate regardless. */
+  requireAccepted?: boolean;
+  /** From the results page, open the new query in a new tab instead of navigating. */
+  openInNewTabFromResults?: boolean;
+}
+
+/** POSTs a query request and returns the parsed response. */
+const postQuery = async (body: object): Promise<QuerySubmissionResponse> => {
+  const response = await fetch(`${API_PATH_PREFIX}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return response.json();
+};
+
+const singleSubmission = (item: QueryItem, node: NonNullable<QueryItem['node']>, projectId?: string): SubmissionRequest => ({
+  body: {
+    curie: node.id,
+    type: item.type.targetType,
+    direction: item.type.direction,
+    pid: projectId || null,
+    node_one_label: node.label,
+  },
+  analytics: {
+    query_template_id: String(item.type.id),
+    query_template_label: item.type.label,
+    subject_category: item.type.filterType,
+    object_category: item.type.targetType,
+  },
+});
+
+const pathfinderSubmission = (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, middleType?: string, projectId?: string) => {
+  const subjectType = itemOne?.types?.[0] ?? "";
+  const objectType = itemTwo?.types?.[0] ?? "";
+  const constraint = middleType?.replace("biolink:", "");
+  const request: SubmissionRequest = {
+    body: {
+      type: 'pathfinder',
+      subject: { id: itemOne.id, category: subjectType },
+      object: { id: itemTwo.id, category: objectType },
+      pid: projectId || null,
+      constraint: middleType || null,
+      node_one_label: itemOne.label,
+      node_two_label: itemTwo.label,
+    },
+    analytics: { subject_category: subjectType, object_category: objectType, constraint_category: constraint },
+  };
+  return { request, constraint };
+};
+
+const lookupSubmission = (item: AutocompleteItem, objectCategory: string, projectId?: string) => {
+  const rawCategory = objectCategory.replace("biolink:", "");
+  const subjectType = item.types?.[0] || "";
+  const request: SubmissionRequest = {
+    body: {
+      type: 'lookup',
+      subject: { id: item.id, category: subjectType },
+      object: { category: rawCategory },
+      node_one_label: item.label,
+      pid: projectId || null,
+    },
+    analytics: { subject_category: subjectType, object_category: rawCategory },
+  };
+  return { request, rawCategory };
+};
+
 /**
  * Custom hook that manages query submission logic including API calls, error handling,
  * navigation, and Redux state updates. Provides loading state and submission function.
@@ -137,182 +215,75 @@ export const useQuerySubmission = (queryType: 'single' | 'pathfinder' | 'lookup'
   const navigate = useNavigate();
   const config = useSelector(currentConfig);
 
+  // Shared tail of an accepted submission: notify the caller, then go to the new query's results unless told not to.
+  const completeSubmission = useCallback((newQueryPath: string, openInNewTabFromResults: boolean) => {
+    submissionCallback();
+    if (!shouldNavigate) {
+      setIsLoading(false);
+      return;
+    }
+    if (openInNewTabFromResults && window.location.href.includes('results')) {
+      setIsLoading(false);
+      window.open(newQueryPath, "_blank", "noopener");
+      return;
+    }
+    navigate(`/${newQueryPath}`);
+  }, [navigate, shouldNavigate, submissionCallback]);
+
+  // Posts a query, reports the outcome, and navigates to its results page.
+  // Failures are reported here (toast + analytics) and never rethrown: no caller
+  // awaits these, so a rethrow would only surface as an unhandled rejection.
+  const runSubmission = useCallback(async (
+    type: QueryTypeName,
+    projectId: string | undefined,
+    { body, analytics }: SubmissionRequest,
+    buildResultsPath: (data: QuerySubmissionResponse) => string,
+    { requireAccepted = false, openInNewTabFromResults = false }: SubmissionOptions = {},
+  ) => {
+    setIsLoading(true);
+    try {
+      const data = await postQuery(body);
+      trackAcceptedQuerySubmission(data, type, projectId, analytics);
+      if (requireAccepted && !isAcceptedSubmission(data))
+        throw new Error(`Query submission not accepted (status: ${data.status ?? 'none'})`);
+      completeSubmission(buildResultsPath(data), openInNewTabFromResults);
+    } catch (error) {
+      trackQuerySubmissionFailed(type, error);
+      errorToast(SUBMISSION_ERROR_TEXT);
+      setIsLoading(false);
+      console.error(error);
+    }
+  }, [completeSubmission]);
+
   const submitQuery = useCallback(async (item: QueryItem, projectId?: string) => {
-    if (!item?.node) {
+    const node = item?.node;
+    if (!node) {
       console.error("No node attached to query item, unable to submit");
       return;
     }
-
-    setIsLoading(true);
-
-    try {
-      const queryJson = JSON.stringify({
-        curie: item.node.id,
-        type: item.type.targetType,
-        direction: item.type.direction,
-        pid: projectId || null,
-        node_one_label: item.node.label
-      });
-
-      const response = await fetch(`${API_PATH_PREFIX}/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: queryJson,
-      });
-
-      const data = await response.json();
-
-      trackAcceptedQuerySubmission(data, 'single', projectId, {
-        query_template_id: String(item.type.id),
-        query_template_label: item.type.label,
-        subject_category: item.type.filterType,
-        object_category: item.type.targetType,
-      });
-
-      if (isAcceptedSubmission(data)) {
-        const nodeLabel = item.node?.label || "";
-        const nodeID = item.node?.id || "";
-        const newQueryPath = getResultsShareURLPath({
-          label: nodeLabel,
-          nodeID,
-          typeID: item.type.id,
-          resultID: '0',
-          pk: data.data,
-          shouldHash: config?.include_hashed_parameters,
-        });
-
-        submissionCallback();
-
-        if(!shouldNavigate) {
-          setIsLoading(false);
-          return;
-        }
-
-        if (window.location.href.includes('results')) {
-          setIsLoading(false);
-          window.open(newQueryPath, "_blank", "noopener");
-        } else {
-          navigate(`/${newQueryPath}`);
-        }
-      }
-    } catch (error) {
-      trackQuerySubmissionFailed('single', error);
-      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
-      setIsLoading(false);
-      console.error(error);
-    }
-  }, [navigate, config, shouldNavigate, submissionCallback]);
-
-  const submitPathfinderQuery = useCallback(async (
-    itemOne: AutocompleteItem,
-    itemTwo: AutocompleteItem,
-    middleType?: string,
-    projectId?: string,
-  ) => {
-    setIsLoading(true);
-
-    try {
-      let subjectType = (!!itemOne?.types) ? itemOne.types[0] : "";
-      let objectType = (!!itemTwo?.types) ? itemTwo.types[0] : "";
-      let queryJson = JSON.stringify({
-        type: 'pathfinder',
-        subject: {id: itemOne.id, category: subjectType},
-        object: {id: itemTwo.id, category: objectType},
-        pid: projectId || null,
-        constraint: middleType || null,
-        node_one_label: itemOne.label,
-        node_two_label: itemTwo.label
-      });
-
-      const response = await fetch(`${API_PATH_PREFIX}/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: queryJson
-      });
-
-      const data = await response.json();
-      const constraint = middleType?.replace("biolink:", "");
-      trackAcceptedQuerySubmission(data, 'pathfinder', projectId, {
-        subject_category: subjectType,
-        object_category: objectType,
-        constraint_category: constraint,
-      });
-      let newQueryPath = getPathfinderResultsShareURLPath({
-        itemOne,
-        itemTwo,
+    await runSubmission('single', projectId, singleSubmission(item, node, projectId),
+      (data) => getResultsShareURLPath({
+        label: node.label || "",
+        nodeID: node.id || "",
+        typeID: item.type.id,
         resultID: '0',
-        constraint,
         pk: data.data,
         shouldHash: config?.include_hashed_parameters,
-      });
-      submissionCallback();
-      if (!shouldNavigate) {
-        setIsLoading(false);
-        return;
-      }
-      navigate(`/${newQueryPath}`);
+      }),
+      { requireAccepted: true, openInNewTabFromResults: true });
+  }, [config, runSubmission]);
 
-    } catch (error) {
-      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
-      trackQuerySubmissionFailed('pathfinder', error);
-      setIsLoading(false);
-      console.log(error);
-      throw error;
-    }
-  }, [navigate, config, shouldNavigate, submissionCallback]);
+  const submitPathfinderQuery = useCallback(async (itemOne: AutocompleteItem, itemTwo: AutocompleteItem, middleType?: string, projectId?: string) => {
+    const { request, constraint } = pathfinderSubmission(itemOne, itemTwo, middleType, projectId);
+    await runSubmission('pathfinder', projectId, request,
+      (data) => getPathfinderResultsShareURLPath({ itemOne, itemTwo, resultID: '0', constraint, pk: data.data, shouldHash: config?.include_hashed_parameters }));
+  }, [config, runSubmission]);
 
-  const submitLookupQuery = useCallback(async (
-    item: AutocompleteItem,
-    objectCategory: string,
-    projectId?: string,
-  ) => {
-    setIsLoading(true);
-
-    try {
-      const rawCategory = objectCategory.replace("biolink:", "");
-      const subjectType = item.types?.[0] || "";
-      const queryJson = JSON.stringify({
-        type: 'lookup',
-        subject: { id: item.id, category: subjectType },
-        object: { category: rawCategory },
-        node_one_label: item.label,
-        pid: projectId || null,
-      });
-
-      const response = await fetch(`${API_PATH_PREFIX}/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: queryJson,
-      });
-
-      const data = await response.json();
-      trackAcceptedQuerySubmission(data, 'lookup', projectId, {
-        subject_category: subjectType,
-        object_category: rawCategory,
-      });
-      const newQueryPath = getLookupResultsShareURLPath(
-        item,
-        rawCategory,
-        '0',
-        data.data,
-        config?.include_hashed_parameters
-      );
-      submissionCallback();
-
-      if (!shouldNavigate) {
-        setIsLoading(false);
-        return;
-      }
-      navigate(`/${newQueryPath}`);
-
-    } catch (error) {
-      errorToast("We were unable to submit your query at this time. Please attempt to submit it again or try again later.");
-      trackQuerySubmissionFailed('lookup', error);
-      setIsLoading(false);
-      console.error(error);
-      throw error;
-    }
-  }, [navigate, config, shouldNavigate, submissionCallback]);
+  const submitLookupQuery = useCallback(async (item: AutocompleteItem, objectCategory: string, projectId?: string) => {
+    const { request, rawCategory } = lookupSubmission(item, objectCategory, projectId);
+    await runSubmission('lookup', projectId, request,
+      (data) => getLookupResultsShareURLPath(item, rawCategory, '0', data.data, config?.include_hashed_parameters));
+  }, [config, runSubmission]);
 
   return {
     isLoading,
