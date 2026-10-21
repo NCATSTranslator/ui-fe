@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import canvasReducer, {
   closePane,
   removeCanvasElements,
+  setCanvasGraph,
   setPaneHeight,
   toggleMaximizePane,
   togglePane,
@@ -219,6 +220,33 @@ describe('removeCanvasElements', () => {
     );
 
     expect(Object.keys(next.canvases[0].nodes)).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('setCanvasGraph', () => {
+  it('adopts the merged graph and keeps the sync fields the caller snapshot may lack', () => {
+    const canvas = makeCanvas({ serverKnown: true, syncGeneration: 3, graphLoaded: false });
+    const next = canvasReducer(
+      stateWith(canvas),
+      setCanvasGraph({
+        canvasId: 1,
+        nodes: { b: makeCanvasNode('b') },
+        edges: {},
+      }),
+    );
+
+    expect(Object.keys(next.canvases[0].nodes)).toEqual(['b']);
+    expect(next.canvases[0].serverKnown).toBe(true);
+    expect(next.canvases[0].syncGeneration).toBe(3);
+    expect(next.canvases[0].graphLoaded).toBe(true);
+    expect(next.canvases[0].tags).toBe(canvas.tags);
+  });
+
+  it('ignores a canvas id that is not in the store', () => {
+    const state = stateWith(makeCanvas());
+    const next = canvasReducer(state, setCanvasGraph({ canvasId: 99, nodes: {}, edges: {} }));
+
+    expect(next.canvases).toEqual(state.canvases);
   });
 });
 

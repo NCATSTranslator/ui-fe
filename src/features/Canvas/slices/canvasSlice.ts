@@ -128,6 +128,29 @@ export const canvasSlice = createSlice({
         state.canvases[index] = action.payload;
       }
     },
+    /**
+     * Adopts a merged graph from the server without touching the rest of the canvas. Callers
+     * holding a canvas snapshot from before an async merge must not spread it back in via
+     * replaceCanvas: sync may have marked the canvas serverKnown or bumped syncGeneration since.
+     */
+    setCanvasGraph: (
+      state,
+      action: PayloadAction<{
+        canvasId: number;
+        nodes: Canvas['nodes'];
+        edges: Canvas['edges'];
+        tags?: Canvas['tags'];
+      }>,
+    ) => {
+      const { canvasId, nodes, edges, tags } = action.payload;
+      const canvas = state.canvases.find(c => c.id === canvasId);
+      if (!canvas) return;
+      canvas.nodes = nodes;
+      canvas.edges = edges;
+      if (tags !== undefined) canvas.tags = tags;
+      canvas.graphLoaded = true;
+      canvas.timeUpdated = new Date().toISOString();
+    },
     setCanvasAnnotations: (state, action: PayloadAction<{ canvasId: number; annotations: Canvas['annotations'] }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
       if (canvas) {
@@ -268,6 +291,7 @@ export const {
   addCanvasEdge,
   removeCanvasElements,
   replaceCanvas,
+  setCanvasGraph,
   syncCanvasFromServer,
   adoptCanvasServerTime,
   setSyncDeferredCanvasIds,
