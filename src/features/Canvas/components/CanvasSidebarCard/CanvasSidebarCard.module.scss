@@ -9,3 +9,12 @@
   font-weight: 400;
   color: $darkGray;
 }
+
+// Sidebar cards are narrow; the default indicator size (h5) wraps long labels.
+.dropIndicator {
+  --drop-indicator-size: #{$bodyOneSize};
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
