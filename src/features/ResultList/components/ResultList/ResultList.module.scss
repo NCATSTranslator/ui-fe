@@ -151,6 +151,15 @@
   padding: 20px 12px;
 }
 
+.noMatchTitle {
+  margin-bottom: 4px;
+}
+
+.noMatchSubtitle {
+  font-size: 14px;
+  margin: 0;
+}
+
 .bottomLoadingButtonContainer {
   margin-top: $xl;
   display: grid;
