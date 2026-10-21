@@ -1,0 +1,4 @@
+<svg width="20" height="24" viewBox="-96 -120 240 288" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- One grid square. The viewBox pads the 48-unit square to a 240x288 cell, so tiled at 20x24px it is a 4px square with 1px corners, 8px in from the sides and 10px from the top and bottom. -->
+<rect width="48" height="48" rx="12" fill="#F2F4F7"/>
+</svg>

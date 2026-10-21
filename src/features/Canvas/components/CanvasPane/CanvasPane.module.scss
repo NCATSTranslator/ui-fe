@@ -1,22 +1,55 @@
 @use "@/assets/styles/variables" as *;
 
+// Extra border thickness shown while the resize edge is hovered or dragged.
+$resizeHandleHoverHeight: 3px;
+
+// Dot grid behind the collapsed pill: CanvasTile.svg is one 4px rounded square
+// ($lightGray) inset 8px from the sides and 10px from the top and bottom of a
+// 20x24px cell. Three rows fill the 72px padding box with 10px margins.
+$collapsedGridTileWidth: 20px;
+$collapsedGridTileHeight: 24px;
+
+// Open, the pane is a flex row of main.content below the scrolling page
+// content, splitting the column. Its height is set inline from the measured
+// area; the class heights below only cover the paint before that measurement.
+// Collapsed, it stays a floating pill in the corner.
 .canvasPane {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  z-index: 100;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   background: $white;
-  box-shadow: $dropShadow;
-  transition: height 0.3s ease, width 0.3s ease;
-  border: 1px solid $midGray;
-  border-radius: $s;
   overflow: hidden;
+  transition: height 0.3s ease, width 0.3s ease;
+  // Lets the open/collapse transition animate to the pill's content size.
+  @supports (interpolate-size: allow-keywords) {
+    interpolate-size: allow-keywords;
+  }
 
   &.collapsed {
-    height: 72px;
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 100;
+    // Explicit sizes keep the transition animating where interpolate-size is
+    // unsupported; otherwise the pill sizes to its label. The 228px button
+    // plus $s padding on each side bounds it at 260px. No max-width here: it
+    // would not transition and would clamp the collapse animation at once.
+    height: 74px;
     width: 260px;
+    @supports (interpolate-size: allow-keywords) {
+      height: fit-content;
+      width: fit-content;
+    }
+    border: 1px solid $midGray;
+    border-radius: $s;
+    box-shadow: $dropShadow;
+    background-color: $white;
+    background-image: url('@/assets/icons/CanvasTile.svg');
+    background-size: $collapsedGridTileWidth $collapsedGridTileHeight;
+    // `space` on the x axis pins the first and last columns 8px from the
+    // edges whatever the pill's width; rows repeat from the top edge.
+    background-repeat: space repeat;
+    background-position: 0 0;
     .collapsedTitle {
       display: flex;
     }
@@ -25,42 +58,85 @@
     }
   }
 
-  &.expanded {
+  &.open {
+    position: relative;
+    flex: none;
+    // Pinned to the right so the width animation grows out of the corner the
+    // collapsed pill sits in, mirroring the collapse animation.
+    align-self: flex-end;
+    width: 100%;
     height: 50vh;
-    width: calc(100% - 24px);
+    // Matches the sidebar's right edge (a 1px $midGray inset shadow).
+    border-top: 1px solid $midGray;
+    border-radius: 0;
+    &:before {
+      border-radius: 0;
+    }
   }
 
   &.maximized {
-    height: calc(100% - 24px);
-    width: calc(100% - 24px);
+    // Approximates the header height until the pane has measured it.
+    height: calc(100% - 64px);
+  }
+
+  &.dragging {
+    transition: none;
+    user-select: none;
+    .resizeHandle::before {
+      height: $resizeHandleHoverHeight;
+    }
+  }
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  z-index: 20;
+  cursor: row-resize;
+  touch-action: none;
+  // Thickens the 1px top border on hover so the edge reads as draggable.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: $midGray;
+    transition: height 0.15s ease;
+  }
+  &:hover::before,
+  &:focus-visible::before {
+    height: $resizeHandleHoverHeight;
+  }
+  &:focus-visible {
+    outline: 2px solid $blueOne;
+    outline-offset: -2px;
   }
 }
 
 .collapsedTitle {
   display: none;
-  font-size: $captionSize;
-  padding: 27px;
+  padding: $s;
 }
 
-.titleLeft {
-  display: flex;
-  align-items: center;
-  gap: $xs;
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.canvasTitle {
-  font-size: $subTwoSize;
-  font-weight: 600;
-  color: $black;
+.collapsedButton {
+  max-width: 228px;
+  min-width: 0;
+  // Button renders an optional icon span before the label span; only the
+  // label may shrink and truncate, or flexbox clips the icon first.
+  > span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  svg path {
+    stroke: $white;
+  }
 }
 
 .contentArea {
