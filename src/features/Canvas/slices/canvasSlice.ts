@@ -9,6 +9,8 @@ export interface CanvasState {
   activeCanvasId: number | null;
   paneOpen: boolean;
   paneMaximized: boolean;
+  /** User-dragged pane height in px; null means the default split. Survives close so reopen restores it. */
+  paneHeight: number | null;
   /** Canvases changed on the server that sync is holding back until local writes settle. */
   syncDeferredCanvasIds: number[];
 }
@@ -18,6 +20,7 @@ const initialState: CanvasState = {
   activeCanvasId: null,
   paneOpen: false,
   paneMaximized: false,
+  paneHeight: null,
   syncDeferredCanvasIds: [],
 };
 
@@ -78,6 +81,12 @@ export const canvasSlice = createSlice({
     toggleMaximizePane: (state) => {
       state.paneOpen = true;
       state.paneMaximized = !state.paneMaximized;
+    },
+    /** A drag or keyboard resize; an explicit height always leaves the maximized state. */
+    setPaneHeight: (state, action: PayloadAction<number>) => {
+      state.paneOpen = true;
+      state.paneMaximized = false;
+      state.paneHeight = action.payload;
     },
     addCanvasNode: (state, action: PayloadAction<{ canvasId: number; node: CanvasNode }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
@@ -254,6 +263,7 @@ export const {
   openPane,
   closePane,
   toggleMaximizePane,
+  setPaneHeight,
   addCanvasNode,
   addCanvasEdge,
   removeCanvasElements,
@@ -276,6 +286,7 @@ export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCan
 export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
 export const selectSyncDeferredCanvasIds = (state: RootState) => state.canvas.syncDeferredCanvasIds;
 export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
+export const selectPaneHeight = (state: RootState) => state.canvas.paneHeight;
 export const selectActiveCanvas = (state: RootState) =>
   state.canvas.canvases.find(c => c.id === state.canvas.activeCanvasId) ?? null;
 

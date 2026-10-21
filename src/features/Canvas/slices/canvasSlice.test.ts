@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import canvasReducer, {
+  closePane,
   removeCanvasElements,
+  setPaneHeight,
+  toggleMaximizePane,
+  togglePane,
   syncCanvasFromServer,
   adoptCanvasServerTime,
   setCanvases,
@@ -21,6 +25,7 @@ const stateWith = (canvas: Canvas) => ({
   activeCanvasId: canvas.id,
   paneOpen: true,
   paneMaximized: false,
+  paneHeight: null,
   syncDeferredCanvasIds: [],
 });
 
@@ -214,5 +219,21 @@ describe('removeCanvasElements', () => {
     );
 
     expect(Object.keys(next.canvases[0].nodes)).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('setPaneHeight', () => {
+  it('stores the height, opens the pane, and leaves the maximized state', () => {
+    const maximized = canvasReducer(stateWith(makeCanvas()), toggleMaximizePane());
+    const next = canvasReducer(maximized, setPaneHeight(420));
+    expect(next.paneHeight).toBe(420);
+    expect(next.paneOpen).toBe(true);
+    expect(next.paneMaximized).toBe(false);
+  });
+
+  it('keeps the dragged height through collapse and close so reopening restores it', () => {
+    const resized = canvasReducer(stateWith(makeCanvas()), setPaneHeight(420));
+    expect(canvasReducer(resized, togglePane()).paneHeight).toBe(420);
+    expect(canvasReducer(resized, closePane()).paneHeight).toBe(420);
   });
 });
