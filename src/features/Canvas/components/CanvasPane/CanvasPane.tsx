@@ -9,16 +9,15 @@ import useCanvasKeyboardShortcuts from '@/features/Canvas/hooks/useCanvasKeyboar
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import Button from '@/features/Core/components/Button/Button';
-import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
 import CanvasSyncBanner from '@/features/Canvas/components/CanvasSync/CanvasSyncBanner';
 import { CanvasNodeChromeActionsContext } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
-import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
+import { CreateCanvasButton, CreateCanvasDropZone } from '@/features/Canvas/components/CreateCanvasDropZone/CreateCanvasDropZone';
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
-import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
+import { isResultEntityDragData } from '@/features/DragAndDrop/types/types';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 
 type User = ReturnType<typeof useUser>[0];
@@ -244,7 +243,7 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
       id={`canvas-zone-${activeCanvas.id}`}
       className={joinClasses(getPaneClass(isOpen, paneMaximized), dragging && styles.dragging)}
       style={paneStyle}
-      canAccept={(draggedData) => isResultEntityDragType(draggedData.type)}
+      canAccept={isResultEntityDragData}
       data={{
         type: 'canvas',
         id: String(activeCanvas.id),
@@ -285,26 +284,24 @@ const CanvasPane: FC = () => {
   const [user] = useUser();
   const pane = useCanvasPane();
   const { paneOpen, activeCanvas, closePane } = pane;
-  const { createCanvas } = useCreateCanvas();
 
   useCloseCanvasOnLogout(user, paneOpen, closePane);
   const wasOpen = usePaneWasOpen(paneOpen);
 
   if (!activeCanvas) {
+    // The whole pill is the drop target, matching the active-canvas pill, so a
+    // release over its padding ring still creates the canvas.
     return (
       user ? (
-        <div className={getPaneClass(false, false)}>
+        <CreateCanvasDropZone
+          id="canvas-pane-create-zone"
+          className={getPaneClass(false, false)}
+          indicatorClass={styles.indicatorClass}
+        >
           <div className={styles.collapsedTitle}>
-            <Button
-              className={styles.collapsedButton}
-              handleClick={createCanvas}
-              ariaLabel="Create new canvas"
-              iconLeft={<AddIcon />}
-            >
-              Create New Canvas
-            </Button>
+            <CreateCanvasButton className={styles.collapsedButton} ariaLabel="Create new canvas" />
           </div>
-        </div>
+        </CreateCanvasDropZone>
       ) : null
     );
   }

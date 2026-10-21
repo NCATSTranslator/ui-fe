@@ -54,7 +54,13 @@ $collapsedGridTileHeight: 24px;
       display: flex;
     }
     .indicatorClass {
-      font-size: $subOneSize;
+      --drop-indicator-size: #{$subOneSize};
+      // "Add to {label}" must fit on one line inside the pill: truncate the
+      // label instead of letting a long name spill past the rounded edges.
+      max-width: calc(100% - #{$s * 2});
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

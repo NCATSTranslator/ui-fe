@@ -4,12 +4,10 @@ import styles from './CanvasPanel.module.scss';
 import TextInput from '@/features/Core/components/TextInput/TextInput';
 import SearchIcon from '@/assets/icons/buttons/Search.svg?react';
 import CloseIcon from '@/assets/icons/buttons/Close/Close.svg?react';
-import Button from '@/features/Core/components/Button/Button';
-import AddIcon from '@/assets/icons/buttons/Add/Add.svg?react';
 import SwapIcon from '@/assets/icons/buttons/Swap.svg?react';
 import CanvasSidebarCard from '@/features/Canvas/components/CanvasSidebarCard/CanvasSidebarCard';
+import { CreateCanvasButton, CreateCanvasDropZone } from '@/features/Canvas/components/CreateCanvasDropZone/CreateCanvasDropZone';
 import useCanvasList from '@/features/Canvas/hooks/useCanvasList';
-import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
 import { useUser, getFormattedLoginURL } from '@/features/UserAuth/utils/userApi';
 import { CanvasSortMode } from '@/features/Canvas/utils/canvasFunctions';
 
@@ -35,8 +33,6 @@ const CanvasPanel: FC = () => {
       ? { sortField: 'name', sortDirection: 'asc' }
       : { sortField: 'created', sortDirection: 'desc' }
   );
-  const { createCanvas } = useCreateCanvas();
-
   const toggleSort = () => {
     setSortMode(prev => prev === 'date' ? 'name' : 'date');
   };
@@ -73,14 +69,9 @@ const CanvasPanel: FC = () => {
             <SwapIcon />
           </button>
         </div>
-        <Button 
-          iconLeft={<AddIcon />}
-          handleClick={createCanvas}
-          title="Create New Canvas"
-          className={styles.createButton}
-        >
-          Create New Canvas
-        </Button>
+        <CreateCanvasDropZone id="canvas-create-zone" indicatorClass={styles.createDropIndicator}>
+          <CreateCanvasButton className={styles.createButton} title="Create New Canvas" />
+        </CreateCanvasDropZone>
       </div>
       <div className={styles.list}>
         {sortedFilteredCanvases.length === 0 ? (
