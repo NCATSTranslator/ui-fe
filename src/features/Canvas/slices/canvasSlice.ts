@@ -9,6 +9,8 @@ export interface CanvasState {
   activeCanvasId: number | null;
   paneOpen: boolean;
   paneMaximized: boolean;
+  /** User-dragged pane height in px; null means the default split. Survives close so reopen restores it. */
+  paneHeight: number | null;
   /** Canvases changed on the server that sync is holding back until local writes settle. */
   syncDeferredCanvasIds: number[];
 }
@@ -18,6 +20,7 @@ const initialState: CanvasState = {
   activeCanvasId: null,
   paneOpen: false,
   paneMaximized: false,
+  paneHeight: null,
   syncDeferredCanvasIds: [],
 };
 
@@ -79,6 +82,12 @@ export const canvasSlice = createSlice({
       state.paneOpen = true;
       state.paneMaximized = !state.paneMaximized;
     },
+    /** A drag or keyboard resize; an explicit height always leaves the maximized state. */
+    setPaneHeight: (state, action: PayloadAction<number>) => {
+      state.paneOpen = true;
+      state.paneMaximized = false;
+      state.paneHeight = action.payload;
+    },
     addCanvasNode: (state, action: PayloadAction<{ canvasId: number; node: CanvasNode }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
       if (canvas) {
@@ -118,6 +127,29 @@ export const canvasSlice = createSlice({
       if (index !== -1) {
         state.canvases[index] = action.payload;
       }
+    },
+    /**
+     * Adopts a merged graph from the server without touching the rest of the canvas. Callers
+     * holding a canvas snapshot from before an async merge must not spread it back in via
+     * replaceCanvas: sync may have marked the canvas serverKnown or bumped syncGeneration since.
+     */
+    setCanvasGraph: (
+      state,
+      action: PayloadAction<{
+        canvasId: number;
+        nodes: Canvas['nodes'];
+        edges: Canvas['edges'];
+        tags?: Canvas['tags'];
+      }>,
+    ) => {
+      const { canvasId, nodes, edges, tags } = action.payload;
+      const canvas = state.canvases.find(c => c.id === canvasId);
+      if (!canvas) return;
+      canvas.nodes = nodes;
+      canvas.edges = edges;
+      if (tags !== undefined) canvas.tags = tags;
+      canvas.graphLoaded = true;
+      canvas.timeUpdated = new Date().toISOString();
     },
     setCanvasAnnotations: (state, action: PayloadAction<{ canvasId: number; annotations: Canvas['annotations'] }>) => {
       const canvas = state.canvases.find(c => c.id === action.payload.canvasId);
@@ -254,10 +286,12 @@ export const {
   openPane,
   closePane,
   toggleMaximizePane,
+  setPaneHeight,
   addCanvasNode,
   addCanvasEdge,
   removeCanvasElements,
   replaceCanvas,
+  setCanvasGraph,
   syncCanvasFromServer,
   adoptCanvasServerTime,
   setSyncDeferredCanvasIds,
@@ -276,6 +310,7 @@ export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCan
 export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
 export const selectSyncDeferredCanvasIds = (state: RootState) => state.canvas.syncDeferredCanvasIds;
 export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
+export const selectPaneHeight = (state: RootState) => state.canvas.paneHeight;
 export const selectActiveCanvas = (state: RootState) =>
   state.canvas.canvases.find(c => c.id === state.canvas.activeCanvasId) ?? null;
 

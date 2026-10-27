@@ -1,4 +1,4 @@
-import { FC, ReactNode, CSSProperties, useMemo } from 'react';
+import { FC, ReactNode, CSSProperties, Ref, useCallback, useMemo } from 'react';
 import { useDndContext, useDroppable } from '@dnd-kit/core';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import styles from './DroppableArea.module.scss';
@@ -18,6 +18,8 @@ export interface DroppableAreaProps {
   'data-testid'?: string;
   canAccept?: (draggedData: DraggableData) => boolean;
   indicateOnlyOnOver?: boolean;
+  /** The container element, alongside the droppable node ref. */
+  ref?: Ref<HTMLDivElement>;
 }
 
 export const DroppableArea: FC<DroppableAreaProps> = ({
@@ -34,6 +36,7 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   'data-testid': testId,
   canAccept,
   indicateOnlyOnOver = false,
+  ref,
 }) => {
   const { isOver, setNodeRef } = useDroppable({
     id,
@@ -42,6 +45,12 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
   });
 
   const { active } = useDndContext();
+
+  const setRefs = useCallback((node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  }, [ref, setNodeRef]);
 
   const isDraggingCompatibleItem = useMemo(() => {
     if (!active || disabled) return false;
@@ -74,7 +83,7 @@ export const DroppableArea: FC<DroppableAreaProps> = ({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={setRefs}
       className={containerClassName}
       style={style}
       data-droppable-id={id}

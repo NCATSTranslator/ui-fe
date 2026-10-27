@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import canvasReducer, {
+  closePane,
   removeCanvasElements,
+  setCanvasGraph,
+  setPaneHeight,
+  toggleMaximizePane,
+  togglePane,
   syncCanvasFromServer,
   adoptCanvasServerTime,
   setCanvases,
@@ -21,6 +26,7 @@ const stateWith = (canvas: Canvas) => ({
   activeCanvasId: canvas.id,
   paneOpen: true,
   paneMaximized: false,
+  paneHeight: null,
   syncDeferredCanvasIds: [],
 });
 
@@ -214,5 +220,48 @@ describe('removeCanvasElements', () => {
     );
 
     expect(Object.keys(next.canvases[0].nodes)).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('setCanvasGraph', () => {
+  it('adopts the merged graph and keeps the sync fields the caller snapshot may lack', () => {
+    const canvas = makeCanvas({ serverKnown: true, syncGeneration: 3, graphLoaded: false });
+    const next = canvasReducer(
+      stateWith(canvas),
+      setCanvasGraph({
+        canvasId: 1,
+        nodes: { b: makeCanvasNode('b') },
+        edges: {},
+      }),
+    );
+
+    expect(Object.keys(next.canvases[0].nodes)).toEqual(['b']);
+    expect(next.canvases[0].serverKnown).toBe(true);
+    expect(next.canvases[0].syncGeneration).toBe(3);
+    expect(next.canvases[0].graphLoaded).toBe(true);
+    expect(next.canvases[0].tags).toBe(canvas.tags);
+  });
+
+  it('ignores a canvas id that is not in the store', () => {
+    const state = stateWith(makeCanvas());
+    const next = canvasReducer(state, setCanvasGraph({ canvasId: 99, nodes: {}, edges: {} }));
+
+    expect(next.canvases).toEqual(state.canvases);
+  });
+});
+
+describe('setPaneHeight', () => {
+  it('stores the height, opens the pane, and leaves the maximized state', () => {
+    const maximized = canvasReducer(stateWith(makeCanvas()), toggleMaximizePane());
+    const next = canvasReducer(maximized, setPaneHeight(420));
+    expect(next.paneHeight).toBe(420);
+    expect(next.paneOpen).toBe(true);
+    expect(next.paneMaximized).toBe(false);
+  });
+
+  it('keeps the dragged height through collapse and close so reopening restores it', () => {
+    const resized = canvasReducer(stateWith(makeCanvas()), setPaneHeight(420));
+    expect(canvasReducer(resized, togglePane()).paneHeight).toBe(420);
+    expect(canvasReducer(resized, closePane()).paneHeight).toBe(420);
   });
 });

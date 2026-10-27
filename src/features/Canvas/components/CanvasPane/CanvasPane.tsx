@@ -1,21 +1,23 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import styles from './CanvasPane.module.scss';
 import useCanvasPane from '@/features/Canvas/hooks/useCanvasPane';
+import { useCanvasPaneAvailableHeight, useCanvasPaneResize } from '@/features/Canvas/hooks/useCanvasPaneResize';
 import { useCanvasPaneGraphModel } from '@/features/Canvas/hooks/useCanvasPaneGraphModel';
 import { useCanvasPaneMenusModel } from '@/features/Canvas/hooks/useCanvasPaneMenusModel';
 import { useCanvasEntityDrop } from '@/features/Canvas/hooks/useCanvasEntityDrop';
 import useCanvasKeyboardShortcuts from '@/features/Canvas/hooks/useCanvasKeyboardShortcuts';
 import { useUser } from '@/features/UserAuth/utils/userApi';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
+import Button from '@/features/Core/components/Button/Button';
 import CanvasGraph from '@/features/Canvas/components/CanvasGraph/CanvasGraph';
 import CanvasObjectList from '@/features/Canvas/components/CanvasObjectList/CanvasObjectList';
 import CanvasNodeContextMenu from '@/features/Canvas/components/CanvasNodeContextMenu/CanvasNodeContextMenu';
 import CanvasSyncBanner from '@/features/Canvas/components/CanvasSync/CanvasSyncBanner';
 import { CanvasNodeChromeActionsContext } from '@/features/Canvas/components/CanvasNodeChrome/CanvasNodeChrome';
 import GraphHoverTooltips from '@/features/ResultGraphView/components/GraphHoverTooltips/GraphHoverTooltips';
-import useCreateCanvas from '@/features/Canvas/hooks/useCreateCanvas';
+import { CreateCanvasButton, CreateCanvasDropZone } from '@/features/Canvas/components/CreateCanvasDropZone/CreateCanvasDropZone';
 import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
-import { isResultEntityDragType } from '@/features/DragAndDrop/types/types';
+import { isResultEntityDragData } from '@/features/DragAndDrop/types/types';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 
 type User = ReturnType<typeof useUser>[0];
@@ -30,13 +32,68 @@ const useCloseCanvasOnLogout = (user: User, paneOpen: boolean, closePane: () => 
   }, [user, paneOpen, closePane]);
 };
 
+/** Whether the pane was open on the previous render; survives the keyed content remount. */
+const usePaneWasOpen = (paneOpen: boolean): boolean => {
+  const wasOpenRef = useRef(paneOpen);
+  const wasOpen = wasOpenRef.current;
+  useEffect(() => {
+    wasOpenRef.current = paneOpen;
+  }, [paneOpen]);
+  return wasOpen;
+};
+
+/**
+ * The content remounts per canvas, so a pane opened by creating a canvas or
+ * picking one from the sidebar mounts already open and would skip the
+ * pill-to-panel transition. Unless the pane was open before the mount, it
+ * paints one collapsed frame first, resolves that style, then switches to
+ * open so the CSS transition runs. Switching canvases while open stays instant.
+ */
+const usePaneOpenTransition = (
+  paneOpen: boolean,
+  wasOpen: boolean,
+  paneRef: RefObject<HTMLDivElement | null>,
+): boolean => {
+  const [entered, setEntered] = useState(wasOpen);
+  useLayoutEffect(() => {
+    if (entered) return;
+    // Reading layout forces the collapsed style to resolve, so the class
+    // change that follows transitions instead of snapping.
+    paneRef.current?.getBoundingClientRect();
+    setEntered(true);
+  }, [entered, paneRef]);
+  return paneOpen && entered;
+};
+
+type PaneModel = ReturnType<typeof useCanvasPane>;
+
 interface CanvasPaneContentProps {
   activeCanvas: Canvas;
-  paneOpen: boolean;
-  paneMaximized: boolean;
-  togglePane: () => void;
-  paneClass: string;
+  pane: PaneModel;
+  /** True when the pane was already open before this content mounted. */
+  wasOpen: boolean;
 }
+
+const getPaneClass = (isOpen: boolean, paneMaximized: boolean) => joinClasses(
+  styles.canvasPane,
+  !isOpen && styles.collapsed,
+  isOpen && styles.open,
+  isOpen && paneMaximized && styles.maximized,
+);
+
+type ResizeHandleProps = ReturnType<typeof useCanvasPaneResize>['handleProps'];
+
+/** The pane's top edge: drag to resize, or focus it and use the arrow keys. */
+const CanvasPaneResizeHandle: FC<ResizeHandleProps> = (handleProps) => (
+  <div
+    role="separator"
+    aria-orientation="horizontal"
+    aria-label="Resize canvas"
+    tabIndex={0}
+    className={styles.resizeHandle}
+    {...handleProps}
+  />
+);
 
 type GraphModel = ReturnType<typeof useCanvasPaneGraphModel>;
 type MenusModel = ReturnType<typeof useCanvasPaneMenusModel>;
@@ -153,11 +210,24 @@ const CanvasPaneOpenContent: FC<CanvasPaneOpenContentProps> = ({
 
 const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
   activeCanvas,
-  paneOpen,
-  paneMaximized,
-  togglePane,
-  paneClass,
+  pane,
+  wasOpen,
 }) => {
+  const { paneOpen, paneMaximized, paneHeight, togglePane, setPaneHeight } = pane;
+  const paneRef = useRef<HTMLDivElement>(null);
+  const isOpen = usePaneOpenTransition(paneOpen, wasOpen, paneRef);
+  const availableHeight = useCanvasPaneAvailableHeight();
+  const { height, dragging, handleProps } = useCanvasPaneResize({
+    active: paneOpen,
+    paneMaximized,
+    paneHeight,
+    availableHeight,
+    onCommit: setPaneHeight,
+  });
+  // Only set once open and measured: the class heights cover the collapsed
+  // pill and the paint before measurement, and an inline height would
+  // override the collapsed size the open transition starts from.
+  const paneStyle = useMemo(() => (isOpen && height !== null ? { height } : undefined), [isOpen, height]);
   const graphModel = useCanvasPaneGraphModel(activeCanvas);
   const menus = useCanvasPaneMenusModel({
     activeCanvas,
@@ -169,9 +239,11 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
 
   return (
     <DroppableArea
+      ref={paneRef}
       id={`canvas-zone-${activeCanvas.id}`}
-      className={paneClass}
-      canAccept={(draggedData) => isResultEntityDragType(draggedData.type)}
+      className={joinClasses(getPaneClass(isOpen, paneMaximized), dragging && styles.dragging)}
+      style={paneStyle}
+      canAccept={isResultEntityDragData}
       data={{
         type: 'canvas',
         id: String(activeCanvas.id),
@@ -181,16 +253,17 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
       indicatorText={`Add to ${activeCanvas.label}`}
     >
       <div className={styles.collapsedTitle}>
-        <button
-          type="button"
-          className={styles.titleLeft}
-          onClick={togglePane}
-          aria-label="Expand canvas"
+        <Button
+          className={styles.collapsedButton}
+          handleClick={togglePane}
+          ariaLabel="Expand canvas"
           aria-expanded={paneOpen}
+          title={activeCanvas.label}
         >
-          <span className={styles.canvasTitle}>{activeCanvas.label}</span>
-        </button>
+          {activeCanvas.label}
+        </Button>
       </div>
+      {paneOpen && <CanvasPaneResizeHandle {...handleProps} />}
       {paneOpen && (
         <CanvasPaneOpenContent
           activeCanvas={activeCanvas}
@@ -209,33 +282,26 @@ const CanvasPaneContent: FC<CanvasPaneContentProps> = ({
 
 const CanvasPane: FC = () => {
   const [user] = useUser();
-  const { paneOpen, paneMaximized, activeCanvas, togglePane, closePane } = useCanvasPane();
-  const { createCanvas } = useCreateCanvas();
+  const pane = useCanvasPane();
+  const { paneOpen, activeCanvas, closePane } = pane;
 
   useCloseCanvasOnLogout(user, paneOpen, closePane);
-
-  const paneClass = joinClasses(
-    styles.canvasPane,
-    !paneOpen && styles.collapsed,
-    paneOpen && !paneMaximized && styles.expanded,
-    paneOpen && paneMaximized && styles.maximized,
-  );
+  const wasOpen = usePaneWasOpen(paneOpen);
 
   if (!activeCanvas) {
+    // The whole pill is the drop target, matching the active-canvas pill, so a
+    // release over its padding ring still creates the canvas.
     return (
       user ? (
-        <div className={paneClass}>
-            <div className={styles.collapsedTitle}>
-              <button
-                type="button"
-                className={styles.titleLeft}
-                onClick={createCanvas}
-                aria-label="Create new canvas"
-              >
-                <span className={styles.canvasTitle}>Create New Canvas</span>
-              </button>
-            </div>
-        </div>
+        <CreateCanvasDropZone
+          id="canvas-pane-create-zone"
+          className={getPaneClass(false, false)}
+          indicatorClass={styles.indicatorClass}
+        >
+          <div className={styles.collapsedTitle}>
+            <CreateCanvasButton className={styles.collapsedButton} ariaLabel="Create new canvas" />
+          </div>
+        </CreateCanvasDropZone>
       ) : null
     );
   }
@@ -244,10 +310,8 @@ const CanvasPane: FC = () => {
     <CanvasPaneContent
       key={activeCanvas.id}
       activeCanvas={activeCanvas}
-      paneOpen={paneOpen}
-      paneMaximized={paneMaximized}
-      togglePane={togglePane}
-      paneClass={paneClass}
+      pane={pane}
+      wasOpen={wasOpen}
     />
   );
 };

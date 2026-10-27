@@ -60,6 +60,7 @@ Creates a drop zone for draggable items using dnd-kit's `useDroppable` hook with
 - `style` (CSSProperties, optional): Additional inline styles
 - `hideIndicator` (boolean, optional): Hide the drop indicator overlay (default: false, indicator is shown)
 - `indicatorText` (string, optional): Custom text for the drop indicator (default: "Drop here")
+- `indicatorClass` (string, optional): Extra class for the indicator. Set `--drop-indicator-size` in it to shrink the text for small targets instead of overriding `font-size`.
 - `canAccept` (function, optional): Filter function `(draggedData: DraggableData) => boolean` to determine if dragged item can be dropped
 - `data-testid` (string, optional): Test identifier
 
@@ -131,7 +132,7 @@ Creates a drop zone for draggable items using dnd-kit's `useDroppable` hook with
 
 Located in: `hooks/useResultEntityDraggable.ts`
 
-Applies `useDraggable` to result path/node/edge UI without wrapping in an extra DOM node (needed for inline path layout). Disabled when there is no active canvas.
+Applies `useDraggable` to result path/node/edge UI without wrapping in an extra DOM node (needed for inline path layout). Enabled whenever a logged-in user has the canvas feature, since the canvas pane then always offers a drop target: the active canvas's drop zone, or the "Create New Canvas" pill when no canvas is active (it creates a canvas and adds the dropped entity). The canvas sidebar panel adds per-canvas cards and its own create button as additional targets.
 
 ```tsx
 const { attributes, listeners, setNodeRef, isDragging, canDrag } = useResultEntityDraggable({
