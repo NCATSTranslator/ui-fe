@@ -34,8 +34,8 @@ const ViewCanvasesButton = () => {
 export const topItems: SidebarItem[] = [
   { id: 'newQuery', title: 'New Query', type: 'link', to: '/new-query', icon: <CirclePlusIcon />, tooltipText: 'New Query' },
   { id: 'projects', title: <Link to="/projects">Projects</Link>, type: 'panel', icon: <FolderIcon />, tooltipText: 'Projects', noUserTooltipText: 'Log In to Access Projects', panelComponent: <ProjectsPanel />, buttonComponent: <ViewProjectsButton /> },
-  { id: 'queries', title: <Link to="/query-history">Query History</Link>, type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
   { id: 'canvases', title: <Link to="/canvases">Canvases</Link>, type: 'panel', icon: <CanvasIcon />, tooltipText: 'Canvases', noUserTooltipText: 'Log In to Access Canvases', panelComponent: <Suspense fallback={null}><CanvasPanel /></Suspense>, buttonComponent: <ViewCanvasesButton /> },
+  { id: 'queries', title: <Link to="/query-history">Query History</Link>, type: 'panel', icon: <HistoryIcon />, tooltipText: 'Query History', noUserTooltipText: 'Log In to Access Query History', panelComponent: <QueriesPanel />, buttonComponent: <ViewAllQueriesButton /> },
 ];
 
 export const bottomItems: SidebarItem[] = [
