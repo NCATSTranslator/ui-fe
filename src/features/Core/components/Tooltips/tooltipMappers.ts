@@ -34,7 +34,6 @@ export const edgeToTooltipEntry = (resultSet: ResultSet | null, edge: ResultEdge
   return {
     id: edge.id,
     predicate: formatPredicate(edge.predicate),
-    description: edge.description ?? undefined,
     predicate_url: edge.predicate_url,
     pubCount,
     ctCount,
