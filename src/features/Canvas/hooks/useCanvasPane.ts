@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useSelector, useDispatch, useStore } from 'react-redux';
-import { selectActiveCanvas, selectActiveCanvasId, selectPaneOpen, selectPaneMaximized, togglePane, openPane, closePane, toggleMaximizePane, setActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
+import { selectActiveCanvas, selectActiveCanvasId, selectPaneOpen, selectPaneMaximized, selectPaneHeight, togglePane, openPane, closePane, toggleMaximizePane, setPaneHeight, setActiveCanvas } from '@/features/Canvas/slices/canvasSlice';
 import type { AppDispatch, RootState } from '@/redux/store';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
@@ -9,6 +9,7 @@ const useCanvasPane = () => {
   const store = useStore<RootState>();
   const paneOpen = useSelector(selectPaneOpen);
   const paneMaximized = useSelector(selectPaneMaximized);
+  const paneHeight = useSelector(selectPaneHeight);
   const activeCanvasId = useSelector(selectActiveCanvasId);
   const activeCanvas = useSelector(selectActiveCanvas);
 
@@ -31,17 +32,23 @@ const useCanvasPane = () => {
     trackEvent('canvas_pane_toggled', { pane_state: selectPaneMaximized(store.getState()) ? 'restored' : 'maximized' });
     dispatch(toggleMaximizePane());
   }, [dispatch, store]);
+  const handleSetPaneHeight = useCallback((height: number) => {
+    trackEvent('canvas_pane_toggled', { pane_state: 'resized' });
+    dispatch(setPaneHeight(height));
+  }, [dispatch]);
   const handleSetActiveCanvas = useCallback((id: number) => dispatch(setActiveCanvas(id)), [dispatch]);
 
   return {
     paneOpen,
     paneMaximized,
+    paneHeight,
     activeCanvasId,
     activeCanvas,
     togglePane: handleTogglePane,
     openPane: handleOpenPane,
     closePane: handleClosePane,
     toggleMaximizePane: handleToggleMaximizePane,
+    setPaneHeight: handleSetPaneHeight,
     setActiveCanvas: handleSetActiveCanvas,
   };
 };

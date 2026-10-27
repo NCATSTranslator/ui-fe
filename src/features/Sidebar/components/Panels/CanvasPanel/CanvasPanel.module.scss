@@ -55,6 +55,12 @@
   }
 }
 
+// The button is only one line tall; the default h5 indicator overflows it.
+.createDropIndicator {
+  --drop-indicator-size: #{$bodyOneSize};
+  white-space: nowrap;
+}
+
 .list {
   display: flex;
   flex-direction: column;

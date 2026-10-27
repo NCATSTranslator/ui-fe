@@ -328,6 +328,9 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Memoized data prop for ResultListHeader
   // Note: currentPage is a ref — it updates in sync with itemOffset/endResultIndex
   // via handlePageClick, so those state deps keep this memo current.
+  // True when the query returned results but the active filters exclude every one of them.
+  const allResultsFilteredOut = displayedResults.length === 0 && originalResults.current.length > 0;
+
   const headerData = useMemo(() => ({
     formattedResultsLength: formattedResults.length,
     originalResultsLength: originalResults.current.length,
@@ -444,6 +447,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                           itemOffset={itemOffset}
                           isLoading={isLoading}
                           isError={isError}
+                          allResultsFilteredOut={allResultsFilteredOut}
                         />
                       </div>
                     </div>

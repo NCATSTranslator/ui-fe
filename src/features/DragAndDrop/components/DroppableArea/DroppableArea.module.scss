@@ -56,7 +56,9 @@
   transform: translate(-50%, -50%);
   color: $blueOne;
   font-weight: 800;
-  font-size: $h5Size;
+  // Small targets override the size through `indicatorClass` by setting this
+  // property, which sidesteps any specificity race with this rule.
+  font-size: var(--drop-indicator-size, #{$h5Size});
   pointer-events: none;
   z-index: 110;
   opacity: 0;

@@ -1,4 +1,4 @@
-import { get, post, put, fetchWithErrorHandling, ErrorHandler } from '@/features/Core/utils/web';
+import { get, post, put, fetchWithErrorHandling, ErrorHandler, quietHttpErrorHandler } from '@/features/Core/utils/web';
 import type {
   BackendUserCanvas,
   BackendCanvasGraph,
@@ -30,7 +30,7 @@ const BASE = '/api/v1/users/me/canvas';
 // ---------------------------------------------------------------------------
 
 export const listCanvases = async (
-  httpErrorHandler?: ErrorHandler,
+  httpErrorHandler: ErrorHandler = quietHttpErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<BackendUserCanvas[]> =>
   fetchWithErrorHandling<BackendUserCanvas[]>(
@@ -97,7 +97,7 @@ export const restoreCanvases = async (
 
 export const getCanvasGraph = async (
   saveId: number,
-  httpErrorHandler?: ErrorHandler,
+  httpErrorHandler: ErrorHandler = quietHttpErrorHandler,
   fetchErrorHandler?: ErrorHandler,
 ): Promise<BackendCanvasGraph> =>
   fetchWithErrorHandling<BackendCanvasGraph>(

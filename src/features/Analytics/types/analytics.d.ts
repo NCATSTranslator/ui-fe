@@ -74,7 +74,7 @@ export type AnalyticsParams = Partial<Record<AnalyticsDimension, string>> &
 export type QueryTypeName = 'single' | 'pathfinder' | 'lookup';
 export type LinkType = 'publication' | 'clinical_trial' | 'source';
 export type ExportFormat = 'csv' | 'json' | 'png' | 'svg';
-export type PaneState = 'open' | 'closed' | 'maximized' | 'restored';
+export type PaneState = 'open' | 'closed' | 'maximized' | 'restored' | 'resized';
 export type HistoryAction = 'undo' | 'redo';
 export type AddMethod = 'drag' | 'menu' | 'paste' | 'shortcut';
 

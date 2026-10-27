@@ -7,6 +7,9 @@ import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import CanvasIcon from '@/assets/icons/navigation/Canvas.svg?react';
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 import { getCanvasObjectCountDisplay } from '@/features/Canvas/utils/canvasFunctions';
+import { useCanvasEntityDrop } from '@/features/Canvas/hooks/useCanvasEntityDrop';
+import { DroppableArea } from '@/features/DragAndDrop/components/DroppableArea/DroppableArea';
+import { isResultEntityDragData } from '@/features/DragAndDrop/types/types';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 
 interface CanvasSidebarCardProps {
@@ -36,6 +39,8 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
   onRenameValueChange,
   onSubmitRename,
 }) => {
+  const handleEntityDrop = useCanvasEntityDrop(canvas);
+
   const options = (
     <>
       <Button handleClick={() => onStartRename(canvas)} iconLeft={<EditIcon />}>Rename</Button>
@@ -49,23 +54,34 @@ const CanvasSidebarCard: FC<CanvasSidebarCardProps> = ({
         if (isRenaming) onSubmitRename();
       }}
     >
-      <SidebarCard
-        className={isActive ? styles.activeCanvas : ''}
-        leftIcon={<CanvasIcon />}
-        title={isRenaming ? renameValue : canvas.label}
-        searchTerm={searchTerm}
-        onClick={() => onSelect(canvas)}
-        bottomLeft={
-          <span className={styles.meta}>
-            {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
-          </span>
-        }
-        options={options}
-        isRenaming={isRenaming}
-        onTitleChange={onRenameValueChange}
-        onFormSubmit={onSubmitRename}
-        textInputRef={renameInputRef}
-      />
+      <DroppableArea
+        id={`canvas-card-zone-${canvas.id}`}
+        // No target until the graph is in: a drop would place nodes against an empty canvas.
+        disabled={!canvas.graphLoaded}
+        canAccept={isResultEntityDragData}
+        data={{ type: 'canvas', id: String(canvas.id), onDrop: handleEntityDrop }}
+        indicatorText={`Add to ${canvas.label}`}
+        indicatorClass={styles.dropIndicator}
+        indicateOnlyOnOver
+      >
+        <SidebarCard
+          className={isActive ? styles.activeCanvas : ''}
+          leftIcon={<CanvasIcon />}
+          title={isRenaming ? renameValue : canvas.label}
+          searchTerm={searchTerm}
+          onClick={() => onSelect(canvas)}
+          bottomLeft={
+            <span className={styles.meta}>
+              {getCanvasObjectCountDisplay(canvas, { singular: 'Object', plural: 'Objects' })}
+            </span>
+          }
+          options={options}
+          isRenaming={isRenaming}
+          onTitleChange={onRenameValueChange}
+          onFormSubmit={onSubmitRename}
+          textInputRef={renameInputRef}
+        />
+      </DroppableArea>
     </OutsideClickHandler>
   );
 };

@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { AppDispatch } from '@/redux/store';
-import { replaceCanvas } from '@/features/Canvas/slices/canvasSlice';
+import { setCanvasGraph } from '@/features/Canvas/slices/canvasSlice';
 import { resultDataToGraphSubmission, backendGraphToInternal } from '@/features/Canvas/utils/canvasMappers';
 import {
   extractNodeFromResultSet,
@@ -12,7 +12,8 @@ import { canvasEntityAddedToast, canvasEntitiesAddedToast, canvasSaveErrorToast 
 import { getDistinctResultEdges } from '@/features/Core/utils/resultHelpers';
 import { getResultById } from '@/features/ResultList/slices/resultsSlice';
 import type { Canvas } from '@/features/Canvas/types/canvas';
-import type { ResultEntityDragType } from '@/features/DragAndDrop/types/types';
+import type { DraggableData, ResultEntityDragType } from '@/features/DragAndDrop/types/types';
+import { isResultEntityDragData } from '@/features/DragAndDrop/types/types';
 import type { Path, ResultSet } from '@/features/ResultList/types/results';
 import type { AddMethod } from '@/features/Analytics/types/analytics';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
@@ -23,6 +24,22 @@ export type ResultEntityTarget = {
   pk: string;
   path?: Path;
   edgeIds?: string[];
+};
+
+/**
+ * Maps a dragged result / node / edge / path payload to a canvas target.
+ * Returns null for non-result drags (queries, projects).
+ */
+export const resultEntityTargetFromDrag = (draggedData: DraggableData): ResultEntityTarget | null => {
+  if (!isResultEntityDragData(draggedData)) return null;
+  const { id, pk } = draggedData.data;
+  return {
+    type: draggedData.type,
+    id,
+    pk,
+    path: draggedData.type === 'path' ? draggedData.data.path : undefined,
+    edgeIds: draggedData.type === 'edge' ? draggedData.data.edgeIds : undefined,
+  };
 };
 
 type ResolvedTarget = {
@@ -135,24 +152,21 @@ export const addResultEntityToCanvas = async ({
   queryClient,
   addMethod = 'menu',
 }: AddResultEntityParams): Promise<boolean> => {
-  const resolved = resolveResultEntityTarget(resultSet, target);
-  if (!resolved) return false;
-
-  const { nodeIds, edgeIds } = resolved;
-  const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds, undefined, {
-    layout: canvas.layout,
-    existingNodes: canvas.nodes,
-  });
+  // Resolution and submission run inside the try as well: drop handlers are async, so a throw
+  // there would surface as an unhandled rejection rather than reaching any caller's catch.
   try {
+    const resolved = resolveResultEntityTarget(resultSet, target);
+    if (!resolved) return false;
+
+    const { nodeIds, edgeIds } = resolved;
+    const submission = resultDataToGraphSubmission(resultSet, nodeIds, edgeIds, undefined, {
+      layout: canvas.layout,
+      existingNodes: canvas.nodes,
+    });
     const graph = await mergeCanvasGraph(canvas.id, submission);
     const { nodes, edges } = backendGraphToInternal(graph);
-    dispatch(replaceCanvas({
-      ...canvas,
-      nodes,
-      edges,
-      tags: graph.tags ?? canvas.tags,
-      timeUpdated: new Date().toISOString(),
-    }));
+    // The `canvas` snapshot predates the merge; only the graph it returned is adopted.
+    dispatch(setCanvasGraph({ canvasId: canvas.id, nodes, edges, tags: graph.tags ?? undefined }));
     queryClient.invalidateQueries({ queryKey: ['userCanvases'] });
     notifyEntityAdded(target, resolved, canvas.label);
     // Tracked after the merge resolves so a failed save is not counted as an add.

@@ -1,4 +1,4 @@
-import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler } from '@/features/Core/utils/web';
+import { get, post, put, remove, fetchWithErrorHandling, ErrorHandler, quietHttpErrorHandler } from '@/features/Core/utils/web';
 import { ProjectCreate, ProjectUpdate, UserQueryObject, ProjectRaw, QueryUpdate} from '@/features/Projects/types/projects.d';
 import { isProjectRaw, isProjectRawArray, isUserQueryObject, isUserQueryObjectArray } from '@/features/Projects/types/checkers';
 
@@ -216,7 +216,7 @@ export const updateQuery = async (
  */
 export const copyQuery = async (
   pk: string,
-  httpErrorHandler?: ErrorHandler,
+  httpErrorHandler: ErrorHandler = quietHttpErrorHandler,
   fetchErrorHandler?: ErrorHandler
 ): Promise<"OK"> => {
   const url = `${API_PATH_PREFIX}/users/me/queries/copy`;

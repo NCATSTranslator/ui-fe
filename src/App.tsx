@@ -39,6 +39,15 @@ const CanvasSync = lazy(() => import('@/features/Canvas/components/CanvasSync/Ca
 
 const queryClient = new QueryClient(commonQueryClientOptions);
 
+// dnd-kit auto-scrolls every scrollable ancestor of the dragged node when the
+// pointer nears its edge. Drops land on the canvas pane, sidebar cards, or the
+// floating create button, none of which need the main content to move, and
+// scrolling it mid-drag shifts the page out from under the drop targets.
+// Sidebar lists stay auto-scrollable so long lists remain reachable.
+const DND_AUTO_SCROLL = {
+  canScroll: (element: Element) => element.id !== MAIN_SCROLL_ELEMENT_ID,
+};
+
 const App = ({children}: {children?: ReactNode}) => {
 
   const location = useLocation();
@@ -120,7 +129,12 @@ const App = ({children}: {children?: ReactNode}) => {
                 <Suspense fallback={null}>
                   {canvasEnabled && <CanvasSync />}
                 </Suspense>
-                <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                <DndContext
+                  sensors={sensors}
+                  autoScroll={DND_AUTO_SCROLL}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                >
                   <div className="layout">
                     <Sidebar className={isSmallScreen ? 'smallScreen' : ''} />
                     <main id={MAIN_CONTENT_ELEMENT_ID} className='content'>

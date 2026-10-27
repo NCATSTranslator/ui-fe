@@ -14,14 +14,23 @@ interface ResultListRowsProps {
   itemOffset: number;
   isLoading: boolean;
   isError: boolean;
+  /** True when the query returned results but the active filters exclude every one of them */
+  allResultsFilteredOut: boolean;
 }
 
 /** The current page of result rows, or the error / empty message in their place. */
-const ResultListRows: FC<ResultListRowsProps> = ({ parentStyles, resultSet, displayedResults, pathFilterState, userSaves, itemOffset, isLoading, isError }) => {
+const ResultListRows: FC<ResultListRowsProps> = ({ parentStyles, resultSet, displayedResults, pathFilterState, userSaves, itemOffset, isLoading, isError, allResultsFilteredOut }) => {
   if (isError)
     return <h5 className={parentStyles.errorText}>There was an error when processing your query. Please try again.</h5>;
   if (isLoading)
     return null;
+  if (allResultsFilteredOut)
+    return (
+      <div className={parentStyles.errorText}>
+        <h5 className={parentStyles.noMatchTitle}>No Matching Results</h5>
+        <p className={parentStyles.noMatchSubtitle}>Try modifying or removing filters to broaden your search</p>
+      </div>
+    );
   if (displayedResults.length === 0)
     return <h5 className={parentStyles.errorText}>No results available.</h5>;
 
