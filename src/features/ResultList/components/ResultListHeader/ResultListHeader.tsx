@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 // import { useSelector } from 'react-redux';
 // import { currentConfig }from "@/features/UserAuth/slices/userSlice";
 import styles from './ResultListHeader.module.scss';
@@ -8,6 +8,7 @@ import Toggle from '@/features/Core/components/Toggle/Toggle';
 import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react';
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { isExclusion } from '@/features/ResultFiltering/utils/filterFunctions';
 
 interface ResultListHeaderData {
   formattedResultsLength: number;
@@ -33,6 +34,11 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
   // const showNoveltyBoost = config?.show_novelty_boost;
   const showNoveltyBoost = false;
   const { activeFilters, handleFilter } = useResultListContext();
+  // Inclusions first, exclusions last; stable sort preserves relative order within each group
+  const orderedFilters = useMemo(
+    () => [...activeFilters].sort((a, b) => Number(isExclusion(a)) - Number(isExclusion(b))),
+    [activeFilters]
+  );
 
   return(
     <div className={styles.resultsHeader}>
@@ -89,7 +95,7 @@ const ResultListHeader: FC<ResultListHeaderProps> = ({ data }) => {
         activeFilters.length > 0 &&
         <div className={styles.activeFilters}>
           {
-            activeFilters.map((activeFilter, i)=> {
+            orderedFilters.map((activeFilter, i)=> {
               return(
                 <SelectedFilterTag key={activeFilter?.id || i.toString()} filter={activeFilter} handleFilter={handleFilter}/>
               )

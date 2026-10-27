@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, MouseEvent } from 'react';
-import { useSortSearchState } from '@/features/Projects/hooks/customHooks';
+import { useRestoreProjects, useSortSearchState } from '@/features/Projects/hooks/customHooks';
 import { useEditProjectHandlers } from '@/features/Projects/hooks/useEditProjectHandlers';
 import { useProjectDetailData } from '@/features/Projects/hooks/useProjectDetailData';
 import { useProjectDetailSortedData } from '@/features/Projects/hooks/useProjectDetailSortedData';
@@ -11,6 +11,7 @@ import { useRenameProject } from '@/features/Projects/hooks/useRenameProject';
 import { useAnimateHeight } from '@/features/Core/hooks/useAnimateHeight';
 import { useSidebar } from '@/features/Sidebar/hooks/sidebarHooks';
 import { useDynamicPageTitle } from '@/features/Page/hooks/usePageTitle';
+import { projectRestoredToast } from '@/features/Core/utils/toastMessages';
 import type { Project } from '@/features/Projects/types/projects';
 
 const useProjectDetailDragState = (project: Project | undefined) => {
@@ -35,18 +36,32 @@ const useProjectDetailDragState = (project: Project | undefined) => {
   return { isDraggedQueryInProject, onQueryDrop };
 };
 
+/** Deleted flag and restore action for a project that is sitting in the trash. */
+const useProjectRestoreState = (project: Project | undefined) => {
+  const { mutate: restoreProjects, isPending: isRestoringProject } = useRestoreProjects();
+  const projectId = project?.id;
+
+  const handleRestoreProject = useCallback(() => {
+    if (projectId === undefined) return;
+    restoreProjects([String(projectId)], { onSuccess: () => projectRestoredToast() });
+  }, [projectId, restoreProjects]);
+
+  // The projects fetch includes trashed projects, so a deleted project still resolves by id
+  return { isProjectDeleted: !!project?.deleted, handleRestoreProject, isRestoringProject };
+};
+
 /** Data, rename, drag, and sort state for the project detail page. */
 export const useProjectDetailViewModel = () => {
   const data = useProjectDetailData();
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const projectsLoading = data.loading.projectsLoading;
-  const queriesLoading = data.loading.queriesLoading;
+  const { projectsLoading, queriesLoading } = data.loading;
   const shouldShowProjectErrorState = !!(data.errors.projectsError && !data.project?.id);
   const shouldShowQueriesErrorState = !!(data.errors.queriesError && data.projectQueries.length === 0);
 
   useDynamicPageTitle(data.project?.data.title || "Project");
 
   const { isDraggedQueryInProject, onQueryDrop } = useProjectDetailDragState(data.project);
+  const { isProjectDeleted, handleRestoreProject, isRestoringProject } = useProjectRestoreState(data.project);
   const sortSearchState = useSortSearchState();
   const { height, toggle: handleAddNewQueryClick } = useAnimateHeight();
   const { togglePanel, activePanelId } = useSidebar();
@@ -87,6 +102,9 @@ export const useProjectDetailViewModel = () => {
     queriesLoading,
     shouldShowProjectErrorState,
     shouldShowQueriesErrorState,
+    isProjectDeleted,
+    handleRestoreProject,
+    isRestoringProject,
     isDraggedQueryInProject,
     sortSearchState,
     height,
