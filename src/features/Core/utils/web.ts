@@ -68,6 +68,14 @@ export const defaultFetchErrorHandler: ErrorHandler = (error: Error): void => {
 };
 
 /**
+ * Logs an HTTP error without surfacing a toast. Use for background or best-effort requests
+ * (polling, opportunistic copies) where a transient failure should not alarm the user.
+ */
+export const quietHttpErrorHandler: ErrorHandler = (error: Error): void => {
+  console.error('HTTP Error:', error.message);
+};
+
+/**
  * Type guard to check if an object is an ErrorObject
  */
 export const isErrorObject = (obj: unknown, warn = false): obj is ErrorObject => {
