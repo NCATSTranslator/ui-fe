@@ -9,7 +9,6 @@ import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 export interface EdgeTooltipEntry {
   id: string;
   predicate: string;
-  description?: string;
   predicate_url?: string;
   pubCount: number;
   ctCount: number;
@@ -26,26 +25,6 @@ export interface EdgeTooltipContentProps {
   isAcceptedOntology?: boolean;
   onPredicateClick?: (e: MouseEvent<HTMLSpanElement>, edgeId: string, options?: PredicateClickOptions) => void;
 }
-
-const renderDescription = (predicate: string, description?: string) => {
-  if (predicate === 'impacts') {
-    return (
-      <span className={styles.predicateDescription}>
-        Indicates that a drug affects one or more biological processes relevant to a disease,
-        in a way that may improve, worsen, or otherwise modify the condition.
-      </span>
-    );
-  }
-  if (!description) return null;
-  const replaced = description.replaceAll('treat', 'impact');
-  const capitalized = replaced.charAt(0).toUpperCase() + replaced.slice(1);
-  const suffix = replaced.slice(-1) !== '.' ? '.' : '';
-  return (
-    <span className={styles.predicateDescription}>
-      {capitalized}{suffix}
-    </span>
-  );
-};
 
 const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
   edges,
@@ -77,7 +56,6 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
               <span className={styles.predicateImpact}>(either positively or negatively)</span>
             }
           </span>
-          {renderDescription(edge.predicate, edge.description)}
           {edge.predicate_url &&
             <a
               href={edge.predicate_url}
