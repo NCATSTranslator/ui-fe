@@ -110,18 +110,6 @@
       }
     }
   }
-  .predicateDescription {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    -webkit-box-orient: vertical;
-    -moz-box-orient: vertical;
-    overflow: hidden;
-    font-size: $captionSize;
-    margin: 0;
-    font-weight: 400;
-    color: $white;
-  }
   .predicateUrl {
     cursor: pointer;
     display: flex;
