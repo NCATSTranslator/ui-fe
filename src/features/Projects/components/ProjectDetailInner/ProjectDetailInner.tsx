@@ -4,6 +4,7 @@ import LoadingWrapper from '@/features/Core/components/LoadingWrapper/LoadingWra
 import Tabs from '@/features/Core/components/Tabs/Tabs';
 import Tab from '@/features/Core/components/Tabs/Tab';
 import ProjectDetailErrorStates from '@/features/Projects/components/ProjectDetailErrorStates/ProjectDetailErrorStates';
+import ProjectDeletedState from '@/features/Projects/components/ProjectDeletedState/ProjectDeletedState';
 import OptionsIcon from '@/assets/icons/buttons/Dot Menu/Vertical Dot Menu.svg?react';
 import EditIcon from '@/assets/icons/buttons/Edit.svg?react';
 import TrashIcon from '@/assets/icons/buttons/Trash.svg?react';
@@ -65,6 +66,25 @@ const ProjectDetailInner = () => {
     return (
       <div className={styles.projectDetail}>
         <ProjectDetailErrorStates type="projects" styles={styles} />
+      </div>
+    );
+  }
+
+  if (vm.isProjectDeleted) {
+    return (
+      <div className={styles.projectDetail}>
+        <div className={styles.projectHeaderContainer}>
+          <ListHeader
+            heading={vm.rename.localTitle}
+            searchPlaceholder="Search Queries"
+            searchTerm=""
+            handleSearch={() => {}}
+            hideSearch
+          />
+        </div>
+        <div className={styles.projectTabsContainer}>
+          <ProjectDeletedState onRestore={vm.handleRestoreProject} restoring={vm.isRestoringProject} />
+        </div>
       </div>
     );
   }

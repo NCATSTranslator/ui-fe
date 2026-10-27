@@ -1,0 +1,12 @@
+@use '@/assets/styles/variables' as *;
+
+.message {
+  margin: 0 0 $m;
+  a {
+    color: $purpleOne;
+    font-weight: 700;
+  }
+}
+.restoreButton {
+  margin: 0 auto;
+}
