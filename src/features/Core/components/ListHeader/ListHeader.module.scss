@@ -18,7 +18,8 @@
   }
 
   .title {
-    padding: 3.5px 0 3.5px 12px;
+    // Match CardList's horizontal inset ($xl) so headings line up with the lists below.
+    padding: 3.5px 0 3.5px $xl;
     &.titleClickable {
       cursor: pointer;
       transition: $defaultAnim;
@@ -30,7 +31,8 @@
   }
   
   .titleInput {
-    margin-left: -13px;
+    // Offset by the input's 12px left padding so rename text stays under the title.
+    margin-left: calc(#{$xl} - 12px);
     margin-top: 0;
     margin-bottom: -6px;
     input {

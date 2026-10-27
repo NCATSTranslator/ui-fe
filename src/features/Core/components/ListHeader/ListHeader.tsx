@@ -15,6 +15,7 @@ interface ListHeaderProps {
   textInputRef?: RefObject<HTMLInputElement | null>;
   onOutsideClick?: () => void;
   onTitleClick?: (e: MouseEvent<HTMLElement>) => void;
+  hideSearch?: boolean;
 }
 
 const ListHeader: FC<ListHeaderProps> = ({
@@ -28,6 +29,7 @@ const ListHeader: FC<ListHeaderProps> = ({
   textInputRef,
   onOutsideClick,
   onTitleClick,
+  hideSearch = false,
 }) => {
 
   const handleOutsideClick = () => {
@@ -51,14 +53,16 @@ const ListHeader: FC<ListHeaderProps> = ({
       <div>
         {headingContent}
       </div>
-      <div>
-        <ProjectSearchBar
-          searchPlaceholder={searchPlaceholder}
-          searchTerm={searchTerm}
-          handleSearch={handleSearch}
-          styles={styles}
-        />
-      </div>
+      {!hideSearch && (
+        <div>
+          <ProjectSearchBar
+            searchPlaceholder={searchPlaceholder}
+            searchTerm={searchTerm}
+            handleSearch={handleSearch}
+            styles={styles}
+          />
+        </div>
+      )}
     </div>
   )
 }

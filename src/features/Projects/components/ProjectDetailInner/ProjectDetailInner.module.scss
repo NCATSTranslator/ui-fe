@@ -14,9 +14,6 @@
     margin: 0 auto;
     width: 100%;
   }
-  .projectTabsTabListWrapper {
-    padding: 0 $s;
-  }
   .queryGrid {
     display: flex;
     flex-direction: column;
@@ -89,5 +86,6 @@
   width: 100%;
 }
 .cardList {
-  padding: 0;
+  // Keep DroppableArea's vertical margin; match list-page CardList horizontal inset.
+  padding: 0 $xl;
 }
