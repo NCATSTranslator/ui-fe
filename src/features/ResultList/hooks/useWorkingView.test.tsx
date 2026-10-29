@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import useWorkingView, { WORKING_VIEW_SAVE_DEBOUNCE_MS } from '@/features/ResultList/hooks/useWorkingView';
 import { getWorkingView, setWorkingView, WorkingView } from '@/features/ResultFiltering/utils/workingViewApi';
 import { Filter, Filters } from '@/features/ResultFiltering/types/filters';
+import { WorkingViewState } from '@/features/ResultFiltering/utils/workingViewApi';
 import { User } from '@/features/UserAuth/types/user';
 
 vi.mock('@/features/ResultFiltering/utils/workingViewApi', async (importOriginal) => {
@@ -30,11 +31,14 @@ interface Props {
   currentQueryID: string | null;
   activeFilters: Filter[];
   hasResults: boolean;
+  urlState: WorkingViewState | null;
 }
+
+const urlStateOf = (filters: Filter[]): WorkingViewState => makeView('url', filters).state as WorkingViewState;
 
 const renderWorkingView = (initial: Partial<Props> = {}) => {
   const handleSetFilters = vi.fn();
-  const defaults: Props = { user, currentQueryID: 'pk-1', activeFilters: [], hasResults: false };
+  const defaults: Props = { user, currentQueryID: 'pk-1', activeFilters: [], hasResults: false, urlState: null };
   const hook = renderHook(
     (props: Props) => useWorkingView({ ...props, availableFilters: available, handleSetFilters }),
     { initialProps: { ...defaults, ...initial } },
@@ -59,23 +63,67 @@ describe('useWorkingView', () => {
     vi.useRealTimers();
   });
 
-  it('does nothing without a user', async () => {
-    const { update } = renderWorkingView({ user: null });
+  it('does not talk to the server without a user, but still initializes once results exist', async () => {
+    const { result, update } = renderWorkingView({ user: null });
+    expect(result.current.initialized).toBe(false);
     await update({ user: null, activeFilters: [aspirin], hasResults: true });
+    expect(result.current.initialized).toBe(true);
     await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
     expect(getWorkingView).not.toHaveBeenCalled();
     expect(setWorkingView).not.toHaveBeenCalled();
   });
 
+  it('applies the filters from the URL for a logged-out user', async () => {
+    const { handleSetFilters, update } = renderWorkingView({ user: null, urlState: urlStateOf([approved]) });
+    await update({ user: null, urlState: urlStateOf([approved]), hasResults: true });
+    expect(handleSetFilters).toHaveBeenCalledWith([approved]);
+  });
+
+  it('prefers the URL filters over the saved view and does not save them until the user changes something', async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(makeView('pk-1', [approved]));
+    const { handleSetFilters, result, update } = renderWorkingView({ urlState: urlStateOf([aspirin]) });
+    await settle();
+    expect(result.current.initialized).toBe(false);
+
+    await update({ urlState: urlStateOf([aspirin]), hasResults: true });
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+    expect(handleSetFilters).toHaveBeenCalledWith([expect.objectContaining({ id: 'g/str', value: 'aspirin' })]);
+    expect(result.current.initialized).toBe(true);
+
+    await update({ urlState: urlStateOf([aspirin]), hasResults: true, activeFilters: [aspirin] });
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+
+    await update({ urlState: urlStateOf([aspirin]), hasResults: true, activeFilters: [aspirin, approved] });
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS);
+    expect(setWorkingView).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies URL filters before the saved view has loaded and ignores the view when it arrives', async () => {
+    let resolveView: (view: WorkingView) => void = () => {};
+    vi.mocked(getWorkingView).mockReturnValue(new Promise((resolve) => { resolveView = resolve; }));
+    const { handleSetFilters, update } = renderWorkingView({ urlState: urlStateOf([aspirin]), hasResults: true });
+    await settle();
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+
+    await act(async () => { resolveView(makeView('pk-1', [approved])); });
+    await update({ urlState: urlStateOf([aspirin]), hasResults: true, activeFilters: [aspirin] });
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+  });
+
   it('applies the saved filters once results exist and does not save them back', async () => {
     vi.mocked(getWorkingView).mockResolvedValue(makeView('pk-1', [approved]));
-    const { handleSetFilters, update } = renderWorkingView();
+    const { handleSetFilters, result, update } = renderWorkingView();
     await settle();
     expect(handleSetFilters).not.toHaveBeenCalled();
+    expect(result.current.initialized).toBe(false);
 
     await update({ hasResults: true });
     expect(handleSetFilters).toHaveBeenCalledTimes(1);
     expect(handleSetFilters).toHaveBeenCalledWith([approved]);
+    expect(result.current.initialized).toBe(true);
 
     await update({ hasResults: true, activeFilters: [approved] });
     await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
@@ -140,12 +188,13 @@ describe('useWorkingView', () => {
     expect(handleSetFilters).toHaveBeenCalledWith([expect.objectContaining({ id: 'g/str', value: 'aspirin' })]);
   });
 
-  it('leaves the view alone when loading it fails', async () => {
+  it('leaves the view alone and never initializes when loading it fails', async () => {
     vi.mocked(getWorkingView).mockRejectedValue(new Error('HTTP Error: 500'));
-    const { update } = renderWorkingView();
+    const { result, update } = renderWorkingView();
     await settle();
     await update({ hasResults: true, activeFilters: [aspirin] });
     await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
     expect(setWorkingView).not.toHaveBeenCalled();
+    expect(result.current.initialized).toBe(false);
   });
 });

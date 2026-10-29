@@ -9,6 +9,7 @@ import {
   setWorkingView,
   toWorkingViewState,
   filtersFromWorkingView,
+  filtersFromWorkingViewState,
 } from '@/features/ResultFiltering/utils/workingViewApi';
 
 export const WORKING_VIEW_SAVE_DEBOUNCE_MS = 500;
@@ -24,10 +25,25 @@ interface UseWorkingViewArgs {
   activeFilters: Filter[];
   availableFilters: Filters;
   hasResults: boolean;
+  urlState: WorkingViewState | null;
   handleSetFilters: (filters: Filter[]) => void;
 }
 
+export interface UseWorkingViewReturn {
+  initialized: boolean;
+}
+
 const serialize = (state: WorkingViewState): string => JSON.stringify(state);
+
+const initialFilters = (
+  urlState: WorkingViewState | null,
+  view: WorkingView | null,
+  availableFilters: Filters,
+): Filter[] | null => {
+  if (urlState !== null) return filtersFromWorkingViewState(urlState, availableFilters, 'the URL');
+  if (view !== null) return filtersFromWorkingView(view, availableFilters);
+  return null;
+};
 
 const useWorkingView = ({
   user,
@@ -35,10 +51,12 @@ const useWorkingView = ({
   activeFilters,
   availableFilters,
   hasResults,
+  urlState,
   handleSetFilters,
-}: UseWorkingViewArgs): void => {
+}: UseWorkingViewArgs): UseWorkingViewReturn => {
   const isLoggedIn = user !== null;
   const [loaded, setLoaded] = useState<LoadedWorkingView | null>(null);
+  const [initializedPk, setInitializedPk] = useState<string | null>(null);
   const appliedPkRef = useRef<string | null>(null);
   const lastSyncedRef = useRef<string | null>(null);
 
@@ -64,27 +82,32 @@ const useWorkingView = ({
     };
   }, [isLoggedIn, currentQueryID, save]);
 
-  useEffect(() => {
-    if (loaded === null || loaded.pk !== currentQueryID || loaded.view === null) return;
-    if (!hasResults || appliedPkRef.current === loaded.pk) return;
-    appliedPkRef.current = loaded.pk;
-    const filters = filtersFromWorkingView(loaded.view, availableFilters);
-    if (filters === null) return;
-    lastSyncedRef.current = serialize(toWorkingViewState(filters));
-    if (filters.length > 0) handleSetFilters(filters);
-  }, [loaded, currentQueryID, hasResults, availableFilters, handleSetFilters]);
+  const viewLoaded = loaded !== null && loaded.pk === currentQueryID;
+  const ready = hasResults && currentQueryID !== null && (urlState !== null || !isLoggedIn || viewLoaded);
 
   useEffect(() => {
-    if (loaded === null || loaded.pk !== currentQueryID) return;
-    if (loaded.view !== null && appliedPkRef.current !== loaded.pk) return;
+    if (!ready || appliedPkRef.current === currentQueryID) return;
+    appliedPkRef.current = currentQueryID;
+    const filters = initialFilters(urlState, viewLoaded ? loaded.view : null, availableFilters);
+    if (filters !== null) {
+      lastSyncedRef.current = serialize(toWorkingViewState(filters));
+      if (filters.length > 0) handleSetFilters(filters);
+    }
+    setInitializedPk(currentQueryID);
+  }, [ready, currentQueryID, urlState, viewLoaded, loaded, availableFilters, handleSetFilters]);
+
+  useEffect(() => {
+    if (!isLoggedIn || currentQueryID === null || appliedPkRef.current !== currentQueryID) return;
     const state = toWorkingViewState(activeFilters);
     const key = serialize(state);
     if (key === lastSyncedRef.current) {
       save.cancel();
       return;
     }
-    save(loaded.pk, state, key);
-  }, [loaded, currentQueryID, activeFilters, save]);
+    save(currentQueryID, state, key);
+  }, [isLoggedIn, currentQueryID, activeFilters, save]);
+
+  return { initialized: initializedPk !== null && initializedPk === currentQueryID };
 };
 
 export default useWorkingView;

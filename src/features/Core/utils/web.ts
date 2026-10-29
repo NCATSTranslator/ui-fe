@@ -158,6 +158,42 @@ export const fetchWithErrorHandling = async <T>(
 };
 
 /**
+ * Encodes arbitrary text as URL-safe base64 (RFC 4648 §5) without padding.
+ * The text is UTF-8 encoded first so characters outside Latin-1 are safe.
+ *
+ * @param {string} text - The text to encode.
+ * @returns {string} The URL-safe base64 string.
+ */
+export const encodeBase64Url = (text: string): string => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return stripTrailingEquals(
+    window.btoa(binary)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+  );
+}
+
+/**
+ * Decodes a URL-safe or standard base64 string produced by `encodeBase64Url`.
+ * Handles URL-safe substitutions (-/_ → +//), normalizes padding, and
+ * decodes the resulting bytes as UTF-8.
+ *
+ * @param {string} text - The base64 string to decode.
+ * @returns {string} The decoded text.
+ * @throws If the input is not valid base64.
+ */
+export const decodeBase64Url = (text: string): string => {
+  const standardB64 = text.replace(/-/g, '+').replace(/_/g, '/');
+  const strippedPadding = stripTrailingEquals(standardB64);
+  const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
+  const binary = window.atob(normalizedB64);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/**
  * Decodes query parameters from a search string.
  * Automatically detects and decodes base64 encoded portions while preserving other parameters.
  *
@@ -174,11 +210,7 @@ export const fetchWithErrorHandling = async <T>(
  * @throws If the segment is not valid base64.
  */
 export const decodeBase64Param = (segment: string): string => {
-  const uriDecoded = decodeURIComponent(segment);
-  const standardB64 = uriDecoded.replace(/-/g, '+').replace(/_/g, '/');
-  const strippedPadding = stripTrailingEquals(standardB64);
-  const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
-  return window.atob(normalizedB64);
+  return decodeBase64Url(decodeURIComponent(segment));
 }
 
 export const getDecodedParamsFromSearch = (search: string): string => {
@@ -243,11 +275,7 @@ export const getDecodedParams = (): string => {
 export const encodeParams = (params: string): string => {
   if(!params)
     return "";
-  return stripTrailingEquals(
-    window.btoa(params)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-  );
+  return encodeBase64Url(params);
 }
 
 /**

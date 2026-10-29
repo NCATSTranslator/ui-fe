@@ -63,17 +63,21 @@ export const toWorkingViewState = (filters: Filter[]): WorkingViewState => ({
   }])),
 });
 
-export const filtersFromWorkingView = (view: WorkingView, availableFilters: Filters): Filter[] | null => {
-  if (view.version !== WORKING_VIEW_VERSION || !isWorkingViewState(view.state)) return null;
+export const filtersFromWorkingViewState = (state: WorkingViewState, availableFilters: Filters, origin: string): Filter[] => {
   const entitySearchId = makeEntitySearch().id;
-  return view.state.filters.flatMap(({ id, name, value, negated }) => {
+  return state.filters.flatMap(({ id, name, value, negated }) => {
     const base: Filter | undefined = id === entitySearchId ? makeEntitySearch() : availableFilters[id];
     if (base === undefined) {
-      console.error(`[filtersFromWorkingView] skipping unknown filter ${id} saved for query ${view.pk}`);
+      console.error(`[filtersFromWorkingViewState] skipping unknown filter ${id} from ${origin}`);
       return [];
     }
     return [{ ...base, id, name: base.name || name, value, negated }];
   });
+};
+
+export const filtersFromWorkingView = (view: WorkingView, availableFilters: Filters): Filter[] | null => {
+  if (view.version !== WORKING_VIEW_VERSION || !isWorkingViewState(view.state)) return null;
+  return filtersFromWorkingViewState(view.state, availableFilters, `query ${view.pk}`);
 };
 
 const workingViewUrl = (pk: string): string => `${API_PATH_PREFIX}/users/me/queries/${pk}/working-view`;

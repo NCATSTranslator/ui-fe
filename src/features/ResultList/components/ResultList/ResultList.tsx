@@ -24,6 +24,7 @@ import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn, ResultsUpdate } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
 import useWorkingView from "@/features/ResultList/hooks/useWorkingView";
+import { useFilterUrlState, useFilterUrlSync } from "@/features/ResultList/hooks/useFilterUrlState";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
 import { useResultsUrlParams, useQueryTitle } from "@/features/ResultList/hooks/useResultsUrlParams";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -204,14 +205,17 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   // Keep the sort hook's entity filters ref in sync
   activeEntityFiltersRef.current = activeEntityFilters;
 
-  useWorkingView({
+  const urlFilterState = useFilterUrlState(decodedParams);
+  const { initialized: filtersInitialized } = useWorkingView({
     user: user ?? null,
     currentQueryID,
     activeFilters,
     availableFilters,
     hasResults: formattedResults.length > 0,
+    urlState: urlFilterState,
     handleSetFilters,
   });
+  useFilterUrlSync({ activeFilters, enabled: filtersInitialized });
 
   // User bookmarks state management via hook
   const {
