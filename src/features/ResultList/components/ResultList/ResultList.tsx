@@ -23,6 +23,7 @@ import useResultPagination, { parseItemsPerPage } from "@/features/ResultList/ho
 import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn, ResultsUpdate } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
+import useWorkingView from "@/features/ResultList/hooks/useWorkingView";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
 import { useResultsUrlParams, useQueryTitle } from "@/features/ResultList/hooks/useResultsUrlParams";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -202,6 +203,15 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   });
   // Keep the sort hook's entity filters ref in sync
   activeEntityFiltersRef.current = activeEntityFilters;
+
+  useWorkingView({
+    user: user ?? null,
+    currentQueryID,
+    activeFilters,
+    availableFilters,
+    hasResults: formattedResults.length > 0,
+    handleSetFilters,
+  });
 
   // User bookmarks state management via hook
   const {
