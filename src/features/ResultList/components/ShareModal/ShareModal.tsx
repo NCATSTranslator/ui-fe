@@ -9,7 +9,8 @@ import { AutocompleteItem } from "@/features/Query/types/querySubmission";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { useSelector } from "react-redux";
 import { trackEvent } from "@/features/Analytics/utils/dataLayer";
-import { FILTER_URL_PARAM } from "@/features/ResultFiltering/utils/filterUrlState";
+import { FILTER_URL_PARAM, encodeFilterUrlState } from "@/features/ResultFiltering/utils/filterUrlState";
+import { useOptionalResultListContext } from "@/features/ResultList/context/ResultListContext";
 
 type ShareContext = 'list' | 'result' | 'evidence' | 'node';
 
@@ -56,6 +57,8 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
   const config = useSelector(currentConfig);
   const decodedParams = getDecodedParams();
   const { resultId: routeResultId, nodeId, edgeId } = useParams();
+  // Live filters when opened from the result list; a share from elsewhere (e.g. a project) has none to carry.
+  const activeFilters = useOptionalResultListContext()?.activeFilters;
 
   const queryLabel = label || getDataFromQueryVar("l", decodedParams) || '';
   const queryItemID = nodeID || getDataFromQueryVar("i", decodedParams) || '';
@@ -106,11 +109,11 @@ const ShareModal: FC<ShareModalProps> = ({ isOpen, onClose, qid, label = null, n
     } else {
       path = getResultsShareURLPath({ label: queryLabel, nodeID: queryItemID, typeID: queryTypeID, resultID: queryResultID, pk: qid, shouldHash });
     }
-    const filterParam = getDataFromQueryVar(FILTER_URL_PARAM, decodedParams);
-    if (filterParam) path += `&${FILTER_URL_PARAM}=${filterParam}`;
+    const filterParam = encodeFilterUrlState(activeFilters ?? []);
+    if (filterParam !== null) path += `&${FILTER_URL_PARAM}=${filterParam}`;
 
     return encodeURI(`${window.location.origin}/${path}`);
-  }, [shareContext, isPathfinder, isLookup, decodedParams, queryResultID, qid, config?.include_hashed_parameters, queryLabel, queryItemID, queryTypeID]);
+  }, [shareContext, isPathfinder, isLookup, decodedParams, queryResultID, qid, config?.include_hashed_parameters, queryLabel, queryItemID, queryTypeID, activeFilters]);
 
   const handleCopyLink = useCallback(() => {
     trackEvent('share_link_copied', { share_scope: shareContext });
