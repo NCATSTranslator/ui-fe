@@ -178,7 +178,8 @@ export const encodeBase64Url = (text: string): string => {
 /**
  * Decodes a URL-safe or standard base64 string produced by `encodeBase64Url`.
  * Handles URL-safe substitutions (-/_ → +//), normalizes padding, and
- * decodes the resulting bytes as UTF-8.
+ * decodes the resulting bytes as UTF-8. Bytes that are not valid UTF-8 are read
+ * as Latin-1, which is what links encoded before text was UTF-8 encoded contain.
  *
  * @param {string} text - The base64 string to decode.
  * @returns {string} The decoded text.
@@ -190,7 +191,12 @@ export const decodeBase64Url = (text: string): string => {
   const normalizedB64 = strippedPadding + '='.repeat((4 - strippedPadding.length % 4) % 4);
   const binary = window.atob(normalizedB64);
   const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    // A legacy link: the old encoder ran btoa on the raw string, one byte per Latin-1 character.
+    return binary;
+  }
 }
 
 /**
