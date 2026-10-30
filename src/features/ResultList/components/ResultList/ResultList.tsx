@@ -131,7 +131,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     formattedResults, setFormattedResults,
     isLoading, setIsLoading, isError,
     arsStatus, resultStatus,
-    nodeDescription,
+    nodeDescription, resultsQueryID,
     hasFreshResults, resultsComplete,
     rawResults, originalResults, prevRawResults,
     isFetchingARAStatus, isFetchingResults,
@@ -209,9 +209,10 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   const { initialized: filtersInitialized } = useWorkingView({
     user: user ?? null,
     currentQueryID,
+    resultsQueryID,
+    hasResults: formattedResults.length > 0,
     activeFilters,
     availableFilters,
-    hasResults: formattedResults.length > 0,
     urlState: urlFilterState,
     handleSetFilters,
   });

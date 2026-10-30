@@ -46,6 +46,8 @@ interface UseResultsDataReturn {
   setFreshRawResults: Dispatch<SetStateAction<ResultSet | null>>;
   nodeDescription: string;
   setNodeDescription: Dispatch<SetStateAction<string>>;
+  /** The query the current formattedResults were built for; null until a result set has been processed. */
+  resultsQueryID: string | null;
   // Derived
   hasFreshResults: boolean;
   resultsComplete: boolean;
@@ -108,6 +110,7 @@ const useResultsData = ({
   const [isLoading, setIsLoading] = useState(presetIsLoading);
   const [resultStatus, setResultStatus] = useState<ResultStatusString>("unknown");
   const [formattedResults, setFormattedResults] = useState<Result[]>([]);
+  const [resultsQueryID, setResultsQueryID] = useState<string | null>(null);
 
   // Refs
   const rawResults = useRef<ResultSet | null>(initialResultSet);
@@ -175,6 +178,7 @@ const useResultsData = ({
     if (!handleUpdateResultsRef.current) return;
 
     const newFormattedResults = handleUpdateResultsRef.current({ mode: 'rebuild', summary: newResultSet });
+    setResultsQueryID(currentQueryID);
 
     // If the result set has results, set the loading state to false
     if (newFormattedResults.length > 0)
@@ -205,6 +209,7 @@ const useResultsData = ({
     setIsLoading(true);
     setIsError(false);
     setFormattedResults([]);
+    setResultsQueryID(null);
     setFreshRawResults(null);
     rawResults.current = null;
     prevRawResults.current = null;
@@ -229,6 +234,7 @@ const useResultsData = ({
     setFreshRawResults,
     nodeDescription,
     setNodeDescription,
+    resultsQueryID,
     hasFreshResults,
     resultsComplete,
     rawResults,

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import useWorkingView, { WORKING_VIEW_SAVE_DEBOUNCE_MS } from '@/features/ResultList/hooks/useWorkingView';
-import { getWorkingView, setWorkingView, WorkingView } from '@/features/ResultFiltering/utils/workingViewApi';
+import { getWorkingView, setWorkingView, WorkingView, WorkingViewState } from '@/features/ResultFiltering/utils/workingViewApi';
 import { Filter, Filters } from '@/features/ResultFiltering/types/filters';
-import { WorkingViewState } from '@/features/ResultFiltering/utils/workingViewApi';
 import { User } from '@/features/UserAuth/types/user';
 
 vi.mock('@/features/ResultFiltering/utils/workingViewApi', async (importOriginal) => {
@@ -18,10 +17,10 @@ const available: Filters = {
 const approved: Filter = { id: 'r/pc/approved', name: 'Approved', count: 3, includeWeight: 1, excludeWeight: 2, value: 'Approved', negated: false };
 const aspirin: Filter = { id: 'g/str', name: '', value: 'aspirin', negated: false };
 
-const makeView = (pk: string, filters: Filter[]): WorkingView => ({
+const makeView = (pk: string, filters: Filter[], version = 1): WorkingView => ({
   user_id: 'user-1',
   pk,
-  version: 1,
+  version,
   state: { filters: filters.map((f) => ({ id: f.id, name: f.name, value: f.value ?? '', negated: f.negated ?? false })) },
   time_updated: '2026-10-28T00:00:00.000Z',
 });
@@ -29,6 +28,7 @@ const makeView = (pk: string, filters: Filter[]): WorkingView => ({
 interface Props {
   user: User | null;
   currentQueryID: string | null;
+  resultsQueryID: string | null;
   activeFilters: Filter[];
   hasResults: boolean;
   urlState: WorkingViewState | null;
@@ -38,7 +38,7 @@ const urlStateOf = (filters: Filter[]): WorkingViewState => makeView('url', filt
 
 const renderWorkingView = (initial: Partial<Props> = {}) => {
   const handleSetFilters = vi.fn();
-  const defaults: Props = { user, currentQueryID: 'pk-1', activeFilters: [], hasResults: false, urlState: null };
+  const defaults: Props = { user, currentQueryID: 'pk-1', resultsQueryID: 'pk-1', activeFilters: [], hasResults: false, urlState: null };
   const hook = renderHook(
     (props: Props) => useWorkingView({ ...props, availableFilters: available, handleSetFilters }),
     { initialProps: { ...defaults, ...initial } },
@@ -138,6 +138,44 @@ describe('useWorkingView', () => {
     expect(setWorkingView).not.toHaveBeenCalled();
   });
 
+  it('does not save the pre-restore filters when applying the saved view does not take', async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(makeView('pk-1', [approved]));
+    const { handleSetFilters, result, update } = renderWorkingView();
+    await settle();
+    await update({ hasResults: true });
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+    expect(result.current.initialized).toBe(true);
+
+    // activeFilters never changes: the restore was requested but nothing came of it
+    await update({ hasResults: true });
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+  });
+
+  it('creates nothing on the server for a query the user only opened', async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(null);
+    const { result, update } = renderWorkingView();
+    await settle();
+    await update({ hasResults: true });
+    expect(result.current.initialized).toBe(true);
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+  });
+
+  it('leaves a saved view of another version alone until the user changes a filter', async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(makeView('pk-1', [approved], 2));
+    const { handleSetFilters, update } = renderWorkingView();
+    await settle();
+    await update({ hasResults: true });
+    expect(handleSetFilters).not.toHaveBeenCalled();
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+
+    await update({ hasResults: true, activeFilters: [aspirin] });
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS);
+    expect(setWorkingView).toHaveBeenCalledTimes(1);
+  });
+
   it('saves a changed filter set once after the debounce', async () => {
     vi.mocked(getWorkingView).mockResolvedValue(null);
     const { update } = renderWorkingView();
@@ -176,7 +214,7 @@ describe('useWorkingView', () => {
     await settle();
     await update({ hasResults: true, activeFilters: [approved] });
 
-    await update({ currentQueryID: 'pk-2', hasResults: false, activeFilters: [] });
+    await update({ currentQueryID: 'pk-2', resultsQueryID: null, hasResults: false, activeFilters: [] });
     expect(setWorkingView).toHaveBeenCalledTimes(1);
     expect(setWorkingView).toHaveBeenCalledWith('pk-1', {
       filters: [{ id: 'r/pc/approved', name: 'Approved', value: 'Approved', negated: false }],
@@ -184,8 +222,46 @@ describe('useWorkingView', () => {
     expect(getWorkingView).toHaveBeenLastCalledWith('pk-2');
 
     await settle();
-    await update({ currentQueryID: 'pk-2', hasResults: true, activeFilters: [] });
+    await update({ currentQueryID: 'pk-2', resultsQueryID: 'pk-2', hasResults: true, activeFilters: [] });
     expect(handleSetFilters).toHaveBeenCalledWith([expect.objectContaining({ id: 'g/str', value: 'aspirin' })]);
+  });
+
+  it("ignores the previous query's results that are still on screen right after a query change", async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(null);
+    const { handleSetFilters, result, update } = renderWorkingView({ hasResults: true, urlState: urlStateOf([approved]) });
+    await settle();
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+
+    // Query B is current, but the results (and so the facets) on screen are still A's
+    const stale: Partial<Props> = { currentQueryID: 'pk-2', resultsQueryID: 'pk-1', hasResults: true, urlState: urlStateOf([aspirin]) };
+    await update(stale);
+    expect(handleSetFilters).toHaveBeenCalledTimes(1);
+    expect(result.current.initialized).toBe(false);
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS * 2);
+    expect(setWorkingView).not.toHaveBeenCalled();
+
+    await update({ ...stale, resultsQueryID: null, hasResults: false });
+    await update({ ...stale, resultsQueryID: 'pk-2' });
+    expect(handleSetFilters).toHaveBeenCalledTimes(2);
+    expect(handleSetFilters).toHaveBeenLastCalledWith([expect.objectContaining({ id: 'g/str', value: 'aspirin' })]);
+    expect(result.current.initialized).toBe(true);
+  });
+
+  it('keeps filters chosen before a late login and saves them over the loaded view', async () => {
+    vi.mocked(getWorkingView).mockResolvedValue(makeView('pk-1', [approved]));
+    const { handleSetFilters, result, update } = renderWorkingView({ user: null, hasResults: true });
+    expect(result.current.initialized).toBe(true);
+    await update({ user: null, hasResults: true, activeFilters: [aspirin] });
+
+    await update({ user, hasResults: true, activeFilters: [aspirin] });
+    await settle();
+    expect(handleSetFilters).not.toHaveBeenCalled();
+    expect(result.current.initialized).toBe(true);
+    await elapse(WORKING_VIEW_SAVE_DEBOUNCE_MS);
+    expect(setWorkingView).toHaveBeenCalledTimes(1);
+    expect(setWorkingView).toHaveBeenCalledWith('pk-1', {
+      filters: [{ id: 'g/str', name: '', value: 'aspirin', negated: false }],
+    });
   });
 
   it('leaves the view alone and never initializes when loading it fails', async () => {
