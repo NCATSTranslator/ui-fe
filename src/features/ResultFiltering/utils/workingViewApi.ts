@@ -1,9 +1,8 @@
 import { get, put, fetchWithErrorHandling, quietHttpErrorHandler } from '@/features/Core/utils/web';
+import { API_PATH_PREFIX } from '@/features/UserAuth/utils/userApi';
 import { isObject, isNumber, isString, isBoolean, checkProperties } from '@/features/Core/types/checkers';
 import { Filter, Filters } from '@/features/ResultFiltering/types/filters';
 import { makeEntitySearch } from '@/features/ResultFiltering/utils/filterFunctions';
-
-const API_PATH_PREFIX = '/api/v1';
 
 export const WORKING_VIEW_VERSION = 1;
 
@@ -16,6 +15,12 @@ export interface PersistedFilter {
 
 export interface WorkingViewState {
   filters: PersistedFilter[];
+}
+
+/** The envelope a WorkingViewState travels in, both in the API body and in the URL. */
+export interface VersionedWorkingViewState {
+  version: number;
+  state: WorkingViewState;
 }
 
 export interface WorkingView {
@@ -54,6 +59,18 @@ export const isWorkingView = (obj: unknown, warn = false): obj is WorkingView =>
   ], warn);
 };
 
+export const toVersionedWorkingViewState = (state: WorkingViewState): VersionedWorkingViewState =>
+  ({ version: WORKING_VIEW_VERSION, state });
+
+/**
+ * Unwraps a versioned envelope (an API working view or a decoded URL payload) when this
+ * client can read it: the current version with a well-formed state. Anything else is null.
+ */
+export const parseVersionedWorkingViewState = (envelope: unknown): WorkingViewState | null => {
+  if (!isObject(envelope)) return null;
+  return envelope.version === WORKING_VIEW_VERSION && isWorkingViewState(envelope.state) ? envelope.state : null;
+};
+
 export const toWorkingViewState = (filters: Filter[]): WorkingViewState => ({
   filters: filters.flatMap((filter) => (filter.id === undefined ? [] : [{
     id: filter.id,
@@ -76,28 +93,23 @@ export const filtersFromWorkingViewState = (state: WorkingViewState, availableFi
 };
 
 export const filtersFromWorkingView = (view: WorkingView, availableFilters: Filters): Filter[] | null => {
-  if (view.version !== WORKING_VIEW_VERSION || !isWorkingViewState(view.state)) return null;
-  return filtersFromWorkingViewState(view.state, availableFilters, `query ${view.pk}`);
+  const state = parseVersionedWorkingViewState(view);
+  return state === null ? null : filtersFromWorkingViewState(state, availableFilters, `query ${view.pk}`);
 };
 
 const workingViewUrl = (pk: string): string => `${API_PATH_PREFIX}/users/me/queries/${pk}/working-view`;
 
-const isWorkingViewOrNull = (data: unknown): data is WorkingView | null => data === null || isWorkingView(data);
-
+/** Resolves to null when the query has no working view yet (404). Other failures reject after logging. */
 export const getWorkingView = async (pk: string): Promise<WorkingView | null> => {
-  const notFoundAsNull = async (): Promise<Response> => {
-    const response = await get(workingViewUrl(pk));
-    if (response.status !== 404) return response;
-    return new Response('null', { status: 200, headers: { 'content-type': 'application/json' } });
-  };
-  return fetchWithErrorHandling<WorkingView | null>(notFoundAsNull, quietHttpErrorHandler, quietHttpErrorHandler, isWorkingViewOrNull);
+  const response = await get(workingViewUrl(pk));
+  if (response.status === 404) return null;
+  return fetchWithErrorHandling<WorkingView>(() => Promise.resolve(response), quietHttpErrorHandler, quietHttpErrorHandler, isWorkingView);
 };
 
-export const setWorkingView = async (pk: string, state: WorkingViewState): Promise<WorkingView> => {
-  return fetchWithErrorHandling<WorkingView>(
-    () => put(workingViewUrl(pk), { version: WORKING_VIEW_VERSION, state }),
+export const setWorkingView = async (pk: string, state: WorkingViewState): Promise<WorkingView> =>
+  fetchWithErrorHandling<WorkingView>(
+    () => put(workingViewUrl(pk), toVersionedWorkingViewState(state)),
     quietHttpErrorHandler,
     quietHttpErrorHandler,
     isWorkingView,
   );
-};

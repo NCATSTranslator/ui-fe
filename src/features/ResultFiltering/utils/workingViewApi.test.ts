@@ -5,6 +5,7 @@ import {
   getWorkingView,
   setWorkingView,
   isWorkingView,
+  parseVersionedWorkingViewState,
   WorkingView,
 } from '@/features/ResultFiltering/utils/workingViewApi';
 import { Filters } from '@/features/ResultFiltering/types/filters';
@@ -128,5 +129,17 @@ describe('working view requests', () => {
     expect(url).toBe('/api/v1/users/me/queries/pk-1/working-view');
     expect(options.method).toBe('PUT');
     expect(JSON.parse(options.body as string)).toEqual({ version: 1, state });
+  });
+});
+
+describe('parseVersionedWorkingViewState', () => {
+  it('unwraps a current, well-formed envelope and nothing else', () => {
+    const state = { filters: [{ id: 'g/str', name: '', value: 'aspirin', negated: false }] };
+    expect(parseVersionedWorkingViewState({ version: 1, state })).toEqual(state);
+    expect(parseVersionedWorkingViewState(makeView(state))).toEqual(state);
+    expect(parseVersionedWorkingViewState({ version: 2, state })).toBeNull();
+    expect(parseVersionedWorkingViewState({ version: 1, state: { filters: [{ id: 1 }] } })).toBeNull();
+    expect(parseVersionedWorkingViewState({ version: 1 })).toBeNull();
+    expect(parseVersionedWorkingViewState('not an envelope')).toBeNull();
   });
 });
