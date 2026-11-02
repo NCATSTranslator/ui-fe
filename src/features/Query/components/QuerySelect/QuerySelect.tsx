@@ -178,16 +178,15 @@ export const QuerySelect: FC<QuerySelectProps> = ({
               <div ref={selectListContainerRef}>
                 {
                   Children.map(children, (child, i) => {
-                    if (isValidElement(child) && (child.props as {value?: number})?.value === selectedItem) {
-                      return null;
-                    }
+                    const optionValue = isValidElement(child) ? (child.props as {value?: number})?.value : undefined;
+                    const isSelected = optionValue === selectedItem;
                     return (
                       <span 
                         onClick={handleOptionClick} 
                         key={i} 
-                        className={styles.option} 
-                        data-value={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
-                        data-testid={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
+                        className={`${styles.option} ${isSelected ? styles.selected : ''}`} 
+                        data-value={optionValue}
+                        data-testid={optionValue}
                       >
                         {isValidElement(child) ? (child.props as {children?: ReactNode})?.children : child}
                       </span>
@@ -205,12 +204,14 @@ export const QuerySelect: FC<QuerySelectProps> = ({
             > 
               {
                 Children.map(children, (child, i) => {
+                  const optionValue = isValidElement(child) ? (child.props as {value?: number})?.value : undefined;
+                  const isSelected = optionValue === selectedItem;
                   return (
                     <span 
                       onClick={handleOptionClick} 
                       key={i} 
-                      className={styles.option} 
-                      data-value={isValidElement(child) ? (child.props as {value?: number})?.value : undefined}
+                      className={`${styles.option} ${isSelected ? styles.selected : ''}`} 
+                      data-value={optionValue}
                     >
                       {isValidElement(child) ? (child.props as {children?: ReactNode})?.children : child}
                     </span>
