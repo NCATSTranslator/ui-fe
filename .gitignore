@@ -39,3 +39,5 @@ coverage
 e2e/test-results
 playwright-report
 test-results
+# local-only docs
+MANUAL_TESTING_CHECKLIST.md

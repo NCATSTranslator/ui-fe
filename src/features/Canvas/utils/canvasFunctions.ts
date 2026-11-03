@@ -8,7 +8,7 @@ export type AnnotationSortMode = 'alphabetical' | 'date';
 
 export const getAnnotationDisplayName = (annotation: CanvasAnnotation): string => {
   const trimmed = annotation.text.trim();
-  return trimmed || 'Empty annotation';
+  return trimmed || 'Empty note';
 };
 
 export const getCanvasNodeDisplayName = (node: CanvasNode): string =>

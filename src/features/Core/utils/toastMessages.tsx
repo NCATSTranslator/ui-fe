@@ -106,7 +106,7 @@ export const bookmarkRemovalErrorToast = () => {
 
 // Query Status
 export const queryStatusResultsCompleteToast = () => {
-  return toast(AppToast, { data: { topText: 'Results Complete' } });
+  return toast(AppToast, { data: { topText: 'Results Complete' }, autoClose: 1500 });
 };
 
 // Canvas
