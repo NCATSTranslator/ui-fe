@@ -28,8 +28,11 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
+import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
+const PATHS_TAB_TOOLTIP_ID = 'paths-tab-tooltip';
 
 const ResultDetailView: FC = () => {
   const { resultId } = useParams();
@@ -183,13 +186,22 @@ const ResultDetailView: FC = () => {
           </div>
 
         </div>
+        <Tooltip id={PATHS_TAB_TOOLTIP_ID}>
+          <span>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
+        </Tooltip>
         <Tabs
           isOpen
           className={styles.tabs}
           fadeClassName={styles.tabFade}
           handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
         >
-          <Tab heading="Paths" className={styles.pathsTab}>
+          <Tab
+            heading="Paths"
+            headingOverride={`${pathCount} Paths`}
+            tooltipIcon={<InfoIcon className={styles.infoIcon} />}
+            dataTooltipId={PATHS_TAB_TOOLTIP_ID}
+            className={styles.pathsTab}
+          >
             <PathView
               active
               activeEntityFilters={activeEntityFilters}

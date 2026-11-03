@@ -86,6 +86,10 @@
   margin-top: $xs;
 }
 
+.infoIcon {
+  margin-left: 4px;
+}
+
 // Only the content below the tab list scrolls horizontally; the header, the
 // excluded-paths toggle, and the path pagination stay put. The tab wrappers are
 // grids, so their single column is pinned to the available width instead of
