@@ -82,38 +82,6 @@
   }
 }
 
-.tabs {
-  margin-top: $xs;
-}
-
-.infoIcon {
-  margin-left: 4px;
-}
-
-// Only the content below the tab list scrolls horizontally; the header, the
-// excluded-paths toggle, and the path pagination stay put. The tab wrappers are
-// grids, so their single column is pinned to the available width instead of
-// growing to fit the widest path.
-.tabFade, .pathsTab, .graphTab {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.pathsTab {
-  min-height: 200px;
-}
-
-.graphTab {
-  overflow-x: auto;
-}
-
-.pathsScroll {
-  overflow-x: auto;
-  // Room for the hover shadows of the edge paths, which would otherwise be clipped
-  // by the scroll container.
-  padding: $xs;
-  margin: -$xs;
-}
-
 .tags {
   display: flex;
   flex-wrap: wrap;
