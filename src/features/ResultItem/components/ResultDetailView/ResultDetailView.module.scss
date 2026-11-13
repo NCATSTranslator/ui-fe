@@ -9,11 +9,8 @@
 
 .tableHeader, .top {
   display: grid;
-  grid-template-columns: 1fr 32px 110px 90px;
+  grid-template-columns: 1fr 110px 90px;
   column-gap: $s;
-  @media screen and (min-width: 1240px) {
-    grid-template-columns: 1fr 72px 110px 90px;
-  }
 }
 
 .tableHeader {
@@ -37,19 +34,23 @@
   display: flex;
   flex-direction: column;
   gap: $xs;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $s;
 }
 
 .nameContainer {
   display: flex;
   align-items: flex-start;
+  align-self: center;
   gap: $xxs;
   flex-wrap: wrap;
-}
-
-.nameRow {
-  display: flex;
-  align-items: center;
-  gap: $xs;
+  min-width: 0;
 }
 
 .name {

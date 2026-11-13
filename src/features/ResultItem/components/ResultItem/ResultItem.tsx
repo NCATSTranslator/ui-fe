@@ -89,7 +89,7 @@ const ResultItem: FC<ResultItemProps> = ({
     resultsNavigate(`/results/${result.id}`);
   }, [resultsNavigate, result.id, subjectNode, pathCount, resultRank]);
 
-  const accordionPanelClass = joinClasses(styles.accordionPanel, roleCount > 0 && !isInUserSave && styles.hasTags, (!!resultDescription && !isPathfinder) && styles.hasDescription, !!isInUserSave && styles.inUserSave);
+  const descriptionPanelClass = joinClasses(styles.descriptionPanel, roleCount > 0 && !isInUserSave && styles.hasTags, (!!resultDescription && !isPathfinder) && styles.hasDescription, !!isInUserSave && styles.inUserSave);
 
   const handleNotesClick = useCallback(async () => {
     await handleNotesClickHook(activateNotes, nameString);
@@ -127,33 +127,30 @@ const ResultItem: FC<ResultItemProps> = ({
       {...resultDragAttributes}
     >
       <div className={styles.top}>
-        <div className={joinClasses(styles.nameContainer, styles.resultSub)}>
-          <ResultItemName
-            isPathfinder={isPathfinder}
-            subjectNode={subjectNode}
-            objectNode={objectNode}
-            item={result}
-            activeEntityFilters={activeEntityFilters}
-            nameString={nameString}
-          />
-        </div>
-        <ResultItemInteractables
-          handleBookmarkClick={handleBookmarkClick}
-          handleNotesClick={handleNotesClick}
-          hasNotes={itemHasNotes}
-          hasUser={!!user}
-          isBookmarked={isBookmarked}
-          isEven={isEven}
-          isPathfinder={isPathfinder}
-          nameString={nameString}
-        />
-        <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
-      </div>
-      <div
-        className={accordionPanelClass}
-        >
-        <div className={styles.container}>
-          <div>
+        <div className={styles.info}>
+          <div className={styles.nameRow}>
+            <div className={joinClasses(styles.nameContainer, styles.resultSub)}>
+              <ResultItemName
+                isPathfinder={isPathfinder}
+                subjectNode={subjectNode}
+                objectNode={objectNode}
+                item={result}
+                activeEntityFilters={activeEntityFilters}
+                nameString={nameString}
+              />
+            </div>
+            <ResultItemInteractables
+              handleBookmarkClick={handleBookmarkClick}
+              handleNotesClick={handleNotesClick}
+              hasNotes={itemHasNotes}
+              hasUser={!!user}
+              isBookmarked={isBookmarked}
+              isEven={isEven}
+              isPathfinder={isPathfinder}
+              nameString={nameString}
+            />
+          </div>
+          <div className={descriptionPanelClass}>
             {
               result.tags && roleCount > 0 && availableFilters &&
               <div className={styles.tags}>
@@ -201,6 +198,7 @@ const ResultItem: FC<ResultItemProps> = ({
             }
           </div>
         </div>
+        <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
       </div>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}
