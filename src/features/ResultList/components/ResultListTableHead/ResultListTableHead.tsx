@@ -72,7 +72,6 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
         Name
         <ArrowUp className={parentStyles.chev}/>
       </div>
-      <div></div>
       <div
         className={`${parentStyles.head} ${parentStyles.evidenceHead} ${getSortClass(isSortedByEvidence)}`}
         onClick={() => handleSort(isSortedByEvidence, false, 'evidenceHighLow', 'evidenceLowHigh')}
