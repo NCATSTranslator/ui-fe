@@ -127,58 +127,59 @@ const ResultDetailView: FC = () => {
       >
         <div className={styles.tableHeader}>
           <span className={styles.tableHeaderRow}></span>
-          <span className={styles.tableHeaderRow}></span>
           <span className={styles.tableHeaderRow}>Evidence</span>
           <span className={styles.tableHeaderRow}>Paths</span>
         </div>
         <div className={styles.header}>
           <div className={styles.top}>
             <div className={styles.infoContainer}>
-              <div
-                ref={setResultDragRef}
-                className={joinClasses(
-                  styles.nameContainer,
-                  canDragResult && dragStyles.draggable,
-                  isResultDragging && dragStyles.dragging,
-                )}
-                onContextMenu={handleResultContextMenu}
-                {...resultDragListeners}
-                {...resultDragAttributes}
-              >
-                <ResultItemName
+              <div className={styles.nameRow}>
+                <div
+                  ref={setResultDragRef}
+                  className={joinClasses(
+                    styles.nameContainer,
+                    canDragResult && dragStyles.draggable,
+                    isResultDragging && dragStyles.dragging,
+                  )}
+                  onContextMenu={handleResultContextMenu}
+                  {...resultDragListeners}
+                  {...resultDragAttributes}
+                >
+                  <ResultItemName
+                    isPathfinder={isPathfinder}
+                    subjectNode={subjectNode}
+                    objectNode={objectNode}
+                    item={result}
+                    activeEntityFilters={activeEntityFilters}
+                    nameString={nameString}
+                  />
+                </div>
+                <ResultItemInteractables
+                  handleBookmarkClick={handleBookmarkClick}
+                  handleNotesClick={handleNotesClick}
+                  hasNotes={itemHasNotes}
+                  hasUser={!!user}
+                  isBookmarked={isBookmarked}
+                  isEven={false}
                   isPathfinder={isPathfinder}
-                  subjectNode={subjectNode}
-                  objectNode={objectNode}
-                  item={result}
-                  activeEntityFilters={activeEntityFilters}
                   nameString={nameString}
                 />
               </div>
-                {
-                  resultTags && 
-                  <div className={styles.tags}>
-                    <span className={styles.tagsList}>{resultTags}</span>
-                  </div>
-                }
-                {
-                  resultDescription && !isPathfinder && (
-                  <ClampedDescription
-                    description={resultDescription}
-                    searchWords={activeEntityFilters}
-                    className={styles.description}
-                  />
-                )}
+              {
+                resultTags &&
+                <div className={styles.tags}>
+                  <span className={styles.tagsList}>{resultTags}</span>
+                </div>
+              }
+              {
+                resultDescription && !isPathfinder && (
+                <ClampedDescription
+                  description={resultDescription}
+                  searchWords={activeEntityFilters}
+                  className={styles.description}
+                />
+              )}
             </div>
-            <ResultItemInteractables
-              handleBookmarkClick={handleBookmarkClick}
-              handleNotesClick={handleNotesClick}
-              hasNotes={itemHasNotes}
-              hasUser={!!user}
-              isBookmarked={isBookmarked}
-              isEven={false}
-              isPathfinder={isPathfinder}
-              nameString={nameString}
-            />
             <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
           </div>
 
