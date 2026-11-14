@@ -34,7 +34,7 @@ const useObjectListSortState = (activeTab: CanvasObjectListTab) => {
   const activeSortKey = activeTab === 'objects' ? sortMode : annotationSortMode;
   const options = activeTab === 'objects' ? OBJECT_SORT_OPTIONS : ANNOTATION_SORT_OPTIONS;
   const currentSortLabel = options.find(o => o.key === activeSortKey)?.label ?? '';
-  const searchPlaceholder = activeTab === 'objects' ? 'Search objects...' : 'Search annotations...';
+  const searchPlaceholder = activeTab === 'objects' ? 'Search objects...' : 'Search notes...';
   const closeSortDropdown = useCallback(() => setSortDropdownOpen(false), []);
   const toggleSortDropdown = useCallback(() => setSortDropdownOpen(prev => !prev), []);
   const handleSortSelect = useCallback((key: ObjectSortMode | AnnotationSortMode) => {

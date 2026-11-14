@@ -140,9 +140,6 @@ const PathView: FC<PathViewProps> = ({
 
   return(
     <div className={styles.pathView}>
-      <Tooltip id='paths-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
-      </Tooltip>
       {
         (!inModal && !isLookup) && 
         <div className={styles.header}>

@@ -1,4 +1,4 @@
-import { FC, useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { FC, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getResultById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
@@ -8,12 +8,9 @@ import { useResultCounts } from '@/features/ResultItem/hooks/useResultCounts';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
-import PathView from '@/features/ResultItem/components/PathView/PathView';
-import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
-import Tabs from '@/features/Core/components/Tabs/Tabs';
-import Tab from '@/features/Core/components/Tabs/Tab';
 import { resultToGraphData } from '@/features/ResultGraphView/utils/graphFunctions';
 import ResultDetailViewSkeleton from '@/features/ResultItem/components/ResultDetailViewSkeleton/ResultDetailViewSkeleton';
+import ResultDetailTabs from '@/features/ResultItem/components/ResultDetailTabs/ResultDetailTabs';
 import ViewNotFound from '@/features/Navigation/components/ViewNotFound/ViewNotFound';
 import ClampedDescription from '@/features/ResultItem/components/ClampedDescription/ClampedDescription';
 import styles from './ResultDetailView.module.scss';
@@ -28,8 +25,6 @@ import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
-
-const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
 
 const ResultDetailView: FC = () => {
   const { resultId } = useParams();
@@ -184,37 +179,20 @@ const ResultDetailView: FC = () => {
           </div>
 
         </div>
-        <Tabs
-          isOpen
-          className={styles.tabs}
-          fadeClassName={styles.tabFade}
-          handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
-        >
-          <Tab heading="Paths" className={styles.pathsTab}>
-            <PathView
-              active
-              activeEntityFilters={activeEntityFilters}
-              activeFilters={activeFilters}
-              isEven={false}
-              pathArray={result.paths}
-              pathFilterState={pathFilterState ?? {}}
-              pk={pk ?? ''}
-              pathsWrapperClassName={styles.pathsScroll}
-              resultId={result.id}
-              setShowHiddenPaths={setShowHiddenPaths}
-              showHiddenPaths={showHiddenPaths}
-            />
-          </Tab>
-          <Tab heading="Graph" className={styles.graphTab}>
-            <Suspense fallback={<LoadingBar useIcon reducedPadding />}>
-              <GraphView
-                graph={graph}
-                active={graphActive}
-                resultSet={resultSet ?? undefined}
-              />
-            </Suspense>
-          </Tab>
-        </Tabs>
+        <ResultDetailTabs
+          activeEntityFilters={activeEntityFilters}
+          activeFilters={activeFilters}
+          graph={graph}
+          graphActive={graphActive}
+          pathCount={pathCount}
+          pathFilterState={pathFilterState ?? {}}
+          pk={pk ?? ''}
+          result={result}
+          resultSet={resultSet ?? undefined}
+          setGraphActive={setGraphActive}
+          setShowHiddenPaths={setShowHiddenPaths}
+          showHiddenPaths={showHiddenPaths}
+        />
       </FilteredOutWrapper>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

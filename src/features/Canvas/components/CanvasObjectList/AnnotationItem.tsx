@@ -18,7 +18,7 @@ export interface AnnotationItemProps {
   onMenuAction: (action: CanvasAnnotationAction, annotation: CanvasAnnotation) => void;
 }
 
-const ANNOTATION_META = <span className={styles.typeChip}>Annotation</span>;
+const ANNOTATION_META = <span className={styles.typeChip}>Note</span>;
 
 const AnnotationItem: FC<AnnotationItemProps> = ({
   annotation,
