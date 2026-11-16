@@ -437,6 +437,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                           isSortedByName={isSortedByName}
                           isSortedByPaths={isSortedByPaths}
                           handleUpdateResults={handleSortUpdate}
+                          isPathfinder={isPathfinder}
                         />
                         <ResultListRows
                           parentStyles={styles}
