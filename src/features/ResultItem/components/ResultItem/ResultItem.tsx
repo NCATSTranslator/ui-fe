@@ -10,7 +10,7 @@ import { useBookmarkItem } from '@/features/ResultItem/hooks/useBookmarkItem';
 import { useSelector } from 'react-redux';
 import { getResultSetById, getNodeById, getNodeSpecies } from '@/features/ResultList/slices/resultsSlice';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { Result, ResultBookmark } from '@/features/ResultList/types/results';
+import { Path, Result, ResultBookmark } from '@/features/ResultList/types/results';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import ResultItemName from '@/features/ResultItem/components/ResultItemName/ResultItemName';
@@ -23,6 +23,7 @@ import { getDataFromQueryVar } from '@/features/Core/utils/urlHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
 import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
+import { isOneHopPath, isStringArray } from '@/features/Core/utils/resultHelpers';
 
 type ResultItemProps = {
   bookmarkItem?: Save | null;
@@ -77,6 +78,15 @@ const ResultItem: FC<ResultItemProps> = ({
   const typeString: string = (!!subjectNode?.types[0]) ? formatBiolinkEntity(subjectNode?.types[0]) : '';
   const nameString: string = (!!result?.drug_name && !!subjectNode) ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
+
+  // Lookup rows preview only the direct relationships; longer paths stay
+  // available in the result detail view.
+  const lookupPaths = useMemo((): string[] | Path[] => {
+    if (!isLookup || !resultSet) return [];
+    if (isStringArray(result.paths))
+      return result.paths.filter(id => isOneHopPath(resultSet.data.paths[id]));
+    return result.paths.filter(isOneHopPath);
+  }, [isLookup, resultSet, result.paths]);
 
   // Declared after subjectNode so the event can carry the real CURIE rather
   // than the internal result ID, which means nothing outside a single session.
@@ -179,7 +189,7 @@ const ResultItem: FC<ResultItemProps> = ({
               />
             }
             {
-              isLookup &&
+              isLookup && lookupPaths.length > 0 &&
               <div className={styles.lookupPathViewContainer}>
                 <PathView
                   active
@@ -187,7 +197,7 @@ const ResultItem: FC<ResultItemProps> = ({
                   activeFilters={activeFilters}
                   isEven={isEven}
                   isLookup
-                  pathArray={result.paths}
+                  pathArray={lookupPaths}
                   pathFilterState={pathFilterState ?? {}}
                   pk={pk ?? ''}
                   resultId={result.id}
