@@ -11,7 +11,8 @@ interface ResultListTableHeadProps {
   isSortedByName: boolean | null;
   isSortedByEvidence: boolean | null;
   isSortedByPaths: boolean | null;
-  handleUpdateResults: () => void
+  handleUpdateResults: () => void;
+  isPathfinder?: boolean;
 }
 
 const getNextSortString = (
@@ -49,7 +50,9 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
   isSortedByName,
   isSortedByEvidence,
   isSortedByPaths,
-  parentStyles }) => {
+  parentStyles,
+  isPathfinder = false,
+}) => {
 
   const handleSort = (isSorted: boolean | null, firstDir: boolean, lowHighString: string, highLowString: string) => {
     const sortString = getNextSortString(isSorted, firstDir, lowHighString, highLowString, defaultSortString);
@@ -69,7 +72,7 @@ const ResultListTableHead: FC<ResultListTableHeadProps> = ({
         className={`${parentStyles.head} ${parentStyles.nameHead} ${getSortClass(isSortedByName)}`}
         onClick={() => handleSort(isSortedByName, true, 'nameLowHigh', 'nameHighLow')}
       >
-        Name
+        {isPathfinder ? 'Objects' : 'Name'}
         <ArrowUp className={parentStyles.chev}/>
       </div>
       <div
