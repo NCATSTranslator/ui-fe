@@ -513,6 +513,54 @@ describe('findStringMatch — path independence', () => {
 });
 
 // ---------------------------------------------------------------------------
+// applyFilters — several text filters must each match, in any order
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — multiple text filters', () => {
+  const buildFixture = () => {
+    const rs = makeResultSet({
+      nodes: {
+        'subject-node': makeNode('subject-node'),
+        cox: makeNode('cox', { names: ['COX-1'] }),
+        kinase: makeNode('kinase', { names: ['Tyrosine kinase'] }),
+      },
+      edges: { e1: makeEdge('e1'), e2: makeEdge('e2') },
+      paths: {
+        coxPath: makePath('coxPath', ['subject-node', 'e1', 'cox']),
+        kinasePath: makePath('kinasePath', ['subject-node', 'e2', 'kinase']),
+      },
+    });
+    const coxOnly = makeResult({ id: 'cox-only', drug_name: 'Aspirin', paths: ['coxPath'] });
+    const coxAndKinase = makeResult({ id: 'cox-and-kinase', drug_name: 'Imatinib', paths: ['coxPath', 'kinasePath'] });
+    return { rs, results: [coxOnly, coxAndKinase] };
+  };
+
+  const keptIds = (rs: ResultSet, results: Result[], filters: Filter[]) =>
+    applyFilters(filters, results, results, rs, genPathFilterState(rs)).results.map((result) => result.id);
+
+  it('keeps only results that match every text filter', () => {
+    const { rs, results } = buildFixture();
+
+    expect(keptIds(rs, results, [makeEntityFilter('cox'), makeEntityFilter('kinase')])).toEqual(['cox-and-kinase']);
+  });
+
+  it('keeps the same results whichever order the text filters were applied in', () => {
+    const { rs, results } = buildFixture();
+
+    expect(keptIds(rs, results, [makeEntityFilter('kinase'), makeEntityFilter('cox')])).toEqual(['cox-and-kinase']);
+  });
+
+  it('does not let a path matched by one text filter stand in for another filter', () => {
+    const { rs, results } = buildFixture();
+    const [coxOnly] = results;
+    const ranks = buildPathRanks(rs, coxOnly);
+
+    expect(findStringMatch(rs, coxOnly, makeEntityFilter('cox'), ranks)).toBe(true);
+    expect(findStringMatch(rs, coxOnly, makeEntityFilter('kinase'), ranks)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // getExcludingFilter — path exclusion helper
 // ---------------------------------------------------------------------------
 

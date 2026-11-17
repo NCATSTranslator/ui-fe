@@ -215,7 +215,9 @@ export const findStringMatch = (
       pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
     }
 
-    return (!isExclusion && pathRank.rank < 0);
+    // Whether this filter matched this path. The path's rank cannot answer that: it
+    // also reflects the other filters, so an earlier one could stand in for this one.
+    return pathRank.matched.has(filter);
   }
 }
 
