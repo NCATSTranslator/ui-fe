@@ -90,7 +90,7 @@ export interface ResultEdge {
   predicate_url: string;
   description?: string | null;
   provenance: EdgeProvenance[];
-  publications: {[key: string]: {id: string; support: PublicationSupport; infores: string}[]};
+  publications: {[key: string]: {id: string; support: PublicationSupport | null; infores: string}[]};
   signature: string;
   source_time: string;
   // nodeID
