@@ -131,7 +131,7 @@ describe('getExportFrame', () => {
 
 describe('buildCanvasExportFilename', () => {
   it('sanitizes the label and stamps the date with the given extension', () => {
-    const date = new Date('2026-09-02T12:00:00Z');
+    const date = new Date(2026, 8, 2, 23, 30, 0);
     expect(buildCanvasExportFilename('My Canvas!', 'png', date))
       .toBe('My-Canvas_canvas_2026-09-02.png');
     expect(buildCanvasExportFilename('My Canvas!', 'csv', date))

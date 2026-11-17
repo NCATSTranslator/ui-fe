@@ -65,3 +65,15 @@ export const getTimeRelativeDate = (date: Date): string => {
   };
   return new Intl.DateTimeFormat('en-US', numericalDateOptions).format(inputDate);
 };
+
+/**
+ * Calendar date in the user's own time zone as YYYY-MM-DD, for stamping
+ * export filenames. toISOString() would give the UTC date, which is a day
+ * off for part of every day outside UTC.
+ */
+export const getLocalDateStamp = (date: Date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

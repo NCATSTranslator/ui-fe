@@ -1,7 +1,8 @@
 import type { Canvas, CanvasNode } from '@/features/Canvas/types/canvas';
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import { getCanvasNodeDisplayName } from '@/features/Canvas/utils/canvasFunctions';
-import { escapeCSVValue, joinArrayForCSV } from '@/features/Core/utils/csvUtils';
+import { rowsToCSV, joinArrayForCSV } from '@/features/Core/utils/csvUtils';
+import { getLocalDateStamp } from '@/features/Core/utils/dateHelpers';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
 export const buildCanvasExportFilename = (
@@ -9,8 +10,7 @@ export const buildCanvasExportFilename = (
   extension: string,
   date: Date = new Date(),
 ): string => {
-  const datePart = date.toISOString().split('T')[0];
-  return `${sanitizeForFilename(label)}_canvas_${datePart}.${extension}`;
+  return `${sanitizeForFilename(label)}_canvas_${getLocalDateStamp(date)}.${extension}`;
 };
 
 type CanvasCSVRow = {
@@ -121,12 +121,7 @@ export const buildCanvasCSV = (canvas: Canvas): string => {
     });
   }
 
-  const lines = [
-    CSV_HEADERS.join(','),
-    ...rows.map(row => CSV_HEADERS.map(header => escapeCSVValue(row[header])).join(',')),
-  ];
-
-  return lines.join('\n');
+  return rowsToCSV(CSV_HEADERS, rows);
 };
 
 export const exportCanvasToCSVFile = (canvas: Canvas): void => {
