@@ -29,7 +29,7 @@ const ObjectListTabs: FC<ObjectListTabsProps> = ({
       className={joinClasses(styles.tab, activeTab === 'annotations' && styles.activeTab)}
       onClick={() => onTabChange('annotations')}
     >
-      Annotations ({annotationCount})
+      Notes ({annotationCount})
     </button>
   </div>
 );

@@ -112,7 +112,8 @@
           font-size: 14px;
           font-weight: 500;
         }
-        &:hover {
+        &:hover,
+        &.selected {
           background-color: $palePurple;
           border-top-color: $palePurple;
           color: $purpleOne;
