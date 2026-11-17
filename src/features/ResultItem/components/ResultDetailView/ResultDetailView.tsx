@@ -49,6 +49,7 @@ const ResultDetailView: FC = () => {
     handleClearAllFilters,
     isPathfinder,
     pathFilterState,
+    pathRankState,
     pk,
     resultsLoading,
     setShowHiddenPaths,
@@ -198,6 +199,7 @@ const ResultDetailView: FC = () => {
               isEven={false}
               pathArray={result.paths}
               pathFilterState={pathFilterState ?? {}}
+              pathRankState={pathRankState}
               pk={pk ?? ''}
               pathsWrapperClassName={styles.pathsScroll}
               resultId={result.id}

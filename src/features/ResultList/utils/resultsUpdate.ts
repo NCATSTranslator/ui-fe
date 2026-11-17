@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
+import { Result, ResultSet, PathFilterState, PathRankState } from '@/features/ResultList/types/results.d';
 import { Filter, Filters } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { ResultsUpdate } from '@/features/ResultList/hooks/useResultFiltering';
@@ -30,6 +30,8 @@ export interface ResultsFilteringOutput {
   /** Entity (string-search) filters as applyFilters normalised them. */
   entityFilters: string[];
   availableFilters: Filters;
+  /** Rank of each path against the filters; orders the paths within a result. */
+  pathRankState: PathRankState;
   shouldResetPage: boolean;
 }
 
@@ -95,7 +97,7 @@ export const computeResultsUpdate = (inputs: ResultsUpdateInputs): ResultsUpdate
   }
 
   const filters = update.mode === 'refilter' ? update.filters : activeFilters;
-  const { results, updatedEntityFilters, updatedPathFilterState, facetCounts, shouldResetPage } =
+  const { results, updatedEntityFilters, updatedPathFilterState, updatedPathRankState, facetCounts, shouldResetPage } =
     applyFilters(filters, formatted, original, summary, pathFilterState);
   const availableFilters = calculateFacetCounts(
     facetCounts.results,
@@ -113,6 +115,7 @@ export const computeResultsUpdate = (inputs: ResultsUpdateInputs): ResultsUpdate
       originalResults: original,
       entityFilters: updatedEntityFilters,
       availableFilters,
+      pathRankState: updatedPathRankState,
       shouldResetPage,
     },
   };

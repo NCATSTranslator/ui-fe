@@ -1,6 +1,29 @@
 import { describe, it, expect } from 'vitest';
-import { applyPredicateFilterDisplayNames, formatPredicateFilterName, propagatesExclusionAcrossCompressionGroups, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
+import { applyPredicateFilterDisplayNames, formatPredicateFilterName, groupInclusionFiltersByFamily, propagatesExclusionAcrossCompressionGroups, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
+
+describe('groupInclusionFiltersByFamily', () => {
+  it('groups inclusion filters by family, keeping their order within a family', () => {
+    const agentA: Filter = { id: 'p/ara/agent-a', name: 'Agent A' };
+    const treats: Filter = { id: 'p/pred/treats', name: 'treats' };
+    const agentB: Filter = { id: 'p/ara/agent-b', name: 'Agent B' };
+
+    const grouped = groupInclusionFiltersByFamily([agentA, treats, agentB]);
+
+    expect([...grouped.keys()]).toEqual(['ara', 'pred']);
+    expect(grouped.get('ara')).toEqual([agentA, agentB]);
+    expect(grouped.get('pred')).toEqual([treats]);
+  });
+
+  it('skips negated filters and filters without an id', () => {
+    const grouped = groupInclusionFiltersByFamily([
+      { id: 'p/ara/agent-a', name: 'Agent A', negated: true },
+      { name: 'No id' },
+    ]);
+
+    expect(grouped.size).toBe(0);
+  });
+});
 
 // Permissive default: no families propagate. See commented strict-mode logic in
 // propagatesExclusionAcrossCompressionGroups to re-enable group-wide propagation.

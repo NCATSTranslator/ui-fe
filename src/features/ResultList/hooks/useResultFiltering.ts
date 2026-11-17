@@ -1,7 +1,7 @@
 import { useState, useCallback, Dispatch, SetStateAction, RefObject } from 'react';
 import { filterCompare } from '@/features/Core/utils/sortingFunctions';
 import { isEntityFilter, toggleFilter } from '@/features/ResultFiltering/utils/filterFunctions';
-import { Result, ResultSet, PathFilterState } from '@/features/ResultList/types/results.d';
+import { Result, ResultSet, PathFilterState, PathRankState } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
@@ -29,6 +29,8 @@ export interface UseResultFilteringReturn {
   setActiveEntityFilters: Dispatch<SetStateAction<string[]>>;
   pathFilterState: PathFilterState | null;
   setPathFilterState: Dispatch<SetStateAction<PathFilterState | null>>;
+  pathRankState: PathRankState;
+  setPathRankState: Dispatch<SetStateAction<PathRankState>>;
   handleFilter: (filter: Filter) => void;
   handleSetFilters: (filters: Filter[]) => void;
   handleClearAllFilters: () => void;
@@ -41,6 +43,8 @@ interface UseResultFilteringArgs {
   handleUpdateResultsRef: RefObject<HandleUpdateResultsFn | null>;
 }
 
+const NO_PATH_RANKS: PathRankState = {};
+
 const useResultFiltering = ({
   handlePageReset,
   rawResults,
@@ -50,6 +54,7 @@ const useResultFiltering = ({
   const [availableFilters, setAvailableFilters] = useState<{ [key: string]: Filter }>({});
   const [activeEntityFilters, setActiveEntityFilters] = useState<string[]>([]);
   const [pathFilterState, setPathFilterState] = useState<PathFilterState | null>(null);
+  const [pathRankState, setPathRankState] = useState<PathRankState>(NO_PATH_RANKS);
 
   const handleApplyFilterAndCleanup = useCallback((filtersToActivate: Filter[]) => {
     if (!rawResults.current || !handleUpdateResultsRef.current)
@@ -95,6 +100,7 @@ const useResultFiltering = ({
     setActiveEntityFilters([]);
     setAvailableFilters({});
     setPathFilterState(null);
+    setPathRankState(NO_PATH_RANKS);
   }, []);
 
   return {
@@ -106,6 +112,8 @@ const useResultFiltering = ({
     setActiveEntityFilters,
     pathFilterState,
     setPathFilterState,
+    pathRankState,
+    setPathRankState,
     handleFilter,
     handleSetFilters,
     handleClearAllFilters,
