@@ -107,6 +107,14 @@ export const extractPathSequence = (subgraph: string[]): string[] => {
   return subgraph.filter((_, i) => isNodeIndex(i));
 };
 
+/**
+ * A subgraph alternates node, edge, node, so a single hop is exactly three
+ * entries.
+ */
+export const isOneHopPath = (path: Path | null | undefined): boolean => {
+  return path?.subgraph.length === 3;
+};
+
 export const getPathSequenceKey = (resultSet: ResultSet, path: string | Path): string | null => {
   const resolved = (typeof path === "string") ? getPathById(resultSet, path) : path;
   if (!resolved) return null;

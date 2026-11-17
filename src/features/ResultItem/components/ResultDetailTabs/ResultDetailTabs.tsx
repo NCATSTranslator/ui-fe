@@ -7,7 +7,7 @@ import { resultToGraphData } from '@/features/ResultGraphView/utils/graphFunctio
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import { Filter } from '@/features/ResultFiltering/types/filters';
-import { PathFilterState, Result, ResultSet } from '@/features/ResultList/types/results';
+import { PathFilterState, PathRankState, Result, ResultSet } from '@/features/ResultList/types/results';
 import styles from './ResultDetailTabs.module.scss';
 
 const GraphView = lazy(() => import('@/features/ResultGraphView/components/GraphView/GraphView'));
@@ -20,6 +20,7 @@ interface ResultDetailTabsProps {
   graphActive: boolean;
   pathCount: number;
   pathFilterState: PathFilterState;
+  pathRankState?: PathRankState;
   pk: string;
   result: Result;
   resultSet: ResultSet | undefined;
@@ -35,6 +36,7 @@ const ResultDetailTabs: FC<ResultDetailTabsProps> = ({
   graphActive,
   pathCount,
   pathFilterState,
+  pathRankState,
   pk,
   result,
   resultSet,
@@ -66,6 +68,7 @@ const ResultDetailTabs: FC<ResultDetailTabsProps> = ({
           isEven={false}
           pathArray={result.paths}
           pathFilterState={pathFilterState}
+          pathRankState={pathRankState}
           pk={pk}
           pathsWrapperClassName={styles.pathsScroll}
           resultId={result.id}

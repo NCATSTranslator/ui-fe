@@ -69,7 +69,7 @@
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-    margin-bottom: $xxs;
+    margin-bottom: 12px;
     svg {
       margin-left: $xxs;
       width: 24px;
@@ -81,7 +81,7 @@
       }
     }
     span, mark {
-      font-size: $subTwoSize;
+      font-size: $subTwoSize !important;
       font-weight: 800;
       line-height: 1.25;
       color: $white;
@@ -94,7 +94,8 @@
       color: $black;
     }
     .predicateImpact {
-      font-size: $captionSize;
+      font-size: $subTwoSize !important;
+      font-style: italic;
       font-weight: 400;
       color: $white;
       width: 100%;
@@ -116,12 +117,13 @@
     align-items: center;
     justify-content: flex-start;
     gap: $xxxs;
+    text-decoration: none;
     span {
       display: -webkit-box;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      font-size: $captionSize;
+      font-size: $captionSize !important;
       font-weight: 800;
       color: $white;
     }

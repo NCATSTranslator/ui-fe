@@ -26,14 +26,10 @@
     }
   }
   &.pathfinder {
-    grid-template-columns: 1fr 72px 110px 90px 24px;
-    .accordionPanel {
-      grid-column: 1/6;
-    }
     .tags {
       display: none;
     }
-    .accordionPanel {
+    .descriptionPanel {
       min-height: initial !important;
     }
   }
@@ -111,6 +107,15 @@
   .checkboxContainer {
     display: none;
   }
+  .info {
+    min-width: 0;
+  }
+  .nameRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $s;
+  }
   .nameContainer {
     display: flex;
     align-content: center;
@@ -185,20 +190,11 @@
   }
   .top {
     display: grid;
-    grid-template-columns: 1fr 32px 110px 90px 24px;
+    grid-template-columns: 1fr 110px 90px 24px;
     column-gap: $s;
     padding: $m $s 0 $s;
-    @media screen and (min-width: 1240px) {
-      grid-template-columns: 1fr 72px 110px 90px 24px;
-    }
   }
-  .accordionPanel {
-    grid-column: 1/6;
-    grid-row: 2;
-    padding: 0;
-    .container, .resultTabs > div > div {
-      padding: 0 $s;
-    } 
+  .descriptionPanel {
     &.hasDescription, &.hasTags {
       min-height: 41px;
     }
@@ -208,14 +204,8 @@
     &.hasDescription.hasTags {
       min-height: 81px;
     }
-    &>div {
-      display: block !important;
-    }
-    .container {
-      max-width: calc(100% - 390px);
-      p, p span, p mark {
-        font-size: 12px;
-      }
+    p, p span, p mark {
+      font-size: 12px;
     }
   }
 }

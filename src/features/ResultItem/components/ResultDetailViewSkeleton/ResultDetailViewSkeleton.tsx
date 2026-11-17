@@ -9,14 +9,12 @@ const ResultDetailViewSkeleton: FC = () => {
       <ViewTopBar/>
       <div className={styles.tableHeader}>
         <div />
-        <div />
         <SkeletonBar width="60px" height="10px" />
         <SkeletonBar width="40px" height="10px" />
       </div>
       <div className={styles.header}>
         <div className={styles.top}>
           <SkeletonBar width="70%" height="20px" />
-          <SkeletonBar width="100%" height="32px" />
           <SkeletonBar width="80px" height="14px" />
           <SkeletonBar width="60px" height="14px" />
         </div>

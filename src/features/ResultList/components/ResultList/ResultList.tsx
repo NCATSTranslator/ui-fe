@@ -193,6 +193,8 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setActiveEntityFilters,
     pathFilterState,
     setPathFilterState,
+    pathRankState,
+    setPathRankState,
     handleFilter,
     handleSetFilters,
     handleClearAllFilters,
@@ -305,6 +307,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       if (!areEntityFiltersEqual(filtering.entityFilters, activeEntityFiltersRef.current))
         setActiveEntityFilters(filtering.entityFilters);
       setAvailableFilters(filtering.availableFilters);
+      setPathRankState(filtering.pathRankState);
       if (filtering.shouldResetPage && currentPage.current !== 0)
         handlePageReset(false, newFormattedResults.length);
       originalResults.current = filtering.originalResults;
@@ -315,7 +318,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     openSharedResultOnFirstLoad(summary, newFormattedResults);
     rawResults.current = summary;
     return newFormattedResults;
-  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, openSharedResultOnFirstLoad, currentPage, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
+  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setPathRankState, setActiveEntityFilters, setAvailableFilters, openSharedResultOnFirstLoad, currentPage, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
 
   // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
   // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
@@ -374,6 +377,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isPathfinder,
     lookupCategory,
     pathFilterState,
+    pathRankState,
     pk: currentQueryID,
     resultId,
     resultsNavigate,
@@ -398,7 +402,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     constraintText,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
-    handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, currentQueryID,
+    handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, pathRankState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     effectiveNodeId, effectiveNodeLabel, nodeDescription,
     presetTypeObject, resultsComplete, isLoading, scoreWeights,
@@ -452,6 +456,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
                           isSortedByName={isSortedByName}
                           isSortedByPaths={isSortedByPaths}
                           handleUpdateResults={handleSortUpdate}
+                          isPathfinder={isPathfinder}
                         />
                         <ResultListRows
                           parentStyles={styles}
