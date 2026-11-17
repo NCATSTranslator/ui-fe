@@ -1,10 +1,10 @@
 import { getPathCount } from '@/features/Core/utils/resultHelpers';
 import { getEvidenceCounts, calculateTotalEvidence } from '@/features/Evidence/utils/utilities';
-import { EdgeRank, Path, PathRank, Result, ResultEdge, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
+import { EdgeRank, EntityTags, Path, PathRank, Result, ResultEdge, ResultSet, ScoreWeights } from '@/features/ResultList/types/results';
 import { Filter, FilterFamily } from '@/features/ResultFiltering/types/filters';
 import { Provenance, PublicationObject } from '@/features/Evidence/types/evidence';
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
-import { getFilterFamily, getTagFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
+import { getFilterFamily, getTagFamily, groupInclusionFiltersByFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
 const compareWithFallback = (
   aValue: string | undefined | null,
@@ -232,6 +232,27 @@ export const getExcludingFilter = (
   return null;
 };
 
+/**
+ * Ranks a tagged item (path or edge) against inclusion filters grouped by family.
+ * Families are ANDed: an item matching no filter in some family gets an excluding rank.
+ * Within a family filters are ORed, and every filter the item matches improves its rank,
+ * so an item meeting more of the criteria ranks ahead of one meeting fewer.
+ */
+const applyInclusionFiltersByFamily = (
+  tagged: { tags: EntityTags },
+  inclusionsByFamily: Map<FilterFamily, Filter[]>,
+  rank: { rank: number },
+): void => {
+  for (const group of inclusionsByFamily.values()) {
+    const matchCount = group.filter((ftr) => tagged.tags[ftr.id as string] !== undefined).length;
+    if (matchCount === 0) {
+      rank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
+      return;
+    }
+    rank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+  }
+};
+
 function _applyPathExclusion(ctx: PathRankingContext, path: Path, pathRank: PathRank): boolean {
   const negatedFilters = ctx.otherFilters.filter((ftr) => ftr.negated);
   const excludingFilter = getExcludingFilter(path, negatedFilters, ctx.hasAraInclusion);
@@ -258,40 +279,17 @@ function _applyEvidenceFiltering(path: Path, evidenceFilters: Filter[], pathRank
 
   const inclusionFilters = evidenceFilters.filter((ftr) => !ftr.negated);
   if (inclusionFilters.length > 0) {
-    const hasMatch = inclusionFilters.some(
+    const matchCount = inclusionFilters.filter(
       (ftr) => ftr.id && path.tags[ftr.id] !== undefined
-    );
-    if (!hasMatch) {
+    ).length;
+    if (matchCount === 0) {
       pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
       return true;
     }
-    pathRank.rank += INCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+    pathRank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
   }
 
   return false;
-}
-
-function _applyInclusionFiltering(ctx: PathRankingContext, path: Path, pathRank: PathRank): void {
-  let include = true;
-  let lastFamily = null;
-  for (const ftr of ctx.otherFilters) {
-    if (!ftr.negated && ftr.id) {
-      const currentFamily = getFilterFamily(ftr);
-      if (currentFamily !== lastFamily) {
-        if (!include) break;
-        include = (path.tags[ftr.id] !== undefined);
-        lastFamily = currentFamily;
-      } else {
-        include ||= (path.tags[ftr.id] !== undefined);
-      }
-    }
-    if (include) {
-      pathRank.rank += INCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-    }
-  }
-  if (!include) {
-    pathRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-  }
 }
 
 function _updatePathRanks(ctx: PathRankingContext, path: Path, pathRank: PathRank): void {
@@ -299,7 +297,7 @@ function _updatePathRanks(ctx: PathRankingContext, path: Path, pathRank: PathRan
 
   if (_applyEvidenceFiltering(path, ctx.evidenceFilters, pathRank)) return;
 
-  _applyInclusionFiltering(ctx, path, pathRank);
+  applyInclusionFiltersByFamily(path, groupInclusionFiltersByFamily(ctx.otherFilters), pathRank);
 }
 
 export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: PathRank, pathFilters: Filter[]) => {
@@ -315,8 +313,6 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     }
   }
 
-  otherFilters.sort(filterCompare);
-
   const ctx: PathRankingContext = {
     resultSet,
     evidenceFilters,
@@ -327,10 +323,6 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
   };
 
   _updatePathRanks(ctx, path, pathRank);
-}
-
-export const pathRankSort = (pathRanks: PathRank[]) => {
-  pathRanks.sort(pathRankCompare);
 }
 
 export const makeEdgeRank = (edgeID: string): EdgeRank => {
@@ -351,33 +343,6 @@ const applyNegatedEdgeFilters = (
   return false;
 };
 
-const groupInclusionEdgeFiltersByFamily = (edgeFilters: Filter[]): Map<FilterFamily, Filter[]> => {
-  const inclusionsByFamily = new Map<FilterFamily, Filter[]>();
-  for (const ftr of edgeFilters) {
-    if (ftr.negated || !ftr.id) continue;
-    const family = getFilterFamily(ftr);
-    const group = inclusionsByFamily.get(family);
-    if (group) group.push(ftr);
-    else inclusionsByFamily.set(family, [ftr]);
-  }
-  return inclusionsByFamily;
-};
-
-const applyInclusionEdgeFilters = (
-  edge: ResultEdge,
-  inclusionsByFamily: Map<FilterFamily, Filter[]>,
-  edgeRank: EdgeRank,
-): void => {
-  for (const group of inclusionsByFamily.values()) {
-    const matchCount = group.filter((ftr) => edge.tags[ftr.id as string] !== undefined).length;
-    if (matchCount === 0) {
-      edgeRank.rank = EXCLUDE_RANK_BASE * FILTERING_CONSTANTS.WEIGHT.HEAVY;
-      return;
-    }
-    edgeRank.rank += INCLUDE_RANK_BASE * matchCount * FILTERING_CONSTANTS.WEIGHT.LIGHT;
-  }
-};
-
 /**
  * Ranks a single edge against the active edge filters.
  *
@@ -388,10 +353,5 @@ const applyInclusionEdgeFilters = (
 export const updateEdgeRank = (edge: ResultEdge, edgeFilters: Filter[], edgeRank: EdgeRank) => {
   if (edgeFilters.length === 0) return;
   if (applyNegatedEdgeFilters(edge, edgeFilters, edgeRank)) return;
-  applyInclusionEdgeFilters(edge, groupInclusionEdgeFiltersByFamily(edgeFilters), edgeRank);
-}
-
-const pathRankCompare = (a: PathRank, b: PathRank) => {
-  if (b === undefined) return -1;
-  return a.rank - b.rank;
+  applyInclusionFiltersByFamily(edge, groupInclusionFiltersByFamily(edgeFilters), edgeRank);
 }

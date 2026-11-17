@@ -50,6 +50,7 @@ const ResultItem: FC<ResultItemProps> = ({
     handleFilter,
     isPathfinder,
     pathFilterState,
+    pathRankState,
     setShowHiddenPaths,
     showHiddenPaths,
     pk,
@@ -199,6 +200,7 @@ const ResultItem: FC<ResultItemProps> = ({
                   isLookup
                   pathArray={lookupPaths}
                   pathFilterState={pathFilterState ?? {}}
+                  pathRankState={pathRankState}
                   pk={pk ?? ''}
                   resultId={result.id}
                   setShowHiddenPaths={setShowHiddenPaths}

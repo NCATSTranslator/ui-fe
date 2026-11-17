@@ -1,5 +1,5 @@
 import { createContext, useContext, FC, ReactNode, RefObject, Dispatch, SetStateAction } from 'react';
-import { PathFilterState, ScoreWeights } from '@/features/ResultList/types/results.d';
+import { PathFilterState, PathRankState, ScoreWeights } from '@/features/ResultList/types/results.d';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { SaveGroup } from '@/features/UserAuth/utils/userApi';
 import { QueryType } from '@/features/Query/types/querySubmission';
@@ -20,6 +20,7 @@ export interface ResultListContextValue {
   isPathfinder: boolean;
   navigateToEvidenceView: (options: EvidenceNavigationOptions) => void;
   pathFilterState: PathFilterState | null;
+  pathRankState: PathRankState;
   pk: string | null;
   resultId: string | undefined;
   resultsNavigate: (path: string, extraParams?: Record<string, string>) => void;

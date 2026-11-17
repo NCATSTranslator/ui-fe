@@ -1,8 +1,8 @@
 import { getEdgeById, getNodeById, getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState, EdgeFilterState } from "@/features/ResultList/types/results.d";
+import { Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, PathFilterState, PathRankState, EdgeFilterState } from "@/features/ResultList/types/results.d";
 import { isPath, isResultEdge } from "@/features/ResultList/types/checkers";
 import { Filter, Filters } from "@/features/ResultFiltering/types/filters";
-import { makePathRank, updatePathRanks, pathRankSort, makeEdgeRank, updateEdgeRank, getExcludingFilter } from "@/features/Core/utils/sortingFunctions";
+import { makePathRank, updatePathRanks, makeEdgeRank, updateEdgeRank, getExcludingFilter } from "@/features/Core/utils/sortingFunctions";
 import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import * as filtering from "@/features/ResultFiltering/utils/filterFunctions";
 import cloneDeep from "lodash/cloneDeep";
@@ -124,7 +124,7 @@ const matchesShallowProperties = (resultSet: ResultSet, result: Result, normaliz
 };
 
 /**
- * Re-ranks a result's paths against the path filters, then re-sorts its path ranks.
+ * Re-ranks a result's paths against the path filters.
  */
 const updateResultPathRanks = (
   resultSet: ResultSet,
@@ -139,7 +139,6 @@ const updateResultPathRanks = (
       updatePathRanks(resultSet, path, rank, pathFilters);
     }
   }
-  pathRankSort([...pathRanks?.values() || []]);
 };
 
 /**
@@ -227,6 +226,8 @@ export interface ApplyFiltersOutcome {
   results: Result[];
   updatedEntityFilters: string[];
   updatedPathFilterState: PathFilterState;
+  /** Rank of every path evaluated against the filters; drives the display order of a result's paths. */
+  updatedPathRankState: PathRankState;
   updatedEdgeFilterState: EdgeFilterState;
   facetCounts: {
     resultFacets: Filter[];
@@ -253,7 +254,7 @@ const _resolvePath = (resultSet: ResultSet, p: string | Path): Path | null =>
  * @param {ResultSet} summary - The complete context including path, node, and tag metadata.
  * @param {PathFilterState} pathFilterState - Current state of which paths are filtered out.
  * @returns {ApplyFiltersOutcome} Filtering and facet metadata including final results, updated entity filters,
- * updated path filter state, grouped facet filters, and flags for UI reset logic.
+ * updated path filter state, path ranks, grouped facet filters, and flags for UI reset logic.
  */
 export const applyFilters = (
   filters: Filter[],
@@ -272,6 +273,7 @@ export const applyFilters = (
       results: filteredResults,
       updatedEntityFilters: [],
       updatedPathFilterState: genPathFilterState(summary),
+      updatedPathRankState: {},
       updatedEdgeFilterState: {},
       facetCounts: { resultFacets, negatedResultFacets, results: filteredResults, negatedResults: [] },
       unrankedIsFiltered: false,
@@ -286,8 +288,10 @@ export const applyFilters = (
     [...rankMap.values()].some(rank => rank.rank < 0)
   );
 
+  const pathRankState: PathRankState = {};
   for (const pathRanks of resultPathRanks.values()) {
     _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
+    _updatePathRankState(pathRankState, [...pathRanks.values()]);
   }
   _propagateExclusionAcrossCompressionGroups(summary, resultsAfterFacets, pathFilters, pathFilterState);
 
@@ -299,6 +303,7 @@ export const applyFilters = (
     updatedEntityFilters,
     updatedEdgeFilterState,
     updatedPathFilterState: pathFilterState,
+    updatedPathRankState: pathRankState,
     facetCounts: { resultFacets, negatedResultFacets, results, negatedResults },
     unrankedIsFiltered,
     shouldResetPage: finalResults.length > 0
@@ -375,7 +380,7 @@ const _filterResults = (
 /**
  * Applies facet-based filters to an already filtered list of results.
  * Enforces AND logic between facet families and OR logic within each family.
- * Updates and sorts per-path ranks for each retained result.
+ * Updates per-path ranks for each retained result.
  *
  * @param {ResultSet} resultSet - The full dataset used for path and tag metadata.
  * @param {Filter[]} resultFacets - The set of active facet filters to apply.
@@ -616,6 +621,18 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
     const pid = pathRank.path.id;
     if (!pid) continue;
     pathFilterState[pid] = pathRank.rank > 0 || (pathRank.rank === 0 && unrankedIsFiltered);
+  }
+}
+
+/**
+ * Records the rank of each path so the order the ranks imply survives past filtering.
+ * @param {PathRankState} pathRankState - The map of path IDs to ranks to update.
+ * @param {PathRank[]} pathRanks - The ranked paths to record.
+ */
+function _updatePathRankState(pathRankState: PathRankState, pathRanks: PathRank[]) {
+  for (const pathRank of pathRanks) {
+    const pid = pathRank.path.id;
+    if (pid) pathRankState[pid] = pathRank.rank;
   }
 }
 

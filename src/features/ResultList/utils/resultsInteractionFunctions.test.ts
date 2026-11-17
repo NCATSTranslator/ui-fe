@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { applyFilters, findStringMatch, genPathFilterState, getItemStringMatchLocations, logStringMatch, setStringMatchLogging } from '@/features/ResultList/utils/resultsInteractionFunctions';
-import { getExcludingFilter, makePathRank } from '@/features/Core/utils/sortingFunctions';
+import { getExcludingFilter, makePathRank, updatePathRanks } from '@/features/Core/utils/sortingFunctions';
 import { getPathById } from '@/features/ResultList/slices/resultsSlice';
 import { FILTERING_CONSTANTS, normalizeSearchTerm } from '@/features/ResultFiltering/utils/filterFunctions';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { EntityTags, Path, PathRank, Result, ResultEdge, ResultNode, ResultSet, ResultSetTags, TagDescription, TagObject } from '@/features/ResultList/types/results.d';
-import { getCompressedPaths, getIsPathFiltered, getIsPathIdFiltered } from '@/features/ResultItem/utils/utilities';
+import { getCompressedPaths, getFormattedPaths, getIsPathFiltered, getIsPathIdFiltered, getPathRank } from '@/features/ResultItem/utils/utilities';
 
 // ---------------------------------------------------------------------------
 // Minimal fixture factories
@@ -889,5 +889,168 @@ describe('getIsPathIdFiltered — evidence view lookup by member path ID', () =>
 
     expect(getIsPathIdFiltered(rs, 'P1', ['P1', 'P2'], pathFilterState)).toBe(true);
     expect(getIsPathIdFiltered(rs, 'P2', ['P1', 'P2'], pathFilterState)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updatePathRanks — rank reflects how many criteria a path meets
+// ---------------------------------------------------------------------------
+
+describe('updatePathRanks — rank counts matched criteria', () => {
+  const LIGHT = FILTERING_CONSTANTS.WEIGHT.LIGHT;
+  const EV_CLINICAL = 'p/ev/clinical';
+  const EV_PUBLICATION = 'p/ev/publication';
+  const rs = makeResultSet({});
+
+  const rankOf = (tagIds: string[], filters: Filter[]): number => {
+    const path = makePath('P', ['n1', 'e1', 'n2'], {
+      tags: pathTags(Object.fromEntries(tagIds.map((id) => [id, id]))),
+    });
+    const pathRank = makePathRank(path);
+    updatePathRanks(rs, path, pathRank, filters);
+    return pathRank.rank;
+  };
+
+  const predicateFilters = [makePathFilter(PRED_TREATS), makePathFilter(PRED_AFFECTS), makePathFilter(PRED_CAUSES)];
+
+  it('ranks a path once per matching filter in a family, wherever the match falls in the filter list', () => {
+    expect(rankOf([PRED_TREATS], predicateFilters)).toBe(-1 * LIGHT);
+    expect(rankOf([PRED_AFFECTS], predicateFilters)).toBe(-1 * LIGHT);
+    expect(rankOf([PRED_CAUSES], predicateFilters)).toBe(-1 * LIGHT);
+    expect(rankOf([PRED_AFFECTS, PRED_CAUSES], predicateFilters)).toBe(-2 * LIGHT);
+    expect(rankOf([PRED_TREATS, PRED_AFFECTS, PRED_CAUSES], predicateFilters)).toBe(-3 * LIGHT);
+  });
+
+  it('ranks a path meeting more criteria ahead of one meeting fewer', () => {
+    expect(rankOf([PRED_AFFECTS, PRED_CAUSES], predicateFilters)).toBeLessThan(rankOf([PRED_TREATS], predicateFilters));
+  });
+
+  it('gives no credit for negated filters the path survives', () => {
+    const filters = [makePathFilter(PRED_TREATS), makePathFilter(PRED_UNRELATED, true), makePathFilter(ARA_EXCLUDE, true)];
+
+    expect(rankOf([PRED_TREATS], filters)).toBe(-1 * LIGHT);
+  });
+
+  it('adds the matches of each family together and excludes a path that misses a whole family', () => {
+    const filters = [makePathFilter(PRED_TREATS), makePathFilter(PRED_AFFECTS), makePathFilter(ARA_INCLUDE)];
+
+    expect(rankOf([PRED_TREATS, PRED_AFFECTS, ARA_INCLUDE], filters)).toBe(-3 * LIGHT);
+    expect(rankOf([PRED_TREATS, ARA_INCLUDE], filters)).toBe(-2 * LIGHT);
+    expect(rankOf([PRED_TREATS, PRED_AFFECTS], filters)).toBe(FILTERING_CONSTANTS.WEIGHT.HEAVY);
+  });
+
+  it('ranks a path once per matching evidence filter', () => {
+    const filters = [makePathFilter(EV_CLINICAL), makePathFilter(EV_PUBLICATION)];
+
+    expect(rankOf([EV_CLINICAL], filters)).toBe(-1 * LIGHT);
+    expect(rankOf([EV_CLINICAL, EV_PUBLICATION], filters)).toBe(-2 * LIGHT);
+    expect(rankOf([], filters)).toBe(FILTERING_CONSTANTS.WEIGHT.HEAVY);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters + getFormattedPaths — path ranks order the displayed paths
+// ---------------------------------------------------------------------------
+
+describe('path ranks order the displayed paths', () => {
+  const LIGHT = FILTERING_CONSTANTS.WEIGHT.LIGHT;
+
+  /** Four paths with distinct node sequences, so none of them compress together. */
+  const buildRankedFixture = () => {
+    const rs = makeResultSet({
+      nodes: Object.fromEntries(['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'].map((id) => [id, makeNode(id)])),
+      edges: Object.fromEntries(['e1', 'e2', 'e3', 'e4', 'e5', 'e6'].map((id) => [id, makeEdge(id)])),
+      paths: {
+        oneHopOneMatch: makePath('oneHopOneMatch', ['n1', 'e1', 'n2'], { tags: pathTags({ [PRED_TREATS]: 'treats' }) }),
+        twoHopTwoMatches: makePath('twoHopTwoMatches', ['n1', 'e2', 'n3', 'e3', 'n4'], {
+          tags: pathTags({ [PRED_TREATS]: 'treats', [PRED_AFFECTS]: 'affects' }),
+        }),
+        twoHopOneMatch: makePath('twoHopOneMatch', ['n1', 'e4', 'n5', 'e5', 'n6'], { tags: pathTags({ [PRED_AFFECTS]: 'affects' }) }),
+        oneHopNoMatch: makePath('oneHopNoMatch', ['n1', 'e6', 'n7']),
+      },
+      tags: resultSetTags({ [PRED_TREATS]: 'treats', [PRED_AFFECTS]: 'affects' }),
+    });
+    const result = makeResult({
+      drug_name: 'Drug',
+      paths: ['oneHopNoMatch', 'twoHopOneMatch', 'oneHopOneMatch', 'twoHopTwoMatches'],
+    });
+    return { rs, result };
+  };
+
+  const ids = (paths: Path[]) => paths.map((path) => path.id);
+
+  it('returns the rank of every evaluated path from applyFilters', () => {
+    const { rs, result } = buildRankedFixture();
+    const { updatedPathRankState } = runApplyFilters(rs, result, [makePathFilter(PRED_TREATS), makePathFilter(PRED_AFFECTS)]);
+
+    expect(updatedPathRankState).toEqual({
+      oneHopOneMatch: -1 * LIGHT,
+      twoHopTwoMatches: -2 * LIGHT,
+      twoHopOneMatch: -1 * LIGHT,
+      oneHopNoMatch: FILTERING_CONSTANTS.WEIGHT.HEAVY,
+    });
+  });
+
+  it('returns no ranks when no filters are active', () => {
+    const { rs, result } = buildRankedFixture();
+
+    expect(runApplyFilters(rs, result, []).updatedPathRankState).toEqual({});
+  });
+
+  it('shows the path meeting more criteria first, with length breaking ties and filtered paths last', () => {
+    const { rs, result } = buildRankedFixture();
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, [
+      makePathFilter(PRED_TREATS),
+      makePathFilter(PRED_AFFECTS),
+    ]);
+
+    expect(ids(getFormattedPaths(rs, result.paths, updatedPathFilterState, updatedPathRankState))).toEqual([
+      'twoHopTwoMatches',
+      'oneHopOneMatch',
+      'twoHopOneMatch',
+      'oneHopNoMatch',
+    ]);
+  });
+
+  it('orders paths by text-search matches too', () => {
+    const rs = makeResultSet({
+      nodes: {
+        n1: makeNode('n1', { names: ['Start'] }),
+        n2: makeNode('n2', { names: ['COX1'] }),
+        n3: makeNode('n3', { names: ['COX2'] }),
+        n4: makeNode('n4', { names: ['COX3'] }),
+      },
+      edges: { e1: makeEdge('e1'), e2: makeEdge('e2'), e3: makeEdge('e3') },
+      paths: {
+        oneMatch: makePath('oneMatch', ['n1', 'e1', 'n2']),
+        twoMatches: makePath('twoMatches', ['n1', 'e2', 'n3', 'e3', 'n4']),
+      },
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['oneMatch', 'twoMatches'] });
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, [makeEntityFilter('cox')]);
+
+    expect(updatedPathRankState).toEqual({ oneMatch: -1 * LIGHT, twoMatches: -2 * LIGHT });
+    expect(ids(getFormattedPaths(rs, result.paths, updatedPathFilterState, updatedPathRankState))).toEqual(['twoMatches', 'oneMatch']);
+  });
+
+  it('orders by length alone when there are no ranks', () => {
+    const { rs, result } = buildRankedFixture();
+
+    expect(ids(getFormattedPaths(rs, result.paths, genPathFilterState(rs)))).toEqual([
+      'oneHopNoMatch',
+      'oneHopOneMatch',
+      'twoHopOneMatch',
+      'twoHopTwoMatches',
+    ]);
+  });
+
+  it('ranks a compressed path by its best member', () => {
+    const { rs } = buildCompressedFixture();
+    const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2', 'P3']);
+
+    expect(compressedPath.compressedIDs).toEqual(['P1', 'P2', 'P3']);
+    expect(getPathRank(compressedPath, { P1: FILTERING_CONSTANTS.WEIGHT.HEAVY, P2: -2 * LIGHT, P3: -1 * LIGHT })).toBe(-2 * LIGHT);
+    expect(getPathRank(getPathById(rs, 'P4')!, { P4: -1 * LIGHT })).toBe(-1 * LIGHT);
+    expect(getPathRank(getPathById(rs, 'P4')!, {})).toBe(0);
   });
 });

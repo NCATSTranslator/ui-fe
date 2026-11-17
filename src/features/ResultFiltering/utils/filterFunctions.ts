@@ -254,6 +254,24 @@ export const hasFilterFamily = (filter: Filter, family: FilterFamily): boolean =
   return getFilterFamily(filter) === family;
 }
 
+/**
+ * Groups the inclusion (non-negated) tag filters by family, preserving filter order within
+ * each family. Negated filters and filters without an id are skipped.
+ * @param {Filter[]} filters - The filters to group
+ * @returns {Map<FilterFamily, Filter[]>} The inclusion filters keyed by family
+ */
+export const groupInclusionFiltersByFamily = (filters: Filter[]): Map<FilterFamily, Filter[]> => {
+  const inclusionsByFamily = new Map<FilterFamily, Filter[]>();
+  for (const ftr of filters) {
+    if (ftr.negated || !ftr.id) continue;
+    const family = getFilterFamily(ftr);
+    const group = inclusionsByFamily.get(family);
+    if (group) group.push(ftr);
+    else inclusionsByFamily.set(family, [ftr]);
+  }
+  return inclusionsByFamily;
+};
+
 export const getFilterLabel = (filter: Filter | FilterFamily): string => {
   const defaultLabel = "Tag";
 

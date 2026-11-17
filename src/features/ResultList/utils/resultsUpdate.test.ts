@@ -66,6 +66,7 @@ describe('computeResultsUpdate', () => {
     const outcome = computeResultsUpdate(next({ mode: 'refilter', filters: [approvedFilter] }));
     expect(names(outcome!.formattedResults)).toEqual(['Aspirin', 'Zinc']);
     expect(outcome!.filtering?.originalResults).toHaveLength(3);
+    expect(outcome!.filtering?.pathRankState).toEqual({ p1: 0, p2: 0, p3: 0 });
     expect(outcome!.filtering?.shouldResetPage).toBe(true);
   });
 

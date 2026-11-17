@@ -232,6 +232,11 @@ export type PathFilterState = {
   [pid: string]: boolean;
 }
 
+/** Filter rank per path ID; lower ranks meet more of the active filter criteria. Paths not listed are unranked (0). */
+export type PathRankState = {
+  [pid: string]: number;
+}
+
 export type EdgeFilterState = {
   [eid: string]: boolean;
 }
