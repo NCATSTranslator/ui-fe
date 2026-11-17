@@ -23,6 +23,8 @@ import useResultPagination, { parseItemsPerPage } from "@/features/ResultList/ho
 import useShareState from "@/features/ResultList/hooks/useShareState";
 import useResultFiltering, { HandleUpdateResultsFn, ResultsUpdate } from "@/features/ResultList/hooks/useResultFiltering";
 import useUserBookmarks from "@/features/ResultList/hooks/useUserBookmarks";
+import useWorkingView from "@/features/ResultList/hooks/useWorkingView";
+import { useFilterUrlState, useFilterUrlSync } from "@/features/ResultList/hooks/useFilterUrlState";
 import useResultsData from "@/features/ResultList/hooks/useResultsData";
 import { useResultsUrlParams, useQueryTitle } from "@/features/ResultList/hooks/useResultsUrlParams";
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
@@ -129,7 +131,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     formattedResults, setFormattedResults,
     isLoading, setIsLoading, isError,
     arsStatus, resultStatus,
-    nodeDescription,
+    nodeDescription, resultsQueryID,
     hasFreshResults, resultsComplete,
     rawResults, originalResults, prevRawResults,
     isFetchingARAStatus, isFetchingResults,
@@ -191,6 +193,8 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     setActiveEntityFilters,
     pathFilterState,
     setPathFilterState,
+    pathRankState,
+    setPathRankState,
     handleFilter,
     handleSetFilters,
     handleClearAllFilters,
@@ -202,6 +206,19 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
   });
   // Keep the sort hook's entity filters ref in sync
   activeEntityFiltersRef.current = activeEntityFilters;
+
+  const urlFilterState = useFilterUrlState(decodedParams);
+  const { initialized: filtersInitialized } = useWorkingView({
+    user: user ?? null,
+    currentQueryID,
+    resultsQueryID,
+    hasResults: formattedResults.length > 0,
+    activeFilters,
+    availableFilters,
+    urlState: urlFilterState,
+    handleSetFilters,
+  });
+  useFilterUrlSync({ activeFilters, enabled: filtersInitialized });
 
   // User bookmarks state management via hook
   const {
@@ -290,6 +307,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
       if (!areEntityFiltersEqual(filtering.entityFilters, activeEntityFiltersRef.current))
         setActiveEntityFilters(filtering.entityFilters);
       setAvailableFilters(filtering.availableFilters);
+      setPathRankState(filtering.pathRankState);
       if (filtering.shouldResetPage && currentPage.current !== 0)
         handlePageReset(false, newFormattedResults.length);
       originalResults.current = filtering.originalResults;
@@ -300,7 +318,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     openSharedResultOnFirstLoad(summary, newFormattedResults);
     rawResults.current = summary;
     return newFormattedResults;
-  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setActiveEntityFilters, setAvailableFilters, openSharedResultOnFirstLoad, currentPage, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
+  }, [handlePageReset, getSortedResults, setFormattedResults, setPathFilterState, setPathRankState, setActiveEntityFilters, setAvailableFilters, openSharedResultOnFirstLoad, currentPage, originalResults, rawResults, currentSortString, activeEntityFiltersRef, isPathfinder]);
 
   // useLayoutEffect (not render-time assignment) keeps refs concurrent-safe under StrictMode.
   // Ideally useEffectEvent, but it hasn't shipped in stable React 19.1 yet.
@@ -359,6 +377,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     isPathfinder,
     lookupCategory,
     pathFilterState,
+    pathRankState,
     pk: currentQueryID,
     resultId,
     resultsNavigate,
@@ -383,7 +402,7 @@ const ResultList: FC<ResultListProps> = ({ children, hidden = false }) => {
     constraintText,
   }), [
     userSaves, activateNotes, activeEntityFilters, activeFilters, availableFilters,
-    handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, currentQueryID,
+    handleFilter, handleClearAllFilters, visibleResultIds, isLookup, isPathfinder, lookupCategory, pathFilterState, pathRankState, currentQueryID,
     resultId, resultsNavigate, navigateToEvidenceView,
     effectiveNodeId, effectiveNodeLabel, nodeDescription,
     presetTypeObject, resultsComplete, isLoading, scoreWeights,

@@ -74,13 +74,11 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(({
       aria-controls={`tabpanel-${heading}`}
       tabIndex={isActive ? 0 : -1}
       id={`tab-${heading}`}
+      data-tooltip-id={dataTooltipId || undefined}
     >
       <span className={styles.heading}>{headingOverride || heading}</span>
       {tooltipIcon && (
-        <span 
-          data-tooltip-id={dataTooltipId} 
-          className={styles.iconContainer}
-        >
+        <span className={styles.iconContainer}>
           {tooltipIcon}
         </span>
       )}

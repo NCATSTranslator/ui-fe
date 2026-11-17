@@ -133,12 +133,12 @@ const CanvasObjectList: FC<CanvasObjectListProps> = ({
               {activeTab === 'annotations' && (
                 <>
                   <ObjectListEmptyState
-                    entityLabel="annotations"
+                    entityLabel="notes"
                     allCount={allAnnotations.length}
                     filteredCount={sortedAnnotations.length}
                     searchTerm={searchTerm}
                     onAdd={onAddAnnotation}
-                    addLabel="Add Annotation"
+                    addLabel="Add Note"
                   />
                   {sortedAnnotations.length > 0 && (
                     <ObjectListBody menuId={annotationMenuId} onCloseMenu={handleCloseMenu}>

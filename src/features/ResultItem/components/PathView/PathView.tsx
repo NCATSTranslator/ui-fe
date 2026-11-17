@@ -7,7 +7,7 @@ import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?reac
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
 import { getIsPathFiltered, getPathsPerPage, getFormattedPaths } from '@/features/ResultItem/utils/utilities';
-import { PathFilterState, ResultNode, Path, ResultEdge } from '@/features/ResultList/types/results';
+import { PathFilterState, PathRankState, ResultNode, Path, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { createHoverStore, HoverContext } from '@/features/ResultItem/hooks/hoverHooks';
 import { getResultSetById, getPathsByIds } from '@/features/ResultList/slices/resultsSlice';
@@ -29,6 +29,7 @@ export const ResultItemIdContext = createContext<string | undefined>(undefined);
 // descendants aren't invalidated by a fresh literal on every render.
 const NO_FILTERS: Filter[] = [];
 const NO_PATH_FILTER_STATE: PathFilterState = {};
+const NO_PATH_RANK_STATE: PathRankState = {};
 
 interface PathViewProps {
   active: boolean;
@@ -41,6 +42,8 @@ interface PathViewProps {
   isLookup?: boolean;
   pathArray: string[] | Path[];
   pathFilterState?: PathFilterState;
+  /** Filter rank per path ID; paths are shown best rank first. */
+  pathRankState?: PathRankState;
   pk: string;
   /** Applied to the wrapper around the paths, which excludes the pagination and the excluded-paths toggle, so callers can scroll the paths alone. */
   pathsWrapperClassName?: string;
@@ -62,6 +65,7 @@ const PathView: FC<PathViewProps> = ({
   isLookup = false,
   pathArray,
   pathFilterState = NO_PATH_FILTER_STATE,
+  pathRankState = NO_PATH_RANK_STATE,
   pk,
   pathsWrapperClassName,
   resultId: resultItemId,
@@ -77,7 +81,7 @@ const PathView: FC<PathViewProps> = ({
   const resultSet = useSelector(getResultSetById(pk));
   const paths = useMemo(() => isStringArray(pathArray) ?  getPathsByIds(resultSet, pathArray) : pathArray, [pathArray, resultSet]);
   const pathsPerPage: number = getPathsPerPage(prefs);
-  const formattedPaths = useMemo(() => getFormattedPaths(resultSet, paths, pathFilterState), [paths, pathFilterState, resultSet]);
+  const formattedPaths = useMemo(() => getFormattedPaths(resultSet, paths, pathFilterState, pathRankState), [paths, pathFilterState, pathRankState, resultSet]);
   const [itemOffset, setItemOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [hoverStore] = useState(createHoverStore);
@@ -140,9 +144,6 @@ const PathView: FC<PathViewProps> = ({
 
   return(
     <div className={styles.pathView}>
-      <Tooltip id='paths-label-tooltip'>
-        <span className={styles.inferredLabelTooltip}>Paths are composed of stepwise links for each result's key concepts. Select a path to explore publications and additional resources supporting each relationship.</span>
-      </Tooltip>
       {
         (!inModal && !isLookup) && 
         <div className={styles.header}>

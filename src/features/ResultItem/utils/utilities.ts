@@ -1,5 +1,5 @@
 import { getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, EntityTags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
+import { Path, ResultSet, PathFilterState, PathRankState, EntityTags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
@@ -44,42 +44,66 @@ export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
 
 /**
  * Compresses paths and sorts them.
- * Paths are sorted via sortArrayByIndirect (length, filter state).
+ * Paths are sorted via sortArrayByIndirect (filter rank, length, filter state).
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {(string|Path)[]} paths - An array of paths or path IDs
  * @param {PathFilterState} pathFilterState - The current Path Filter State
+ * @param {PathRankState} [pathRankState] - The current filter rank of each path
  * @returns {Path[]} - The array of properly formatted paths.
  */
-export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState) => {
+export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | Path)[] | undefined, pathFilterState: PathFilterState, pathRankState?: PathRankState) => {
   if(!paths || !resultSet)
     return [];
 
   const newPaths = getCompressedPaths(resultSet, paths);
 
-  return sortArrayByIndirect(resultSet, newPaths, pathFilterState);
+  return sortArrayByIndirect(resultSet, newPaths, pathFilterState, pathRankState);
+}
+
+/**
+ * Returns the filter rank of a path; lower ranks meet more of the active filter criteria.
+ * The members of a compressed path are ranked together as one row, so they normally share a rank; if they
+ * differ the best one is used. A path with no recorded rank is unranked (0).
+ *
+ * @param {Path} path - A Path object, possibly compressed.
+ * @param {PathRankState} [pathRankState] - The current filter rank of each path
+ * @returns {number} - The path's rank.
+ */
+export const getPathRank = (path: Path, pathRankState?: PathRankState): number => {
+  if(!pathRankState)
+    return 0;
+  if(path.compressedIDs && path.compressedIDs.length > 0)
+    return Math.min(...path.compressedIDs.map(id => pathRankState[id] ?? 0));
+  return (path.id && pathRankState[path.id]) || 0;
 }
 
 /**
  * Sorts paths for top-level display. Priority order:
- * 1. Shorter subgraph (fewer hops) before longer
- * 2. Non-filtered before filtered
+ * 1. Better filter rank (meets more of the active filter criteria) before worse
+ * 2. Shorter subgraph (fewer hops) before longer
+ * 3. Non-filtered before filtered
  *
  * @param {ResultSet} resultSet - ResultSet Object.
  * @param {Path[]} paths - An array of paths.
  * @param {PathFilterState} [pathFilterState] - Optional filter state for tiebreaking.
+ * @param {PathRankState} [pathRankState] - Optional filter rank of each path; without it only length and filter state apply.
  * @returns {Path[]} - The sorted array of paths.
  */
-export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], pathFilterState?: PathFilterState) => {
+export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], pathFilterState?: PathFilterState, pathRankState?: PathRankState) => {
   if(!resultSet)
     return paths;
   return cloneDeep(paths).sort((a, b) => {
+      const rankDiff = getPathRank(a, pathRankState) - getPathRank(b, pathRankState);
+      if(rankDiff !== 0)
+        return rankDiff;
       const lengthDiff = (a.subgraph?.length ?? 0) - (b.subgraph?.length ?? 0);
       if(lengthDiff !== 0)
         return lengthDiff;
       if(pathFilterState) {
-        const aFiltered = (a?.id && pathFilterState[a.id] === true) ? 1 : 0;
-        const bFiltered = (b?.id && pathFilterState[b.id] === true) ? 1 : 0;
+        // A compressed path only counts as filtered when all of its members are.
+        const aFiltered = getIsPathFiltered(a, pathFilterState) ? 1 : 0;
+        const bFiltered = getIsPathFiltered(b, pathFilterState) ? 1 : 0;
         return aFiltered - bFiltered;
       }
       return 0;

@@ -53,7 +53,7 @@ const AddMenu: FC<AddMenuProps> = ({ onAddObject, onAddAnnotation }) => {
             className={styles.addMenuItem}
             onClick={handleAddAnnotation}
           >
-            Annotation
+            Note
           </button>
         </div>
       )}
