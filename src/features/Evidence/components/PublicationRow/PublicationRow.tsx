@@ -5,7 +5,7 @@ import { getNodeById } from "@/features/ResultList/slices/resultsSlice";
 import styles from "@/features/Evidence/components/PublicationsTable/PublicationsTable.module.scss";
 import EmphasizeWord from "@/features/Core/components/EmphasizeWord/EmphasizeWord";
 import { joinClasses } from "@/features/Core/utils/classHelpers";
-import { findPublicationOnEdge } from "@/features/Evidence/utils/utilities";
+import { getPublicationEdgeSupport } from "@/features/Evidence/utils/utilities";
 import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
 
 const buildSupportSnippet = (
@@ -33,17 +33,17 @@ const PublicationRow: FC<{
   selectedEdge: ResultEdge | null;
 }> = ({ pub, resultSet, selectedEdge }) => {
   const getSupportTextOrSnippet = useCallback((): ReactNode | string => {
-    const matchingEdgePub = pub?.id && selectedEdge ? findPublicationOnEdge(pub.id, selectedEdge) : false;
-
-    if(!matchingEdgePub || matchingEdgePub.support === null)
-      return pub.snippet ?? 'No snippet available.';
+    // Same support-vs-snippet decision as the CSV export (getPublicationDisplaySnippet).
+    const support = getPublicationEdgeSupport(pub, selectedEdge);
+    if (!support)
+      return pub.snippet || 'No snippet available.';
 
     // Just log a warning if no object or subject positions are found for the publication, 
     // we still want to use the provided support text if it's available.
-    if(matchingEdgePub.support.object === null || matchingEdgePub.support.subject === null)
-      console.warn('No object or subject positions found for publication:', pub, 'on edge:', selectedEdge, 'support:', matchingEdgePub.support);
+    if (support.object === null || support.subject === null)
+      console.warn('No object or subject positions found for publication:', pub, 'on edge:', selectedEdge, 'support:', support);
 
-    return buildSupportSnippet(resultSet, selectedEdge, matchingEdgePub.support);
+    return buildSupportSnippet(resultSet, selectedEdge, support);
   }, [pub, resultSet, selectedEdge]);
 
   return (
