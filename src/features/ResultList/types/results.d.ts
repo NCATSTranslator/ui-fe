@@ -1,5 +1,6 @@
 import { PublicationObject, KnowledgeLevel, EvidenceCountsContainer, TrialObject,
   EdgeProvenance, ProvenanceCatalogEntry, PublicationSupport } from "@/features/Evidence/types/evidence";
+import { Filter } from "@/features/ResultFiltering/types/filters";
 
 export type ResultSet = {
   status: "error" | "running" | "success",
@@ -63,6 +64,8 @@ export interface Path {
 export type PathRank = {
   path: Path;
   rank: number;
+  /** The inclusion filters this path meets, recorded even when another filter excludes the path. */
+  matched: Set<Filter>;
 }
 
 export type EdgeRank = {
@@ -232,7 +235,10 @@ export type PathFilterState = {
   [pid: string]: boolean;
 }
 
-/** Filter rank per path ID; lower ranks meet more of the active filter criteria. Paths not listed are unranked (0). */
+/**
+ * Filter rank per path ID; lower ranks meet more of the active filter criteria. Paths not listed are unranked (0).
+ * A path's rank is that of the row it is displayed in: paths that compress into one row share the row's rank.
+ */
 export type PathRankState = {
   [pid: string]: number;
 }

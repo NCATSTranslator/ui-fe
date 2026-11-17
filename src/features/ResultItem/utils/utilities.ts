@@ -63,7 +63,8 @@ export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | 
 
 /**
  * Returns the filter rank of a path; lower ranks meet more of the active filter criteria.
- * A compressed path takes the best rank among its members, and a path with no recorded rank is unranked (0).
+ * The members of a compressed path are ranked together as one row, so they normally share a rank; if they
+ * differ the best one is used. A path with no recorded rank is unranked (0).
  *
  * @param {Path} path - A Path object, possibly compressed.
  * @param {PathRankState} [pathRankState] - The current filter rank of each path
@@ -100,8 +101,9 @@ export const sortArrayByIndirect = (resultSet: ResultSet | null, paths: Path[], 
       if(lengthDiff !== 0)
         return lengthDiff;
       if(pathFilterState) {
-        const aFiltered = (a?.id && pathFilterState[a.id] === true) ? 1 : 0;
-        const bFiltered = (b?.id && pathFilterState[b.id] === true) ? 1 : 0;
+        // A compressed path only counts as filtered when all of its members are.
+        const aFiltered = getIsPathFiltered(a, pathFilterState) ? 1 : 0;
+        const bFiltered = getIsPathFiltered(b, pathFilterState) ? 1 : 0;
         return aFiltered - bFiltered;
       }
       return 0;

@@ -150,7 +150,7 @@ const updateResultPathRanks = (
  * - Matching the term against node names, curies, descriptions, and edge predicates
  *
  * During traversal, the function also mutates the corresponding `PathRank` objects to influence relevance scoring:
- * - Decreases rank for each matching element on a path
+ * - Decreases rank once, and records the filter as met, when any element on a path matches
  * - Sets an excluding rank when the term is an exclusion and the path matches
  *
  * @param resultSet - The full ResultSet containing all nodes, edges, and paths
@@ -196,8 +196,8 @@ export const findStringMatch = (
       path: Path,
       pathRank: PathRank,
       isExclusion: boolean): boolean {
-    // Look for matches on any node/edge of this path, accumulating rank
-    // for every matching element (not just the first).
+    // Look for matches on any node/edge of this path. Every element is checked so
+    // match logging stays complete, but the filter is only credited once per path.
     for (let i = 0; i < path.subgraph.length; i++) {
       const item = isNodeIndex(i)
         ? getNodeById(resultSet, path.subgraph[i])
@@ -210,6 +210,8 @@ export const findStringMatch = (
         pathRank.rank = FILTERING_CONSTANTS.WEIGHT.HEAVY;
         return false;
       }
+      if (pathRank.matched.has(filter)) continue;
+      pathRank.matched.add(filter);
       pathRank.rank += -1 * FILTERING_CONSTANTS.WEIGHT.LIGHT;
     }
 
@@ -226,7 +228,7 @@ export interface ApplyFiltersOutcome {
   results: Result[];
   updatedEntityFilters: string[];
   updatedPathFilterState: PathFilterState;
-  /** Rank of every path evaluated against the filters; drives the display order of a result's paths. */
+  /** Rank of the display row of every path evaluated against the filters; drives the display order of a result's paths. */
   updatedPathRankState: PathRankState;
   updatedEdgeFilterState: EdgeFilterState;
   facetCounts: {
@@ -288,12 +290,11 @@ export const applyFilters = (
     [...rankMap.values()].some(rank => rank.rank < 0)
   );
 
-  const pathRankState: PathRankState = {};
   for (const pathRanks of resultPathRanks.values()) {
     _updatePathFilterState(pathFilterState, [...pathRanks.values()], unrankedIsFiltered);
-    _updatePathRankState(pathRankState, [...pathRanks.values()]);
   }
   _propagateExclusionAcrossCompressionGroups(summary, resultsAfterFacets, pathFilters, pathFilterState);
+  const pathRankState = _genPathRankState(summary, results, resultPathRanks, pathFilterState);
 
   const finalResults = _filterResultsByPathFilterState(resultsAfterFacets, pathFilterState);
   const updatedEdgeFilterState = _genEdgeFilterState(summary, finalResults, edgeFilters);
@@ -624,18 +625,6 @@ function _updatePathFilterState(pathFilterState: {[key: string]: boolean},
   }
 }
 
-/**
- * Records the rank of each path so the order the ranks imply survives past filtering.
- * @param {PathRankState} pathRankState - The map of path IDs to ranks to update.
- * @param {PathRank[]} pathRanks - The ranked paths to record.
- */
-function _updatePathRankState(pathRankState: PathRankState, pathRanks: PathRank[]) {
-  for (const pathRank of pathRanks) {
-    const pid = pathRank.path.id;
-    if (pid) pathRankState[pid] = pathRank.rank;
-  }
-}
-
 /** Groups a result's paths by node sequence; paths sharing a sequence form a compression group. */
 const _groupPathsBySequence = (resultSet: ResultSet, result: Result): Path[][] => {
   const groups = new Map<string, Path[]>();
@@ -650,6 +639,53 @@ const _groupPathsBySequence = (resultSet: ResultSet, result: Result): Path[][] =
   }
   return [...groups.values()];
 };
+
+/**
+ * Ranks a display row: the paths of one compression group, shown merged as a single row.
+ * A row is credited once for each inclusion filter that any of its members meets, because the
+ * row shows every member's content, including that of members a filter excluded. A row whose
+ * members are all filtered out is hidden, so it takes an excluding rank.
+ */
+const _rankRow = (members: Path[], pathRanks: Map<string, PathRank>, pathFilterState: PathFilterState): number => {
+  const isVisible = members.some((path) => path.id && !pathFilterState[path.id]);
+  if (!isVisible) return FILTERING_CONSTANTS.WEIGHT.HEAVY;
+
+  const matched = new Set<Filter>();
+  for (const path of members) {
+    const pathRank = path.id ? pathRanks.get(path.id) : undefined;
+    for (const filter of pathRank?.matched ?? []) matched.add(filter);
+  }
+  // Subtracting rather than negating keeps an unmatched row at 0 instead of -0.
+  return 0 - matched.size * FILTERING_CONSTANTS.WEIGHT.LIGHT;
+};
+
+/**
+ * Builds the rank of every evaluated path's display row, so the order the ranks imply survives past filtering.
+ * @param {ResultSet} resultSet - The full dataset used for path lookup.
+ * @param {Result[]} results - The results whose paths were ranked.
+ * @param {Map<string, Map<string, PathRank>>} resultPathRanks - A map of result IDs to their path rank structures.
+ * @param {PathFilterState} pathFilterState - The final map of path IDs to their filtered state.
+ * @returns {PathRankState} A map of path IDs to the rank of the row each path is displayed in.
+ */
+function _genPathRankState(
+  resultSet: ResultSet,
+  results: Result[],
+  resultPathRanks: Map<string, Map<string, PathRank>>,
+  pathFilterState: PathFilterState
+): PathRankState {
+  const pathRankState: PathRankState = {};
+  for (const result of results) {
+    const pathRanks = resultPathRanks.get(result.id);
+    if (!pathRanks) continue;
+    for (const members of _groupPathsBySequence(resultSet, result)) {
+      const rank = _rankRow(members, pathRanks, pathFilterState);
+      for (const path of members) {
+        if (path.id) pathRankState[path.id] = rank;
+      }
+    }
+  }
+  return pathRankState;
+}
 
 /** Marks every path in a compression group as filtered out. */
 const _excludeGroup = (members: Path[], pathFilterState: PathFilterState): void => {

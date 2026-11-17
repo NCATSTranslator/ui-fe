@@ -201,7 +201,7 @@ export const pivotSort = <T>(arr: T[], pivot: number, compare: (a: T, b: T) => n
 }
 
 export const makePathRank = (path: Path): PathRank => {
-  return { rank: 0, path: path };
+  return { rank: 0, path: path, matched: new Set() };
 }
 
 interface PathRankingContext {
@@ -311,6 +311,8 @@ export const updatePathRanks = (resultSet: ResultSet, path: Path, pathRank: Path
     } else {
       otherFilters.push(ftr);
     }
+    // Recorded before any exclusion applies, since an excluded path still shows in a compressed row.
+    if (!ftr.negated && ftr.id && path.tags[ftr.id] !== undefined) pathRank.matched.add(ftr);
   }
 
   const ctx: PathRankingContext = {

@@ -367,7 +367,7 @@ describe('findStringMatch — path content (include)', () => {
     expect(run(rs, result, makeEntityFilter('interacts_with'))).toBe(true);
   });
 
-  it('accumulates rank for every matching element in a path (not just the first)', () => {
+  it('credits a path once per text filter, however many of its elements match', () => {
     // Path P1 has three matching elements: node, edge predicate, node.
     const rs = makeResultSet({
       nodes: {
@@ -381,9 +381,12 @@ describe('findStringMatch — path content (include)', () => {
     const result = makeResult({ drug_name: 'Aspirin', paths: ['P1'] });
     const ranks = buildPathRanks(rs, result);
 
-    expect(findStringMatch(rs, result, makeEntityFilter('cox'), ranks)).toBe(true);
-    // three matches → three LIGHT decrements
-    expect(ranks.get('P1')!.rank).toBe(-3 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+    const filter = makeEntityFilter('cox');
+
+    expect(findStringMatch(rs, result, filter, ranks)).toBe(true);
+    // three matching elements, but one filter → one LIGHT decrement
+    expect(ranks.get('P1')!.rank).toBe(-1 * FILTERING_CONSTANTS.WEIGHT.LIGHT);
+    expect([...ranks.get('P1')!.matched]).toEqual([filter]);
   });
 });
 
@@ -1012,25 +1015,32 @@ describe('path ranks order the displayed paths', () => {
     ]);
   });
 
-  it('orders paths by text-search matches too', () => {
+  it('orders paths by how many text filters they match, not how many elements match', () => {
     const rs = makeResultSet({
       nodes: {
         n1: makeNode('n1', { names: ['Start'] }),
-        n2: makeNode('n2', { names: ['COX1'] }),
+        n2: makeNode('n2', { names: ['COX1 kinase'] }),
         n3: makeNode('n3', { names: ['COX2'] }),
         n4: makeNode('n4', { names: ['COX3'] }),
       },
       edges: { e1: makeEdge('e1'), e2: makeEdge('e2'), e3: makeEdge('e3') },
       paths: {
-        oneMatch: makePath('oneMatch', ['n1', 'e1', 'n2']),
-        twoMatches: makePath('twoMatches', ['n1', 'e2', 'n3', 'e3', 'n4']),
+        twoElementsOneFilter: makePath('twoElementsOneFilter', ['n1', 'e2', 'n3', 'e3', 'n4']),
+        oneElementTwoFilters: makePath('oneElementTwoFilters', ['n1', 'e1', 'n2', 'e3', 'n4']),
       },
     });
-    const result = makeResult({ drug_name: 'Drug', paths: ['oneMatch', 'twoMatches'] });
-    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, [makeEntityFilter('cox')]);
+    const result = makeResult({ drug_name: 'Drug', paths: ['twoElementsOneFilter', 'oneElementTwoFilters'] });
+    const cox = runApplyFilters(rs, result, [makeEntityFilter('cox')]);
 
-    expect(updatedPathRankState).toEqual({ oneMatch: -1 * LIGHT, twoMatches: -2 * LIGHT });
-    expect(ids(getFormattedPaths(rs, result.paths, updatedPathFilterState, updatedPathRankState))).toEqual(['twoMatches', 'oneMatch']);
+    expect(cox.updatedPathRankState).toEqual({ twoElementsOneFilter: -1 * LIGHT, oneElementTwoFilters: -1 * LIGHT });
+
+    const both = runApplyFilters(rs, result, [makeEntityFilter('cox'), makeEntityFilter('kinase')]);
+
+    expect(both.updatedPathRankState).toEqual({ twoElementsOneFilter: -1 * LIGHT, oneElementTwoFilters: -2 * LIGHT });
+    expect(ids(getFormattedPaths(rs, result.paths, both.updatedPathFilterState, both.updatedPathRankState))).toEqual([
+      'oneElementTwoFilters',
+      'twoElementsOneFilter',
+    ]);
   });
 
   it('orders by length alone when there are no ranks', () => {
@@ -1044,7 +1054,7 @@ describe('path ranks order the displayed paths', () => {
     ]);
   });
 
-  it('ranks a compressed path by its best member', () => {
+  it('reads a compressed path\'s rank from its members', () => {
     const { rs } = buildCompressedFixture();
     const [compressedPath] = getCompressedPaths(rs, ['P1', 'P2', 'P3']);
 
@@ -1052,5 +1062,102 @@ describe('path ranks order the displayed paths', () => {
     expect(getPathRank(compressedPath, { P1: FILTERING_CONSTANTS.WEIGHT.HEAVY, P2: -2 * LIGHT, P3: -1 * LIGHT })).toBe(-2 * LIGHT);
     expect(getPathRank(getPathById(rs, 'P4')!, { P4: -1 * LIGHT })).toBe(-1 * LIGHT);
     expect(getPathRank(getPathById(rs, 'P4')!, {})).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// applyFilters — a compressed row is ranked on what its members show together
+// ---------------------------------------------------------------------------
+
+describe('applyFilters — compressed row ranking', () => {
+  const LIGHT = FILTERING_CONSTANTS.WEIGHT.LIGHT;
+  const HEAVY = FILTERING_CONSTANTS.WEIGHT.HEAVY;
+  const EV_CLINICAL = 'p/ev/clinical';
+  const clinical = pathTags({ [EV_CLINICAL]: 'Clinical Trials' });
+
+  /**
+   * drug → disease-a → target is two paths that compress into one row: one whose first edge
+   * matches "affects" but has no clinical evidence, and one with clinical evidence that does not
+   * match "affects". The other rows are single paths.
+   */
+  const buildRowFixture = () => {
+    const rs = makeResultSet({
+      nodes: Object.fromEntries(['drug', 'disease-a', 'disease-b', 'disease-c', 'target'].map((id) => [id, makeNode(id)])),
+      edges: {
+        affectsA: makeEdge('affectsA', { predicate: 'affects' }),
+        trialsA: makeEdge('trialsA', { predicate: 'in clinical trials for' }),
+        trialsB: makeEdge('trialsB', { predicate: 'in clinical trials for' }),
+        affectsC: makeEdge('affectsC', { predicate: 'affects' }),
+        subclassA: makeEdge('subclassA', { predicate: 'subclass of' }),
+        subclassB: makeEdge('subclassB', { predicate: 'subclass of' }),
+        subclassC: makeEdge('subclassC', { predicate: 'subclass of' }),
+      },
+      paths: {
+        single: makePath('single', ['drug', 'trialsB', 'disease-b', 'subclassB', 'target'], { tags: clinical }),
+        rowAffects: makePath('rowAffects', ['drug', 'affectsA', 'disease-a', 'subclassA', 'target']),
+        rowTrials: makePath('rowTrials', ['drug', 'trialsA', 'disease-a', 'subclassA', 'target'], { tags: clinical }),
+        noTrials: makePath('noTrials', ['drug', 'affectsC', 'disease-c', 'subclassC', 'target']),
+      },
+      tags: resultSetTags({ [EV_CLINICAL]: 'Clinical Trials' }),
+    });
+    const result = makeResult({ drug_name: 'Drug', paths: ['single', 'rowAffects', 'rowTrials', 'noTrials'] });
+    return { rs, result };
+  };
+
+  const filters = () => [makeEntityFilter('affects'), makeEntityFilter('subclass'), makePathFilter(EV_CLINICAL)];
+  const ids = (paths: Path[]) => paths.map((path) => path.id);
+
+  it('credits a row for every filter any of its members meets, including members a filter excluded', () => {
+    const { rs, result } = buildRowFixture();
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, filters());
+
+    // rowAffects is excluded for lacking clinical evidence, but its edge still shows in the row.
+    expect(updatedPathFilterState.rowAffects).toBe(true);
+    expect(updatedPathFilterState.rowTrials).toBe(false);
+    expect(updatedPathRankState.rowAffects).toBe(-3 * LIGHT);
+    expect(updatedPathRankState.rowTrials).toBe(-3 * LIGHT);
+    expect(updatedPathRankState.single).toBe(-2 * LIGHT);
+  });
+
+  it('shows the row meeting all the filters ahead of a single path meeting fewer', () => {
+    const { rs, result } = buildRowFixture();
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, filters());
+
+    expect(ids(getFormattedPaths(rs, result.paths, updatedPathFilterState, updatedPathRankState))).toEqual([
+      'rowAffects',
+      'single',
+      'noTrials',
+    ]);
+  });
+
+  it('credits a row once per filter even when several members meet it', () => {
+    const { rs, result } = buildRowFixture();
+    const { updatedPathRankState } = runApplyFilters(rs, result, [makeEntityFilter('subclass')]);
+
+    expect(updatedPathRankState.rowAffects).toBe(-1 * LIGHT);
+    expect(updatedPathRankState.rowTrials).toBe(-1 * LIGHT);
+  });
+
+  it('gives a row whose members are all filtered out an excluding rank', () => {
+    const { rs, result } = buildRowFixture();
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, result, filters());
+
+    expect(updatedPathFilterState.noTrials).toBe(true);
+    expect(updatedPathRankState.noTrials).toBe(HEAVY);
+  });
+
+  it('does not push a visible row down a tie because its first member is filtered out', () => {
+    const { rs, result } = buildRowFixture();
+    const rowFirst = makeResult({ drug_name: 'Drug', paths: ['rowAffects', 'rowTrials', 'single'] });
+    const { updatedPathFilterState, updatedPathRankState } = runApplyFilters(rs, rowFirst, [
+      makeEntityFilter('subclass'),
+      makePathFilter(EV_CLINICAL),
+    ]);
+
+    // Both rows meet both filters and are the same length, so backend order decides.
+    expect(updatedPathRankState.rowTrials).toBe(updatedPathRankState.single);
+    expect(updatedPathFilterState.rowAffects).toBe(true);
+    expect(ids(getFormattedPaths(rs, rowFirst.paths, updatedPathFilterState, updatedPathRankState))).toEqual(['rowAffects', 'single']);
+    expect(result.paths).toHaveLength(4);
   });
 });
