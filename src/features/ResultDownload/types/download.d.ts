@@ -36,7 +36,7 @@ export interface ExportedEdge {
   predicate_url: string;
   knowledge_level: KnowledgeLevel;
   provenance: Provenance[];
-  publications: { [key: string]: { id: string; support: PublicationSupport }[] };
+  publications: { [key: string]: { id: string; support: PublicationSupport | null }[] };
   trials: string[];
   aras: string[];
   description?: string | null;

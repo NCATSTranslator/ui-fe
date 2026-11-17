@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from 'react';
 import Tabs from '@/features/Core/components/Tabs/Tabs';
 import Tab from '@/features/Core/components/Tabs/Tab';
 import PublicationsTable from '@/features/Evidence/components/PublicationsTable/PublicationsTable';
@@ -6,20 +6,21 @@ import ClinicalTrialsTable from '@/features/Evidence/components/ClinicalTrialsTa
 import MiscEvidenceTable from '@/features/Evidence/components/MiscEvidenceTable/MiscEvidenceTable';
 import KnowledgeSourcesTable from '@/features/Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
-import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence.d';
+import { PublicationObject, TableState } from '@/features/Evidence/types/evidence.d';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { Preferences } from '@/features/UserAuth/types/user';
 import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
+import { EdgeEvidence, hasEdgeEvidence } from '@/features/Evidence/utils/utilities';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
-  publications: PublicationObject[];
+  /** Evidence as displayed: misc links deduplicated, sources grouped by name. */
+  evidence: EdgeEvidence;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
-  clinicalTrials: TrialObject[];
-  miscEvidence: PublicationObject[];
-  sources: Provenance[];
+  pubTableState: TableState;
+  updatePubTableState: (updates: Partial<TableState>) => void;
   selectedEdge: ResultEdge | null;
   pk: string;
   prefs: Preferences;
@@ -41,20 +42,19 @@ const getTabCount = (tab: EvidenceTabName, counts: EvidenceCounts): number => {
 const tabHasData = (tab: EvidenceTabName, counts: EvidenceCounts): boolean =>
   getTabCount(tab, counts) > 0;
 
-const getFirstTabHeading = (publicationsLength: number, clinicalTrialsLength: number, miscEvidenceLength: number): EvidenceTabName => {
-  if (publicationsLength > 0) return 'Publications';
-  if (clinicalTrialsLength > 0) return 'Clinical Trials';
-  if (miscEvidenceLength > 0) return 'Miscellaneous';
+const getFirstTabHeading = (counts: EvidenceCounts): EvidenceTabName => {
+  if (counts.pubs > 0) return 'Publications';
+  if (counts.cts > 0) return 'Clinical Trials';
+  if (counts.misc > 0) return 'Miscellaneous';
   return 'Knowledge Sources';
 };
 
 const EvidenceTabs: FC<EvidenceTabsProps> = ({
   isOpen,
-  publications,
+  evidence,
   setPublications,
-  clinicalTrials,
-  miscEvidence,
-  sources,
+  pubTableState,
+  updatePubTableState,
   selectedEdge,
   pk,
   prefs,
@@ -64,29 +64,26 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
   const initialTabRef = useRef(initialTab);
   initialTabRef.current = initialTab;
 
-  const hasEvidence = useMemo(() => 
-    clinicalTrials.length > 0 || publications.length > 0 || sources.length > 0,
-    [clinicalTrials.length, publications.length, sources.length]
-  );
+  const { publications, clinicalTrials, miscEvidence, sources } = evidence;
+
+  const dataCounts: EvidenceCounts = {
+    pubs: publications.length,
+    cts: clinicalTrials.length,
+    misc: miscEvidence.length,
+    sources: sources.length,
+  };
+  const dataCountsRef = useRef(dataCounts);
+  dataCountsRef.current = dataCounts;
+
+  const hasEvidence = hasEdgeEvidence(evidence);
 
   const [activeTab, setActiveTab] = useState<EvidenceTabName>('Publications');
-  const firstTabHeading: EvidenceTabName = useMemo(() => 
-    getFirstTabHeading(publications.length, clinicalTrials.length, miscEvidence.length)
-  , [publications.length, clinicalTrials.length, miscEvidence.length]);
+  const firstTabHeading = getFirstTabHeading(dataCounts);
   const firstTabHeadingRef = useRef(firstTabHeading);
   firstTabHeadingRef.current = firstTabHeading;
   const handleTabSelection = (tabName: string) => {
     setActiveTab(tabName as EvidenceTabName);
   };
-
-  const dataCounts = useMemo(() => ({
-    pubs: publications.length,
-    cts: clinicalTrials.length,
-    misc: miscEvidence.length,
-    sources: sources.length,
-  }), [publications.length, clinicalTrials.length, miscEvidence.length, sources.length]);
-  const dataCountsRef = useRef(dataCounts);
-  dataCountsRef.current = dataCounts;
 
   // Tracked on onTabClick rather than handleTabSelection: Tabs also calls the
   // latter when it resets an invalid active tab, which is not a user choice.
@@ -130,6 +127,8 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
             selectedEdge={selectedEdge}
             publications={publications}
             setPublications={setPublications}
+            tableState={pubTableState}
+            updateTableState={updatePubTableState}
             pk={pk}
             prefs={prefs}
             isOpen={isOpen}

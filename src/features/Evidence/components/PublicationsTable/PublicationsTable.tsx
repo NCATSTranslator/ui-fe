@@ -3,11 +3,11 @@ import LoadingBar from "@/features/Core/components/LoadingBar/LoadingBar";
 import styles from './PublicationsTable.module.scss';
 import { handleEvidenceSort } from "@/features/Evidence/utils/evidenceModalFunctions";
 import { Preferences } from '@/features/UserAuth/types/user';
-import { PublicationObject, EvidenceSortState } from '@/features/Evidence/types/evidence';
+import { PublicationObject, EvidenceSortState, TableState } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
-import { usePubmedDataFetch, usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
+import { usePubmedDataFetch } from '@/features/Evidence/hooks/evidenceHooks';
 import { usePagination } from '@/features/Core/hooks/usePagination';
 import { getInitItemsPerPage } from '@/features/Evidence/utils/evidenceModalFunctions';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/features/Evidence/hooks/evidenceHooks';
@@ -22,7 +22,10 @@ interface PublicationsTableProps {
   prefs: Preferences;
   publications: PublicationObject[];
   selectedEdge: ResultEdge | null;
-  setPublications: Dispatch<SetStateAction<PublicationObject[]>>
+  setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
+  /** Owned by the evidence view, which also needs the loading flag for the download button. */
+  tableState: TableState;
+  updateTableState: (updates: Partial<TableState>) => void;
 }
 
 // Maps a sortable column to its sort type when the column is already active vs. inactive.
@@ -40,10 +43,11 @@ const PublicationsTable: FC<PublicationsTableProps> = ({
   publications,
   selectedEdge,
   setPublications,
+  tableState: state,
+  updateTableState: updateState,
 }) => {
   const resultSet = useSelector(getResultSetById(pk));
   const selectedEdgeId = selectedEdge?.id || null;
-  const [state, updateState] = usePubTableState();
   const {
     itemsPerPage,
     currentPage,

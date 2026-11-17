@@ -16,6 +16,7 @@ import {
 } from "@/features/ResultDownload/types/download.d";
 import { exportToCSV } from "@/features/Core/utils/csvUtils";
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
+import { getLocalDateStamp } from '@/features/Core/utils/dateHelpers';
 import { replaceTreatWithImpact } from '@/features/Core/utils/stringFormatters';
 import { displayScore } from "@/features/ResultList/utils/scoring";
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
@@ -335,7 +336,7 @@ export const exportToJSON = (exportedResultSet: ExportedResultSet): string => {
  * Generates a filename for the export
  */
 export const generateFilename = (scope: DownloadScope, format: ExportFormat, queryTitle?: string): string => {
-  const date = new Date().toISOString().split('T')[0];
+  const date = getLocalDateStamp();
   const sanitizedTitle = queryTitle ? sanitizeForFilename(queryTitle) : '';
   const titlePart = sanitizedTitle ? `${sanitizedTitle}` : '';
   return `${titlePart}_${scope}_results_${date}.${format}`;

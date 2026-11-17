@@ -83,6 +83,7 @@ GA4 `page_view`.
 | `evidence_tab_changed` | `tab_name`, `item_count` | User clicks a tab. Programmatic resets excluded | `Evidence/components/EvidenceTabs/EvidenceTabs.tsx` |
 | `evidence_link_clicked` | `link_type`, `link_domain` | An outbound publication, source, or trial link is clicked or middle-clicked | `Evidence/components/PublicationRow/PublicationRow.tsx`, `Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable.tsx`, `NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink.tsx` |
 | `evidence_paginated` | `tab_name`, `page_number` | Paging within an evidence table. `tab_name` uses the same names as `evidence_tab_changed` | `Evidence/components/TablePaginationControls/TablePaginationControls.tsx` |
+| `evidence_downloaded` | `export_format` (`csv`), `item_count` | The evidence file for an edge is produced. `item_count` is the number of evidence rows across all types | `Evidence/utils/evidenceExportUtils.ts` |
 | `graph_view_opened` | `node_count`, `edge_count` | Graph tab becomes visible with data. Once per opening | `ResultGraphView/components/GraphView/GraphView.tsx` |
 | `graph_node_selected` | `node_curie`, `node_category` | A graph node is clicked | `ResultGraphView/components/GraphView/GraphView.tsx` |
 | `graph_layout_changed` | `layout_name` | A layout button is clicked | `ResultGraphView/components/GraphLayoutButtons/GraphLayoutButtons.tsx` |

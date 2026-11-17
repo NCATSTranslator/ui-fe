@@ -10,18 +10,38 @@ import {
   CSVValue,
 } from "@/features/ResultDownload/types/download.d";
 
+const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
+const NEEDS_QUOTING = /[,";\n\r]/;
+
 /**
  * Escapes a value for CSV format
  */
 export const escapeCSVValue = (value: CSVValue): string => {
   if (value === null || value === undefined) return '';
-  const stringValue = String(value);
-  // If value contains comma, quote, newline, or semicolon, wrap in quotes and escape quotes
-  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes(';')) {
+  // Spreadsheet apps run text cells that start with these characters as
+  // formulas. A leading apostrophe makes them plain text. Numbers are left
+  // alone so negative values stay numeric.
+  const stringValue = typeof value === 'string' && FORMULA_TRIGGER.test(value)
+    ? `'${value}`
+    : String(value);
+  // If value contains a comma, quote, line break, or semicolon, wrap in quotes and escape quotes
+  if (NEEDS_QUOTING.test(stringValue)) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
   return stringValue;
 };
+
+/**
+ * Serializes rows to CSV text: a header line, then one escaped line per row,
+ * with columns in the order given by `headers`.
+ */
+export const rowsToCSV = <T extends { [K in keyof T]: CSVValue }>(
+  headers: readonly (keyof T & string)[],
+  rows: readonly T[],
+): string => [
+  headers.join(','),
+  ...rows.map(row => headers.map(header => escapeCSVValue(row[header])).join(',')),
+].join('\n');
 
 
 /**
@@ -369,22 +389,8 @@ const CSV_HEADERS: (keyof DenormalizedCSVRow)[] = [
  * Converts the exported result set to denormalized CSV format
  * One row per edge in each path
  */
-export const exportToCSV = (exportedResultSet: ExportedResultSet): string => {
-  const rows: string[] = [];
-
-  // Add data header row
-  rows.push(CSV_HEADERS.join(','));
-
-  // Generate denormalized rows for each result
-  exportedResultSet.results.forEach(result => {
-    const denormalizedRows = generateDenormalizedRows(result.id, exportedResultSet);
-    denormalizedRows.forEach(csvRow => {
-      const rowValues = CSV_HEADERS.map(header => {
-        return escapeCSVValue(csvRow[header]);
-      });
-      rows.push(rowValues.join(','));
-    });
-  });
-
-  return rows.join('\n');
-};
+export const exportToCSV = (exportedResultSet: ExportedResultSet): string =>
+  rowsToCSV(
+    CSV_HEADERS,
+    exportedResultSet.results.flatMap(result => generateDenormalizedRows(result.id, exportedResultSet)),
+  );
