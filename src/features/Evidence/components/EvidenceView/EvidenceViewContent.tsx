@@ -1,10 +1,13 @@
-import { FC, KeyboardEvent } from 'react';
+import { FC, KeyboardEvent, useMemo } from 'react';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
+import EvidenceDownloadButton from '@/features/Evidence/components/EvidenceDownloadButton/EvidenceDownloadButton';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { EvidenceViewContentProps } from '@/features/Evidence/hooks/useEvidenceView';
+import { usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
+import { buildEdgeEvidence, hasEdgeEvidence } from '@/features/Evidence/utils/utilities';
 import styles from './EvidenceView.module.scss';
 
 const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
@@ -29,6 +32,17 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   initialTab,
   isCanvasOnlyMode,
 }) => {
+  // Derived once here so the tabs, the tables, and the download all use the same lists.
+  const evidence = useMemo(
+    () => buildEdgeEvidence({ publications, clinicalTrials, miscEvidence, sources }),
+    [publications, clinicalTrials, miscEvidence, sources],
+  );
+
+  // The publications table fills in titles, journals, dates, and snippets from
+  // PubMed after it mounts. Its state lives here so the download can wait for that.
+  const [pubTableState, updatePubTableState] = usePubTableState();
+  const isPublicationDataLoading = publications.length > 0 && pubTableState.isLoading;
+
   const handleToggleSeenKeyDown = (event: KeyboardEvent<HTMLParagraphElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -38,7 +52,16 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
 
   return (
   <div className={styles.evidenceViewWrapper}>
-    <ViewTopBar />
+    <ViewTopBar
+      actions={hasEdgeEvidence(evidence) ? (
+        <EvidenceDownloadButton
+          evidence={evidence}
+          edgeLabel={edgeLabel}
+          selectedEdge={selectedEdge}
+          isLoading={isPublicationDataLoading}
+        />
+      ) : undefined}
+    />
     <FilteredOutWrapper
       isFilteredOut={isFilteredOut}
       message="This path has been filtered out."
@@ -84,11 +107,10 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
         )}
         <EvidenceTabs
           isOpen={true}
-          publications={publications}
+          evidence={evidence}
           setPublications={setPublications}
-          clinicalTrials={clinicalTrials}
-          miscEvidence={miscEvidence}
-          sources={sources}
+          pubTableState={pubTableState}
+          updatePubTableState={updatePubTableState}
           selectedEdge={selectedEdge}
           pk={pk}
           prefs={prefs}

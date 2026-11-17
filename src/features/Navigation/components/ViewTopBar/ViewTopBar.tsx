@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 import styles from './ViewTopBar.module.scss';
 import Breadcrumbs from '@/features/Navigation/components/Breadcrumbs/Breadcrumbs';
 import Button from '@/features/Core/components/Button/Button';
@@ -13,7 +13,12 @@ import { useOptionalResultListContext } from '@/features/ResultList/context/Resu
 import { useMatches } from 'react-router-dom';
 import { BreadcrumbHandle } from '@/features/Navigation/types/navigation.d';
 
-const ViewTopBar: FC = () => {
+interface ViewTopBarProps {
+  /** View-specific actions, rendered to the left of the share button. */
+  actions?: ReactNode;
+}
+
+const ViewTopBar: FC<ViewTopBarProps> = ({ actions }) => {
   const resultListContext = useOptionalResultListContext();
 
   const config = useSelector(currentConfig);
@@ -46,10 +51,10 @@ const ViewTopBar: FC = () => {
   return (
     <div className={styles.viewTopBar}>
       <Breadcrumbs hideBaseView={false} />
-      {resultListContext && (
+      {(resultListContext || actions) && (
         <div className={styles.buttons}>
           {
-            showAddToProjectButton &&
+            resultListContext && showAddToProjectButton &&
             <Button
               variant="secondary"
               handleClick={handleAddToProject}
@@ -61,7 +66,10 @@ const ViewTopBar: FC = () => {
               Project
             </Button>
           }
-          <Button variant="secondary" handleClick={() => resultListContext.setShareModalOpen(true)} className={styles.shareButton} small iconLeft={<ShareIcon/>} iconOnly/>
+          {actions}
+          {resultListContext && (
+            <Button variant="secondary" handleClick={() => resultListContext.setShareModalOpen(true)} className={styles.shareButton} small iconLeft={<ShareIcon/>} iconOnly/>
+          )}
         </div>
       )}
     </div>

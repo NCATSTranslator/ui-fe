@@ -1,49 +1,18 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import InfoIcon from '@/assets/icons/status/Alerts/Info.svg?react';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
-import { Provenance } from '@/features/Evidence/types/evidence.d';
 import evidenceStyles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import styles from './KnowledgeSourcesTable.module.scss';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { getEvidenceLinkTrackingProps } from '@/features/Analytics/utils/linkTracking';
+import { GroupedSource } from '@/features/Evidence/utils/utilities';
 
 interface KnowledgeSourcesTableProps {
-  sources: Provenance[];
+  /** Already grouped by name (see groupSourcesByName). */
+  sources: GroupedSource[];
 }
 
-type GroupedSource = {
-  name: string;
-  wiki?: string;
-  urls: string[];
-};
-
 const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
-  const groupedSources = useMemo<GroupedSource[]>(() => {
-    const byName = new Map<string, GroupedSource>();
-
-    sources.forEach((src) => {
-      const key = src.name?.trim();
-      if (!key) return;
-
-      const existing = byName.get(key);
-      if (!existing) {
-        byName.set(key, {
-          name: key,
-          wiki: src.wiki || undefined,
-          urls: src.url ? [src.url] : [],
-        });
-        return;
-      }
-
-      if (!existing.wiki && src.wiki) existing.wiki = src.wiki;
-      if (src.url && !existing.urls.includes(src.url)) {
-        existing.urls.push(src.url);
-      }
-    });
-
-    return Array.from(byName.values());
-  }, [sources]);
-
   return (
     <div className={joinClasses("table-body", styles.tableBody, evidenceStyles.tableBody, evidenceStyles.sources)}>
       <div className={joinClasses("table-head", evidenceStyles.tableHead)}>
@@ -51,7 +20,7 @@ const KnowledgeSourcesTable: FC<KnowledgeSourcesTableProps> = ({ sources }) => {
         <div className={joinClasses("head", evidenceStyles.head)}>Rationale</div>
       </div>
       <div className={joinClasses("table-items", evidenceStyles.tableItems, "scrollable")}>
-        {groupedSources.map((src, i) => {
+        {sources.map((src, i) => {
           const sourceKey = `${src.name}-${i}`;
           const tooltipId = `source-tooltip-${sourceKey}`;
 

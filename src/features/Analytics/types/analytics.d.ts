@@ -143,6 +143,10 @@ export interface AnalyticsEventMap {
     tab_name?: string;
     page_number: number;
   };
+  evidence_downloaded: {
+    export_format: ExportFormat;
+    item_count?: number;
+  };
   graph_view_opened: {
     node_count?: number;
     edge_count?: number;
