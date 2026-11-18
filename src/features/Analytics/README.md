@@ -80,7 +80,7 @@ GA4 `page_view`.
 
 | Event | Parameters | Fires when | Source |
 | --- | --- | --- | --- |
-| `evidence_opened` | `evidence_source`, `path_rank`, `path_length` | A path (`path`), graph edge (`graph_edge`), or predicate (`graph_predicate`) opens the evidence view | `ResultItem/components/PathContainer/PathContainer.tsx`, `ResultGraphView/components/GraphView/GraphView.tsx` |
+| `evidence_opened` | `evidence_source`, `path_rank`, `path_length` | A path (`path`), graph edge (`graph_edge`), or predicate (`graph_predicate`) opens the evidence view | `ResultItem/components/PathContainer/PathEvidenceButton.tsx`, `ResultGraphView/components/GraphView/GraphView.tsx` |
 | `evidence_tab_changed` | `tab_name`, `item_count` | User clicks a tab. Programmatic resets excluded | `Evidence/components/EvidenceTabs/EvidenceTabs.tsx` |
 | `evidence_link_clicked` | `link_type`, `link_domain` | An outbound publication, source, or trial link is clicked or middle-clicked | `Evidence/components/PublicationRow/PublicationRow.tsx`, `Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable.tsx`, `NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink.tsx` |
 | `evidence_paginated` | `tab_name`, `page_number` | Paging within an evidence table. `tab_name` uses the same names as `evidence_tab_changed` | `Evidence/components/TablePaginationControls/TablePaginationControls.tsx` |
