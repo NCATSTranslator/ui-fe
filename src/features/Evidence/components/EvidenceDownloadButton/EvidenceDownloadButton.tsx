@@ -1,5 +1,6 @@
-import { FC } from 'react';
+import { FC, useId } from 'react';
 import Button from '@/features/Core/components/Button/Button';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ExportIcon from '@/assets/icons/buttons/Export.svg?react';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { downloadEdgeEvidence } from '@/features/Evidence/utils/evidenceExportUtils';
@@ -21,19 +22,32 @@ const EvidenceDownloadButton: FC<EvidenceDownloadButtonProps> = ({
   selectedEdge,
   isLoading = false,
 }) => {
-  const label = isLoading ? 'Download available once evidence finishes loading' : 'Download all evidence';
+  const label = isLoading ? 'Download available once evidence finishes loading' : 'Download this evidence';
+
+  const tooltipId = useId();
+
+  const handleDownload = () => {
+    if (isLoading) return;
+    downloadEdgeEvidence(evidence, selectedEdge, edgeLabel);
+  };
 
   return (
-    <Button
-      handleClick={() => downloadEdgeEvidence(evidence, selectedEdge, edgeLabel)}
-      ariaLabel={label}
-      title={label}
-      variant="secondary"
-      iconLeft={<ExportIcon className={styles.icon} />}
-      iconOnly
-      small
-      disabled={isLoading}
-    />
+    <>
+      {/* aria-disabled rather than disabled, so the tooltip can still explain why while loading. */}
+      <Button
+        handleClick={handleDownload}
+        ariaLabel={label}
+        dataTooltipId={tooltipId}
+        variant="secondary"
+        iconLeft={<ExportIcon className={styles.icon} />}
+        iconOnly
+        small
+        aria-disabled={isLoading}
+      />
+      <Tooltip id={tooltipId}>
+        <span>{label}</span>
+      </Tooltip>
+    </>
   );
 };
 
