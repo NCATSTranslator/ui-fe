@@ -60,7 +60,9 @@
       }
     }
   }
-  &:disabled {
+  // aria-disabled buttons stay focusable, so they need the same look without the attribute.
+  &:disabled,
+  &[aria-disabled="true"] {
     background-color: $lightGray;
     color: $midDarkGray;
     cursor: default;

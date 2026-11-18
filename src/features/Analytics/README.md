@@ -70,6 +70,7 @@ GA4 `page_view`.
 | `results_sorted` | `sort_field`, `sort_direction` | A column header is clicked | `ResultList/components/ResultListTableHead/ResultListTableHead.tsx` |
 | `results_paginated` | `page_number`, `items_per_page` | User changes page. Resets and shared-result page jumps excluded | `ResultList/hooks/useResultPagination.ts` |
 | `result_opened` | `result_curie`, `result_rank`, `path_count` | A result row is opened | `ResultItem/components/ResultItem/ResultItem.tsx` |
+| `view_stepped` | `entity_type` (`result`/`path`), `step_direction` (`previous`/`next`), `result_rank` or `path_rank` | A top bar arrow steps to the neighbouring result (result detail view) or path (evidence view). The rank is that of the item stepped to. `result_opened` and `evidence_opened` do not also fire | `ResultItem/hooks/useResultStepper.ts`, `Evidence/hooks/usePathStepper.ts` |
 | `result_bookmarked` | `result_curie` | Bookmark save succeeds | `ResultItem/hooks/useBookmarkItem.ts` |
 | `result_unbookmarked` | `result_curie` | Bookmark delete succeeds, after confirmation | `ResultItem/hooks/useBookmarkItem.ts` |
 | `result_note_saved` | — | Notes modal closes after at least one save | `ResultItem/components/NotesModal/NotesModal.tsx` |
@@ -79,7 +80,7 @@ GA4 `page_view`.
 
 | Event | Parameters | Fires when | Source |
 | --- | --- | --- | --- |
-| `evidence_opened` | `evidence_source`, `path_rank`, `path_length` | A path (`path`), graph edge (`graph_edge`), or predicate (`graph_predicate`) opens the evidence view | `ResultItem/components/PathContainer/PathContainer.tsx`, `ResultGraphView/components/GraphView/GraphView.tsx` |
+| `evidence_opened` | `evidence_source`, `path_rank`, `path_length` | A path (`path`), graph edge (`graph_edge`), or predicate (`graph_predicate`) opens the evidence view | `ResultItem/components/PathContainer/PathEvidenceButton.tsx`, `ResultGraphView/components/GraphView/GraphView.tsx` |
 | `evidence_tab_changed` | `tab_name`, `item_count` | User clicks a tab. Programmatic resets excluded | `Evidence/components/EvidenceTabs/EvidenceTabs.tsx` |
 | `evidence_link_clicked` | `link_type`, `link_domain` | An outbound publication, source, or trial link is clicked or middle-clicked | `Evidence/components/PublicationRow/PublicationRow.tsx`, `Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable.tsx`, `NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink.tsx` |
 | `evidence_paginated` | `tab_name`, `page_number` | Paging within an evidence table. `tab_name` uses the same names as `evidence_tab_changed` | `Evidence/components/TablePaginationControls/TablePaginationControls.tsx` |
@@ -133,7 +134,7 @@ not logins.
 ## Parameter reference
 
 String parameters become GA4 **custom dimensions**, numeric ones become
-**custom metrics**. GA4 allows 50 of each; this taxonomy uses 32 and 13.
+**custom metrics**. GA4 allows 50 of each; this taxonomy uses 33 and 13.
 
 **Dimensions** — `query_type`, `query_template_id`, `query_template_label`,
 `subject_category`, `object_category`, `constraint_category`, `project_attached`,
@@ -142,7 +143,7 @@ String parameters become GA4 **custom dimensions**, numeric ones become
 `link_domain`, `layout_name`, `node_category`, `node_curie`, `entity_type`,
 `pane_state`, `add_method`, `element_type`, `history_action`, `annotation_type`,
 `export_format`, `download_scope`, `move_method`, `filter_type`, `filter_value`,
-`auth_provider`
+`auth_provider`, `step_direction`
 
 **Metrics** — `result_count`, `load_ms`, `page_number`, `items_per_page`,
 `result_rank`, `path_count`, `path_rank`, `path_length`, `item_count`, `node_count`,
@@ -152,8 +153,8 @@ String parameters become GA4 **custom dimensions**, numeric ones become
 `STANDARD` counts.
 
 Each dimension holds one kind of value. `node_category` is always a biolink
-category; what kind of thing was added to a canvas goes in `entity_type` instead,
-so the two never mix in one report.
+category; what kind of thing was added to a canvas or stepped to goes in
+`entity_type` instead, so the two never mix in one report.
 
 ### Key events (GA4 conversions)
 

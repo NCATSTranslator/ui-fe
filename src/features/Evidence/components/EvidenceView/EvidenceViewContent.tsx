@@ -2,6 +2,7 @@ import { FC, KeyboardEvent, useMemo } from 'react';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
 import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
 import EvidenceDownloadButton from '@/features/Evidence/components/EvidenceDownloadButton/EvidenceDownloadButton';
+import PathStepper from '@/features/Evidence/components/PathStepper/PathStepper';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
@@ -53,6 +54,8 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   return (
   <div className={styles.evidenceViewWrapper}>
     <ViewTopBar
+      // Only an edge reached through a result's path has neighbouring paths to step to.
+      stepper={path && !isCanvasOnlyMode ? <PathStepper /> : undefined}
       actions={hasEdgeEvidence(evidence) ? (
         <EvidenceDownloadButton
           evidence={evidence}

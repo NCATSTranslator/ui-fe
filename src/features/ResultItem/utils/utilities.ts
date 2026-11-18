@@ -7,6 +7,10 @@ import { Filter } from "@/features/ResultFiltering/types/filters";
 import { FILTERING_CONSTANTS, getTagFamily } from "@/features/ResultFiltering/utils/filterFunctions";
 import { Preferences } from "@/features/UserAuth/types/user";
 
+// Stable default for callers with no path filter state, so memoized path lists
+// aren't invalidated by a fresh literal on every render.
+export const NO_PATH_FILTER_STATE: PathFilterState = {};
+
 /**
  * Extracts ARA tag names from a ResultItem's tags object.
  *
@@ -59,6 +63,29 @@ export const getFormattedPaths = (resultSet: ResultSet | null, paths: (string | 
   const newPaths = getCompressedPaths(resultSet, paths);
 
   return sortArrayByIndirect(resultSet, newPaths, pathFilterState, pathRankState);
+}
+
+/**
+ * Splits a result's formatted paths into those its path list shows. Excluded (filtered) paths
+ * are left out unless they are being shown, and are counted either way.
+ *
+ * @param {Path[]} formattedPaths - The result's paths in display order, see getFormattedPaths.
+ * @param {PathFilterState} pathFilterState - The current Path Filter State
+ * @param {boolean} showHiddenPaths - Whether excluded paths are currently being shown.
+ * @returns The paths to show, in order, and the number of excluded paths.
+ */
+export const getVisiblePaths = (formattedPaths: Path[], pathFilterState: PathFilterState, showHiddenPaths: boolean) => {
+  let filteredPathCount = 0;
+  const unfilteredPaths = formattedPaths.filter(path => {
+    const isFiltered = getIsPathFiltered(path, pathFilterState);
+    if (isFiltered) filteredPathCount++;
+    return !isFiltered;
+  });
+
+  return {
+    visiblePaths: showHiddenPaths ? formattedPaths : unfilteredPaths,
+    filteredPathCount,
+  };
 }
 
 /**
