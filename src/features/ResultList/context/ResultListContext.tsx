@@ -14,6 +14,7 @@ export interface ResultListContextValue {
   availableFilters: { [key: string]: Filter };
   handleFilter: (filter: Filter) => void;
   handleClearAllFilters: () => void;
+  /** The results that pass the active filters. Iterates in the list's display order, which result stepping relies on. */
   visibleResultIds: Set<string>;
   handleBookmarkError: (operation: BookmarkOperation) => void;
   isLookup: boolean;

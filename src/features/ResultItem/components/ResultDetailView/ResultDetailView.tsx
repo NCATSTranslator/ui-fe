@@ -18,12 +18,13 @@ import ResultItemName from '@/features/ResultItem/components/ResultItemName/Resu
 import ResultItemInteractables from '@/features/ResultItem/components/ResultItemInteractables/ResultItemInteractables';
 import BookmarkConfirmationModal from '@/features/ResultItem/components/BookmarkConfirmationModal/BookmarkConfirmationModal';
 import { currentUser } from '@/features/UserAuth/slices/userSlice';
-import { getNodeDescription, getResultRoleTagsString } from '@/features/ResultItem/utils/utilities';
+import { getNodeDescription, getResultRoleTagsString, NO_PATH_FILTER_STATE } from '@/features/ResultItem/utils/utilities';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { useResultCanvasDrag } from '@/features/ResultItem/hooks/useResultCanvasDrag';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
+import ResultStepper from '@/features/ResultItem/components/ResultStepper/ResultStepper';
 import ResultEvidenceSummary from '@/features/ResultItem/components/ResultEvidenceSummary/ResultEvidenceSummary';
 
 const ResultDetailView: FC = () => {
@@ -115,7 +116,7 @@ const ResultDetailView: FC = () => {
 
   return (
     <div className={styles.resultDetailView}>
-      <ViewTopBar/>
+      <ViewTopBar actions={<ResultStepper resultId={result.id} />} />
       <FilteredOutWrapper
         isFilteredOut={isFilteredOut}
         message="This result has been filtered out."
@@ -186,7 +187,7 @@ const ResultDetailView: FC = () => {
           graph={graph}
           graphActive={graphActive}
           pathCount={pathCount}
-          pathFilterState={pathFilterState ?? {}}
+          pathFilterState={pathFilterState ?? NO_PATH_FILTER_STATE}
           pathRankState={pathRankState}
           pk={pk ?? ''}
           result={result}
