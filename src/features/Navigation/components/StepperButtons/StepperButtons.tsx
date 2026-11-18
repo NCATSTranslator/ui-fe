@@ -1,5 +1,6 @@
 import { FC, useEffect, useId, useRef } from 'react';
 import Button from '@/features/Core/components/Button/Button';
+import DividerVert from '@/features/Core/components/DividerVert/DividerVert';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ArrowUpIcon from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
 import ArrowDownIcon from '@/assets/icons/directional/Arrows/Arrow Down.svg?react';
@@ -21,7 +22,8 @@ interface StepperButtonsProps {
 let pendingFocus: { itemLabel: string; direction: StepDirection } | null = null;
 
 /**
- * Up and down arrows that step to the item before or after the one being viewed.
+ * Up and down arrows that step to the item before or after the one being viewed,
+ * joined into a single segmented control.
  *
  * An arrow with nowhere to go is aria-disabled rather than disabled, so it stays focusable
  * and stepping onto the first or last item does not throw keyboard focus out of the control.
@@ -63,6 +65,7 @@ const StepperButtons: FC<StepperButtonsProps> = ({ itemLabel, onPrevious, onNext
         small
         aria-disabled={!onPrevious}
       />
+      <DividerVert className={styles.divider} />
       <Button
         ref={nextRef}
         handleClick={() => step('next', onNext)}

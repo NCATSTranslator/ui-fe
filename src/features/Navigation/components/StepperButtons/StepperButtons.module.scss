@@ -1,8 +1,22 @@
 @use "@/assets/styles/variables" as *;
 
-// The pair sits closer together than the other top bar buttons so it reads as one control.
+// The two arrows share one pill so they read as a single control.
 .stepperButtons {
   display: flex;
   align-items: center;
-  gap: $xxs;
+  background-color: $lightGray;
+  border-radius: $largeBorderRadius;
+  button {
+    padding: $xxs $xs;
+    border-radius: 0;
+    &:first-of-type {
+      border-radius: $largeBorderRadius 0 0 $largeBorderRadius;
+    }
+    &:last-of-type {
+      border-radius: 0 $largeBorderRadius $largeBorderRadius 0;
+    }
+  }
+  .divider {
+    height: $s;
+  }
 }
