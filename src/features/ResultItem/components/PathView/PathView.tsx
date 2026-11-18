@@ -6,7 +6,7 @@ import ChevLeft from '@/assets/icons/directional/Chevron/Chevron Left.svg?react'
 import ChevRight from '@/assets/icons/directional/Chevron/Chevron Right.svg?react';
 import Information from '@/assets/icons/status/Alerts/Info.svg?react';
 import { isStringArray } from '@/features/Core/utils/resultHelpers';
-import { getIsPathFiltered, getPathsPerPage, getFormattedPaths } from '@/features/ResultItem/utils/utilities';
+import { getVisiblePaths, getPathsPerPage, getFormattedPaths, NO_PATH_FILTER_STATE } from '@/features/ResultItem/utils/utilities';
 import { PathFilterState, PathRankState, ResultNode, Path, ResultEdge } from '@/features/ResultList/types/results';
 import { Filter } from '@/features/ResultFiltering/types/filters';
 import { createHoverStore, HoverContext } from '@/features/ResultItem/hooks/hoverHooks';
@@ -28,7 +28,6 @@ export const ResultItemIdContext = createContext<string | undefined>(undefined);
 // Stable defaults for callers that have nothing to filter by, so memoized
 // descendants aren't invalidated by a fresh literal on every render.
 const NO_FILTERS: Filter[] = [];
-const NO_PATH_FILTER_STATE: PathFilterState = {};
 const NO_PATH_RANK_STATE: PathRankState = {};
 
 interface PathViewProps {
@@ -104,18 +103,10 @@ const PathView: FC<PathViewProps> = ({
     return map;
   }, [formattedPaths]);
   
-  const { formattedPathsToDisplay, filteredPathCount } = useMemo(() => {
-    let filteredCount = 0;
-    const visible = formattedPaths.filter(path => {
-      const isFiltered = getIsPathFiltered(path, pathFilterState);
-      if (isFiltered) filteredCount++;
-      return !isFiltered;
-    });
-    return {
-      formattedPathsToDisplay: showHiddenPaths ? formattedPaths : visible,
-      filteredPathCount: filteredCount
-    };
-  }, [formattedPaths, pathFilterState, showHiddenPaths]);
+  const { visiblePaths: formattedPathsToDisplay, filteredPathCount } = useMemo(
+    () => getVisiblePaths(formattedPaths, pathFilterState, showHiddenPaths),
+    [formattedPaths, pathFilterState, showHiddenPaths]
+  );
 
   const hasFilteredPaths = filteredPathCount > 0;
   const pageCount = Math.ceil(formattedPathsToDisplay.length / pathsPerPage);
