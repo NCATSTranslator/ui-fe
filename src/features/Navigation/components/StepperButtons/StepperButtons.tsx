@@ -1,5 +1,6 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useId, useRef } from 'react';
 import Button from '@/features/Core/components/Button/Button';
+import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ArrowUpIcon from '@/assets/icons/directional/Arrows/Arrow Up.svg?react';
 import ArrowDownIcon from '@/assets/icons/directional/Arrows/Arrow Down.svg?react';
 import type { StepDirection } from '@/features/Analytics/types/analytics.d';
@@ -30,6 +31,10 @@ const StepperButtons: FC<StepperButtonsProps> = ({ itemLabel, onPrevious, onNext
   const nextRef = useRef<HTMLButtonElement>(null);
   const previousLabel = `Previous ${itemLabel}`;
   const nextLabel = `Next ${itemLabel}`;
+  // Generated because a hidden view can keep its own stepper mounted beside the visible one.
+  const tooltipId = useId();
+  const previousTooltipId = `${tooltipId}-previous`;
+  const nextTooltipId = `${tooltipId}-next`;
 
   // Runs after every render so both the remounted and the surviving buttons settle the request.
   useEffect(() => {
@@ -51,7 +56,7 @@ const StepperButtons: FC<StepperButtonsProps> = ({ itemLabel, onPrevious, onNext
         ref={previousRef}
         handleClick={() => step('previous', onPrevious)}
         ariaLabel={previousLabel}
-        title={previousLabel}
+        dataTooltipId={previousTooltipId}
         variant="secondary"
         iconLeft={<ArrowUpIcon />}
         iconOnly
@@ -62,13 +67,19 @@ const StepperButtons: FC<StepperButtonsProps> = ({ itemLabel, onPrevious, onNext
         ref={nextRef}
         handleClick={() => step('next', onNext)}
         ariaLabel={nextLabel}
-        title={nextLabel}
+        dataTooltipId={nextTooltipId}
         variant="secondary"
         iconLeft={<ArrowDownIcon />}
         iconOnly
         small
         aria-disabled={!onNext}
       />
+      <Tooltip id={previousTooltipId}>
+        <span>{previousLabel}</span>
+      </Tooltip>
+      <Tooltip id={nextTooltipId}>
+        <span>{nextLabel}</span>
+      </Tooltip>
     </div>
   );
 };
