@@ -7,6 +7,9 @@ import cloneDeep from "lodash/cloneDeep";
 import chunk from "lodash/chunk";
 import isEqual from "lodash/isEqual";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { currentConfig } from "@/features/UserAuth/slices/userSlice";
+import { fetchPublicationMetadata, PUBLICATION_METADATA_FALLBACK_ENDPOINT } from "@/features/Evidence/utils/publicationMetadataApi";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
   flattenPublicationObject, flattenTrialObject, formatEvidenceEdgeLabel } from "@/features/Evidence/utils/utilities";
 import { isPublication } from "@/features/Evidence/types/checkers";
@@ -15,8 +18,6 @@ import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/u
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
 
 const QUERY_AMOUNT = 200;
-const PUBMED_API_URL = 'https://docmetadata.transltr.io/publications';
-const REQUEST_ID = '26394fad-bfd9-4e32-bb90-ef9d5044f593';
 export const DEFAULT_ITEMS_PER_PAGE = 5;
 
 interface FetchState {
@@ -30,13 +31,6 @@ interface FetchState {
 const INITIAL_FETCH_STATE: FetchState = {
   isFetching: false, hasFetched: false, processedCount: 0, totalItems: 0, metadata: {},
 };
-
-interface FetchResult {
-  success: boolean;
-  data?: PubmedMetadataMap;
-  error?: string;
-  processedCount: number;
-}
 
 export interface UsePubmedDataFetchProps {
   isOpen: boolean;
@@ -85,40 +79,8 @@ const applySortingAndUpdate = (
   }
 };
 
-const fetchChunk = async (ids: string[], signal: AbortSignal): Promise<FetchResult> => {
-  try {
-    const res = await fetch(
-      `${PUBMED_API_URL}?pubids=${ids.join(',')}&request_id=${REQUEST_ID}`,
-      { signal }
-    );
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    return {
-      success: true,
-      data: data.results || {},
-      processedCount: Object.keys(data.results || {}).length,
-    };
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn('Fetch aborted for chunk:', ids, 'error:', error);
-      return { success: false, error: 'aborted', processedCount: 0 };
-    }
-
-    console.warn('Error fetching PubMed data for chunk:', ids, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      processedCount: 0
-    };
-  }
-};
-
 const processChunks = async (
+  endpoint: string,
   chunksArr: string[][],
   signal: AbortSignal,
   isOpen: boolean,
@@ -133,7 +95,7 @@ const processChunks = async (
       break;
     }
 
-    const result = await fetchChunk(idChunk, signal);
+    const result = await fetchPublicationMetadata(endpoint, idChunk, signal);
 
     if (result.success && result.data) {
       accumulatedMetadata = { ...accumulatedMetadata, ...result.data };
@@ -185,6 +147,17 @@ const resetFetchState = (
 };
 
 /**
+ * Custom hook that resolves the publication metadata endpoint from config, falling back to the
+ * production annotator when config is unavailable or does not supply one.
+ *
+ * @returns {string} The publication metadata endpoint URL.
+ */
+export const usePublicationMetadataEndpoint = (): string => {
+  const config = useSelector(currentConfig);
+  return config?.publication_metadata?.endpoint || PUBLICATION_METADATA_FALLBACK_ENDPOINT;
+};
+
+/**
  * Custom hook to fetch and manage PubMed metadata for publications in the evidence modal.
  *
  * @param {UsePubmedDataFetchProps} props - Props containing modal state and callbacks.
@@ -203,6 +176,7 @@ export const usePubmedDataFetch = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const didMountRef = useRef(false);
   const prevSelectedEdgeId = useRef<string | null>(null);
+  const metadataEndpoint = usePublicationMetadataEndpoint();
 
   const fetchPubmedData = useCallback(async (
     chunksArr: string[][],
@@ -210,8 +184,11 @@ export const usePubmedDataFetch = ({
   ): Promise<void> => {
     if (!isOpen || chunksArr.length === 0) return;
 
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
+    // A newer run supersedes any run still in flight, so that run can never be orphaned un-aborted.
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const signal = controller.signal;
 
     setFetchState(prev => ({
       ...prev, isFetching: true, hasFetched: false, processedCount: 0, totalItems, metadata: {},
@@ -219,7 +196,11 @@ export const usePubmedDataFetch = ({
 
     try {
       const { accumulatedMetadata, totalProcessed } =
-        await processChunks(chunksArr, signal, isOpen, setFetchState);
+        await processChunks(metadataEndpoint, chunksArr, signal, isOpen, setFetchState);
+
+      // An aborted run belongs to a previous edge (or an unmounted modal); whoever aborted it owns
+      // the state from here, so its partial metadata must not be written over the current one.
+      if (signal.aborted) return;
 
       if (totalProcessed > 0) {
         const dataToSort = insertAdditionalPubmedData(accumulatedMetadata, publications);
@@ -233,16 +214,17 @@ export const usePubmedDataFetch = ({
       setFetchState(prev => ({ ...prev, isFetching: false, hasFetched: true }));
       updateState({ isLoading: false });
     } finally {
-      abortControllerRef.current = null;
+      // Only clear our own controller: a newer run may already have replaced it.
+      if (abortControllerRef.current === controller) abortControllerRef.current = null;
     }
-  }, [isOpen, publications, prefs, setPublications, updateState]);
+  }, [isOpen, publications, prefs, setPublications, updateState, metadataEndpoint]);
 
   useEffect(() => {
     return () => { if (abortControllerRef.current) abortControllerRef.current.abort(); };
   }, []);
 
   useQuery({
-    queryKey: ['pubmedMetadata', processedEvidenceIDs, fetchState.isFetching, publications.length],
+    queryKey: ['pubmedMetadata', metadataEndpoint, processedEvidenceIDs, fetchState.isFetching, publications.length],
     queryFn: () => fetchPubmedData(processedEvidenceIDs, publications.length),
     enabled: fetchState.isFetching && processedEvidenceIDs.length > 0,
     retry: 1,
