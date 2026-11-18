@@ -3,9 +3,9 @@ import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ResearchMultiple from '@/assets/icons/queries/Evidence.svg?react';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import { Path } from '@/features/ResultList/types/results';
-import { useLastViewedPath, useResultItemId } from '@/features/ResultItem/hooks/resultHooks';
+import { useResultItemId } from '@/features/ResultItem/hooks/resultHooks';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
-import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
+import { useOpenPathEvidence } from '@/features/ResultItem/hooks/useOpenPathEvidence';
 import { useCanvasContextMenu } from '@/features/Canvas/components/CanvasContextMenu/CanvasContextMenu';
 import { useResultEntityDraggable } from '@/features/DragAndDrop/hooks/useResultEntityDraggable';
 import dragStyles from '@/features/DragAndDrop/styles/resultEntityDraggable.module.scss';
@@ -24,8 +24,7 @@ interface PathEvidenceButtonProps {
  * Also serves as the path's drag handle and canvas context-menu target.
  */
 const PathEvidenceButton: FC<PathEvidenceButtonProps> = ({ path, pk, pathIndex, styles }) => {
-  const { setLastViewedPathID } = useLastViewedPath();
-  const { navigateToEvidenceView } = useResultListContext();
+  const openPathEvidence = useOpenPathEvidence();
   const { openMenu, canvasEnabled } = useCanvasContextMenu();
   const itemResultId = useResultItemId();
   const generatedId = useId();
@@ -60,22 +59,14 @@ const PathEvidenceButton: FC<PathEvidenceButtonProps> = ({ path, pk, pathIndex, 
   }, [path, pk, openMenu]);
 
   const handlePathClick = useCallback(() => {
-    if (!path?.id) return;
-    setLastViewedPathID(path.id);
-    if (!path.subgraph[1]) return;
+    if (!openPathEvidence({ path, pathNumber, resultId: itemResultId })) return;
     trackEvent('evidence_opened', {
       evidence_source: 'path',
-      path_rank: pathNumber ?? undefined,
+      path_rank: pathNumber,
       // subgraph alternates node/edge, so its length encodes hops.
       path_length: path.subgraph.length,
     });
-    navigateToEvidenceView({
-      edgeId: path.subgraph[1],
-      path,
-      pathKey: pathNumber?.toString() ?? "-",
-      resultId: itemResultId,
-    });
-  }, [path, pathNumber, itemResultId, setLastViewedPathID, navigateToEvidenceView]);
+  }, [path, pathNumber, itemResultId, openPathEvidence]);
 
   return (
     <>
