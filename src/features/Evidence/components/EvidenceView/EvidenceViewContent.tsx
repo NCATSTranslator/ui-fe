@@ -54,20 +54,16 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   return (
   <div className={styles.evidenceViewWrapper}>
     <ViewTopBar
-      actions={
-        <>
-          {hasEdgeEvidence(evidence) && (
-            <EvidenceDownloadButton
-              evidence={evidence}
-              edgeLabel={edgeLabel}
-              selectedEdge={selectedEdge}
-              isLoading={isPublicationDataLoading}
-            />
-          )}
-          {/* Only an edge reached through a result's path has neighbouring paths to step to. */}
-          {path && !isCanvasOnlyMode && <PathStepper />}
-        </>
-      }
+      // Only an edge reached through a result's path has neighbouring paths to step to.
+      stepper={path && !isCanvasOnlyMode ? <PathStepper /> : undefined}
+      actions={hasEdgeEvidence(evidence) ? (
+        <EvidenceDownloadButton
+          evidence={evidence}
+          edgeLabel={edgeLabel}
+          selectedEdge={selectedEdge}
+          isLoading={isPublicationDataLoading}
+        />
+      ) : undefined}
     />
     <FilteredOutWrapper
       isFilteredOut={isFilteredOut}

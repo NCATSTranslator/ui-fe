@@ -116,7 +116,7 @@ const ResultDetailView: FC = () => {
 
   return (
     <div className={styles.resultDetailView}>
-      <ViewTopBar actions={<ResultStepper resultId={result.id} />} />
+      <ViewTopBar stepper={<ResultStepper resultId={result.id} />} />
       <FilteredOutWrapper
         isFilteredOut={isFilteredOut}
         message="This result has been filtered out."
