@@ -1,0 +1,8 @@
+@use "@/assets/styles/variables" as *;
+
+// The pair sits closer together than the other top bar buttons so it reads as one control.
+.stepperButtons {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
