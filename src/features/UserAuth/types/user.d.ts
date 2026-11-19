@@ -88,6 +88,10 @@ export type Config = {
   name_resolver: {
     endpoint: string;
   };
+  // Optional so a backend that predates this entry still yields a valid config.
+  publication_metadata?: {
+    endpoint: string;
+  };
   social_providers: Record<string, SocialProvider>;
   show_novelty_boost: boolean;
 }

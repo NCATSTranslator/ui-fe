@@ -77,16 +77,17 @@ export type TrialObject = {
   url: string;
 }
 
+// Fields the service has no value for come back as empty strings or are omitted entirely.
 export type PubmedMetadata = {
-  abstract: string;
-  article_title: string;
-  issue: string;
-  journal_abbrev: string;
-  journal_name: string;
-  pub_day: string;
-  pub_month: string;
-  pub_year: string;
-  volume: string;
+  abstract?: string;
+  article_title?: string;
+  issue?: string;
+  journal_abbrev?: string;
+  journal_name?: string;
+  pub_day?: string;
+  pub_month?: string;
+  pub_year?: string;
+  volume?: string;
 };
 
 export type PubmedMetadataMap = {

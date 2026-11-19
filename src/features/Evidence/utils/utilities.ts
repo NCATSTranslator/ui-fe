@@ -359,7 +359,7 @@ export const checkForEdgeMatch = (edgeOne: ResultEdge | null, edgeTwo: ResultEdg
  */
 export const updateJournal = (element: PublicationObject, data: PubmedMetadataMap) => {
   if(!element.journal && element.id)
-    element.journal = capitalizeAllWords(data[element.id].journal_name);
+    element.journal = capitalizeAllWords(data[element.id]?.journal_name ?? '');
 }
 
 /**
@@ -370,7 +370,7 @@ export const updateJournal = (element: PublicationObject, data: PubmedMetadataMa
  */
 export const updateTitle = (element: PublicationObject, data: PubmedMetadataMap) => {
   if(!element.title && element.id)
-    element.title = capitalizeAllWords(data[element.id].article_title.replace('[', '').replace(']',''));
+    element.title = capitalizeAllWords((data[element.id]?.article_title ?? '').replace('[', '').replace(']',''));
 }
 
 /**
@@ -381,7 +381,7 @@ export const updateTitle = (element: PublicationObject, data: PubmedMetadataMap)
  */
 export const updateSnippet = (element: PublicationObject, data: PubmedMetadataMap) => {
   if(!element.snippet && element.id)
-    element.snippet = data[element.id].abstract;
+    element.snippet = data[element.id]?.abstract ?? '';
 }
 
 /**
@@ -392,7 +392,7 @@ export const updateSnippet = (element: PublicationObject, data: PubmedMetadataMa
  */
 export const updatePubdate = (element: PublicationObject, data: PubmedMetadataMap) => {
   if(!element.pubdate && element.id) {
-    let year = (data[element.id].pub_year) ? data[element.id].pub_year: "0";
+    const year = data[element.id]?.pub_year || "0";
     element.pubdate = year;
   }
 }

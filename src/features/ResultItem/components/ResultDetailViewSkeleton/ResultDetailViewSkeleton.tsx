@@ -3,7 +3,12 @@ import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import styles from './ResultDetailViewSkeleton.module.scss';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
-const ResultDetailViewSkeleton: FC = () => {
+interface ResultDetailViewSkeletonProps {
+  /** Reserves room for the bookmark and notes buttons shown to the left of the tabs. */
+  showInteractables?: boolean;
+}
+
+const ResultDetailViewSkeleton: FC<ResultDetailViewSkeletonProps> = ({ showInteractables = false }) => {
   return (
     <div className={styles.container}>
       <ViewTopBar/>
@@ -26,8 +31,17 @@ const ResultDetailViewSkeleton: FC = () => {
         <SkeletonBar width="70%" height="72px" />
       </div>
       <div className={styles.tabBar}>
-        <SkeletonBar width="48px" height="40px" />
-        <SkeletonBar width="48px" height="40px" />
+        {
+          showInteractables &&
+          <div className={styles.interactables}>
+            <SkeletonBar width="24px" height="24px" />
+            <SkeletonBar width="24px" height="24px" />
+          </div>
+        }
+        <div className={styles.tabList}>
+          <SkeletonBar width="72px" height="20px" />
+          <SkeletonBar width="44px" height="20px" />
+        </div>
       </div>
       <div className={styles.tabContent}>
         <SkeletonBar width="100%" height="48px" className={styles.tabContentItem} />
