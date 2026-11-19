@@ -13,6 +13,7 @@ import { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import styles from '@/features/Evidence/components/EvidenceView/EvidenceView.module.scss';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 import { EdgeEvidence, hasEdgeEvidence } from '@/features/Evidence/utils/utilities';
+import { ActiveTabName, NO_EVIDENCE_TAB, getEvidenceCounts, getFirstTabHeading, getTabCount, getTabHeading, tabHasData } from '@/features/Evidence/utils/evidenceTabs';
 
 interface EvidenceTabsProps {
   isOpen: boolean;
@@ -26,28 +27,6 @@ interface EvidenceTabsProps {
   prefs: Preferences;
   initialTab?: EvidenceTabName;
 }
-
-type EvidenceCounts = { pubs: number; cts: number; misc: number; sources: number };
-
-const getTabCount = (tab: EvidenceTabName, counts: EvidenceCounts): number => {
-  switch (tab) {
-    case 'Publications': return counts.pubs;
-    case 'Clinical Trials': return counts.cts;
-    case 'Miscellaneous': return counts.misc;
-    case 'Knowledge Sources': return counts.sources;
-    default: return 0;
-  }
-};
-
-const tabHasData = (tab: EvidenceTabName, counts: EvidenceCounts): boolean =>
-  getTabCount(tab, counts) > 0;
-
-const getFirstTabHeading = (counts: EvidenceCounts): EvidenceTabName => {
-  if (counts.pubs > 0) return 'Publications';
-  if (counts.cts > 0) return 'Clinical Trials';
-  if (counts.misc > 0) return 'Miscellaneous';
-  return 'Knowledge Sources';
-};
 
 const EvidenceTabs: FC<EvidenceTabsProps> = ({
   isOpen,
@@ -66,23 +45,18 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
 
   const { publications, clinicalTrials, miscEvidence, sources } = evidence;
 
-  const dataCounts: EvidenceCounts = {
-    pubs: publications.length,
-    cts: clinicalTrials.length,
-    misc: miscEvidence.length,
-    sources: sources.length,
-  };
+  const dataCounts = getEvidenceCounts(evidence);
   const dataCountsRef = useRef(dataCounts);
   dataCountsRef.current = dataCounts;
 
   const hasEvidence = hasEdgeEvidence(evidence);
 
-  const [activeTab, setActiveTab] = useState<EvidenceTabName>('Publications');
   const firstTabHeading = getFirstTabHeading(dataCounts);
+  const [activeTab, setActiveTab] = useState<ActiveTabName>(firstTabHeading);
   const firstTabHeadingRef = useRef(firstTabHeading);
   firstTabHeadingRef.current = firstTabHeading;
   const handleTabSelection = (tabName: string) => {
-    setActiveTab(tabName as EvidenceTabName);
+    setActiveTab(tabName as ActiveTabName);
   };
 
   // Tracked on onTabClick rather than handleTabSelection: Tabs also calls the
@@ -90,7 +64,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
   const handleTabClick = (tabName: string) => {
     trackEvent('evidence_tab_changed', {
       tab_name: tabName,
-      item_count: getTabCount(tabName as EvidenceTabName, dataCounts),
+      item_count: getTabCount(tabName as ActiveTabName, dataCounts),
     });
   };
 
@@ -122,7 +96,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       fadeClassName={styles.fade}
     >
       {publications.length > 0 ? (
-        <Tab heading="Publications" className={styles.tab}>
+        <Tab heading="Publications" headingOverride={getTabHeading('Publications', dataCounts)} className={styles.tab}>
           <PublicationsTable
             selectedEdge={selectedEdge}
             publications={publications}
@@ -137,13 +111,13 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       ) : null}
 
       {clinicalTrials.length > 0 ? (
-        <Tab heading="Clinical Trials" className={styles.tab}>
+        <Tab heading="Clinical Trials" headingOverride={getTabHeading('Clinical Trials', dataCounts)} className={styles.tab}>
           <ClinicalTrialsTable clinicalTrials={clinicalTrials} prefs={prefs} />
         </Tab>
       ) : null}
 
       {miscEvidence.length > 0 ? (
-        <Tab heading="Miscellaneous" className={styles.tab}>
+        <Tab heading="Miscellaneous" headingOverride={getTabHeading('Miscellaneous', dataCounts)} className={styles.tab}>
           <MiscEvidenceTable miscEvidence={miscEvidence} prefs={prefs} />
         </Tab>
       ) : null}
@@ -151,6 +125,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       {sources.length > 0 ? (
         <Tab
           heading="Knowledge Sources"
+          headingOverride={getTabHeading('Knowledge Sources', dataCounts)}
           tooltipIcon={<InfoIcon className={styles.infoIcon} />}
           dataTooltipId="knowledge-sources-tooltip"
           className={styles.tab}
@@ -160,7 +135,7 @@ const EvidenceTabs: FC<EvidenceTabsProps> = ({
       ) : null}
 
       {!hasEvidence ? (
-        <Tab heading="No Evidence Available">
+        <Tab heading={NO_EVIDENCE_TAB}>
           <p className={styles.noEvidence}>No evidence is currently available for this item.</p>
         </Tab>
       ) : null}

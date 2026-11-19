@@ -48,7 +48,8 @@ export type AnalyticsDimension =
   | 'move_method'
   | 'filter_type'
   | 'filter_value'
-  | 'auth_provider';
+  | 'auth_provider'
+  | 'step_direction';
 
 /** Number-valued parameters, registered in GA4 as event-scoped custom metrics. */
 export type AnalyticsMetric =
@@ -76,6 +77,7 @@ export type LinkType = 'publication' | 'clinical_trial' | 'source';
 export type ExportFormat = 'csv' | 'json' | 'png' | 'svg';
 export type PaneState = 'open' | 'closed' | 'maximized' | 'restored' | 'resized';
 export type HistoryAction = 'undo' | 'redo';
+export type StepDirection = 'previous' | 'next';
 export type AddMethod = 'drag' | 'menu' | 'paste' | 'shortcut';
 
 /**
@@ -119,6 +121,15 @@ export interface AnalyticsEventMap {
     result_curie?: string;
     result_rank?: number;
     path_count?: number;
+  };
+  // Stepping with the top bar arrows; does not also fire result_opened or evidence_opened.
+  view_stepped: {
+    // What was stepped to, in the same vocabulary canvas_node_added uses.
+    entity_type: 'result' | 'path';
+    step_direction: StepDirection;
+    // Position of the result or path stepped to, as result_opened and evidence_opened report it.
+    result_rank?: number;
+    path_rank?: number;
   };
   result_bookmarked: { result_curie?: string };
   result_unbookmarked: { result_curie?: string };

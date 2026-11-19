@@ -1,4 +1,4 @@
-import { useState, useEffect, FC, ReactElement, Children, isValidElement,
+import { useState, useEffect, FC, ReactElement, ReactNode, Children, isValidElement,
   useMemo, useCallback, useRef } from "react";
 import Tab, { TabProps } from "./Tab";
 import { Fade } from 'react-awesome-reveal';
@@ -12,6 +12,8 @@ interface TabsProps {
   fadeClassName?: string;
   tabListClassName?: string;
   tabListWrapperClassName?: string;
+  /** Content rendered in the tab list row, to the left of the tabs (e.g. action buttons). */
+  tabListLeading?: ReactNode;
   tabClassName?: string;
   isOpen?: boolean;
   handleTabSelection?: (heading: string) => void;
@@ -29,6 +31,7 @@ const Tabs: FC<TabsProps> = ({
   fadeClassName = "",
   tabListClassName = "",
   tabListWrapperClassName = "",
+  tabListLeading,
   tabClassName = "",
   isOpen = true, 
   handleTabSelection = () => {}, 
@@ -95,9 +98,8 @@ const Tabs: FC<TabsProps> = ({
   if (!isOpen) return null;
 
   const tabsClasses = joinClasses(className, styles.tabs);
-  const tabListWrapperClasses = joinClasses(tabListWrapperClassName, styles.tabListWrapper);
+  const tabListWrapperClasses = joinClasses(tabListWrapperClassName, styles.tabListWrapper, !!tabListLeading && styles.hasLeading);
   const tabListClasses = joinClasses(tabListClassName, styles.tabList);
-
 
   return (
     <div 
@@ -106,6 +108,7 @@ const Tabs: FC<TabsProps> = ({
       ref={tabsContainerRef}
     >
       <div className={tabListWrapperClasses}>
+        {!!tabListLeading && <div className={styles.tabListLeading}>{tabListLeading}</div>}
         <OutsideClickHandler onOutsideClick={handleOutsideTabListClick} className={styles.outsideClickHandler}>
           <div className={tabListClasses}>
             {validChildren.map((child, i) => {

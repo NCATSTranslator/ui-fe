@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, lazy, Suspense } from 'react';
+import { Dispatch, FC, ReactNode, SetStateAction, lazy, Suspense } from 'react';
 import PathView from '@/features/ResultItem/components/PathView/PathView';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
 import Tabs from '@/features/Core/components/Tabs/Tabs';
@@ -18,6 +18,8 @@ interface ResultDetailTabsProps {
   activeFilters: Filter[];
   graph: ReturnType<typeof resultToGraphData>;
   graphActive: boolean;
+  /** Rendered in the tab row, to the left of the Paths and Graph tabs. */
+  leadingControls?: ReactNode;
   pathCount: number;
   pathFilterState: PathFilterState;
   pathRankState?: PathRankState;
@@ -34,6 +36,7 @@ const ResultDetailTabs: FC<ResultDetailTabsProps> = ({
   activeFilters,
   graph,
   graphActive,
+  leadingControls,
   pathCount,
   pathFilterState,
   pathRankState,
@@ -52,11 +55,12 @@ const ResultDetailTabs: FC<ResultDetailTabsProps> = ({
       isOpen
       className={styles.tabs}
       fadeClassName={styles.tabFade}
+      tabListLeading={leadingControls}
       handleTabSelection={(heading) => setGraphActive(heading === 'Graph')}
     >
       <Tab
         heading="Paths"
-        headingOverride={`${pathCount} Paths`}
+        headingOverride={`${pathCount} ${pathCount === 1 ? 'Path' : 'Paths'}`}
         tooltipIcon={<InfoIcon className={styles.infoIcon} />}
         dataTooltipId={PATHS_TAB_TOOLTIP_ID}
         className={styles.pathsTab}
