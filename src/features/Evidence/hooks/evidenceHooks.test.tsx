@@ -249,7 +249,7 @@ describe('usePubmedDataFetch', () => {
       { wrapper: makeWrapper(makeConfig()), initialProps: { edgeId: 'e1' } },
     );
 
-    await waitFor(() => expect(requestedUrls().some(url => url.includes(encodeURIComponent('PMID:200')))).toBe(true));
+    await waitFor(() => expect(requestedUrls().some(url => url.includes('PMID:200'))).toBe(true));
 
     hookWrites.length = 0;
     act(() => {

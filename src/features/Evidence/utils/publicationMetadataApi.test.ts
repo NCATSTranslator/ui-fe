@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   buildPublicationMetadataUrl,
   fetchPublicationMetadata,
+  isSupportedPublicationId,
+  toPublicationCurie,
 } from '@/features/Evidence/utils/publicationMetadataApi';
 
 const ENDPOINT = 'https://annotator.ci.transltr.io/publications';
@@ -29,12 +31,43 @@ describe('buildPublicationMetadataUrl', () => {
     expect([...url.searchParams.keys()]).toEqual(['pubids']);
   });
 
-  it('encodes ids so reserved characters cannot corrupt the batch', () => {
-    const ids = ['DOI:10.1000/a&b#c+d', 'PMID:1'];
-    const url = buildPublicationMetadataUrl(ENDPOINT, ids);
-    expect(new URL(url).searchParams.get('pubids')).toBe(ids.join(','));
-    expect([...new URL(url).searchParams.keys()]).toEqual(['pubids']);
-    expect(new URL(url).hash).toBe('');
+  it('sends ids unencoded so colons reach the endpoint literally', () => {
+    expect(buildPublicationMetadataUrl(ENDPOINT, ['PMID:1', 'PMC:PMC2']))
+      .toBe(`${ENDPOINT}?pubids=PMID:1,PMC:PMC2`);
+  });
+
+  it('sends PMC ids in the PMC:PMC form the endpoint requires', () => {
+    expect(buildPublicationMetadataUrl(ENDPOINT, ['PMID:8928190', 'PMC2490599']))
+      .toBe(`${ENDPOINT}?pubids=PMID:8928190,PMC:PMC2490599`);
+  });
+});
+
+describe('toPublicationCurie', () => {
+  it.each([
+    ['PMC2490599', 'PMC:PMC2490599'],
+    ['PMC:2490599', 'PMC:PMC2490599'],
+    ['PMC:PMC2490599', 'PMC:PMC2490599'],
+    ['pmc2490599', 'PMC:PMC2490599'],
+    ['PMID:8928190', 'PMID:8928190'],
+    [' PMID:8928190 ', 'PMID:8928190'],
+    ['doi:10.1242/jcs.03153', 'doi:10.1242/jcs.03153'],
+  ])('converts %s to %s', (id, expected) => {
+    expect(toPublicationCurie(id)).toBe(expected);
+  });
+});
+
+describe('isSupportedPublicationId', () => {
+  it.each([
+    'PMID:8928190', 'pmid:8928190', 'PMC2490599', 'PMC:PMC2490599', 'doi:10.1242/jcs.03153', 'DOI:10.1242/jcs.03153',
+  ])('accepts %s', (id) => {
+    expect(isSupportedPublicationId(id)).toBe(true);
+  });
+
+  it.each([
+    '', 'PMID:', 'PMID:abc', '8928190', 'NCT00000102', 'clinicaltrials:NCT00000102', 'PMC:', 'doi:',
+    'doi:10.1000/a&b', 'doi:10.1000/a,b', 'doi:10.1000/a#b', 'https://example.com/paper',
+  ])('rejects %j', (id) => {
+    expect(isSupportedPublicationId(id)).toBe(false);
   });
 });
 
@@ -63,6 +96,36 @@ describe('fetchPublicationMetadata', () => {
     expect(url).toBe(buildPublicationMetadataUrl(ENDPOINT, ['PMID:1']));
     expect(init.signal).toBe(signal);
     expect(result).toEqual({ success: true, data: { 'PMID:1': METADATA }, processedCount: 1 });
+  });
+
+  it('keys PMC metadata by the id that was requested, not the normalized CURIE', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({
+      results: { 'PMID:1': METADATA, 'PMC:PMC2490599': METADATA },
+    }));
+
+    const result = await fetchPublicationMetadata(ENDPOINT, ['PMID:1', 'PMC2490599']);
+
+    expect(fetchMock.mock.calls[0][0]).toBe(`${ENDPOINT}?pubids=PMID:1,PMC:PMC2490599`);
+    expect(result).toEqual({
+      success: true,
+      data: { 'PMID:1': METADATA, PMC2490599: METADATA },
+      processedCount: 2,
+    });
+  });
+
+  it('leaves unsupported ids out of the request so they cannot fail the batch', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ results: { 'PMID:1': METADATA } }));
+
+    const result = await fetchPublicationMetadata(ENDPOINT, ['clinicaltrials:NCT00000102', 'PMID:1', 'PMID:abc']);
+
+    expect(fetchMock.mock.calls[0][0]).toBe(`${ENDPOINT}?pubids=PMID:1`);
+    expect(result).toEqual({ success: true, data: { 'PMID:1': METADATA }, processedCount: 1 });
+  });
+
+  it('makes no request when no id is supported', async () => {
+    expect(await fetchPublicationMetadata(ENDPOINT, ['clinicaltrials:NCT00000102', '']))
+      .toEqual({ success: true, data: {}, processedCount: 0 });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('omits ids the service did not find', async () => {
