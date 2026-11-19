@@ -9,7 +9,17 @@
   .tabListWrapper {
     border-bottom: 1px solid $midGray;
     margin: 0 0 $s;
-    padding: 0 $xl;
+    padding: 0 $s;
+    &.hasLeading {
+      display: flex;
+      align-items: center;
+      gap: $xs;
+    }
+  }
+  .tabListLeading {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
   .outsideClickHandler {
     width: fit-content;
