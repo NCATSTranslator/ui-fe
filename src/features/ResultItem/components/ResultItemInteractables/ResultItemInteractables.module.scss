@@ -3,9 +3,8 @@
 .interactablesContainer {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: $xs;
   transition: $defaultAnim;
-  z-index: 10;
   &.belowBreakpoint {
     grid-template-columns: 1fr;
     gap: 0;
@@ -63,8 +62,8 @@
     background-color: $lightGray;
     cursor: pointer;
     position: relative;
-    height: 32px;
-    width: 32px;
+    height: $l;
+    width: $l;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -91,8 +90,8 @@
       }
     }
     svg {
-      height: 24px;
-      width: 24px;
+      height: $m;
+      width: $m;
       transition: $defaultAnim;
       position: absolute;
       top: 50%;
@@ -115,6 +114,20 @@
   &.even {
     .icon {
       background-color: $white;
+    }
+  }
+  // Icon-only buttons: no filled background at rest or on hover. The collapsed
+  // menu keeps its own panel background, so only its trigger and the inline
+  // buttons are affected.
+  &.bare {
+    > .icon, .interactablesContainer:not(.belowBreakpoint) .icon {
+      background-color: transparent;
+      width: $m;
+      height: $m;
+      padding: 0;
+      &:hover {
+        background-color: transparent !important;
+      }
     }
   }
 }

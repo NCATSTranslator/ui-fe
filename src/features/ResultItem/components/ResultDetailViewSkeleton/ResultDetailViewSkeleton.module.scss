@@ -30,12 +30,36 @@
   gap: $xs;
 }
 
+// Mirrors the Tabs tab list row: same gutter and rule as .tabListWrapper, with the
+// leading controls and the tabs spaced as they are once loaded.
 .tabBar {
   display: flex;
-  gap: $m;
+  align-items: center;
+  gap: $xs;
   margin: $xs 0 $s;
-  padding: 0 $xl $xs;
-  border-bottom: 1px solid $lightGray;
+  padding: 0 $s;
+  border-bottom: 1px solid $midGray;
+}
+
+// Mirrors the bare ResultItemInteractables: two 24px icons, 8px apart.
+.interactables {
+  display: flex;
+  gap: $xs;
+  flex-shrink: 0;
+  // Below its breakpoint ResultItemInteractables collapses into a single menu icon.
+  @media (max-width: 1239px) {
+    > :last-child {
+      display: none;
+    }
+  }
+}
+
+// Each tab is text inside 10px/16px padding with no gap between tabs, so the
+// placeholders sit in the same padding, two paddings apart.
+.tabList {
+  display: flex;
+  gap: $l;
+  padding: 10px $s;
 }
 
 .tabContent {

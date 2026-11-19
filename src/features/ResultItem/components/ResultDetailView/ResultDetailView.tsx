@@ -104,7 +104,7 @@ const ResultDetailView: FC = () => {
   // The result set can be cached in Redux while the list refetches, so this reads
   // the list's own loading state to stay in sync with `visibleResultIds` below.
   if (resultsLoading) {
-    return <ResultDetailViewSkeleton />;
+    return <ResultDetailViewSkeleton showInteractables={!!user && !isPathfinder} />;
   }
 
   // Not found
@@ -151,16 +151,6 @@ const ResultDetailView: FC = () => {
                     nameString={nameString}
                   />
                 </div>
-                <ResultItemInteractables
-                  handleBookmarkClick={handleBookmarkClick}
-                  handleNotesClick={handleNotesClick}
-                  hasNotes={itemHasNotes}
-                  hasUser={!!user}
-                  isBookmarked={isBookmarked}
-                  isEven={false}
-                  isPathfinder={isPathfinder}
-                  nameString={nameString}
-                />
               </div>
               {
                 resultTags &&
@@ -186,6 +176,20 @@ const ResultDetailView: FC = () => {
           activeFilters={activeFilters}
           graph={graph}
           graphActive={graphActive}
+          leadingControls={
+            !!user && !isPathfinder &&
+            <ResultItemInteractables
+              bare
+              handleBookmarkClick={handleBookmarkClick}
+              handleNotesClick={handleNotesClick}
+              hasNotes={itemHasNotes}
+              hasUser
+              isBookmarked={isBookmarked}
+              isEven={false}
+              isPathfinder={isPathfinder}
+              nameString={nameString}
+            />
+          }
           pathCount={pathCount}
           pathFilterState={pathFilterState ?? NO_PATH_FILTER_STATE}
           pathRankState={pathRankState}

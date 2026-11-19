@@ -28,6 +28,6 @@
   overflow-x: auto;
   // Room for the hover shadows of the edge paths, which would otherwise be clipped
   // by the scroll container.
-  padding: $xs;
+  padding: $xs $xs $xs $s;
   margin: -$xs;
 }

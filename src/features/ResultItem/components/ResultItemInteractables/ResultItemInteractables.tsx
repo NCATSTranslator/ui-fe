@@ -1,6 +1,5 @@
 import { FC, useCallback, useState } from "react";
 import styles from './ResultItemInteractables.module.scss';
-import { Link } from 'react-router-dom';
 import Bookmark from "@/assets/icons/navigation/Bookmark/Bookmark.svg?react";
 import BookmarkFilled from "@/assets/icons/navigation/Bookmark/Filled Bookmark.svg?react";
 import Notes from "@/assets/icons/buttons/Notes/Notes.svg?react"
@@ -11,6 +10,8 @@ import { useWindowSize } from "@/features/Core/hooks/useWindowSize";
 import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/OutsideClickHandler';
 
 interface ResultItemInteractablesProps {
+  /** Renders the buttons as bare icons, without the filled button background. */
+  bare?: boolean;
   handleBookmarkClick: () => Promise<string | number | false | null>;
   handleNotesClick: () => Promise<void>;
   hasNotes: boolean;
@@ -30,6 +31,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
   isEven,
   isPathfinder,
   nameString,
+  bare = false,
 }) => {
 
   const screenWidth = useWindowSize();
@@ -45,7 +47,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
 
   return(
     <OutsideClickHandler 
-      className={`${styles.interactables} ${!!isEven && styles.even}`}
+      className={`${styles.interactables} ${!!isEven && styles.even} ${bare ? styles.bare : ''}`}
       onOutsideClick={handleOutsideClick}>
       {
         (!!belowBreakpoint && !isPathfinder) &&
@@ -76,7 +78,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                       {
                         isBookmarked
                         ? <>Remove this result from your bookmarks.</>
-                        : <>Bookmark this result to review it later in your <Link to="/projects" target='_blank'>Projects.</Link></>
+                        : <>Bookmark this result to review it later.</>
                       }
                     </span>
                   </Tooltip>
@@ -98,7 +100,7 @@ const ResultItemInteractables: FC<ResultItemInteractablesProps> = ({
                     aria-describedby={`notes-tooltip-${nameString.replaceAll("'", "")}`}
                   />
                   <Tooltip id={`notes-tooltip-${nameString.replaceAll("'", "")}`}>
-                    <span className={styles.tooltip}>Add your own custom notes to this result. You can also view and edit notes on your bookmarked results in your <Link to="/projects" target='_blank'>Projects.</Link></span>
+                    <span className={styles.tooltip}>Add your own custom notes to this result.</span>
                   </Tooltip>
                   <span className={styles.label}>Notes</span>
                 </button>
