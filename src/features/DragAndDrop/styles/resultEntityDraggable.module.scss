@@ -10,4 +10,6 @@
 
 .dragging {
   opacity: 0.5;
+  // Shown even when the grab cursor is not, i.e. when dragging with no canvas open
+  cursor: grabbing !important;
 }

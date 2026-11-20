@@ -18,7 +18,7 @@ export const useResultCanvasDrag = (
     listeners,
     setNodeRef,
     isDragging,
-    canDrag,
+    showDragCursor,
   } = useResultEntityDraggable(resultDragData);
 
   const onContextMenu = useCallback((e: MouseEvent) => {
@@ -33,7 +33,7 @@ export const useResultCanvasDrag = (
     attributes,
     listeners,
     isDragging,
-    canDrag,
+    showDragCursor,
     onContextMenu: canvasEnabled ? onContextMenu : undefined,
   };
 };

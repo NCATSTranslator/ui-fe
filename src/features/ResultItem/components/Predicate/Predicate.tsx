@@ -77,7 +77,7 @@ const Predicate: FC<PredicateProps> = ({
     listeners: edgeDragListeners,
     setNodeRef: setEdgeDragRef,
     isDragging: isEdgeDragging,
-    canDrag: canDragEdge,
+    showDragCursor: showEdgeDragCursor,
   } = useResultEntityDraggable({
     type: 'edge',
     data: { id: edgeIds[0], pk, edgeIds },
@@ -108,7 +108,7 @@ const Predicate: FC<PredicateProps> = ({
     (inModal && parentStyles) && `${parentStyles.inModal} ${styles.inModal}`,
     (isEven && parentStyles) && `${parentStyles.isEven} ${styles.isEven}`,
     (isHighlighted && parentStyles) && `${parentStyles.highlighted} ${styles.highlighted}`,
-    canDragEdge && dragStyles.draggable,
+    showEdgeDragCursor && dragStyles.draggable,
     isEdgeDragging && dragStyles.dragging,
   )
 
