@@ -57,7 +57,7 @@ const ResultDetailView: FC = () => {
   const [graphActive, setGraphActive] = useState(false);
 
   const user = useSelector(currentUser);
-  const { evidenceCounts, pathCount } = useResultCounts(resultSet, result);
+  const { evidenceCounts, pathCount, maxEvidenceTotal } = useResultCounts(resultSet, result);
   const typeString = subjectNode?.types[0] ? formatBiolinkEntity(subjectNode.types[0]) : '';
   const nameString = result?.drug_name && subjectNode ? formatBiolinkNode(result.drug_name, typeString, getNodeSpecies(subjectNode)) : '';
   const resultDescription = subjectNode ? getNodeDescription(subjectNode) : null;
@@ -88,7 +88,7 @@ const ResultDetailView: FC = () => {
     attributes: resultDragAttributes,
     listeners: resultDragListeners,
     isDragging: isResultDragging,
-    canDrag: canDragResult,
+    showDragCursor: showResultDragCursor,
     onContextMenu: handleResultContextMenu,
   } = useResultCanvasDrag(result?.id, pk);
 
@@ -135,7 +135,7 @@ const ResultDetailView: FC = () => {
                   ref={setResultDragRef}
                   className={joinClasses(
                     styles.nameContainer,
-                    canDragResult && dragStyles.draggable,
+                    showResultDragCursor && dragStyles.draggable,
                     isResultDragging && dragStyles.dragging,
                   )}
                   onContextMenu={handleResultContextMenu}
@@ -167,7 +167,7 @@ const ResultDetailView: FC = () => {
                 />
               )}
             </div>
-            <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
+            <ResultEvidenceSummary evidenceCounts={evidenceCounts} maxEvidenceTotal={maxEvidenceTotal} pathCount={pathCount} />
           </div>
 
         </div>

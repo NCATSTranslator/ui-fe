@@ -8,6 +8,7 @@ $yellowHover: #d59501;
 $lightYellow: #FFF2C2;
 
 $green: #669F38;
+$lightGreen: #85C94E;
 
 $blueOne: #3562AC;
 $lightBlueOne: #84A3DC;
@@ -21,6 +22,8 @@ $lightPurpleTwo: #BAB9CD;
 $midPurpleTwo: #9795B3;
 $palePurple: #DCDCE6;
 
+$magenta: #DE82E8;
+
 $transparentPurpleHover: #3A236B26;
 
 $purpleEdgeBG: #7271A4;
@@ -30,6 +33,7 @@ $purpleEdgeBGHover: #7271A4;
 $darkGray: #606368;
 $midDarkGray: #919191;
 $placeholderGray: #A5A5A5;
+$purpleGray: #C1C0D1;
 $midGray: #CED0D0;
 $hoverGray: #F5F4FF;
 $grayHover: #D8D5E0;
@@ -103,6 +107,8 @@ $projectCardColumns: 1fr $xl $xl 85px 110px 110px 14px;
 $dataCardGap: $l;
 $queryCardColumns: 1fr $xl $xl 120px 110px 110px 14px;
 $canvasCardColumns: 1fr 85px 130px 110px 110px 14px;
+// Evidence column of a result row: the evidence total plus its segmented bar
+$resultEvidenceColumn: 170px;
 
 // Screens //
 $small: 425px;

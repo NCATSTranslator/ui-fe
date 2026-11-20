@@ -1,0 +1,104 @@
+@use "@/assets/styles/variables" as *;
+
+$barHeight: $m;
+
+.evidenceBar {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  width: 100%;
+  min-width: 0;
+  height: $barHeight;
+}
+
+.total {
+  // Reserves room for a four-digit total so bars line up from row to row
+  min-width: 4ch;
+  text-align: right;
+  font-size: $captionSize;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  color: $darkGray;
+}
+
+// Read by screen readers only
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.barArea {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.track {
+  display: flex;
+  gap: $xxs;
+  height: $barHeight;
+  // Relative to the result with the most evidence, but never narrower than every pill at its
+  // minimum width plus the gaps between them
+  width: max(
+    calc(var(--segment-count) * #{$xs} + (var(--segment-count) - 1) * #{$xxs}),
+    calc(var(--bar-scale) * 100%)
+  );
+  max-width: 100%;
+}
+
+.segment {
+  position: relative;
+  flex-shrink: 1;
+  flex-basis: 0;
+  min-width: $xs;
+  outline: none;
+  &:focus-visible::before {
+    outline: 2px solid $purpleTwo;
+    outline-offset: 1px;
+  }
+  // The pill is drawn by a pseudo-element so it can widen on hover, into the gaps on either
+  // side, without resizing its neighbors
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: $defaultBorderRadius;
+    background-color: var(--segment-color);
+    transition: inset .15s ease, filter .15s ease;
+  }
+  &.hovered::before {
+    inset: 0 (-$xxxs);
+    filter: brightness(.9);
+  }
+  &.publications { --segment-color: #{$lightBlueOne}; }
+  &.clinicalTrials { --segment-color: #{$yellow}; }
+  &.productLabels { --segment-color: #{$magenta}; }
+  &.acceptedOntologies { --segment-color: #{$lightGreen}; }
+  &.misc { --segment-color: #{$lightPurpleOne}; }
+  &.sources { --segment-color: #{$purpleGray}; }
+}
+
+.label {
+  position: absolute;
+  top: calc(100% + #{$xxxs});
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  font-size: $captionSize;
+  line-height: 1.25;
+  white-space: nowrap;
+  color: $darkGray;
+  pointer-events: none;
+}
+
+.labelIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
