@@ -6,8 +6,9 @@ import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
-import { getCompressedEdge } from "@/features/Core/utils/resultHelpers";
+import { getCompressedEdge, getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
 import { isResultEdge } from "@/features/ResultList/types/checkers";
+import { EVIDENCE_COUNT_KEYS } from "@/features/Evidence/utils/evidenceSegments";
 
 interface EvidenceAccumulator {
   pubs: Set<string>;
@@ -80,6 +81,20 @@ export const getEvidenceFromEdge = (
 };
 
 /**
+ * Checks if an edge is an accepted ontology edge.
+ *
+ * @param {ResultEdge} edge - The edge object.
+ * @returns {boolean} - Whether the edge is an accepted ontology edge.
+ */
+export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
+  return edge.predicate === "subclass of" || edge.predicate === "superclass of";
+}
+
+export const EMPTY_EVIDENCE_COUNTS: EvidenceCountsContainer = {
+  acceptedOntologyCount: 0, clinicalTrialCount: 0, miscCount: 0, productLabelCount: 0, publicationCount: 0, sourceCount: 0,
+};
+
+/**
  * Generates evidence counts for a provided list of paths
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
@@ -87,35 +102,35 @@ export const getEvidenceFromEdge = (
  * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
  */
 const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): EvidenceCountsContainer => {
-  let allPubs = new Set<string>();
-  let allCTs = new Set<string>();
-  let allSources = new Set<string>();
-  let allMisc = new Set<string>();
-
-  const processPathEdges = (path: Path) => {
-    for(let i = 1; i < path.subgraph.length; i += 2) {
-      let edgeEvidence = getEvidenceFromEdge(resultSet, path.subgraph[i]);
-      if(edgeEvidence.pubs.size > 0)
-        allPubs = allPubs.union(edgeEvidence.pubs);
-      if(edgeEvidence.cts.size > 0)
-        allCTs = allCTs.union(edgeEvidence.cts);
-      if(edgeEvidence.sources.size > 0)
-        allSources = allSources.union(edgeEvidence.sources);
-      if(edgeEvidence.misc.size > 0)
-        allMisc = allMisc.union(edgeEvidence.misc);
-    }
+  const acc: EvidenceAccumulator = {
+    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(),
   };
+  // Edge slots, keyed by node sequence and position, holding an accepted ontology edge
+  const ontologySlots = new Set<string>();
 
-  // Process all paths
   for (const path of paths) {
-    processPathEdges(path);
+    // Paths sharing a node sequence display as one path, with the edges at each position merged
+    // into a single predicate. Each displayed predicate with an accepted ontology edge among its
+    // edges counts once, so an edge shared by several displayed paths counts once per path.
+    const sequenceKey = getPathSequenceKey(resultSet, path);
+
+    for (let i = 1; i < path.subgraph.length; i += 2) {
+      const edge = getEdgeById(resultSet, path.subgraph[i]);
+      if (!edge)
+        continue;
+      if (sequenceKey && isAcceptedOntologyEdge(edge))
+        ontologySlots.add(`${sequenceKey}|${i}`);
+      collectEvidenceFromEdge(resultSet, edge, acc);
+    }
   }
 
   return {
-    clinicalTrialCount: allCTs.size,
-    miscCount: allMisc.size,
-    publicationCount: allPubs.size,
-    sourceCount: allSources.size,
+    acceptedOntologyCount: ontologySlots.size,
+    clinicalTrialCount: acc.cts.size,
+    miscCount: acc.misc.size,
+    productLabelCount: 0,
+    publicationCount: acc.pubs.size,
+    sourceCount: acc.sources.size,
   };
 };
 
@@ -129,7 +144,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
  */
 export const getEvidenceCounts = (resultSet: ResultSet | null, result: Result | undefined): EvidenceCountsContainer => {
   if (!resultSet || !result) {
-    return { publicationCount: 0, sourceCount: 0, clinicalTrialCount: 0, miscCount: 0 };
+    return { ...EMPTY_EVIDENCE_COUNTS };
   }
 
   const paths: Path[] = [];
@@ -149,13 +164,32 @@ export const getEvidenceCounts = (resultSet: ResultSet | null, result: Result | 
  *
  */
 export const calculateTotalEvidence = (countObj: EvidenceCountsContainer): number => {
-  return (
-    countObj.clinicalTrialCount +
-    countObj.miscCount +
-    countObj.publicationCount +
-    countObj.sourceCount
-  );
+  // Counts saved before a type existed (e.g. on older bookmarks) may lack its field
+  return EVIDENCE_COUNT_KEYS.reduce((total, [, countKey]) => total + (countObj[countKey] ?? 0), 0);
 }
+
+const maxEvidenceTotalCache = new WeakMap<ResultSet, number>();
+
+/**
+ * Finds the largest total evidence count of any result in a result set. Used to size a result's
+ * evidence bar relative to the other results in its query. Cached per result set object.
+ *
+ * @param {ResultSet | null} resultSet - ResultSet object.
+ * @returns {number} - The largest total evidence count, or 0 without results.
+ */
+export const getMaxEvidenceTotal = (resultSet: ResultSet | null): number => {
+  if (!resultSet?.data?.results) return 0;
+  const cached = maxEvidenceTotalCache.get(resultSet);
+  if (cached !== undefined) return cached;
+
+  let max = 0;
+  for (const result of resultSet.data.results) {
+    const total = calculateTotalEvidence(result.evidenceCount ?? getEvidenceCounts(resultSet, result));
+    if (total > max) max = total;
+  }
+  maxEvidenceTotalCache.set(resultSet, max);
+  return max;
+};
 
 /**
  * Returns a formatted name for a publication source based on a provided string.

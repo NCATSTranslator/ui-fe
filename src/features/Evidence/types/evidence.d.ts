@@ -29,8 +29,11 @@ export type RawPublicationList = {
   [key: string]: RawPublicationObject[];
 }
 export type EvidenceCountsContainer = {
+  acceptedOntologyCount: number;
   clinicalTrialCount: number;
   miscCount: number;
+  // Product labels are an upcoming evidence type; nothing populates this yet, so it is always 0.
+  productLabelCount: number;
   publicationCount: number;
   sourceCount: number;
 }

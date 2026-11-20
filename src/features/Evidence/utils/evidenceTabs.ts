@@ -1,5 +1,6 @@
 import type { EvidenceTabName } from '@/features/Evidence/types/navigation';
 import type { EdgeEvidence } from '@/features/Evidence/utils/utilities';
+import { EvidenceTypeKey, formatEvidenceCount } from '@/features/Evidence/utils/evidenceLabels';
 
 /** Heading of the placeholder tab rendered when the edge has no evidence at all. */
 export const NO_EVIDENCE_TAB = 'No Evidence Available';
@@ -14,11 +15,12 @@ export interface EvidenceCounts {
   sources: number;
 }
 
-// "Miscellaneous" reads the same for one item or many, so it has no singular form here.
-const SINGULAR_TAB_LABELS: Partial<Record<EvidenceTabName, string>> = {
-  'Publications': 'Publication',
-  'Clinical Trials': 'Clinical Trial',
-  'Knowledge Sources': 'Knowledge Source',
+// The evidence type behind each tab, whose shared labels give the tab's heading
+const TAB_EVIDENCE_TYPES: Record<EvidenceTabName, EvidenceTypeKey> = {
+  'Publications': 'publications',
+  'Clinical Trials': 'clinicalTrials',
+  'Miscellaneous': 'misc',
+  'Knowledge Sources': 'sources',
 };
 
 /**
@@ -70,9 +72,7 @@ export const tabHasData = (tab: EvidenceTabName, counts: EvidenceCounts): boolea
  * @returns {string} The heading text.
  */
 export const getTabHeading = (tab: EvidenceTabName, counts: EvidenceCounts): string => {
-  const count = getTabCount(tab, counts);
-  const label = count === 1 ? SINGULAR_TAB_LABELS[tab] ?? tab : tab;
-  return `${count.toLocaleString()} ${label}`;
+  return formatEvidenceCount(getTabCount(tab, counts), TAB_EVIDENCE_TYPES[tab]);
 };
 
 /**

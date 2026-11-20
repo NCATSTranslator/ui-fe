@@ -308,6 +308,8 @@ export { getNextCanvasLabel };
 export const selectCanvases = (state: RootState) => state.canvas.canvases;
 export const selectActiveCanvasId = (state: RootState) => state.canvas.activeCanvasId;
 export const selectPaneOpen = (state: RootState) => state.canvas.paneOpen;
+// True while a canvas is showing in the open canvas pane
+export const selectCanvasOpen = (state: RootState) => state.canvas.paneOpen && state.canvas.activeCanvasId !== null;
 export const selectSyncDeferredCanvasIds = (state: RootState) => state.canvas.syncDeferredCanvasIds;
 export const selectPaneMaximized = (state: RootState) => state.canvas.paneMaximized;
 export const selectPaneHeight = (state: RootState) => state.canvas.paneHeight;

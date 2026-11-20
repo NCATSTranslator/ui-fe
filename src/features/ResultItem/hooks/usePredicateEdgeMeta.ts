@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { ResultEdge, ResultSet } from '@/features/ResultList/types/results';
-import { checkEdgesForClinicalTrials, checkEdgesForPubs } from '@/features/Evidence/utils/utilities';
-import { isAcceptedOntologyEdge } from '@/features/ResultItem/utils/utilities';
+import { checkEdgesForClinicalTrials, checkEdgesForPubs, isAcceptedOntologyEdge } from '@/features/Evidence/utils/utilities';
 import { edgesToTooltipEntries } from '@/features/Core/components/Tooltips/tooltipMappers';
 
 /**
