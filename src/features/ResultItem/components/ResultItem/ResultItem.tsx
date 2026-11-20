@@ -58,7 +58,7 @@ const ResultItem: FC<ResultItemProps> = ({
   } = useResultListContext();
   const resultSet = useSelector(getResultSetById(pk));
   const roleCount: number = (!!result) ? Object.keys(result.tags).filter(tag => tag.includes("role")).length : 0;
-  const { evidenceCounts, pathCount } = useResultCounts(resultSet, result);
+  const { evidenceCounts, pathCount, maxEvidenceTotal } = useResultCounts(resultSet, result);
   const user = useSelector(currentUser);
   const decodedParams = useDecodedParams();
   const isLookup = getDataFromQueryVar("t", decodedParams) === 'l';
@@ -111,7 +111,7 @@ const ResultItem: FC<ResultItemProps> = ({
     attributes: resultDragAttributes,
     listeners: resultDragListeners,
     isDragging: isResultDragging,
-    canDrag: canDragResult,
+    showDragCursor: showResultDragCursor,
     onContextMenu: handleResultContextMenu,
   } = useResultCanvasDrag(result.id, pk);
 
@@ -126,7 +126,7 @@ const ResultItem: FC<ResultItemProps> = ({
         'result',
         styles.result,
         isPathfinder && styles.pathfinder,
-        canDragResult && dragStyles.draggable,
+        showResultDragCursor && dragStyles.draggable,
         isResultDragging && dragStyles.dragging,
       )}
       data-result-curie={result.subject}
@@ -210,7 +210,7 @@ const ResultItem: FC<ResultItemProps> = ({
             }
           </div>
         </div>
-        <ResultEvidenceSummary evidenceCounts={evidenceCounts} pathCount={pathCount} />
+        <ResultEvidenceSummary evidenceCounts={evidenceCounts} maxEvidenceTotal={maxEvidenceTotal} pathCount={pathCount} />
       </div>
       <BookmarkConfirmationModal
         isOpen={bookmarkRemovalConfirmationModalOpen}

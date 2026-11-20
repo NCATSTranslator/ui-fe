@@ -48,7 +48,7 @@ const PathEvidenceButton: FC<PathEvidenceButtonProps> = ({ path, pk, pathIndex, 
     listeners: pathDragListeners,
     setNodeRef: setPathDragRef,
     isDragging: isPathDragging,
-    canDrag: canDragPath,
+    showDragCursor: showPathDragCursor,
   } = useResultEntityDraggable(pathDragData);
 
   const handlePathContextMenu = useCallback((e: MouseEvent) => {
@@ -76,7 +76,7 @@ const PathEvidenceButton: FC<PathEvidenceButtonProps> = ({ path, pk, pathIndex, 
         onContextMenu={path.id && canvasEnabled ? handlePathContextMenu : undefined}
         className={joinClasses(
           styles.pathEvidenceButton,
-          canDragPath && dragStyles.draggable,
+          showPathDragCursor && dragStyles.draggable,
           isPathDragging && dragStyles.dragging,
         )}
         data-tooltip-id={tooltipID}

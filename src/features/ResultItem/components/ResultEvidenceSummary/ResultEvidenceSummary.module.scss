@@ -3,16 +3,13 @@
 .evidenceContainer, .pathsContainer {
   display: flex;
   align-items: flex-start;
+  min-width: 0;
 }
-.evidenceLink {
-  font-size: $bodyTwoSize;
+.pathsContainer {
+  // Centers the path count on the evidence bar beside it
+  line-height: $m;
 }
-.pathsNum, .info {
+.pathsNum {
   font-size: $captionSize;
-  line-height: 1.25;
   color: $darkGray;
-}
-.info {
-  display: block;
-  margin-bottom: 2px;
 }

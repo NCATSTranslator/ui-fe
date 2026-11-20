@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { Result, ResultBookmark, ResultSet } from '@/features/ResultList/types/results';
-import { getEvidenceCounts } from '@/features/Evidence/utils/utilities';
+import { getEvidenceCounts, getMaxEvidenceTotal } from '@/features/Evidence/utils/utilities';
 import { getPathCount } from '@/features/Core/utils/resultHelpers';
 
 /**
  * Evidence and path counts for a result, preferring the values precalculated
- * on the result set and falling back to computing them from its paths.
+ * on the result set and falling back to computing them from its paths. Also
+ * returns the largest evidence total of any result in the set, for sizing the
+ * result's evidence bar relative to the rest of the query.
  */
 export const useResultCounts = (resultSet: ResultSet | null, result: Result | ResultBookmark | undefined) => {
   const evidenceCounts = useMemo(
@@ -17,5 +19,7 @@ export const useResultCounts = (resultSet: ResultSet | null, result: Result | Re
     if (!resultSet || !result) return 0;
     return getPathCount(resultSet, result.paths);
   }, [resultSet, result]);
-  return { evidenceCounts, pathCount };
+  // Cached per result set, so every result row shares a single pass over the results
+  const maxEvidenceTotal = getMaxEvidenceTotal(resultSet);
+  return { evidenceCounts, pathCount, maxEvidenceTotal };
 };

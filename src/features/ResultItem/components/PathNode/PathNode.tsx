@@ -54,7 +54,7 @@ const PathNode: FC<PathNodeProps> = ({
     listeners: nodeDragListeners,
     setNodeRef: setNodeDragRef,
     isDragging: isNodeDragging,
-    canDrag: canDragNode,
+    showDragCursor: showNodeDragCursor,
   } = useResultEntityDraggable({ type: 'node', data: { id: node.id, pk } });
 
   const nodeTooltipProps = nodeToTooltipProps(node);
@@ -68,7 +68,7 @@ const PathNode: FC<PathNodeProps> = ({
     inModal && parentStyles.inModal,
     isEven && parentStyles.isEven,
     isHighlighted && parentStyles.highlighted,
-    canDragNode && dragStyles.draggable,
+    showNodeDragCursor && dragStyles.draggable,
     isNodeDragging && dragStyles.dragging,
   );
 
