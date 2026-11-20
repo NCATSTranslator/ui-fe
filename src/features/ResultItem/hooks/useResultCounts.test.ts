@@ -4,6 +4,7 @@ import { useResultCounts } from '@/features/ResultItem/hooks/useResultCounts';
 import { makeTestEdge, makeTestNode, makeTestPath, makeTestResultSet } from '@/features/ResultList/utils/resultTestFixtures';
 import { Result, ResultSet } from '@/features/ResultList/types/results';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
+import { EMPTY_EVIDENCE_COUNTS } from '@/features/Evidence/utils/utilities';
 
 const pubRef = (id: string) => ({ id, support: { object: [0, 0] as [number, number], subject: [0, 0] as [number, number], text: '' }, infores: 'infores:test' });
 
@@ -29,7 +30,7 @@ const makeResult = (overrides: Partial<Result> = {}): Result => ({
 
 describe('useResultCounts', () => {
   it('prefers counts precalculated on the result', () => {
-    const evidenceCount = { publicationCount: 7, clinicalTrialCount: 2, miscCount: 0, sourceCount: 3 };
+    const evidenceCount = { ...EMPTY_EVIDENCE_COUNTS, publicationCount: 7, clinicalTrialCount: 2, sourceCount: 3 };
     const { result } = renderHook(() => useResultCounts(makeSet(), makeResult({ evidenceCount, pathCount: 42 })));
     expect(result.current.evidenceCounts).toBe(evidenceCount);
     expect(result.current.pathCount).toBe(42);
@@ -41,9 +42,53 @@ describe('useResultCounts', () => {
     expect(result.current.pathCount).toBe(2);
   });
 
+  it('counts an accepted ontology edge once per displayed path it appears in', () => {
+    const set = makeSet();
+    set.data.edges.e2.predicate = 'subclass of';
+    // p3 shares p2's node sequence, so the two display as one path and count once
+    set.data.paths.p3 = makeTestPath({ id: 'p3', subgraph: ['n2', 'e2', 'n3'] });
+    const { result } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3'] })));
+    expect(result.current.evidenceCounts?.acceptedOntologyCount).toBe(1);
+    expect(result.current.evidenceCounts?.productLabelCount).toBe(0);
+
+    // p4 has its own node sequence, so its e2 counts again; with e1 also an
+    // ontology edge, p1 counts one and p4 counts two
+    set.data.paths.p4 = makeTestPath({ id: 'p4', subgraph: ['n1', 'e1', 'n2', 'e2', 'n3'] });
+    const { result: shared } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3', 'p4'] })));
+    expect(shared.current.evidenceCounts?.acceptedOntologyCount).toBe(2);
+    set.data.edges.e1.predicate = 'superclass of';
+    const { result: multiple } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3', 'p4'] })));
+    expect(multiple.current.evidenceCounts?.acceptedOntologyCount).toBe(4);
+  });
+
+  it('counts an accepted ontology edge compressed behind another edge, whichever path comes first', () => {
+    const set = makeSet();
+    set.data.edges.e3 = makeTestEdge('e3', { subject: 'n2', object: 'n3', predicate: 'subclass of' });
+    set.data.edges.e4 = makeTestEdge('e4', { subject: 'n2', object: 'n3', predicate: 'superclass of' });
+    set.data.paths.p3 = makeTestPath({ id: 'p3', subgraph: ['n2', 'e3', 'n3'] });
+    set.data.paths.p4 = makeTestPath({ id: 'p4', subgraph: ['n2', 'e4', 'n3'] });
+    const { result } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3'] })));
+    expect(result.current.evidenceCounts?.acceptedOntologyCount).toBe(1);
+    const { result: leading } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p3', 'p2'] })));
+    expect(leading.current.evidenceCounts?.acceptedOntologyCount).toBe(1);
+    // Two ontology edges merged into the same displayed predicate still count once
+    const { result: merged } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3', 'p4'] })));
+    expect(merged.current.evidenceCounts?.acceptedOntologyCount).toBe(1);
+  });
+
+  it('returns the largest evidence total of any result in the set', () => {
+    const set = makeSet();
+    set.data.results = [
+      makeResult({ id: 'r1', evidenceCount: { ...EMPTY_EVIDENCE_COUNTS, publicationCount: 4, sourceCount: 2 } }),
+      makeResult({ id: 'r2', evidenceCount: { ...EMPTY_EVIDENCE_COUNTS, clinicalTrialCount: 9, acceptedOntologyCount: 3 } }),
+    ];
+    const { result } = renderHook(() => useResultCounts(set, set.data.results[0]));
+    expect(result.current.maxEvidenceTotal).toBe(12);
+  });
+
   it('returns empty counts without a result', () => {
     const { result } = renderHook(() => useResultCounts(makeSet(), undefined));
-    expect(result.current).toEqual({ evidenceCounts: null, pathCount: 0 });
+    expect(result.current).toEqual({ evidenceCounts: null, pathCount: 0, maxEvidenceTotal: 0 });
   });
 
   it('returns zero paths without a result set to resolve them against', () => {

@@ -1,5 +1,5 @@
 import { getPathById } from "@/features/ResultList/slices/resultsSlice";
-import { Path, ResultSet, PathFilterState, PathRankState, EntityTags, ResultNode, ResultEdge } from "@/features/ResultList/types/results.d";
+import { Path, ResultSet, PathFilterState, PathRankState, EntityTags, ResultNode } from "@/features/ResultList/types/results.d";
 import cloneDeep from "lodash/cloneDeep";
 import { isNodeIndex } from "@/features/ResultList/utils/resultsInteractionFunctions";
 import { getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
@@ -399,16 +399,6 @@ export const getNodeDescription = (node: ResultNode) => {
   if(node.descriptions && node.descriptions.length > 0)
     return node.descriptions[0];
   return null;
-}
-
-/**
- * Checks if an edge is an accepted ontology edge.
- *
- * @param {ResultEdge} edge - The edge object.
- * @returns {boolean} - Whether the edge is an accepted ontology edge.
- */
-export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
-  return edge.predicate === "subclass of" || edge.predicate === "superclass of";
 }
 
 /**
