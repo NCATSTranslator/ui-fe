@@ -15,8 +15,6 @@ const SEGMENT_ICONS: Partial<Record<EvidenceTypeKey, FC<SVGProps<SVGSVGElement>>
   publications: PubIcon,
   clinicalTrials: CTIcon,
   acceptedOntologies: AcceptedOntologyIcon,
-  misc: MiscIcon,
-  sources: SourceIcon,
 };
 
 interface EvidenceBarProps {

@@ -15,10 +15,10 @@ $barHeight: $m;
   // Reserves room for a four-digit total so bars line up from row to row
   min-width: 4ch;
   text-align: right;
-  font-size: $captionSize;
+  font-size: $bodyTwoSize;
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
-  color: $darkGray;
+  color: $black;
 }
 
 // Read by screen readers only
