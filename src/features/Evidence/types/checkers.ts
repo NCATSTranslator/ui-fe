@@ -1,7 +1,6 @@
 import * as tc from "@/features/Core/types/checkers";
 import { EdgeProvenance, Provenance, ProvenanceCatalogEntry, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
-import { EvidenceTabName } from "./navigation";
 
 /**
  * Type guard to check if an object is a Provenance object.
@@ -153,12 +152,35 @@ export const isPublicationDictionary = (publications: unknown, warn = false): pu
   return true;
 }
 
+const DRUG_LABEL_HOST = 'dailymed.nlm.nih.gov';
+
 /**
- * Checks if a string is a valid evidence tab name.
+ * Checks if a link points to a drug label. Drug labels are the label pages hosted on DailyMed.
  *
- * @param tab - The string to check.
- * @returns {boolean} True if the string is a valid evidence tab name, otherwise false.
+ * @param {string | null | undefined} url - The link to check.
+ * @returns {boolean} True if the link is hosted on DailyMed, otherwise false.
  */
-export const isValidEvidenceTabName = (tab: string): tab is EvidenceTabName => {
-  return tab === 'Publications' || tab === 'Clinical Trials' || tab === 'Miscellaneous' || tab === 'Knowledge Sources';
+export const isDrugLabelUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  try {
+    return new URL(url).hostname.toLowerCase() === DRUG_LABEL_HOST;
+  } catch {
+    return false;
+  }
 }
+
+/** What a piece of link evidence is shown and counted as. */
+export type EvidenceLinkKind = 'publication' | 'drugLabel' | 'misc';
+
+/**
+ * Sorts a piece of link evidence into its kind: a PubMed or PMC publication, a drug label
+ * (a DailyMed link), or miscellaneous for every other link. The result evidence counts and the
+ * evidence view both use this, so the two always agree.
+ *
+ * @param {PublicationObject} item - The evidence to classify.
+ * @returns {EvidenceLinkKind} The kind of evidence the item is.
+ */
+export const classifyEvidenceLink = (item: PublicationObject): EvidenceLinkKind => {
+  if (isPublication(item)) return 'publication';
+  return isDrugLabelUrl(item.url) ? 'drugLabel' : 'misc';
+};
