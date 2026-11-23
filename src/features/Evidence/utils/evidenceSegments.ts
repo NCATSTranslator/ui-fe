@@ -12,7 +12,7 @@ export interface EvidenceSegment {
 export const EVIDENCE_COUNT_KEYS: [EvidenceTypeKey, keyof EvidenceCountsContainer][] = [
   ['publications', 'publicationCount'],
   ['clinicalTrials', 'clinicalTrialCount'],
-  ['productLabels', 'productLabelCount'],
+  ['drugLabels', 'drugLabelCount'],
   ['acceptedOntologies', 'acceptedOntologyCount'],
   ['misc', 'miscCount'],
   ['sources', 'sourceCount'],

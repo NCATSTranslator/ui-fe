@@ -4,7 +4,7 @@ import PubIcon from '@/assets/icons/status/HasPub.svg?react';
 import CTIcon from '@/assets/icons/status/HasCT.svg?react';
 import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
 import styles from './Tooltips.module.scss';
-import { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 
 export interface EdgeTooltipEntry {
   id: string;
@@ -15,7 +15,7 @@ export interface EdgeTooltipEntry {
 }
 
 export interface PredicateClickOptions {
-  tab?: EvidenceTabName;
+  tab?: EvidenceSectionName;
 }
 
 export interface EdgeTooltipContentProps {
@@ -89,7 +89,7 @@ const EdgeTooltipContent: FC<EdgeTooltipContentProps> = ({
                 isAcceptedOntology &&
                 <span
                   className={styles.count}
-                  onClick={(e) => onPredicateClick?.(e, edge.id, { tab: 'Knowledge Sources' })}
+                  onClick={(e) => onPredicateClick?.(e, edge.id, { tab: 'Accepted Ontology' })}
                 >
                   <AcceptedOntologyIcon /> Accepted Ontology
                 </span>

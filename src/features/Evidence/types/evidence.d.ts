@@ -32,8 +32,8 @@ export type EvidenceCountsContainer = {
   acceptedOntologyCount: number;
   clinicalTrialCount: number;
   miscCount: number;
-  // Product labels are an upcoming evidence type; nothing populates this yet, so it is always 0.
-  productLabelCount: number;
+  // DailyMed links, counted separately from the rest of the miscellaneous evidence
+  drugLabelCount: number;
   publicationCount: number;
   sourceCount: number;
 }
@@ -62,17 +62,13 @@ export type PublicationSupport = {
 
 export type KnowledgeLevel = "trusted" | "ml" | "unknown" | "";
 
-export type EvidenceSortState = {
-  date: null | boolean;
-  journal: null | boolean;
-  title: null | boolean;
-}
-
 export type TrialObject = {
   child: boolean;
   id?: string;
   phase: number;
   size: number;
+  // The clinical trials source of the edge the trial is attached to, if the edge has it (see getTrialSources)
+  sources?: Provenance[];
   start_date: string;
   status: string;
   title?: string;
@@ -97,18 +93,5 @@ export type PubmedMetadataMap = {
   [id: string]: PubmedMetadata;
 };
 
-export type SortingState = {
-  title: boolean | null;
-  journal: boolean | null;
-  date: boolean | null;
-};
-
-export type KnowledgeLevelFilterType = 'all' | 'trusted' | 'ml';
-
 export type SortPreference = 'dateHighLow' | 'dateLowHigh' | 'journalHighLow' | 'journalLowHigh' | 'titleHighLow' | 'titleLowHigh';
 
-export type TableState = {
-  knowledgeLevelFilter: KnowledgeLevelFilterType;
-  sortingState: SortingState;
-  isLoading: boolean;
-}

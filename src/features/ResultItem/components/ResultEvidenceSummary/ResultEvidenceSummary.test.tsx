@@ -10,7 +10,7 @@ describe('ResultEvidenceSummary', () => {
   it('shows the evidence bar beside the path count', () => {
     render(<ResultEvidenceSummary evidenceCounts={counts({ publicationCount: 3, sourceCount: 4 })} maxEvidenceTotal={10} pathCount={3} />);
     expect(screen.getByLabelText('3 Publications')).toBeInTheDocument();
-    expect(screen.getByLabelText('4 Knowledge Sources')).toBeInTheDocument();
+    expect(screen.getByLabelText('4 Databases')).toBeInTheDocument();
     expect(screen.getByText('7')).toHaveTextContent('7 total evidence');
     expect(screen.getByText('3 Paths')).toBeInTheDocument();
   });

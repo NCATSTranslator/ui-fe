@@ -8,10 +8,10 @@ const counts = (overrides: Partial<EvidenceCountsContainer> = {}): EvidenceCount
 describe('getEvidenceSegments', () => {
   it('returns a segment per evidence type with items, in display order', () => {
     const segments = getEvidenceSegments(counts({
-      sourceCount: 5, miscCount: 4, acceptedOntologyCount: 3, productLabelCount: 2, clinicalTrialCount: 6, publicationCount: 1200,
+      sourceCount: 5, miscCount: 4, acceptedOntologyCount: 3, drugLabelCount: 2, clinicalTrialCount: 6, publicationCount: 1200,
     }));
     expect(segments.map((segment) => segment.key)).toEqual(
-      ['publications', 'clinicalTrials', 'productLabels', 'acceptedOntologies', 'misc', 'sources']
+      ['publications', 'clinicalTrials', 'drugLabels', 'acceptedOntologies', 'misc', 'sources']
     );
     expect(segments[0]).toEqual({ key: 'publications', count: 1200, label: `${(1200).toLocaleString()} Publications` });
   });
@@ -22,10 +22,10 @@ describe('getEvidenceSegments', () => {
 
   it('uses the singular type name for a single item', () => {
     const labels = getEvidenceSegments(counts({
-      publicationCount: 1, clinicalTrialCount: 1, productLabelCount: 1, acceptedOntologyCount: 1, miscCount: 1, sourceCount: 1,
+      publicationCount: 1, clinicalTrialCount: 1, drugLabelCount: 1, acceptedOntologyCount: 1, miscCount: 1, sourceCount: 1,
     })).map((segment) => segment.label);
     expect(labels).toEqual([
-      '1 Publication', '1 Clinical Trial', '1 Product Label', '1 Accepted Ontology', '1 Miscellaneous', '1 Knowledge Source',
+      '1 Publication', '1 Clinical Trial', '1 Drug Label', '1 Accepted Ontology', '1 Miscellaneous', '1 Database',
     ]);
   });
 
