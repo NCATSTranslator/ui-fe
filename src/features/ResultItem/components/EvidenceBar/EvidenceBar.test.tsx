@@ -16,8 +16,8 @@ describe('EvidenceBar', () => {
   });
 
   it('sizes the bar relative to the largest evidence total in the query', () => {
-    render(<EvidenceBar evidenceCounts={counts({ publicationCount: 9 })} maxEvidenceTotal={99} />);
-    const track = screen.getByLabelText('9 Publications').parentElement as HTMLElement;
+    render(<EvidenceBar evidenceCounts={counts({ publicationCount: 10 })} maxEvidenceTotal={100} />);
+    const track = screen.getByLabelText('10 Publications').parentElement as HTMLElement;
     expect(Number(track.style.getPropertyValue('--bar-scale'))).toBeCloseTo(0.5);
     expect(track.style.getPropertyValue('--segment-count')).toBe('1');
   });

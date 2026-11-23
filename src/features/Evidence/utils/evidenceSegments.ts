@@ -41,7 +41,8 @@ export const getEvidenceSegments = (counts: EvidenceCountsContainer | null): Evi
  * Fraction of the available width a result's evidence bar should span, relative to the result
  * with the most evidence in the query. Log scaled so that an outlier with far more evidence than
  * the rest does not shrink results that still have a lot of evidence down to the minimum width:
- * a result with a third of the maximum still spans most of the width.
+ * a result with a third of the maximum still spans most of the width. A single piece of evidence
+ * scales to 0, so the bar falls back to its minimum width.
  *
  * @param {number} total - The result's total evidence count.
  * @param {number} maxTotal - The largest total evidence count of any result in the query.
@@ -49,5 +50,6 @@ export const getEvidenceSegments = (counts: EvidenceCountsContainer | null): Evi
  */
 export const getEvidenceBarScale = (total: number, maxTotal: number): number => {
   if (total <= 0 || maxTotal <= 0) return 0;
-  return Math.min(1, Math.log1p(total) / Math.log1p(maxTotal));
+  if (total >= maxTotal) return 1;
+  return Math.max(0, Math.log(total) / Math.log(maxTotal));
 };

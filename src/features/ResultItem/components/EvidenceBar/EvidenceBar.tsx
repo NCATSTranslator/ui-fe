@@ -7,16 +7,12 @@ import { getEvidenceBarScale, getEvidenceSegments } from '@/features/Evidence/ut
 import PubIcon from '@/assets/icons/status/HasPub.svg?react';
 import CTIcon from '@/assets/icons/status/HasCT.svg?react';
 import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
-import MiscIcon from '@/assets/icons/queries/Evidence.svg?react';
-import SourceIcon from '@/assets/icons/navigation/Database.svg?react';
 
 // Product labels have no icon asset yet, so their hover label shows text only
 const SEGMENT_ICONS: Partial<Record<EvidenceTypeKey, FC<SVGProps<SVGSVGElement>>>> = {
   publications: PubIcon,
   clinicalTrials: CTIcon,
   acceptedOntologies: AcceptedOntologyIcon,
-  misc: MiscIcon,
-  sources: SourceIcon,
 };
 
 interface EvidenceBarProps {
