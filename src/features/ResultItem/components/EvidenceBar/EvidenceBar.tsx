@@ -1,19 +1,10 @@
-import { CSSProperties, FC, SVGProps, useMemo, useState } from 'react';
+import { CSSProperties, FC, useMemo, useState } from 'react';
 import styles from './EvidenceBar.module.scss';
 import { EvidenceCountsContainer } from '@/features/Evidence/types/evidence';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { EvidenceTypeKey } from '@/features/Evidence/utils/evidenceLabels';
 import { getEvidenceBarScale, getEvidenceSegments } from '@/features/Evidence/utils/evidenceSegments';
-import PubIcon from '@/assets/icons/status/HasPub.svg?react';
-import CTIcon from '@/assets/icons/status/HasCT.svg?react';
-import AcceptedOntologyIcon from '@/assets/icons/queries/Accepted Ontology.svg?react';
-
-// Product labels have no icon asset yet, so their hover label shows text only
-const SEGMENT_ICONS: Partial<Record<EvidenceTypeKey, FC<SVGProps<SVGSVGElement>>>> = {
-  publications: PubIcon,
-  clinicalTrials: CTIcon,
-  acceptedOntologies: AcceptedOntologyIcon,
-};
+import { EVIDENCE_TYPE_ICONS } from '@/features/Evidence/utils/evidenceIcons';
 
 interface EvidenceBarProps {
   evidenceCounts: EvidenceCountsContainer | null;
@@ -32,7 +23,7 @@ const EvidenceBar: FC<EvidenceBarProps> = ({ evidenceCounts, maxEvidenceTotal })
   const segments = useMemo(() => getEvidenceSegments(evidenceCounts), [evidenceCounts]);
   const total = segments.reduce((sum, segment) => sum + segment.count, 0);
   const hovered = segments.find((segment) => segment.key === hoveredKey);
-  const HoveredIcon = hovered ? SEGMENT_ICONS[hovered.key] : undefined;
+  const HoveredIcon = hovered ? EVIDENCE_TYPE_ICONS[hovered.key] : undefined;
   const trackStyle = {
     '--bar-scale': getEvidenceBarScale(total, maxEvidenceTotal),
     '--segment-count': segments.length,

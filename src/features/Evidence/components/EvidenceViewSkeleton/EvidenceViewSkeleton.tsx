@@ -3,6 +3,15 @@ import SkeletonBar from '@/features/Core/components/SkeletonBar/SkeletonBar';
 import styles from './EvidenceViewSkeleton.module.scss';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 
+const SkeletonSection: FC<{ rows: number }> = ({ rows }) => (
+  <div className={styles.section}>
+    <SkeletonBar width="160px" height="20px" />
+    {Array.from({ length: rows }, (_, i) => (
+      <SkeletonBar key={i} width="100%" height="55px" />
+    ))}
+  </div>
+);
+
 const EvidenceViewSkeleton: FC = () => {
   return (
     <div className={styles.container}>
@@ -17,17 +26,14 @@ const EvidenceViewSkeleton: FC = () => {
         height="64px"
         className={styles.pathPlaceholder}
       />
-      <div>
-        <div className={styles.tabBar}>
-          <SkeletonBar width="80px" height="40px" />
-          <SkeletonBar width="90px" height="40px" />
-          <SkeletonBar width="110px" height="40px" />
+      <div className={styles.grid}>
+        <div className={styles.column}>
+          <SkeletonSection rows={3} />
+          <SkeletonSection rows={3} />
         </div>
-        <div className={styles.tableRows}>
-          <SkeletonBar width="100%" height="40px" />
-          <SkeletonBar width="100%" height="55px" />
-          <SkeletonBar width="100%" height="55px" />
-          <SkeletonBar width="100%" height="55px" />
+        <div className={styles.column}>
+          <SkeletonSection rows={2} />
+          <SkeletonSection rows={3} />
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useLatest } from '@/features/Core/hooks/useLatest';
 import { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
 import { scrollToRef } from '@/features/Core/utils/arrayHelpers';
 import { ResultSet, ResultEdge, Path } from '@/features/ResultList/types/results.d';
@@ -157,8 +158,7 @@ const useEvidenceViewEdgeInteractions = ({
   nodeNameLookupSettled = true,
 }: EdgeInteractionParams) => {
   const resultsNavigate = useResultsNavigate();
-  const decodedParamsRef = useRef(decodedParams);
-  decodedParamsRef.current = decodedParams;
+  const decodedParamsRef = useLatest(decodedParams);
   const { selectedEdge, setSelectedEdge, selectedEdgeRef, selectedEdgeDomRef } = useSelectedEdgeState();
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
@@ -166,6 +166,7 @@ const useEvidenceViewEdgeInteractions = ({
     publications,
     sources,
     clinicalTrials,
+    drugLabels,
     miscEvidence,
     handleSelectedEdge: handleEvidenceData,
     setPublications,
@@ -225,6 +226,7 @@ const useEvidenceViewEdgeInteractions = ({
     publications,
     setPublications,
     clinicalTrials,
+    drugLabels,
     miscEvidence,
     sources,
   };

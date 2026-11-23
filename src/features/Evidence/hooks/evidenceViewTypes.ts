@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, RefObject } from 'react';
 import { ResultSet, ResultEdge, ResultNode, Path, Result } from '@/features/ResultList/types/results.d';
-import { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 import { PublicationObject, Provenance, TrialObject } from '@/features/Evidence/types/evidence';
 import { Preferences } from '@/features/UserAuth/types/user';
 
@@ -22,10 +22,11 @@ export interface EvidenceViewContentProps {
   publications: PublicationObject[];
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
   clinicalTrials: TrialObject[];
+  drugLabels: PublicationObject[];
   miscEvidence: PublicationObject[];
   sources: Provenance[];
   prefs: Preferences;
-  initialTab: EvidenceTabName | undefined;
+  initialSection: EvidenceSectionName | undefined;
   isCanvasOnlyMode: boolean;
 }
 
