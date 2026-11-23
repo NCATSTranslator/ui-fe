@@ -1,7 +1,6 @@
 import { Dispatch, FC, SetStateAction, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import LoadingBar from '@/features/Core/components/LoadingBar/LoadingBar';
-import { Preferences } from '@/features/UserAuth/types/user';
 import { PublicationObject } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results';
 import { getNodeById, getResultSetById } from '@/features/ResultList/slices/resultsSlice';
@@ -11,7 +10,7 @@ import cardStyles from '@/features/Evidence/components/EvidenceSection/evidenceC
 
 interface PublicationsListProps {
   pk: string;
-  prefs: Preferences;
+  /** Already in display order (see sortPublications). */
   publications: PublicationObject[];
   selectedEdge: ResultEdge | null;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
@@ -21,13 +20,11 @@ interface PublicationsListProps {
 }
 
 /**
- * The publications supporting the selected relationship. Titles, journals, years, and snippets
- * are filled in from PubMed after mounting, and the list is then ordered by the user's evidence
- * sort preference, newest first by default.
+ * The publications supporting the selected relationship, in the order given. Titles, journals,
+ * years, and snippets are filled in from PubMed after mounting.
  */
 const PublicationsList: FC<PublicationsListProps> = ({
   pk,
-  prefs,
   publications,
   selectedEdge,
   setPublications,
@@ -38,7 +35,6 @@ const PublicationsList: FC<PublicationsListProps> = ({
   usePubmedDataFetch({
     publications,
     selectedEdgeId: selectedEdge?.id || null,
-    prefs,
     setPublications,
     setIsLoading,
   });

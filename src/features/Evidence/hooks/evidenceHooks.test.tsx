@@ -49,12 +49,10 @@ const makePublication = (id: string, overrides: Partial<PublicationObject> = {})
   ...overrides,
 });
 
-const PREFS = {} as Preferences;
-
 const useFetchHarness = (initial: PublicationObject[]) => {
   const [publications, setPublications] = useState(initial);
   const [isLoading, setIsLoading] = useState(true);
-  usePubmedDataFetch({ publications, selectedEdgeId: 'e1', prefs: PREFS, setPublications, setIsLoading });
+  usePubmedDataFetch({ publications, selectedEdgeId: 'e1', setPublications, setIsLoading });
   return { publications, isLoading };
 };
 
@@ -123,8 +121,8 @@ describe('usePubmedDataFetch', () => {
       url: generatePubmedURL('PMID:1'),
     });
     expect(byId['PMID:2']).toMatchObject({ title: 'Second Title', pubdate: '2021' });
-    // Default sort is newest first.
-    expect(result.current.publications.map(p => p.id)).toEqual(['PMID:2', 'PMID:1']);
+    // Ordering is the evidence view's job, so the hook leaves the list as it was given.
+    expect(result.current.publications.map(p => p.id)).toEqual(['PMID:1', 'PMID:2']);
   });
 
   it('falls back to the production annotator when config supplies no endpoint', async () => {
@@ -252,7 +250,7 @@ describe('usePubmedDataFetch', () => {
           setPublications(next);
         }, []);
         usePubmedDataFetch({
-          publications, selectedEdgeId: edgeId, prefs: PREFS,
+          publications, selectedEdgeId: edgeId,
           setPublications: recordingSetPublications, setIsLoading,
         });
         return { publications, isLoading, setPublications };

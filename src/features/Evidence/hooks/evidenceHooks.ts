@@ -1,7 +1,6 @@
 import { ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo, RefObject } from "react";
-import { PublicationObject, SortPreference, Provenance, ProvenanceCatalogEntry, TrialObject } from "@/features/Evidence/types/evidence";
-import { Preferences } from "@/features/UserAuth/types/user";
+import { PublicationObject, Provenance, ProvenanceCatalogEntry, TrialObject } from "@/features/Evidence/types/evidence";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
 import chunk from "lodash/chunk";
@@ -14,8 +13,7 @@ import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateT
   flattenPublicationObject, flattenTrialObject, formatEvidenceEdgeLabel, getTrialSources } from "@/features/Evidence/utils/utilities";
 import { classifyEvidenceLink } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
-import { getSortingFunction } from "@/features/Evidence/utils/publicationSorting";
-import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
+import { compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
 
 // The publications endpoint rejects any request for more than 100 ids with a 400
 const QUERY_AMOUNT = 100;
@@ -35,7 +33,6 @@ const INITIAL_FETCH_STATE: FetchState = {
 export interface UsePubmedDataFetchProps {
   publications: PublicationObject[];
   selectedEdgeId: string | null;
-  prefs: Preferences;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
   /** Reports whether metadata is still being fetched, so the caller can hold the list back until it is. */
   setIsLoading: (isLoading: boolean) => void;
@@ -56,13 +53,6 @@ const insertAdditionalPubmedData = (data: PubmedMetadataMap, existing: Publicati
     }
   });
   return newEvidence;
-};
-
-// Orders publications by the user's evidence sort preference, newest first when there is none
-const sortPublications = (prefs: Preferences, publications: PublicationObject[]): PublicationObject[] => {
-  const sortPreference = prefs?.evidence_sort?.pref_value as SortPreference;
-  const sortFn = (sortPreference && getSortingFunction(sortPreference)) || sortDateYearHighLow;
-  return sortFn(publications);
 };
 
 const processChunks = async (
@@ -139,7 +129,8 @@ export const usePublicationMetadataEndpoint = (): string => {
 };
 
 /**
- * Custom hook to fetch and manage PubMed metadata for publications in the evidence view.
+ * Custom hook to fetch and manage PubMed metadata for publications in the evidence view. It fills
+ * in details only; the evidence view orders the list (see sortPublications).
  *
  * @param {UsePubmedDataFetchProps} props - The publications to enrich and the callbacks that receive the results.
  * @returns {void} - This function does not return a value but updates the state directly.
@@ -147,7 +138,6 @@ export const usePublicationMetadataEndpoint = (): string => {
 export const usePubmedDataFetch = ({
   publications,
   selectedEdgeId,
-  prefs,
   setPublications,
   setIsLoading,
 }: UsePubmedDataFetchProps) => {
@@ -183,7 +173,7 @@ export const usePubmedDataFetch = ({
       if (signal.aborted) return;
 
       if (totalProcessed > 0) {
-        setPublications(sortPublications(prefs, insertAdditionalPubmedData(accumulatedMetadata, publications)));
+        setPublications(insertAdditionalPubmedData(accumulatedMetadata, publications));
       }
 
       setFetchState(prev => ({ ...prev, isFetching: false, hasFetched: true }));
@@ -196,7 +186,7 @@ export const usePubmedDataFetch = ({
       // Only clear our own controller: a newer run may already have replaced it.
       if (abortControllerRef.current === controller) abortControllerRef.current = null;
     }
-  }, [publications, prefs, setPublications, setIsLoading, metadataEndpoint]);
+  }, [publications, setPublications, setIsLoading, metadataEndpoint]);
 
   useEffect(() => {
     return () => { if (abortControllerRef.current) abortControllerRef.current.abort(); };
