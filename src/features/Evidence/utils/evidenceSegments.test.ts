@@ -42,7 +42,12 @@ describe('getEvidenceBarScale', () => {
   });
 
   it('scales logarithmically against the maximum', () => {
-    expect(getEvidenceBarScale(9, 99)).toBeCloseTo(0.5);
+    expect(getEvidenceBarScale(10, 100)).toBeCloseTo(0.5);
+  });
+
+  it('scales a single piece of evidence to zero so its bar takes the minimum width', () => {
+    expect(getEvidenceBarScale(1, 2837)).toBe(0);
+    expect(getEvidenceBarScale(1, 1)).toBe(1);
   });
 
   it('keeps evidence-rich results long beside an outlier, and orders bars by total', () => {
