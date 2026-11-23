@@ -78,8 +78,8 @@ export const HowToUseTranslator = () => {
         collected by Translator’s{' '}
         <Link to="/about-translator#reasoning-agents">reasoning agents</Link>.{' '}
         <strong>Click on the connecting terms between entities</strong> (e.g., “impacts,” “associated with,” “subclass of”) to view supporting evidence, which may include{' '}
-        <strong>publications</strong>, <strong>clinical trials</strong>, <strong>miscellaneous data</strong>, and{' '}
-        <strong>knowledge sources</strong> that provide the underlying reasoning for the relationship.
+        <strong>publications</strong>, <strong>clinical trials</strong>, <strong>drug labels</strong>, <strong>miscellaneous data</strong>, and{' '}
+        <strong>databases</strong> that provide the underlying reasoning for the relationship.
       </p>
 
       <p style={{textAlign: 'center', margin: '30px auto', border: '1px solid #CED0D0', borderRadius: '8px', overflow: 'hidden'}}><img src={HelpEvidence} alt="Evidence supporting a relationship" style={{display: 'block'}} /></p>
