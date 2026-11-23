@@ -1,6 +1,6 @@
 import { ResultSet, ResultEdge } from "@/features/ResultList/types/results.d";
 import { useCallback, useState, useRef, useEffect, Dispatch, SetStateAction, useMemo, RefObject } from "react";
-import { PublicationObject, SortPreference, TableState, Provenance, ProvenanceCatalogEntry, TrialObject } from "@/features/Evidence/types/evidence";
+import { PublicationObject, SortPreference, Provenance, ProvenanceCatalogEntry, TrialObject } from "@/features/Evidence/types/evidence";
 import { Preferences } from "@/features/UserAuth/types/user";
 import { PubmedMetadataMap } from "@/features/Evidence/types/evidence";
 import cloneDeep from "lodash/cloneDeep";
@@ -11,14 +11,14 @@ import { useSelector } from "react-redux";
 import { currentConfig } from "@/features/UserAuth/slices/userSlice";
 import { fetchPublicationMetadata, PUBLICATION_METADATA_FALLBACK_ENDPOINT } from "@/features/Evidence/utils/publicationMetadataApi";
 import { generatePubmedURL, updatePubdate, updateSnippet, updateJournal, updateTitle,
-  flattenPublicationObject, flattenTrialObject, formatEvidenceEdgeLabel } from "@/features/Evidence/utils/utilities";
-import { isPublication } from "@/features/Evidence/types/checkers";
+  flattenPublicationObject, flattenTrialObject, formatEvidenceEdgeLabel, getTrialSources } from "@/features/Evidence/utils/utilities";
+import { classifyEvidenceLink } from "@/features/Evidence/types/checkers";
 import { getEdgeProvenance } from "@/features/ResultList/slices/resultsSlice";
-import { getSortingFunction, getSortingStateUpdate } from "@/features/Evidence/utils/evidenceModalFunctions";
+import { getSortingFunction } from "@/features/Evidence/utils/publicationSorting";
 import { sortDateYearHighLow, compareByKeyLexographic } from "@/features/Core/utils/sortingFunctions";
 
-const QUERY_AMOUNT = 200;
-export const DEFAULT_ITEMS_PER_PAGE = 5;
+// The publications endpoint rejects any request for more than 100 ids with a 400
+const QUERY_AMOUNT = 100;
 
 interface FetchState {
   isFetching: boolean;
@@ -33,12 +33,12 @@ const INITIAL_FETCH_STATE: FetchState = {
 };
 
 export interface UsePubmedDataFetchProps {
-  isOpen: boolean;
   publications: PublicationObject[];
   selectedEdgeId: string | null;
   prefs: Preferences;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
-  updateState: (updates: Partial<TableState>) => void;
+  /** Reports whether metadata is still being fetched, so the caller can hold the list back until it is. */
+  setIsLoading: (isLoading: boolean) => void;
 }
 
 const insertAdditionalPubmedData = (data: PubmedMetadataMap, existing: PublicationObject[]): PublicationObject[] => {
@@ -58,39 +58,24 @@ const insertAdditionalPubmedData = (data: PubmedMetadataMap, existing: Publicati
   return newEvidence;
 };
 
-const applySortingAndUpdate = (
-  prefs: Preferences,
-  dataToSort: PublicationObject[],
-  setPublications: Dispatch<SetStateAction<PublicationObject[]>>,
-  updateState: (updates: Partial<TableState>) => void
-) => {
+// Orders publications by the user's evidence sort preference, newest first when there is none
+const sortPublications = (prefs: Preferences, publications: PublicationObject[]): PublicationObject[] => {
   const sortPreference = prefs?.evidence_sort?.pref_value as SortPreference;
-
-  const sortFn = getSortingFunction(sortPreference);
-  if (sortPreference && sortFn) {
-    const sortedData = sortFn(dataToSort) as PublicationObject[];
-    const newSortingState = getSortingStateUpdate(sortPreference);
-    setPublications(sortedData);
-    updateState({ sortingState: newSortingState });
-  } else {
-    const defaultSortedData = sortDateYearHighLow(dataToSort);
-    setPublications(defaultSortedData);
-    updateState({ sortingState: { title: null, journal: null, date: true } });
-  }
+  const sortFn = (sortPreference && getSortingFunction(sortPreference)) || sortDateYearHighLow;
+  return sortFn(publications);
 };
 
 const processChunks = async (
   endpoint: string,
   chunksArr: string[][],
   signal: AbortSignal,
-  isOpen: boolean,
   setFetchState: Dispatch<SetStateAction<FetchState>>
 ): Promise<{ accumulatedMetadata: PubmedMetadataMap; totalProcessed: number }> => {
   let accumulatedMetadata: PubmedMetadataMap = {};
   let totalProcessed = 0;
 
   for (const idChunk of chunksArr) {
-    if (signal.aborted || !isOpen) {
+    if (signal.aborted) {
       console.warn('Fetch operation aborted');
       break;
     }
@@ -127,7 +112,7 @@ const setupPubmedDataFetch = (
 };
 
 const resetFetchState = (
-  updateState: (updates: Partial<TableState>) => void,
+  setIsLoading: (isLoading: boolean) => void,
   abortControllerRef: RefObject<AbortController | null>,
   setFetchState: Dispatch<SetStateAction<FetchState>>
 ) => {
@@ -137,11 +122,7 @@ const resetFetchState = (
     abortControllerRef.current = null;
   }
 
-  updateState({
-    sortingState: { title: null, journal: null, date: null },
-    knowledgeLevelFilter: 'all',
-    isLoading: true,
-  });
+  setIsLoading(true);
 
   setFetchState(INITIAL_FETCH_STATE);
 };
@@ -158,18 +139,17 @@ export const usePublicationMetadataEndpoint = (): string => {
 };
 
 /**
- * Custom hook to fetch and manage PubMed metadata for publications in the evidence modal.
+ * Custom hook to fetch and manage PubMed metadata for publications in the evidence view.
  *
- * @param {UsePubmedDataFetchProps} props - Props containing modal state and callbacks.
+ * @param {UsePubmedDataFetchProps} props - The publications to enrich and the callbacks that receive the results.
  * @returns {void} - This function does not return a value but updates the state directly.
  */
 export const usePubmedDataFetch = ({
-  isOpen,
   publications,
   selectedEdgeId,
   prefs,
   setPublications,
-  updateState,
+  setIsLoading,
 }: UsePubmedDataFetchProps) => {
   const [processedEvidenceIDs, setProcessedEvidenceIDs] = useState<string[][]>([]);
   const [fetchState, setFetchState] = useState<FetchState>(INITIAL_FETCH_STATE);
@@ -182,7 +162,7 @@ export const usePubmedDataFetch = ({
     chunksArr: string[][],
     totalItems: number
   ): Promise<void> => {
-    if (!isOpen || chunksArr.length === 0) return;
+    if (chunksArr.length === 0) return;
 
     // A newer run supersedes any run still in flight, so that run can never be orphaned un-aborted.
     abortControllerRef.current?.abort();
@@ -196,28 +176,27 @@ export const usePubmedDataFetch = ({
 
     try {
       const { accumulatedMetadata, totalProcessed } =
-        await processChunks(metadataEndpoint, chunksArr, signal, isOpen, setFetchState);
+        await processChunks(metadataEndpoint, chunksArr, signal, setFetchState);
 
       // An aborted run belongs to a previous edge (or an unmounted modal); whoever aborted it owns
       // the state from here, so its partial metadata must not be written over the current one.
       if (signal.aborted) return;
 
       if (totalProcessed > 0) {
-        const dataToSort = insertAdditionalPubmedData(accumulatedMetadata, publications);
-        applySortingAndUpdate(prefs, dataToSort, setPublications, updateState);
+        setPublications(sortPublications(prefs, insertAdditionalPubmedData(accumulatedMetadata, publications)));
       }
 
       setFetchState(prev => ({ ...prev, isFetching: false, hasFetched: true }));
-      updateState({ isLoading: false });
+      setIsLoading(false);
     } catch (error) {
       console.error('Error in fetchPubmedData:', error);
       setFetchState(prev => ({ ...prev, isFetching: false, hasFetched: true }));
-      updateState({ isLoading: false });
+      setIsLoading(false);
     } finally {
       // Only clear our own controller: a newer run may already have replaced it.
       if (abortControllerRef.current === controller) abortControllerRef.current = null;
     }
-  }, [isOpen, publications, prefs, setPublications, updateState, metadataEndpoint]);
+  }, [publications, prefs, setPublications, setIsLoading, metadataEndpoint]);
 
   useEffect(() => {
     return () => { if (abortControllerRef.current) abortControllerRef.current.abort(); };
@@ -233,22 +212,22 @@ export const usePubmedDataFetch = ({
 
   useEffect(() => {
     if (publications.length === 0 && didMountRef.current) {
-      updateState({ isLoading: false });
+      setIsLoading(false);
       return;
     }
     didMountRef.current = true;
     if (publications.length > 0) {
       if (fetchState.hasFetched) {
-        updateState({ isLoading: false });
+        setIsLoading(false);
       } else {
         setupPubmedDataFetch(publications, setProcessedEvidenceIDs, setFetchState);
       }
     }
-  }, [publications, isOpen, updateState, fetchState.hasFetched]);
+  }, [publications, setIsLoading, fetchState.hasFetched]);
 
   useEffect(() => {
     if (selectedEdgeId !== null && prevSelectedEdgeId.current !== selectedEdgeId) {
-      resetFetchState(updateState, abortControllerRef, setFetchState);
+      resetFetchState(setIsLoading, abortControllerRef, setFetchState);
       setTimeout(() => {
         if (publications.length > 0) {
           setupPubmedDataFetch(publications, setProcessedEvidenceIDs, setFetchState);
@@ -256,44 +235,26 @@ export const usePubmedDataFetch = ({
       }, 0);
       prevSelectedEdgeId.current = selectedEdgeId;
     }
-  }, [selectedEdgeId, publications, updateState]);
-};
-
-/**
- * Custom hook to manage the publication table state including sorting and filtering.
- * Pagination is handled separately by usePagination.
- *
- * @returns {[TableState, (updates: Partial<TableState>) => void]} Returns a tuple containing the current table state and a function to update it.
- */
-export const usePubTableState = (): [TableState, (updates: Partial<TableState>) => void] => {
-  const [state, setState] = useState<TableState>({
-    knowledgeLevelFilter: 'all',
-    sortingState: { title: null, journal: null, date: null },
-    isLoading: true,
-  });
-
-  const updateState = useCallback((updates: Partial<TableState>) => {
-    setState(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  return [state, updateState];
+  }, [selectedEdgeId, publications, setIsLoading]);
 };
 
 interface EvidenceData {
   publications: PublicationObject[];
   sources: Provenance[];
   clinicalTrials: TrialObject[];
+  drugLabels: PublicationObject[];
   miscEvidence: PublicationObject[];
   edgeLabel: string | null;
 }
 
 /**
- * Custom hook to manage evidence data including publications, sources, clinical trials, and miscellaneous evidence.
+ * Custom hook to manage evidence data including publications, sources, clinical trials, drug labels, and miscellaneous evidence.
  */
 export const useEvidenceData = () => {
   const [publications, setPublications] = useState<PublicationObject[]>([]);
   const [sources, setSources] = useState<Provenance[]>([]);
   const [clinicalTrials, setClinicalTrials] = useState<TrialObject[]>([]);
+  const [drugLabels, setDrugLabels] = useState<PublicationObject[]>([]);
   const [miscEvidence, setMiscEvidence] = useState<PublicationObject[]>([]);
   const [edgeLabel, setEdgeLabel] = useState<string | null>(null);
 
@@ -311,16 +272,20 @@ export const useEvidenceData = () => {
     sources: Set<Provenance>;
     trials: Set<TrialObject>;
   }) => {
-    const pubmedItems = [...evidence.publications].filter(item => isPublication(item));
+    const items = [...evidence.publications];
+    const pubmedItems = items.filter(item => classifyEvidenceLink(item) === 'publication');
     const trialItems = [...evidence.trials];
-    const miscItems = [...evidence.publications]
-      .filter(item => !isPublication(item))
+    const linkItems = items
+      .filter(item => classifyEvidenceLink(item) !== 'publication')
       .filter((v, i, a) => a.findIndex(v2 => v2.id === v.id) === i);
+    const labelItems = linkItems.filter(item => classifyEvidenceLink(item) === 'drugLabel');
+    const miscItems = linkItems.filter(item => classifyEvidenceLink(item) === 'misc');
     
     const sortedSources = [...evidence.sources].sort(compareByKeyLexographic('name'));
 
     setPublications(pubmedItems);
     setClinicalTrials(trialItems);
+    setDrugLabels(labelItems);
     setMiscEvidence(miscItems);
     setSources(sortedSources);
   }, []);
@@ -348,7 +313,10 @@ export const useEvidenceData = () => {
     };
 
     filteredEvidence.publications = new Set(flattenPublicationObject(resultSet, selEdge.publications, selEdge, provenanceCatalog));
-    filteredEvidence.trials = new Set(flattenTrialObject(resultSet, selEdge.trials));
+    const trialSources = getTrialSources(resultSet, selEdge, provenanceCatalog);
+    filteredEvidence.trials = new Set(
+      flattenTrialObject(resultSet, selEdge.trials).map(trial => ({ ...trial, sources: trialSources })),
+    );
     filteredEvidence.sources = new Set(getEdgeProvenance(resultSet, selEdge, provenanceCatalog));
 
     processEvidence(filteredEvidence);
@@ -360,9 +328,10 @@ export const useEvidenceData = () => {
     publications,
     sources,
     clinicalTrials,
+    drugLabels,
     miscEvidence,
     edgeLabel,
-  }), [publications, sources, clinicalTrials, miscEvidence, edgeLabel]);
+  }), [publications, sources, clinicalTrials, drugLabels, miscEvidence, edgeLabel]);
 
   return {
     ...evidenceData,
