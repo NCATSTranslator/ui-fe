@@ -169,6 +169,26 @@ export const isDrugLabelUrl = (url: string | null | undefined): boolean => {
   }
 }
 
+const DRUG_LABEL_ID_PREFIX = 'dailymed';
+// DailyMed identifies a label by its set id, a UUID
+const SET_ID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+/**
+ * The link for a piece of evidence. For a drug label this is the DailyMed page for the set id found
+ * in the evidence id, since the link that arrives with a label does not always carry its set id.
+ * Every other kind of evidence keeps the link it arrived with.
+ *
+ * @param {string | undefined} id - The evidence id, e.g. "dailymed:<set id>".
+ * @param {string} url - The link the evidence arrived with.
+ * @returns {string} The link to show and count the evidence by.
+ */
+export const resolveEvidenceUrl = (id: string | undefined, url: string): string => {
+  if (!id) return url;
+  if (!id.toLowerCase().startsWith(DRUG_LABEL_ID_PREFIX) && !isDrugLabelUrl(url)) return url;
+  const setId = id.match(SET_ID_PATTERN)?.[0];
+  return setId ? `https://${DRUG_LABEL_HOST}/dailymed/drugInfo.cfm?setid=${setId.toLowerCase()}` : url;
+}
+
 /** What a piece of link evidence is shown and counted as. */
 export type EvidenceLinkKind = 'publication' | 'drugLabel' | 'misc';
 

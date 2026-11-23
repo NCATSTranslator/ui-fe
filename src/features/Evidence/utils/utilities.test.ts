@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { makeTestEdge, makeTestPath, makeTestResult, makeTestResultSet } from '@/features/ResultList/utils/resultTestFixtures';
-import { isDrugLabelUrl } from '@/features/Evidence/types/checkers';
+import { isDrugLabelUrl, resolveEvidenceUrl } from '@/features/Evidence/types/checkers';
 import {
   buildEdgeEvidence,
   getEvidenceCounts,
@@ -134,6 +134,30 @@ describe('isDrugLabelUrl', () => {
     expect(isDrugLabelUrl('')).toBe(false);
     expect(isDrugLabelUrl(undefined)).toBe(false);
     expect(isDrugLabelUrl('not a url')).toBe(false);
+  });
+});
+
+describe('resolveEvidenceUrl', () => {
+  const SET_ID = 'e1ada3ec-c2c0-4f43-9b4b-1234567890ab';
+  const LABEL_URL = `https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${SET_ID}`;
+  const BROKEN_URL = 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dailymed';
+
+  it('builds a drug label link from the set id in the evidence id', () => {
+    expect(resolveEvidenceUrl(`dailymed:${SET_ID}`, BROKEN_URL)).toBe(LABEL_URL);
+    expect(resolveEvidenceUrl(`DAILYMED:dailymed:${SET_ID.toUpperCase()}`, BROKEN_URL)).toBe(LABEL_URL);
+    // No result set to supply a link, so the link arrives as the id itself
+    expect(resolveEvidenceUrl(`dailymed:${SET_ID}`, `dailymed:${SET_ID}`)).toBe(LABEL_URL);
+  });
+
+  it('keeps the arriving link when the id has no set id', () => {
+    expect(resolveEvidenceUrl('dailymed:unknown', BROKEN_URL)).toBe(BROKEN_URL);
+    expect(resolveEvidenceUrl(undefined, LABEL_URL)).toBe(LABEL_URL);
+  });
+
+  it('leaves other evidence alone, even when its id holds a UUID', () => {
+    const url = 'https://example.org/article';
+    expect(resolveEvidenceUrl(`DOC:${SET_ID}`, url)).toBe(url);
+    expect(resolveEvidenceUrl('PMID:1', 'https://www.ncbi.nlm.nih.gov/pubmed/1')).toBe('https://www.ncbi.nlm.nih.gov/pubmed/1');
   });
 });
 

@@ -1,7 +1,7 @@
 //  Focus: General evidence processing and data analysis
 
 import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry, Provenance } from "@/features/Evidence/types/evidence";
-import { classifyEvidenceLink, EvidenceLinkKind, isPublication } from "@/features/Evidence/types/checkers";
+import { classifyEvidenceLink, EvidenceLinkKind, isPublication, resolveEvidenceUrl } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getEdgeProvenance, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
@@ -36,7 +36,7 @@ const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: Eviden
     for (const pubData of pubArray) {
       const pub = getPubById(resultSet, pubData.id);
       if (!pub) continue;
-      acc[LINK_KIND_SETS[classifyEvidenceLink(pub)]].add(pub.url);
+      acc[LINK_KIND_SETS[classifyEvidenceLink(pub)]].add(resolveEvidenceUrl(pubData.id, pub.url));
     }
   }
 };
@@ -494,7 +494,7 @@ const publicationObjectFromRef = (
     source: getPublicationSource(null, pubEntry.infores, edge, provenanceCatalog),
     support: pubEntry.support || null,
     type,
-    url: getUrlByType(pubEntry.id, type),
+    url: resolveEvidenceUrl(pubEntry.id, getUrlByType(pubEntry.id, type)),
   };
 };
 
@@ -539,7 +539,7 @@ export const flattenPublicationObject = (
           source: getPublicationSource(resultSet, pubEntry.infores, edge),
           support: pub.support || null,
           type: pub.type,
-          url: pub.url
+          url: resolveEvidenceUrl(pubEntry.id, pub.url),
         });
       } else {
         pubArray.push(publicationObjectFromRef(pubEntry, kl, edge, provenanceCatalog));

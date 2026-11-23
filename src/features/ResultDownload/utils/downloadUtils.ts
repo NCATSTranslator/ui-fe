@@ -1,3 +1,4 @@
+import { resolveEvidenceUrl } from '@/features/Evidence/types/checkers';
 import { ResultSet, Result, ResultNode, ResultEdge, Path } from "@/features/ResultList/types/results.d";
 import { getNodeSpecies, getEdgeProvenance, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { PublicationObject, TrialObject } from "@/features/Evidence/types/evidence";
@@ -240,7 +241,7 @@ const cleanPath = (path: Path, pathId: string): ExportedPath => ({
  */
 const cleanPublication = (pub: PublicationObject, pubId: string, resultSet: ResultSet): ExportedPublication => ({
   id: pub.id || pubId,
-  url: pub.url,
+  url: resolveEvidenceUrl(pub.id || pubId, pub.url),
   source: pub.source ?? getPublicationSource(resultSet, pub.infores?.[0]),
   support: pub.support,
   knowledgeLevel: pub.knowledgeLevel,
