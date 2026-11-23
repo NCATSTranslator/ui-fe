@@ -4,22 +4,23 @@ import {
   getTrialDisplayId,
   getTrialSummary,
   getTrialYear,
-  sortTrialsNewestFirst,
+  sortTrials,
 } from '@/features/Evidence/components/ClinicalTrialsList/clinicalTrialHelpers';
 
 const makeTrial = (id: string, overrides: Partial<TrialObject> = {}): TrialObject => ({
   child: false, id, phase: 0, size: 0, start_date: '', status: 'UNKNOWN', url: '', ...overrides,
 });
 
-describe('sortTrialsNewestFirst', () => {
-  it('orders trials by start date, newest first, without changing the input', () => {
+describe('sortTrials', () => {
+  it('orders trials by start date in either direction, without changing the input', () => {
     const trials = [
       makeTrial('a', { start_date: '2015-03-01' }),
       makeTrial('b', { start_date: '2023-01-15' }),
       makeTrial('c', { start_date: '2008-11' }),
       makeTrial('d', { start_date: '2023-06-01' }),
     ];
-    expect(sortTrialsNewestFirst(trials).map(trial => trial.id)).toEqual(['d', 'b', 'a', 'c']);
+    expect(sortTrials(trials, 'dateHighLow').map(trial => trial.id)).toEqual(['d', 'b', 'a', 'c']);
+    expect(sortTrials(trials, 'dateLowHigh').map(trial => trial.id)).toEqual(['c', 'a', 'b', 'd']);
     expect(trials.map(trial => trial.id)).toEqual(['a', 'b', 'c', 'd']);
   });
 
@@ -30,7 +31,32 @@ describe('sortTrialsNewestFirst', () => {
       makeTrial('bad', { start_date: 'not a date' }),
       makeTrial('new', { start_date: '2020-01-01' }),
     ];
-    expect(sortTrialsNewestFirst(trials).map(trial => trial.id)).toEqual(['new', 'old', 'none', 'bad']);
+    expect(sortTrials(trials, 'dateHighLow').map(trial => trial.id)).toEqual(['new', 'old', 'none', 'bad']);
+    expect(sortTrials(trials, 'dateLowHigh').map(trial => trial.id)).toEqual(['old', 'new', 'none', 'bad']);
+  });
+
+  it('orders trials by title in either direction, with untitled trials last', () => {
+    const trials = [
+      makeTrial('b', { title: 'Beta study' }),
+      makeTrial('untitled'),
+      makeTrial('c', { title: 'Gamma study' }),
+      makeTrial('a', { title: 'Alpha study' }),
+    ];
+    expect(sortTrials(trials, 'titleLowHigh').map(trial => trial.id)).toEqual(['a', 'b', 'c', 'untitled']);
+    expect(sortTrials(trials, 'titleHighLow').map(trial => trial.id)).toEqual(['c', 'b', 'a', 'untitled']);
+  });
+
+  it('orders trials by participants in either direction, with unknown counts last', () => {
+    const trials = [
+      makeTrial('mid', { size: 100 }),
+      makeTrial('unknown'),
+      makeTrial('big', { size: 5000 }),
+      makeTrial('small', { size: 12 }),
+    ];
+    expect(sortTrials(trials, 'participantsHighLow').map(trial => trial.id))
+      .toEqual(['big', 'mid', 'small', 'unknown']);
+    expect(sortTrials(trials, 'participantsLowHigh').map(trial => trial.id))
+      .toEqual(['small', 'mid', 'big', 'unknown']);
   });
 });
 

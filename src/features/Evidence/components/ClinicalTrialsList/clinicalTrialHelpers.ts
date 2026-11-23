@@ -1,5 +1,7 @@
 import { TrialObject } from '@/features/Evidence/types/evidence.d';
 import { ClinicalTrialMeta, formatTrialPhase } from '@/features/NodeInformationView/hooks/useClinicalTrialMetadata';
+import { compareWithFallback } from '@/features/Core/utils/sortingFunctions';
+import { TrialSortOption } from '@/features/Evidence/utils/evidenceSortOptions';
 
 /** Whether a trial is missing details that ClinicalTrials.gov metadata can fill in. */
 export const trialNeedsMetadata = (trial: TrialObject): boolean =>
@@ -57,23 +59,51 @@ export const getTrialYear = (startDate: string): string => {
   return Number.isNaN(year) ? '' : String(year);
 };
 
-const getStartTime = (trial: TrialObject): number => {
+type TrialComparator = (a: TrialObject, b: TrialObject) => number;
+
+const getStartTime = (trial: TrialObject): number | null => {
   const time = trial.start_date ? new Date(trial.start_date).getTime() : NaN;
-  return Number.isNaN(time) ? -Infinity : time;
+  return Number.isNaN(time) ? null : time;
+};
+
+// Trials without a readable start date go last in either direction
+const byStartDate = (newestFirst: boolean): TrialComparator => (a, b) => {
+  const aTime = getStartTime(a);
+  const bTime = getStartTime(b);
+  if (aTime === bTime) return 0;
+  if (aTime === null) return 1;
+  if (bTime === null) return -1;
+  return newestFirst ? bTime - aTime : aTime - bTime;
+};
+
+// Trials without a participant count go last in either direction
+const byParticipants = (highestFirst: boolean): TrialComparator => (a, b) => {
+  const aSize = a.size || 0;
+  const bSize = b.size || 0;
+  if (aSize === bSize) return 0;
+  if (!aSize) return 1;
+  if (!bSize) return -1;
+  return highestFirst ? bSize - aSize : aSize - bSize;
+};
+
+// One comparator per order the clinical trials section offers. Trials without a title go last in
+// either direction, as publications without one do.
+const TRIAL_COMPARATORS: Record<TrialSortOption, TrialComparator> = {
+  dateHighLow: byStartDate(true),
+  dateLowHigh: byStartDate(false),
+  titleLowHigh: (a, b) => compareWithFallback(a.title, b.title, 'asc'),
+  titleHighLow: (a, b) => compareWithFallback(a.title, b.title, 'desc'),
+  participantsHighLow: byParticipants(true),
+  participantsLowHigh: byParticipants(false),
 };
 
 /**
- * Orders trials by start date, newest first. Trials without a readable start date go last, and
- * trials that tie keep their original order. Returns a new array.
+ * Orders trials by one of the orders the clinical trials section offers: by start date, title, or
+ * number of participants. Trials missing the detail being sorted on go last, and trials that tie
+ * keep their original order. Returns a new array.
  */
-export const sortTrialsNewestFirst = (trials: TrialObject[]): TrialObject[] =>
-  [...trials].sort((a, b) => {
-    const aTime = getStartTime(a);
-    const bTime = getStartTime(b);
-    // Compared rather than subtracted: two undated trials would give -Infinity minus -Infinity, NaN
-    if (aTime === bTime) return 0;
-    return bTime > aTime ? 1 : -1;
-  });
+export const sortTrials = (trials: TrialObject[], sort: TrialSortOption): TrialObject[] =>
+  [...trials].sort(TRIAL_COMPARATORS[sort]);
 
 /** The NCT id as displayed, without the CURIE prefix some trial ids carry. */
 export const getTrialDisplayId = (id: string | undefined): string => {
