@@ -93,5 +93,4 @@ export type PubmedMetadataMap = {
   [id: string]: PubmedMetadata;
 };
 
-export type SortPreference = 'dateHighLow' | 'dateLowHigh' | 'journalHighLow' | 'journalLowHigh' | 'titleHighLow' | 'titleLowHigh';
 
