@@ -3,13 +3,16 @@ import EvidenceSection from '@/features/Evidence/components/EvidenceSection/Evid
 import PublicationsList from '@/features/Evidence/components/PublicationsList/PublicationsList';
 import ClinicalTrialsList from '@/features/Evidence/components/ClinicalTrialsList/ClinicalTrialsList';
 import EvidenceLinkList from '@/features/Evidence/components/EvidenceLinkList/EvidenceLinkList';
+import EvidenceSortSelect from '@/features/Evidence/components/EvidenceSortSelect/EvidenceSortSelect';
 import DatabasesList from '@/features/Evidence/components/DatabasesList/DatabasesList';
 import { PublicationObject } from '@/features/Evidence/types/evidence.d';
 import { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
-import { Preferences } from '@/features/UserAuth/types/user';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import { EdgeEvidence, isAcceptedOntologyEdge } from '@/features/Evidence/utils/utilities';
+import { EvidenceSorting } from '@/features/Evidence/hooks/useEvidenceSorting';
+import { TrialMetadata } from '@/features/Evidence/hooks/useEnrichedTrials';
+import { PUBLICATION_SORT_OPTIONS, TRIAL_SORT_OPTIONS } from '@/features/Evidence/utils/evidenceSortOptions';
 import { EvidenceTypeKey } from '@/features/Evidence/utils/evidenceLabels';
 import {
   EvidenceSectionCounts,
@@ -30,14 +33,16 @@ const ACCEPTED_ONTOLOGY_EXPLANATION = 'Based on established taxonomies and class
   + 'relationships marked as accepted ontology are established facts in the biomedical field.';
 
 interface EvidenceGridProps {
-  /** Evidence as displayed: links deduplicated, databases grouped by name. */
+  /** Evidence as displayed: publications and trials in order, links deduplicated, databases grouped by name. */
   evidence: EdgeEvidence;
+  trialMetadata: TrialMetadata;
   setPublications: Dispatch<SetStateAction<PublicationObject[]>>;
   isPublicationDataLoading: boolean;
   setIsPublicationDataLoading: (isLoading: boolean) => void;
   selectedEdge: ResultEdge | null;
   pk: string;
-  prefs: Preferences;
+  /** The sort order of each sortable section, for its sort menu. The lists arrive already in order. */
+  sorting: EvidenceSorting;
   /** Section to scroll to when the view opens, if it has anything in it. */
   initialSection?: EvidenceSectionName;
 }
@@ -71,12 +76,13 @@ const useScrollToInitialSection = (
  */
 const EvidenceGrid: FC<EvidenceGridProps> = ({
   evidence,
+  trialMetadata,
   setPublications,
   isPublicationDataLoading,
   setIsPublicationDataLoading,
   selectedEdge,
   pk,
-  prefs,
+  sorting,
   initialSection,
 }) => {
   const isAcceptedOntology = !!selectedEdge && isAcceptedOntologyEdge(selectedEdge);
@@ -99,10 +105,9 @@ const EvidenceGrid: FC<EvidenceGridProps> = ({
         isLoading={isPublicationDataLoading}
         setIsLoading={setIsPublicationDataLoading}
         pk={pk}
-        prefs={prefs}
       />
     ),
-    clinicalTrials: () => <ClinicalTrialsList clinicalTrials={evidence.clinicalTrials} />,
+    clinicalTrials: () => <ClinicalTrialsList clinicalTrials={evidence.clinicalTrials} metadata={trialMetadata} />,
     drugLabels: () => <EvidenceLinkList links={evidence.drugLabels} linkType="drug_label" />,
     acceptedOntologies: () => (
       <p className={joinClasses(cardStyles.card, styles.explanation)}>{ACCEPTED_ONTOLOGY_EXPLANATION}</p>
@@ -111,12 +116,29 @@ const EvidenceGrid: FC<EvidenceGridProps> = ({
     sources: () => <DatabasesList sources={evidence.sources} />,
   };
 
+  const sortMenus: Partial<Record<EvidenceTypeKey, ReactNode>> = {
+    // Held back while details load: the order would be of titles, journals, and years not yet known
+    publications: (
+      <EvidenceSortSelect
+        label="publications"
+        options={PUBLICATION_SORT_OPTIONS}
+        disabled={isPublicationDataLoading}
+        {...sorting.publications}
+      />
+    ),
+    clinicalTrials: (
+      <EvidenceSortSelect label="clinical trials" options={TRIAL_SORT_OPTIONS} {...sorting.clinicalTrials} />
+    ),
+  };
+
   const renderSection = (key: EvidenceTypeKey) => (
     <EvidenceSection
       key={key}
       sectionKey={key}
       heading={getSectionHeading(key, counts[key])}
       tooltip={SECTION_TOOLTIPS[key]}
+      // Nothing to reorder in a section with a single item
+      action={counts[key] > 1 ? sortMenus[key] : undefined}
     >
       {sectionBodies[key]()}
     </EvidenceSection>

@@ -1,11 +1,15 @@
 import { FC, KeyboardEvent, useMemo, useState } from 'react';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
+import { sortPublications } from '@/features/Evidence/utils/publicationSorting';
+import { sortTrials } from '@/features/Evidence/components/ClinicalTrialsList/clinicalTrialHelpers';
 import EvidenceGrid from '@/features/Evidence/components/EvidenceGrid/EvidenceGrid';
 import EvidenceDownloadButton from '@/features/Evidence/components/EvidenceDownloadButton/EvidenceDownloadButton';
 import PathStepper from '@/features/Evidence/components/PathStepper/PathStepper';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { EvidenceViewContentProps } from '@/features/Evidence/hooks/useEvidenceView';
+import useEvidenceSorting from '@/features/Evidence/hooks/useEvidenceSorting';
+import useEnrichedTrials from '@/features/Evidence/hooks/useEnrichedTrials';
 import { buildEdgeEvidence, hasEdgeEvidence } from '@/features/Evidence/utils/utilities';
 import styles from './EvidenceView.module.scss';
 
@@ -32,10 +36,33 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   initialSection,
   isCanvasOnlyMode,
 }) => {
-  // Derived once here so the sections and the download all use the same lists.
+  // Derived once here so the sections and the download all use the same lists. Publications and
+  // trials are put in order here too, so the download follows the order chosen in each sort menu.
+  // Trials are ordered after enrichment, since a title or start date may only arrive with it.
+  const sorting = useEvidenceSorting(prefs?.evidence_sort?.pref_value);
+  const publicationSort = sorting.publications.value;
+  const trialSort = sorting.clinicalTrials.value;
+  const {
+    trials: enrichedTrials,
+    metadata: trialMetadata,
+    isLoading: isTrialDataLoading,
+  } = useEnrichedTrials(clinicalTrials);
+  // Each list is ordered on its own, so trial details arriving does not hand the publications
+  // list a new array, which would restart its PubMed fetch.
+  const sortedPublications = useMemo(
+    () => sortPublications(publications, publicationSort),
+    [publications, publicationSort],
+  );
+  const sortedTrials = useMemo(() => sortTrials(enrichedTrials, trialSort), [enrichedTrials, trialSort]);
   const evidence = useMemo(
-    () => buildEdgeEvidence({ publications, clinicalTrials, drugLabels, miscEvidence, sources }),
-    [publications, clinicalTrials, drugLabels, miscEvidence, sources],
+    () => buildEdgeEvidence({
+      publications: sortedPublications,
+      clinicalTrials: sortedTrials,
+      drugLabels,
+      miscEvidence,
+      sources,
+    }),
+    [sortedPublications, sortedTrials, drugLabels, miscEvidence, sources],
   );
 
   // The publications list fills in titles, journals, dates, and snippets from
@@ -60,7 +87,7 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
           evidence={evidence}
           edgeLabel={edgeLabel}
           selectedEdge={selectedEdge}
-          isLoading={isPublicationDataLoading}
+          isLoading={isPublicationDataLoading || isTrialDataLoading}
         />
       ) : undefined}
     />
@@ -106,12 +133,13 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
         )}
         <EvidenceGrid
           evidence={evidence}
+          trialMetadata={trialMetadata}
           setPublications={setPublications}
           isPublicationDataLoading={isPubmedLoading}
           setIsPublicationDataLoading={setIsPubmedLoading}
           selectedEdge={selectedEdge}
           pk={pk}
-          prefs={prefs}
+          sorting={sorting}
           initialSection={initialSection}
         />
       </div>
