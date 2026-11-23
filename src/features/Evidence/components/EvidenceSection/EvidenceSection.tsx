@@ -12,6 +12,8 @@ interface EvidenceSectionProps {
   heading: string;
   /** Explanation shown from an info icon beside the heading. */
   tooltip?: string;
+  /** A control shown at the right end of the heading row, e.g. a sort menu. */
+  action?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,21 +21,24 @@ interface EvidenceSectionProps {
  * One block of the evidence view: a heading over a body that grows with its content up to a
  * maximum height, then scrolls.
  */
-const EvidenceSection: FC<EvidenceSectionProps> = ({ sectionKey, heading, tooltip, children }) => {
+const EvidenceSection: FC<EvidenceSectionProps> = ({ sectionKey, heading, tooltip, action, children }) => {
   const headingId = useId();
   const Icon = EVIDENCE_TYPE_ICONS[sectionKey];
 
   return (
     <section id={getSectionDomId(sectionKey)} className={styles.section} aria-labelledby={headingId}>
-      <h6 id={headingId} className={styles.heading}>
-        {Icon && <Icon className={styles.icon} aria-hidden="true" />}
-        {heading}
-        {tooltip && (
-          <InfoTooltip iconClassName={styles.infoIcon}>
-            <span>{tooltip}</span>
-          </InfoTooltip>
-        )}
-      </h6>
+      <div className={styles.header}>
+        <h6 id={headingId} className={styles.heading}>
+          {Icon && <Icon className={styles.icon} aria-hidden="true" />}
+          {heading}
+          {tooltip && (
+            <InfoTooltip iconClassName={styles.infoIcon}>
+              <span>{tooltip}</span>
+            </InfoTooltip>
+          )}
+        </h6>
+        {action}
+      </div>
       <div className={joinClasses(styles.body, 'scrollable')}>
         {children}
       </div>

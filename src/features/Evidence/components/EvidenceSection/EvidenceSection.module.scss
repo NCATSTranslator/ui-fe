@@ -15,19 +15,28 @@
   }
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $s;
+  margin-bottom: $xs;
+}
+
 .heading {
   display: flex;
   align-items: center;
-  gap: $xxs;
-  margin-bottom: $xs;
+  gap: $xs;
+  min-width: 0;
   font-size: $subOneSize;
   color: $black;
+  margin: 0;
 }
 
 .icon {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: $m;
+  height: $m;
 }
 
 .infoIcon {
