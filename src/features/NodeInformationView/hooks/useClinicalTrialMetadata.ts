@@ -1,4 +1,5 @@
-import { useQueries } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useQueries, UseQueryResult } from "@tanstack/react-query";
 
 const CLINICAL_TRIALS_API = "https://clinicaltrials.gov/api/v2/studies";
 const CLINICAL_TRIALS_URL = "https://clinicaltrials.gov/study";
@@ -116,22 +117,25 @@ const fetchClinicalTrialMetadata = async (nctId: string): Promise<ClinicalTrialM
   return parseClinicalTrialMetadata(nctId, data?.protocolSection);
 };
 
+/**
+ * Fetches ClinicalTrials.gov metadata for the given trials, one entry per id in the order given.
+ * The returned object keeps its identity until a query's result changes, provided nctIds does too.
+ */
 const useClinicalTrialMetadata = (nctIds: string[]) => {
-  const results = useQueries({
+  const combine = useCallback((results: UseQueryResult<ClinicalTrialMeta>[]) => ({
+    trials: results.map((r, i) => r.data ?? emptyClinicalTrialMeta(nctIds[i])),
+    isLoading: results.some((r) => r.isLoading),
+  }), [nctIds]);
+
+  return useQueries({
     queries: nctIds.map((nctId) => ({
       queryKey: ["clinicalTrialMeta", nctId],
       queryFn: () => fetchClinicalTrialMetadata(nctId),
       staleTime: Infinity,
       enabled: nctIds.length > 0,
     })),
+    combine,
   });
-
-  const isLoading = results.some((r) => r.isLoading);
-  const trials: ClinicalTrialMeta[] = results.map((r, i) =>
-    r.data ?? emptyClinicalTrialMeta(nctIds[i]),
-  );
-
-  return { trials, isLoading };
 };
 
 export default useClinicalTrialMetadata;

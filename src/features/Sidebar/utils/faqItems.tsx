@@ -38,7 +38,7 @@ export const faqItems: FAQItem[] = [
     id: "evidence-support",
     title: "Is it possible to see the evidence supporting each result?",
     paragraphs: [
-      "Yes, Translator provides evidence for every association between two concepts. At the moment Translator is able to distinguish two different types of evidence: publications and knowledge sources.",
+      "Yes, Translator provides evidence for every association between two concepts. At the moment Translator is able to distinguish two different types of evidence: publications and databases.",
       "Click on a relationship to view the evidence supporting it."
     ]
   },

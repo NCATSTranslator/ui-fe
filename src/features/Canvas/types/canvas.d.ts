@@ -118,6 +118,7 @@ export type GraphSubmissionEdgeData = {
   knowledge_level: string;
   description: string | null;
   predicate_url: string | null;
+  predicate_rank: number | null;
   provenance: unknown[];
   publications: Record<string, unknown>;
   metadata: unknown;

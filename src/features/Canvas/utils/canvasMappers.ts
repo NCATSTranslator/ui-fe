@@ -210,6 +210,8 @@ const resultEdgeToSubmissionEdge = (edge: ResultEdge): GraphSubmissionEdge => ({
     knowledge_level: edge.knowledge_level,
     description: edge.description ?? null,
     predicate_url: edge.predicate_url,
+    // Part of the data the backend signs, so leaving it out invalidates the edge's signature.
+    predicate_rank: edge.predicate_rank ?? null,
     provenance: [...edge.provenance],
     publications: { ...edge.publications },
     metadata: edge.metadata,

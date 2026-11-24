@@ -1,0 +1,27 @@
+@use "@/assets/styles/variables" as *;
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+}
+
+.wikiLink {
+  font-size: $captionSize;
+  font-weight: 800;
+  color: $white;
+}
+
+.urls {
+  display: grid;
+  gap: $xxs;
+  margin: $xxs 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: $captionSize;
+  overflow-wrap: anywhere;
+}

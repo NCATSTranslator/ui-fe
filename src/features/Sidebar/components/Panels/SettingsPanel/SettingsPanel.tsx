@@ -35,9 +35,9 @@ const getPrefsForType = (prefTypeId: PrefType | null, userPrefs: Preferences) =>
         result_sort: userPrefs.result_sort ?? defaultPrefs.result_sort,
       };
     case "evidence":
+      // evidence_per_page is still returned by the backend but no longer shown: the evidence view lists everything
       return {
         evidence_sort: userPrefs.evidence_sort ?? defaultPrefs.evidence_sort,
-        evidence_per_page: userPrefs.evidence_per_page ?? defaultPrefs.evidence_per_page,
       };
     case "graphs":
       return {

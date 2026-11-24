@@ -1,6 +1,6 @@
 {
   "exportFormatVersion": 2,
-  "exportTime": "2026-11-18T17:18:12.004Z",
+  "exportTime": "2026-11-23T18:04:59.835Z",
   "containerVersion": {
     "path": "accounts/0/containers/0/versions/0",
     "accountId": "0",
@@ -922,132 +922,6 @@
         "accountId": "0",
         "containerId": "0",
         "tagId": "18",
-        "name": "GA4 Event - evidence_paginated",
-        "type": "gaawe",
-        "parameter": [
-          {
-            "type": "TEMPLATE",
-            "key": "eventName",
-            "value": "evidence_paginated"
-          },
-          {
-            "type": "LIST",
-            "key": "eventSettingsTable",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "tab_name"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "{{DLV - tab_name}}"
-                  }
-                ]
-              },
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "page_number"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "{{DLV - page_number}}"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "measurementIdOverride",
-            "value": "{{GA4 Measurement ID}}"
-          }
-        ],
-        "fingerprint": "0",
-        "firingTriggerId": [
-          "17"
-        ],
-        "tagFiringOption": "ONCE_PER_EVENT",
-        "monitoringMetadata": {
-          "type": "MAP"
-        }
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "tagId": "19",
-        "name": "GA4 Event - evidence_tab_changed",
-        "type": "gaawe",
-        "parameter": [
-          {
-            "type": "TEMPLATE",
-            "key": "eventName",
-            "value": "evidence_tab_changed"
-          },
-          {
-            "type": "LIST",
-            "key": "eventSettingsTable",
-            "list": [
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "tab_name"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "{{DLV - tab_name}}"
-                  }
-                ]
-              },
-              {
-                "type": "MAP",
-                "map": [
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameter",
-                    "value": "item_count"
-                  },
-                  {
-                    "type": "TEMPLATE",
-                    "key": "parameterValue",
-                    "value": "{{DLV - item_count}}"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "measurementIdOverride",
-            "value": "{{GA4 Measurement ID}}"
-          }
-        ],
-        "fingerprint": "0",
-        "firingTriggerId": [
-          "18"
-        ],
-        "tagFiringOption": "ONCE_PER_EVENT",
-        "monitoringMetadata": {
-          "type": "MAP"
-        }
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "tagId": "20",
         "name": "GA4 Event - example_query_selected",
         "type": "gaawe",
         "parameter": [
@@ -1100,7 +974,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "19"
+          "17"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1110,7 +984,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "21",
+        "tagId": "19",
         "name": "GA4 Event - filter_applied",
         "type": "gaawe",
         "parameter": [
@@ -1178,7 +1052,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "20"
+          "18"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1188,7 +1062,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "22",
+        "tagId": "20",
         "name": "GA4 Event - filter_cleared",
         "type": "gaawe",
         "parameter": [
@@ -1241,7 +1115,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "21"
+          "19"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1251,7 +1125,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "23",
+        "tagId": "21",
         "name": "GA4 Event - graph_layout_changed",
         "type": "gaawe",
         "parameter": [
@@ -1289,7 +1163,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "22"
+          "20"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1299,7 +1173,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "24",
+        "tagId": "22",
         "name": "GA4 Event - graph_node_selected",
         "type": "gaawe",
         "parameter": [
@@ -1352,7 +1226,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "23"
+          "21"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1362,7 +1236,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "25",
+        "tagId": "23",
         "name": "GA4 Event - graph_view_opened",
         "type": "gaawe",
         "parameter": [
@@ -1415,7 +1289,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "24"
+          "22"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1425,7 +1299,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "26",
+        "tagId": "24",
         "name": "GA4 Event - node_info_opened",
         "type": "gaawe",
         "parameter": [
@@ -1478,7 +1352,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "25"
+          "23"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1488,7 +1362,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "27",
+        "tagId": "25",
         "name": "GA4 Event - project_created",
         "type": "gaawe",
         "parameter": [
@@ -1510,7 +1384,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "26"
+          "24"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1520,7 +1394,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "28",
+        "tagId": "26",
         "name": "GA4 Event - project_deleted",
         "type": "gaawe",
         "parameter": [
@@ -1558,7 +1432,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "27"
+          "25"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1568,7 +1442,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "29",
+        "tagId": "27",
         "name": "GA4 Event - project_renamed",
         "type": "gaawe",
         "parameter": [
@@ -1590,7 +1464,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "28"
+          "26"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1600,7 +1474,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "30",
+        "tagId": "28",
         "name": "GA4 Event - query_moved_to_project",
         "type": "gaawe",
         "parameter": [
@@ -1638,7 +1512,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "29"
+          "27"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1648,7 +1522,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "31",
+        "tagId": "29",
         "name": "GA4 Event - query_submission_failed",
         "type": "gaawe",
         "parameter": [
@@ -1701,7 +1575,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "30"
+          "28"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1711,7 +1585,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "32",
+        "tagId": "30",
         "name": "GA4 Event - query_submitted",
         "type": "gaawe",
         "parameter": [
@@ -1839,7 +1713,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "31"
+          "29"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1849,7 +1723,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "33",
+        "tagId": "31",
         "name": "GA4 Event - result_bookmarked",
         "type": "gaawe",
         "parameter": [
@@ -1887,7 +1761,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "32"
+          "30"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1897,7 +1771,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "34",
+        "tagId": "32",
         "name": "GA4 Event - result_note_saved",
         "type": "gaawe",
         "parameter": [
@@ -1935,7 +1809,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "33"
+          "31"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -1945,7 +1819,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "35",
+        "tagId": "33",
         "name": "GA4 Event - result_opened",
         "type": "gaawe",
         "parameter": [
@@ -2013,7 +1887,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "34"
+          "32"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2023,7 +1897,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "36",
+        "tagId": "34",
         "name": "GA4 Event - result_unbookmarked",
         "type": "gaawe",
         "parameter": [
@@ -2061,7 +1935,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "35"
+          "33"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2071,7 +1945,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "37",
+        "tagId": "35",
         "name": "GA4 Event - results_downloaded",
         "type": "gaawe",
         "parameter": [
@@ -2139,7 +2013,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "36"
+          "34"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2149,7 +2023,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "38",
+        "tagId": "36",
         "name": "GA4 Event - results_loaded",
         "type": "gaawe",
         "parameter": [
@@ -2232,7 +2106,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "37"
+          "35"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2242,7 +2116,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "39",
+        "tagId": "37",
         "name": "GA4 Event - results_paginated",
         "type": "gaawe",
         "parameter": [
@@ -2295,7 +2169,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "38"
+          "36"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2305,7 +2179,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "40",
+        "tagId": "38",
         "name": "GA4 Event - results_sorted",
         "type": "gaawe",
         "parameter": [
@@ -2358,7 +2232,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "39"
+          "37"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2368,7 +2242,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "41",
+        "tagId": "39",
         "name": "GA4 Event - share_link_copied",
         "type": "gaawe",
         "parameter": [
@@ -2406,7 +2280,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "40"
+          "38"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2416,7 +2290,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "tagId": "42",
+        "tagId": "40",
         "name": "GA4 Event - view_stepped",
         "type": "gaawe",
         "parameter": [
@@ -2499,7 +2373,7 @@
         ],
         "fingerprint": "0",
         "firingTriggerId": [
-          "41"
+          "39"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -2912,56 +2786,6 @@
         "accountId": "0",
         "containerId": "0",
         "triggerId": "17",
-        "name": "CE - evidence_paginated",
-        "type": "CUSTOM_EVENT",
-        "customEventFilter": [
-          {
-            "type": "EQUALS",
-            "parameter": [
-              {
-                "type": "TEMPLATE",
-                "key": "arg0",
-                "value": "{{_event}}"
-              },
-              {
-                "type": "TEMPLATE",
-                "key": "arg1",
-                "value": "evidence_paginated"
-              }
-            ]
-          }
-        ],
-        "fingerprint": "0"
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "triggerId": "18",
-        "name": "CE - evidence_tab_changed",
-        "type": "CUSTOM_EVENT",
-        "customEventFilter": [
-          {
-            "type": "EQUALS",
-            "parameter": [
-              {
-                "type": "TEMPLATE",
-                "key": "arg0",
-                "value": "{{_event}}"
-              },
-              {
-                "type": "TEMPLATE",
-                "key": "arg1",
-                "value": "evidence_tab_changed"
-              }
-            ]
-          }
-        ],
-        "fingerprint": "0"
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "triggerId": "19",
         "name": "CE - example_query_selected",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -2986,7 +2810,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "20",
+        "triggerId": "18",
         "name": "CE - filter_applied",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3011,7 +2835,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "21",
+        "triggerId": "19",
         "name": "CE - filter_cleared",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3036,7 +2860,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "22",
+        "triggerId": "20",
         "name": "CE - graph_layout_changed",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3061,7 +2885,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "23",
+        "triggerId": "21",
         "name": "CE - graph_node_selected",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3086,7 +2910,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "24",
+        "triggerId": "22",
         "name": "CE - graph_view_opened",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3111,7 +2935,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "25",
+        "triggerId": "23",
         "name": "CE - node_info_opened",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3136,7 +2960,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "26",
+        "triggerId": "24",
         "name": "CE - project_created",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3161,7 +2985,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "27",
+        "triggerId": "25",
         "name": "CE - project_deleted",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3186,7 +3010,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "28",
+        "triggerId": "26",
         "name": "CE - project_renamed",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3211,7 +3035,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "29",
+        "triggerId": "27",
         "name": "CE - query_moved_to_project",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3236,7 +3060,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "30",
+        "triggerId": "28",
         "name": "CE - query_submission_failed",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3261,7 +3085,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "31",
+        "triggerId": "29",
         "name": "CE - query_submitted",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3286,7 +3110,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "32",
+        "triggerId": "30",
         "name": "CE - result_bookmarked",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3311,7 +3135,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "33",
+        "triggerId": "31",
         "name": "CE - result_note_saved",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3336,7 +3160,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "34",
+        "triggerId": "32",
         "name": "CE - result_opened",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3361,7 +3185,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "35",
+        "triggerId": "33",
         "name": "CE - result_unbookmarked",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3386,7 +3210,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "36",
+        "triggerId": "34",
         "name": "CE - results_downloaded",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3411,7 +3235,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "37",
+        "triggerId": "35",
         "name": "CE - results_loaded",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3436,7 +3260,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "38",
+        "triggerId": "36",
         "name": "CE - results_paginated",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3461,7 +3285,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "39",
+        "triggerId": "37",
         "name": "CE - results_sorted",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3486,7 +3310,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "40",
+        "triggerId": "38",
         "name": "CE - share_link_copied",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -3511,7 +3335,7 @@
       {
         "accountId": "0",
         "containerId": "0",
-        "triggerId": "41",
+        "triggerId": "39",
         "name": "CE - view_stepped",
         "type": "CUSTOM_EVENT",
         "customEventFilter": [
@@ -4794,32 +4618,6 @@
             "type": "TEMPLATE",
             "key": "name",
             "value": "subject_category"
-          }
-        ],
-        "fingerprint": "0",
-        "formatValue": {}
-      },
-      {
-        "accountId": "0",
-        "containerId": "0",
-        "variableId": "50",
-        "name": "DLV - tab_name",
-        "type": "v",
-        "parameter": [
-          {
-            "type": "INTEGER",
-            "key": "dataLayerVersion",
-            "value": "2"
-          },
-          {
-            "type": "BOOLEAN",
-            "key": "setDefaultValue",
-            "value": "false"
-          },
-          {
-            "type": "TEMPLATE",
-            "key": "name",
-            "value": "tab_name"
           }
         ],
         "fingerprint": "0",

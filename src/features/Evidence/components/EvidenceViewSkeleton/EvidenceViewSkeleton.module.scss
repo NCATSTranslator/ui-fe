@@ -23,16 +23,25 @@
   overflow: hidden;
 }
 
-.tabBar {
-  display: flex;
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: $m;
-  padding-bottom: $xs;
-  border-bottom: 1px solid $lightGray;
+  align-content: start;
+
+  @media screen and (min-width: $medium) {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
 }
 
-.tableRows {
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $m;
+}
+
+.section {
   display: flex;
   flex-direction: column;
   gap: $xs;
-  padding-top: $xs;
 }

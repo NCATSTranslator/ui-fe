@@ -31,7 +31,6 @@ export type AnalyticsDimension =
   | 'result_curie'
   | 'share_scope'
   | 'evidence_source'
-  | 'tab_name'
   | 'link_type'
   | 'link_domain'
   | 'layout_name'
@@ -73,7 +72,7 @@ export type AnalyticsParams = Partial<Record<AnalyticsDimension, string>> &
   Partial<Record<AnalyticsMetric, number>>;
 
 export type QueryTypeName = 'single' | 'pathfinder' | 'lookup';
-export type LinkType = 'publication' | 'clinical_trial' | 'source';
+export type LinkType = 'publication' | 'clinical_trial' | 'drug_label' | 'miscellaneous' | 'source';
 export type ExportFormat = 'csv' | 'json' | 'png' | 'svg';
 export type PaneState = 'open' | 'closed' | 'maximized' | 'restored' | 'resized';
 export type HistoryAction = 'undo' | 'redo';
@@ -142,17 +141,9 @@ export interface AnalyticsEventMap {
     path_rank?: number;
     path_length?: number;
   };
-  evidence_tab_changed: {
-    tab_name: string;
-    item_count?: number;
-  };
   evidence_link_clicked: {
     link_type: LinkType;
     link_domain?: string;
-  };
-  evidence_paginated: {
-    tab_name?: string;
-    page_number: number;
   };
   evidence_downloaded: {
     export_format: ExportFormat;

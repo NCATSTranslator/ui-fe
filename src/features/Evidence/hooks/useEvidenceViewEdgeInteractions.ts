@@ -1,3 +1,4 @@
+import { useLatest } from '@/features/Core/hooks/useLatest';
 import { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
 import { scrollToRef } from '@/features/Core/utils/arrayHelpers';
 import { ResultSet, ResultEdge, Path } from '@/features/ResultList/types/results.d';
@@ -8,9 +9,10 @@ import { useEvidenceData, useEdgeInitialization } from '@/features/Evidence/hook
 import useInforesCatalogLookup from '@/features/Evidence/hooks/useInforesCatalogLookup';
 import { resolveClickedEdge } from '@/features/Evidence/utils/utilities';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
-import { buildEvidenceUrl } from '@/features/Navigation/utils/navigationUtils';
+import { buildEvidenceUrl, extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import {
   buildCompressedSubgraph,
+  resolveSelectedEdgeGroup,
   type DecodedParams,
 } from '@/features/Evidence/hooks/evidenceViewHelpers';
 import type { CompressedSubgraph } from '@/features/Evidence/hooks/evidenceViewTypes';
@@ -83,19 +85,53 @@ const useEvidenceEdgeClickHandler = ({
   nodeNameLookup,
 ]);
 
-const useToggleSeenHandler = (
-  selectedEdge: ResultEdge | null,
-  edgeSeen: boolean,
-  markEdgeSeen: (id: string) => void,
-  markEdgeUnseen: (id: string) => void,
-) => useCallback(() => {
-  if (!selectedEdge?.id) {
-    console.warn('Edge seen status cannot be toggled, selectedEdge is null.');
-    return;
-  }
-  if (edgeSeen) markEdgeUnseen(selectedEdge.id);
-  else markEdgeSeen(selectedEdge.id);
-}, [selectedEdge?.id, edgeSeen, markEdgeSeen, markEdgeUnseen]);
+/**
+ * IDs of every edge compressed into the same path slot as the given edge, the edge itself
+ * included. An edge that is not part of a compressed slot is its own group.
+ */
+const getSeenGroupIds = (
+  edgeId: string | undefined,
+  path: Path | null,
+  compressedEdgeSets: string[][],
+): string[] => {
+  const sets = path ? [...compressedEdgeSets, ...extractCompressedEdgeSets(path)] : compressedEdgeSets;
+  return resolveSelectedEdgeGroup(edgeId, sets);
+};
+
+interface ToggleSeenParams {
+  selectedEdge: ResultEdge | null;
+  edgeSeen: boolean;
+  path: Path | null;
+  compressedEdgeSets: string[][];
+  markEdgeSeen: (id: string) => void;
+  markEdgeUnseen: (id: string) => void;
+}
+
+const useToggleSeenHandler = ({
+  selectedEdge,
+  edgeSeen,
+  path,
+  compressedEdgeSets,
+  markEdgeSeen,
+  markEdgeUnseen,
+}: ToggleSeenParams) => {
+  const selectedEdgeId = selectedEdge?.id;
+  const seenGroupIds = useMemo(
+    () => getSeenGroupIds(selectedEdgeId, path, compressedEdgeSets),
+    [selectedEdgeId, path, compressedEdgeSets],
+  );
+
+  return useCallback(() => {
+    if (!selectedEdgeId) {
+      console.warn('Edge seen status cannot be toggled, selectedEdge is null.');
+      return;
+    }
+    // A compressed edge counts as seen when any of its edges is, so un-marking has to clear them
+    // all or the result list would keep showing it as seen.
+    if (edgeSeen) seenGroupIds.forEach(id => markEdgeUnseen(id));
+    else markEdgeSeen(selectedEdgeId);
+  }, [selectedEdgeId, edgeSeen, seenGroupIds, markEdgeSeen, markEdgeUnseen]);
+};
 
 const useSelectedEdgeState = () => {
   const selectedEdgeDomRef = useRef<HTMLElement | null>(null);
@@ -157,8 +193,7 @@ const useEvidenceViewEdgeInteractions = ({
   nodeNameLookupSettled = true,
 }: EdgeInteractionParams) => {
   const resultsNavigate = useResultsNavigate();
-  const decodedParamsRef = useRef(decodedParams);
-  decodedParamsRef.current = decodedParams;
+  const decodedParamsRef = useLatest(decodedParams);
   const { selectedEdge, setSelectedEdge, selectedEdgeRef, selectedEdgeDomRef } = useSelectedEdgeState();
 
   const { isEdgeSeen, markEdgeSeen, markEdgeUnseen } = useSeenStatus(pk);
@@ -166,6 +201,7 @@ const useEvidenceViewEdgeInteractions = ({
     publications,
     sources,
     clinicalTrials,
+    drugLabels,
     miscEvidence,
     handleSelectedEdge: handleEvidenceData,
     setPublications,
@@ -212,7 +248,7 @@ const useEvidenceViewEdgeInteractions = ({
     if (selectedEdge) scrollToRef(selectedEdgeDomRef);
   }, [selectedEdge, selectedEdgeDomRef]);
 
-  const handleToggleSeen = useToggleSeenHandler(selectedEdge, edgeSeen, markEdgeSeen, markEdgeUnseen);
+  const handleToggleSeen = useToggleSeenHandler({ selectedEdge, edgeSeen, path, compressedEdgeSets, markEdgeSeen, markEdgeUnseen });
 
   return {
     selectedEdge,
@@ -225,6 +261,7 @@ const useEvidenceViewEdgeInteractions = ({
     publications,
     setPublications,
     clinicalTrials,
+    drugLabels,
     miscEvidence,
     sources,
   };

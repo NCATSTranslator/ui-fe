@@ -17,8 +17,9 @@ export const RelationshipEvidence = () => {
       <ul>
         <li>Publications</li>
         <li>Clinical Trials</li>
+        <li>Drug Labels</li>
         <li>Miscellaneous Data</li>
-        <li>Knowledge Sources</li>
+        <li>Databases</li>
       </ul>
 
       <p>Please note that relationship evidence is not currently available in the graph view.</p>
@@ -55,19 +56,27 @@ Clinical Trials</h2>
         <strong>start date</strong>, <strong>phase</strong>, and <strong>number of participants</strong>. Relationships supported by publications are marked with a drug icon.
       </p>
 
+      <h2 className="h6">Drug Labels</h2>
+
+      <p>
+        <strong>Drug Labels</strong> are links to a drug’s official labeling on DailyMed, where the label
+        describes the relationship.
+      </p>
+
       <h2 className="h6">Miscellaneous</h2>
 
       <p>
-        <strong>Miscellaneous</strong> is a general category of evidence that can be anything outside of publications
-        or clinical trials. It includes links out to external sources and databases if provided by the knowledge source.
+        <strong>Miscellaneous</strong> is a general category of evidence that can be anything outside of publications,
+        clinical trials, or drug labels. It includes links out to external sources and databases if provided by the
+        database.
       </p>
 
-      <h2 className="h6">Knowledge Sources</h2>
+      <h2 className="h6">Databases</h2>
 
       <p>
-        <strong>Knowledge Sources</strong> are the resources that provide the information supporting the selected
-        relationship. Some sources provide specific links to the exact information supporting the relationship, while
-        others only provide a general link to the source.
+        <strong>Databases</strong> are the resources that provide the information supporting the selected
+        relationship. Some databases provide specific links to the exact information supporting the relationship, while
+        others only provide a general link to the database.
       </p>
     </>
   );

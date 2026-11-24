@@ -1,8 +1,7 @@
-import { FC, MouseEvent, memo, useCallback, useMemo, RefObject } from 'react';
+import { FC, MouseEvent, memo, useCallback, RefObject } from 'react';
 import styles from './Predicate.module.scss';
 import PathArrow from '@/assets/icons/connectors/PathArrow.svg?react';
 import Highlighter from 'react-highlight-words';
-import { getCompressedEdge } from '@/features/Core/utils/resultHelpers';
 import { joinClasses } from '@/features/Core/utils/classHelpers';
 import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import EdgeTooltipContent from '@/features/Core/components/Tooltips/EdgeTooltipContent';
@@ -10,8 +9,8 @@ import { Path, ResultEdge } from '@/features/ResultList/types/results';
 import { getResultSetById } from '@/features/ResultList/slices/resultsSlice';
 import { useSelector } from 'react-redux';
 import { useLastViewedPath, useResultItemId } from '@/features/ResultItem/hooks/resultHooks';
-import { usePredicateEdgeMeta } from '@/features/ResultItem/hooks/usePredicateEdgeMeta';
-import PredicateBadges from '@/features/ResultItem/components/Predicate/PredicateBadges';
+import { useCompressedPredicateEdge, usePredicateEdgeMeta } from '@/features/ResultItem/hooks/usePredicateEdgeMeta';
+import PredicateBadges from '@/features/ResultItem/components/PredicateBadges/PredicateBadges';
 import { useResultListContext } from '@/features/ResultList/context/ResultListContext';
 import { extractCompressedEdgeSets } from '@/features/Navigation/utils/navigationUtils';
 import { PredicateClickOptions } from '@/features/Core/components/Tooltips/EdgeTooltipContent';
@@ -67,10 +66,7 @@ const Predicate: FC<PredicateProps> = ({
 
   const resultSet = useSelector(getResultSetById(pk));
   const { openMenu, canvasEnabled } = useCanvasContextMenu();
-  const formattedEdge = useMemo(
-    () => (!!resultSet && Array.isArray(edgeIds) && edgeIds.length > 1) ? getCompressedEdge(resultSet, edgeIds) : edge,
-    [resultSet, edgeIds, edge]
-  );
+  const { formattedEdge, topEdgeId } = useCompressedPredicateEdge(resultSet, edgeIds, edge);
 
   const {
     attributes: edgeDragAttributes,
@@ -94,7 +90,7 @@ const Predicate: FC<PredicateProps> = ({
   const itemResultId = useResultItemId();
   const { setLastViewedPathID } = useLastViewedPath();
 
-  const { hasMore, hasPubs, hasCTs, isAcceptedOntology, tooltipEdgeEntries } = usePredicateEdgeMeta(resultSet, formattedEdge);
+  const { hasMore, hasPubs, hasCTs, hasDrugLabels, isAcceptedOntology, tooltipEdgeEntries } = usePredicateEdgeMeta(resultSet, formattedEdge);
 
   const edgeClass = joinClasses(
     styles.edge,
@@ -137,7 +133,7 @@ const Predicate: FC<PredicateProps> = ({
       data-tooltip-id={`${formattedEdge.predicate}${uid}`}
       data-edge-ids={edgeIds.toString()}
       data-aras={edge.aras.toString()}
-      onClick={(e)=> handlePredicateClick(e, edgeIds[0], edgeIds.slice(1))}
+      onClick={(e)=> handlePredicateClick(e, topEdgeId, edgeIds.filter(id => id !== topEdgeId))}
       onContextMenu={canvasEnabled
         ? (e) => { e.preventDefault(); e.stopPropagation(); openMenu({ type: 'edge', id: edgeIds[0], pk, position: { x: e.clientX, y: e.clientY }, edgeIds }); }
         : undefined}
@@ -178,7 +174,7 @@ const Predicate: FC<PredicateProps> = ({
             <span className={styles.more}>+{formattedEdge.compressed_edges?.length}</span>
           }
         </span>
-        <PredicateBadges hasPubs={hasPubs} hasCTs={hasCTs} isAcceptedOntology={isAcceptedOntology} />
+        <PredicateBadges hasPubs={hasPubs} hasCTs={hasCTs} hasDrugLabels={hasDrugLabels} isAcceptedOntology={isAcceptedOntology} />
       </span>
     </span>
   )

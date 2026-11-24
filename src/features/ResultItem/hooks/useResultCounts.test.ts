@@ -49,7 +49,7 @@ describe('useResultCounts', () => {
     set.data.paths.p3 = makeTestPath({ id: 'p3', subgraph: ['n2', 'e2', 'n3'] });
     const { result } = renderHook(() => useResultCounts(set, makeResult({ paths: ['p1', 'p2', 'p3'] })));
     expect(result.current.evidenceCounts?.acceptedOntologyCount).toBe(1);
-    expect(result.current.evidenceCounts?.productLabelCount).toBe(0);
+    expect(result.current.evidenceCounts?.drugLabelCount).toBe(0);
 
     // p4 has its own node sequence, so its e2 counts again; with e1 also an
     // ontology edge, p1 counts one and p4 counts two

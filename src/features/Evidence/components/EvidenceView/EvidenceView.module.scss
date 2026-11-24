@@ -2,7 +2,7 @@
 
 .evidenceViewWrapper {
   padding: 0 $l $m;
-  // Fill the main scroll area but grow with the tables instead of shrinking under the header and footer.
+  // Fill the main scroll area but grow with the evidence sections instead of shrinking under the header and footer.
   flex: 1 0 auto;
   width: calc(100% - #{$l * 2});
   max-width: $maxWidth;
@@ -22,7 +22,9 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  // Every row is as tall as its content; spare height is left below the evidence sections
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
 }
 
 .title {
@@ -60,176 +62,6 @@
   }
 }
 
-.tabs {
-  overflow-y: hidden;
-  display: grid;
-  align-content: flex-start;
-  margin: 0 auto;
-}
-.tab {
-  display: grid;
-}
-.tableHead {
-  padding-right: 0;
-  .head {
-    justify-content: flex-start;
-  }
-}
-.tableBody {
-  box-shadow: $dropShadow;
-  font-size: $bodyTwoSize;
-  border-radius: $defaultBorderRadius;
-  margin: 0 10px 10px;
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-  .tableItems {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: $midGray $lightGray;
-    &::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background-color: $lightGray;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: $midGray;
-      border-radius: 10px;
-    }
-
-    &::-webkit-scrollbar-thumb:hover {
-      background-color: $darkGray;
-    }
-  }
-  &.clinicalTrials {
-    .tableHead, .tableItem {
-      display: grid;
-      grid-template-columns: 1fr .5fr .5fr .25fr .5fr .5fr;
-      .head, .link, .cell {
-        justify-content: flex-start;
-      }
-      .cell, .link a {
-        align-items: flex-start;
-      }
-      .link a {
-        display: inline;
-      }
-      svg {
-        height: 16px;
-        width: 16px;
-        margin-bottom: 0;
-        display: inline;
-        vertical-align: text-top;
-      }
-    }
-  }
-  &.misc {
-    .link svg {
-      min-width: 20px;
-      min-height: 20px;
-    }
-    .tableHead, .tableItem {
-      display: grid;
-      grid-template-columns: 1fr;
-    }
-  }
-  &.sources {
-    .tableHead, .tableItem {
-      display: grid;
-      grid-template-columns: 1.25fr 3.75fr;
-    }
-    .source {
-      display: flex;
-    }
-    .tooltipSpan {
-      margin: 0 2px;
-      font-size: 12px;
-      font-weight: bold;
-      color: $white;
-      display: inline-flex;
-      align-items: center;
-      a {
-        display: inline-flex;
-        align-items: flex-end;
-      }
-      svg {
-        width: 16px;
-        margin-left: 4px;
-        transform: none !important;
-        path {
-          fill: $white !important;
-        }
-      }
-    }
-  }
-  &.distinctSources {
-    .tableHead, .tableItem {
-      display: grid;
-      grid-template-columns: 1.25fr 3.75fr;
-    }
-    .source, .link {
-      text-align: center;
-    }
-  }
-  .relationship {
-    text-align: center;
-    &>span {
-      text-align: center;
-    }
-    span {
-      display: block;
-    }
-  }
-}
-.pValueTable, .otherTable {
-  &>div {
-    grid-template-columns: 1fr 1fr 2fr;
-    height: 60px;
-    .cell {
-      height: auto;
-    }
-  }
-}
-.noEvidence {
-  padding: 50px 0;
-  width: 100%;
-  text-align: center;
-}
-.labelContainer {
-  display: flex;
-  align-items: center;
-}
-.subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: $black;
-  margin-bottom: 0;
-}
-.sep {
-  margin: 0 8px;
-  font-size: 14px;
-  color: $darkGray;
-  font-weight: 800;
-}
-.toggleSeen {
-  color: $purpleOne;
-  font-size: 14px;
-  font-weight: 800;
-  margin-bottom: 0;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-}
-.title {
-  margin-bottom: 0;
-  font-weight: 800;
-}
 .pathViewContainer {
   background-color: $palePurple;
   border-radius: $largeBorderRadius;
@@ -363,11 +195,4 @@
       }
     }
   }
-}
-
-.infoIcon {
-  margin-left: 4px;
-}
-.fade {
-  overflow-y: hidden;
 }

@@ -1,0 +1,49 @@
+@use "@/assets/styles/variables" as *;
+
+.section {
+  // Clears the sticky page header when a link scrolls straight to the section
+  scroll-margin-top: $m;
+  padding: $m 0;
+  border-top: 1px solid $midGray;
+  min-width: 0;
+  &:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $s;
+  margin-bottom: $xs;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: $xs;
+  min-width: 0;
+  font-size: $subOneSize;
+  color: $black;
+  margin: 0;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: $m;
+  height: $m;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+}
+
+.body {
+  // One height for every section; override the variable to tune it
+  max-height: var(--evidence-section-max-height, 320px);
+}

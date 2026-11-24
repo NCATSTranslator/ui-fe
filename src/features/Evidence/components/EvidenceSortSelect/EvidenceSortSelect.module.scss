@@ -1,0 +1,80 @@
+@use "@/assets/styles/variables" as *;
+
+.wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: $xxs;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: $captionSize;
+  font-weight: 800;
+  color: $purpleOne;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: $midDarkGray;
+    cursor: default;
+  }
+
+  &.open .chevron {
+    transform: rotate(180deg);
+  }
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  transition: $defaultTransformAnim;
+
+  path {
+    stroke: currentColor;
+  }
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  margin-top: $xxxs;
+  border: 1px solid $midGray;
+  border-radius: $defaultBorderRadius;
+  background: $white;
+  box-shadow: $dropShadow;
+}
+
+.option {
+  padding: $xxs $xs;
+  border: none;
+  background: transparent;
+  font-size: $captionSize;
+  color: $black;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: $defaultAnim;
+
+  &:hover {
+    background: $hoverGray;
+  }
+
+  &.selected {
+    font-weight: 800;
+    color: $purpleOne;
+  }
+}

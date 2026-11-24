@@ -1,17 +1,18 @@
-import { PublicationObject, TrialObject } from '@/features/Evidence/types/evidence';
+import { Provenance, PublicationObject, TrialObject } from '@/features/Evidence/types/evidence';
 import { ResultEdge } from '@/features/ResultList/types/results.d';
 import { joinArrayForCSV, rowsToCSV } from '@/features/Core/utils/csvUtils';
 import { getLocalDateStamp } from '@/features/Core/utils/dateHelpers';
 import { triggerDownload, sanitizeForFilename } from '@/features/Core/utils/fileDownloadUtils';
 import {
   EdgeEvidence,
+  FormattedMiscEvidence,
   getKnowledgeLevelString,
   getPublicationDisplaySnippet,
   GroupedSource,
 } from '@/features/Evidence/utils/utilities';
 import { trackEvent } from '@/features/Analytics/utils/dataLayer';
 
-type EvidenceCSVType = 'publication' | 'clinical_trial' | 'miscellaneous' | 'knowledge_source';
+type EvidenceCSVType = 'publication' | 'clinical_trial' | 'drug_label' | 'miscellaneous' | 'database';
 
 // Every evidence type shares one sheet so a single file covers the whole edge;
 // columns that don't apply to a row's type are left blank. This list is the one
@@ -62,8 +63,14 @@ const publicationRow = (pub: PublicationObject, edge: ResultEdge | null): Eviden
   source_infores: joinArrayForCSV(pub.infores),
 });
 
+// A trial's source is the clinical trials source of its edge, when the edge has it
+const uniqueSourceValues = (sources: Provenance[] | undefined, key: 'name' | 'infores'): string[] =>
+  [...new Set((sources ?? []).map(source => source[key] ?? '').filter(Boolean))];
+
 const trialRow = (trial: TrialObject): EvidenceCSVRow => ({
   ...emptyRow('clinical_trial'),
+  source_name: joinArrayForCSV(uniqueSourceValues(trial.sources, 'name')),
+  source_infores: joinArrayForCSV(uniqueSourceValues(trial.sources, 'infores')),
   id: trial.id ?? '',
   title: trial.title ?? '',
   url: trial.url ?? '',
@@ -76,7 +83,7 @@ const trialRow = (trial: TrialObject): EvidenceCSVRow => ({
 });
 
 const sourceRow = (source: GroupedSource): EvidenceCSVRow => ({
-  ...emptyRow('knowledge_source'),
+  ...emptyRow('database'),
   url: joinArrayForCSV(source.urls),
   knowledge_level: joinArrayForCSV(source.knowledgeLevels.map(getKnowledgeLevelString)),
   source_name: source.name,
@@ -84,14 +91,17 @@ const sourceRow = (source: GroupedSource): EvidenceCSVRow => ({
   source_wiki: source.wiki ?? '',
 });
 
+const linkRow = (evidenceType: EvidenceCSVType, item: FormattedMiscEvidence): EvidenceCSVRow => ({
+  ...emptyRow(evidenceType),
+  id: item.id,
+  url: item.url,
+});
+
 const buildEvidenceRows = (evidence: EdgeEvidence, edge: ResultEdge | null): EvidenceCSVRow[] => [
   ...evidence.publications.map(pub => publicationRow(pub, edge)),
   ...evidence.clinicalTrials.map(trialRow),
-  ...evidence.miscEvidence.map(item => ({
-    ...emptyRow('miscellaneous'),
-    id: item.id,
-    url: item.url,
-  })),
+  ...evidence.drugLabels.map(item => linkRow('drug_label', item)),
+  ...evidence.miscEvidence.map(item => linkRow('miscellaneous', item)),
   ...evidence.sources.map(sourceRow),
 ];
 

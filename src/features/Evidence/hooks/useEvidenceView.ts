@@ -61,10 +61,11 @@ export const useEvidenceView = (): EvidenceViewModel => {
       publications: edgeData.publications,
       setPublications: edgeData.setPublications,
       clinicalTrials: edgeData.clinicalTrials,
+      drugLabels: edgeData.drugLabels,
       miscEvidence: edgeData.miscEvidence,
       sources: edgeData.sources,
       prefs: routeData.prefs,
-      initialTab: routeData.initialTab,
+      initialSection: routeData.initialSection,
       isCanvasOnlyMode: routeData.isCanvasOnlyMode,
     },
   };

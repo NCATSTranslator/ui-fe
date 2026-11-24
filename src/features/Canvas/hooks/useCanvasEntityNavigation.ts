@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useResultsNavigate } from '@/features/Navigation/hooks/useResultsNavigate';
 import useEvidenceViewNavigation from '@/features/ResultList/hooks/useEvidenceViewNavigation';
 import type { Canvas, CanvasNode, CanvasEdge } from '@/features/Canvas/types/canvas';
-import type { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import type { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 import { canvasEntityParams } from '@/features/Canvas/utils/canvasRouteUtils';
 
 const useCanvasEntityNavigation = () => {
@@ -29,7 +29,7 @@ const useCanvasEntityNavigation = () => {
   const navigateToEdge = useCallback((
     canvas: Canvas,
     edge: CanvasEdge,
-    tab?: EvidenceTabName,
+    tab?: EvidenceSectionName,
   ) => {
     const params: Record<string, string> = canvasEntityParams(canvas, edge.entityId);
     if (canvas.queryRef) params.q = canvas.queryRef;
