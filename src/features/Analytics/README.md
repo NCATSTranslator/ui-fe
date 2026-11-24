@@ -81,9 +81,7 @@ GA4 `page_view`.
 | Event | Parameters | Fires when | Source |
 | --- | --- | --- | --- |
 | `evidence_opened` | `evidence_source`, `path_rank`, `path_length` | A path (`path`), graph edge (`graph_edge`), or predicate (`graph_predicate`) opens the evidence view | `ResultItem/components/PathContainer/PathEvidenceButton.tsx`, `ResultGraphView/components/GraphView/GraphView.tsx` |
-| `evidence_tab_changed` | `tab_name`, `item_count` | User clicks a tab. Programmatic resets excluded | `Evidence/components/EvidenceTabs/EvidenceTabs.tsx` |
-| `evidence_link_clicked` | `link_type`, `link_domain` | An outbound publication, source, or trial link is clicked or middle-clicked | `Evidence/components/PublicationRow/PublicationRow.tsx`, `Evidence/components/KnowledgeSourcesTable/KnowledgeSourcesTable.tsx`, `NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink.tsx` |
-| `evidence_paginated` | `tab_name`, `page_number` | Paging within an evidence table. `tab_name` uses the same names as `evidence_tab_changed` | `Evidence/components/TablePaginationControls/TablePaginationControls.tsx` |
+| `evidence_link_clicked` | `link_type`, `link_domain` | An outbound publication, trial, drug label, miscellaneous, or source link is clicked or middle-clicked. `link_type` is `publication`, `clinical_trial`, `drug_label`, `miscellaneous`, or `source` | `Evidence/components/EvidenceLink/EvidenceLink.tsx` (publication, drug label, miscellaneous, and source links in the evidence view), `NodeInformationView/components/ClinicalTrialTitleLink/ClinicalTrialTitleLink.tsx` |
 | `evidence_downloaded` | `export_format` (`csv`), `item_count` | The evidence file for an edge is produced. `item_count` is the number of evidence rows across all types | `Evidence/utils/evidenceExportUtils.ts` |
 | `graph_view_opened` | `node_count`, `edge_count` | Graph tab becomes visible with data. Once per opening | `ResultGraphView/components/GraphView/GraphView.tsx` |
 | `graph_node_selected` | `node_curie`, `node_category` | A graph node is clicked | `ResultGraphView/components/GraphView/GraphView.tsx` |
@@ -139,7 +137,7 @@ String parameters become GA4 **custom dimensions**, numeric ones become
 **Dimensions** — `query_type`, `query_template_id`, `query_template_label`,
 `subject_category`, `object_category`, `constraint_category`, `project_attached`,
 `error_message`, `query_status`, `sort_field`, `sort_direction`, `result_curie`,
-`share_scope`, `evidence_source`, `tab_name`, `link_type`,
+`share_scope`, `evidence_source`, `link_type`,
 `link_domain`, `layout_name`, `node_category`, `node_curie`, `entity_type`,
 `pane_state`, `add_method`, `element_type`, `history_action`, `annotation_type`,
 `export_format`, `download_scope`, `move_method`, `filter_type`, `filter_value`,

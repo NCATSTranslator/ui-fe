@@ -52,9 +52,27 @@
 .predicatesList {
   display: flex;
   flex-direction: column;
+  // Long lists scroll inside the tooltip rather than running off the viewport.
+  max-height: min(50vh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  // The scrollbar stays visible so it is clear there is more below.
+  scrollbar-width: thin;
+  scrollbar-color: $midGray transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: $midGray;
+    border-radius: 6px;
+  }
 }
 
 .tooltipPredicateContainer {
+  flex-shrink: 0;
   margin-bottom: $xs;
   border-bottom: 1px solid $darkGray;
   padding-bottom: 12px;
@@ -144,6 +162,8 @@
 
 .tooltipEvidenceCounts {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: $xxs;
   margin-top: $xs;
   .count {
     background-color: $palePurple;

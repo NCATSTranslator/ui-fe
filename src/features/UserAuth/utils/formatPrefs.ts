@@ -136,12 +136,14 @@ const PRETTY_PREF_VALUES = new Map<string | number, string>([
   // pref values used to use 'path' instead of 'paths', so we need to handle both
   ["pathHighLow", "Path Count: High to Low"],
   ["pathLowHigh", "Path Count: Low to High"],
-  ["titleHighLow", "Title: A to Z"],
-  ["titleLowHigh", "Title: Z to A"],
-  ["sourceHighLow", "Source: A to Z"],
-  ["sourceLowHigh", "Source: Z to A"],
-  ["dateHighLow", "Date: New to Old"],
-  ["dateLowHigh", "Date: Old to New"],
+  // "LowHigh" is ascending, as it is for names above
+  ["titleLowHigh", "Title: A to Z"],
+  ["titleHighLow", "Title: Z to A"],
+  // The "source" values sort publications by journal
+  ["sourceLowHigh", "Journal: A to Z"],
+  ["sourceHighLow", "Journal: Z to A"],
+  ["dateHighLow", "Date: Newest to Oldest"],
+  ["dateLowHigh", "Date: Oldest to Newest"],
 ]);
 
 export const getPrettyPrefValue = (value: string | number) =>

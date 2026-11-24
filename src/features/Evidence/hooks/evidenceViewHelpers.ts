@@ -6,8 +6,8 @@ import {
   resolveEdgeFromPath,
 } from '@/features/Navigation/utils/navigationUtils';
 import { isNodeIndex } from '@/features/ResultList/utils/resultsInteractionFunctions';
-import { isValidEvidenceTabName } from '@/features/Evidence/types/checkers';
-import { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import { parseEvidenceSectionName } from '@/features/Evidence/utils/evidenceSections';
+import { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 import { useDecodedParams } from '@/features/Core/hooks/useDecodedParams';
 import { ResultSet, ResultEdge, Path, Result } from '@/features/ResultList/types/results.d';
 import type { CompressedSubgraph, EvidenceViewModel, EvidenceViewStatusParams } from '@/features/Evidence/hooks/evidenceViewTypes';
@@ -37,8 +37,7 @@ export const resolveEvidenceEdge = (
 ): ResultEdge | null => {
   if (!resultSet || !decodedEdgeId) return null;
   if (selectedEdgeGroup.length > 1) {
-    const ordered = [decodedEdgeId, ...selectedEdgeGroup.filter(id => id !== decodedEdgeId)];
-    return getCompressedEdge(resultSet, ordered);
+    return getCompressedEdge(resultSet, selectedEdgeGroup, decodedEdgeId);
   }
   return resolveEdgeFromPath(resultSet, path, decodedEdgeId);
 };
@@ -64,10 +63,10 @@ export const buildCompressedSubgraph = (
   return false;
 };
 
-export const parseInitialTab = (decodedParams: DecodedParams): EvidenceTabName | undefined => {
-  const rawTabParam = getDataFromQueryVar('tab', decodedParams);
-  return isValidEvidenceTabName(rawTabParam ?? '') ? rawTabParam as EvidenceTabName : undefined;
-};
+// The section a link asks the view to open scrolled to. The parameter keeps its original name,
+// "tab", so links made when the sections were tabs still work.
+export const parseInitialSection = (decodedParams: DecodedParams): EvidenceSectionName | undefined =>
+  parseEvidenceSectionName(getDataFromQueryVar('tab', decodedParams));
 
 export const resolveEvidenceSubtitle = (
   canvasId: number | undefined,

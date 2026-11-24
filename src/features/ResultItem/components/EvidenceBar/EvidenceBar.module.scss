@@ -76,7 +76,7 @@ $barHeight: $m;
   }
   &.publications { --segment-color: #{$lightBlueOne}; }
   &.clinicalTrials { --segment-color: #{$yellow}; }
-  &.productLabels { --segment-color: #{$magenta}; }
+  &.drugLabels { --segment-color: #{$magenta}; }
   &.acceptedOntologies { --segment-color: #{$lightGreen}; }
   &.misc { --segment-color: #{$lightPurpleOne}; }
   &.sources { --segment-color: #{$purpleGray}; }

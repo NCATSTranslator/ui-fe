@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { GraphNodeType, GraphEdgeType, HoverGeometry } from 'translator-graph-view';
 import type { Canvas } from '@/features/Canvas/types/canvas';
 import type { GraphHoverTarget } from '@/features/ResultGraphView/types/graphTypes';
-import type { EvidenceTabName } from '@/features/Evidence/types/navigation';
+import type { EvidenceSectionName } from '@/features/Evidence/types/navigation';
 import { useDelayedHoverTarget } from '@/features/ResultGraphView/hooks/useDelayedHoverTarget';
 import {
   useCanvasNodeDetail,
@@ -30,7 +30,7 @@ interface HoveredEntity {
 
 interface UseCanvasGraphHoverOptions {
   canvas: Canvas | null;
-  navigateToEdge: (canvas: Canvas, edge: Canvas['edges'][string], tab?: EvidenceTabName) => void;
+  navigateToEdge: (canvas: Canvas, edge: Canvas['edges'][string], tab?: EvidenceSectionName) => void;
 }
 
 const resolveHoverTarget = (

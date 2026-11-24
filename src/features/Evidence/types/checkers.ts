@@ -1,7 +1,6 @@
 import * as tc from "@/features/Core/types/checkers";
 import { EdgeProvenance, Provenance, ProvenanceCatalogEntry, PublicationObject, RawPublicationObject } from "@/features/Evidence/types/evidence";
 import { ResultEdge } from "@/features/ResultList/types/results";
-import { EvidenceTabName } from "./navigation";
 
 /**
  * Type guard to check if an object is a Provenance object.
@@ -153,12 +152,55 @@ export const isPublicationDictionary = (publications: unknown, warn = false): pu
   return true;
 }
 
+const DRUG_LABEL_HOST = 'dailymed.nlm.nih.gov';
+
 /**
- * Checks if a string is a valid evidence tab name.
+ * Checks if a link points to a drug label. Drug labels are the label pages hosted on DailyMed.
  *
- * @param tab - The string to check.
- * @returns {boolean} True if the string is a valid evidence tab name, otherwise false.
+ * @param {string | null | undefined} url - The link to check.
+ * @returns {boolean} True if the link is hosted on DailyMed, otherwise false.
  */
-export const isValidEvidenceTabName = (tab: string): tab is EvidenceTabName => {
-  return tab === 'Publications' || tab === 'Clinical Trials' || tab === 'Miscellaneous' || tab === 'Knowledge Sources';
+export const isDrugLabelUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  try {
+    return new URL(url).hostname.toLowerCase() === DRUG_LABEL_HOST;
+  } catch {
+    return false;
+  }
 }
+
+const DRUG_LABEL_ID_PREFIX = 'dailymed';
+// DailyMed identifies a label by its set id, a UUID
+const SET_ID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+/**
+ * The link for a piece of evidence. For a drug label this is the DailyMed page for the set id found
+ * in the evidence id, since the link that arrives with a label does not always carry its set id.
+ * Every other kind of evidence keeps the link it arrived with.
+ *
+ * @param {string | undefined} id - The evidence id, e.g. "dailymed:<set id>".
+ * @param {string} url - The link the evidence arrived with.
+ * @returns {string} The link to show and count the evidence by.
+ */
+export const resolveEvidenceUrl = (id: string | undefined, url: string): string => {
+  if (!id) return url;
+  if (!id.toLowerCase().startsWith(DRUG_LABEL_ID_PREFIX) && !isDrugLabelUrl(url)) return url;
+  const setId = id.match(SET_ID_PATTERN)?.[0];
+  return setId ? `https://${DRUG_LABEL_HOST}/dailymed/drugInfo.cfm?setid=${setId.toLowerCase()}` : url;
+}
+
+/** What a piece of link evidence is shown and counted as. */
+export type EvidenceLinkKind = 'publication' | 'drugLabel' | 'misc';
+
+/**
+ * Sorts a piece of link evidence into its kind: a PubMed or PMC publication, a drug label
+ * (a DailyMed link), or miscellaneous for every other link. The result evidence counts and the
+ * evidence view both use this, so the two always agree.
+ *
+ * @param {PublicationObject} item - The evidence to classify.
+ * @returns {EvidenceLinkKind} The kind of evidence the item is.
+ */
+export const classifyEvidenceLink = (item: PublicationObject): EvidenceLinkKind => {
+  if (isPublication(item)) return 'publication';
+  return isDrugLabelUrl(item.url) ? 'drugLabel' : 'misc';
+};

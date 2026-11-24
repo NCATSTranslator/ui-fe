@@ -75,6 +75,16 @@ describe('resultDataToGraphSubmission', () => {
       { data: expect.objectContaining({ id: 'e1', subject: 'n1', object: 'n2', signature: 'e1' }) },
     ]);
   });
+
+  it('sends predicate_rank, which the backend signature covers, as null when the edge has none', () => {
+    const resultSet = makeTestResultSet(
+      { ranked: makeTestEdge('ranked', { predicate_rank: 3 }), unranked: makeTestEdge('unranked') },
+      { n1: makeTestNode('n1', 'Aspirin'), n2: makeTestNode('n2', 'Pain') },
+    );
+    const submission = resultDataToGraphSubmission(resultSet, ['n1', 'n2'], ['ranked', 'unranked']);
+
+    expect(submission.edges.map(edge => edge.data.predicate_rank)).toEqual([3, null]);
+  });
 });
 
 describe('selectionFromSubmission', () => {

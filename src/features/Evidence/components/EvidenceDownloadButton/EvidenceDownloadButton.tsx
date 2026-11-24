@@ -12,7 +12,7 @@ interface EvidenceDownloadButtonProps {
   /** Names the downloaded file after the edge it belongs to. */
   edgeLabel: string | null;
   selectedEdge: ResultEdge | null;
-  /** Publication details are still being fetched, so the file would be incomplete. */
+  /** Publication or trial details are still being fetched, so the file would be incomplete. */
   isLoading?: boolean;
 }
 

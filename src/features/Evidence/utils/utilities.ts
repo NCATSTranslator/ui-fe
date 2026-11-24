@@ -1,9 +1,9 @@
 //  Focus: General evidence processing and data analysis
 
 import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry, Provenance } from "@/features/Evidence/types/evidence";
-import { isPublication } from "@/features/Evidence/types/checkers";
+import { classifyEvidenceLink, EvidenceLinkKind, isDrugLabelUrl, isPublication, resolveEvidenceUrl } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
-import { getNodeById, getEdgeById, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
+import { getNodeById, getEdgeById, getEdgeProvenance, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
 import { EvidenceCountsContainer } from "@/features/Evidence/types/evidence";
 import { getCompressedEdge, getPathSequenceKey } from "@/features/Core/utils/resultHelpers";
@@ -15,19 +15,47 @@ interface EvidenceAccumulator {
   cts: Set<string>;
   sources: Set<string>;
   misc: Set<string>;
+  drugLabels: Set<string>;
 }
 
-const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
+const createEvidenceAccumulator = (): EvidenceAccumulator => ({
+  pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(), drugLabels: new Set(),
+});
+
+// The set each kind of link evidence is counted in
+const LINK_KIND_SETS: Record<EvidenceLinkKind, keyof EvidenceAccumulator> = {
+  publication: 'pubs',
+  drugLabel: 'drugLabels',
+  misc: 'misc',
+};
+
+/**
+ * Sorts a publication id into its kind when there is no catalog entry to read its link from, as
+ * for an edge on a canvas. The link is worked out from the id the same way the evidence view
+ * does for such an edge, so the two agree.
+ *
+ * @param {string} id - The publication id, e.g. "PMID:1", "dailymed:<set id>", or a bare link.
+ * @returns The kind of evidence, and the link it is counted by.
+ */
+const classifyPublicationId = (id: string): { kind: EvidenceLinkKind; url: string } => {
+  const type = getTypeFromPub(id);
+  const url = resolveEvidenceUrl(id, getUrlByType(id, type));
+  if (type === 'PMID' || type === 'PMC') return { kind: 'publication', url };
+  return { kind: isDrugLabelUrl(url) ? 'drugLabel' : 'misc', url };
+};
+
+const addEdgePublications = (resultSet: ResultSet | null, edge: Pick<ResultEdge, 'publications'>, acc: EvidenceAccumulator) => {
   for (const key in edge.publications) {
     const pubArray = edge.publications[key];
     if (!Array.isArray(pubArray)) continue;
     for (const pubData of pubArray) {
-      const pub = getPubById(resultSet, pubData.id);
-      if (!pub) continue;
-      if (isPublication(pub, false))
-        acc.pubs.add(pub.url);
-      else
-        acc.misc.add(pub.url);
+      if (typeof pubData?.id !== 'string') continue;
+      const pub = resultSet ? getPubById(resultSet, pubData.id) : undefined;
+      // An edge from a canvas can carry publications the loaded result set has no entry for
+      const { kind, url } = pub
+        ? { kind: classifyEvidenceLink(pub), url: resolveEvidenceUrl(pubData.id, pub.url) }
+        : classifyPublicationId(pubData.id);
+      acc[LINK_KIND_SETS[kind]].add(url);
     }
   }
 };
@@ -66,18 +94,15 @@ const collectEvidenceFromEdge = (
  *
  * @param {ResultSet} resultSet - Result Set to fetch data from.
  * @param {ResultEdge | string} edge - Edge or edge ID to generate counts for.
- * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>}} Returns an object with the evidence Sets.
+ * @returns {{pubs: Set<string>, cts: Set<string>, sources: Set<string>, misc: Set<string>, drugLabels: Set<string>}} Returns an object with the evidence Sets.
  */
 export const getEvidenceFromEdge = (
   resultSet: ResultSet,
   edge: ResultEdge | string
 ) => {
-  const acc: EvidenceAccumulator = {
-    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(),
-  };
+  const acc = createEvidenceAccumulator();
   collectEvidenceFromEdge(resultSet, edge, acc);
-  const { pubs, cts, sources, misc } = acc;
-  return { pubs, cts, sources, misc };
+  return acc;
 };
 
 /**
@@ -91,7 +116,7 @@ export const isAcceptedOntologyEdge = (edge: ResultEdge) => {
 }
 
 export const EMPTY_EVIDENCE_COUNTS: EvidenceCountsContainer = {
-  acceptedOntologyCount: 0, clinicalTrialCount: 0, miscCount: 0, productLabelCount: 0, publicationCount: 0, sourceCount: 0,
+  acceptedOntologyCount: 0, clinicalTrialCount: 0, miscCount: 0, drugLabelCount: 0, publicationCount: 0, sourceCount: 0,
 };
 
 /**
@@ -102,9 +127,7 @@ export const EMPTY_EVIDENCE_COUNTS: EvidenceCountsContainer = {
  * @returns {EvidenceCountsContainer} Returns an EvidenceCountsContainer object with the requested counts.
  */
 const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): EvidenceCountsContainer => {
-  const acc: EvidenceAccumulator = {
-    pubs: new Set(), cts: new Set(), sources: new Set(), misc: new Set(),
-  };
+  const acc = createEvidenceAccumulator();
   // Edge slots, keyed by node sequence and position, holding an accepted ontology edge
   const ontologySlots = new Set<string>();
 
@@ -128,7 +151,7 @@ const getEvidenceCountsFromPaths = (resultSet: ResultSet, paths: Path[]): Eviden
     acceptedOntologyCount: ontologySlots.size,
     clinicalTrialCount: acc.cts.size,
     miscCount: acc.misc.size,
-    productLabelCount: 0,
+    drugLabelCount: acc.drugLabels.size,
     publicationCount: acc.pubs.size,
     sourceCount: acc.sources.size,
   };
@@ -250,6 +273,23 @@ export const getUrlByType = (publicationID: string, type: string): string => {
 }
 
 /**
+ * Counts the evidence on a canvas edge when no result set is loaded to look its publications up
+ * in. Each publication is sorted by its id: PubMed and PMC ids are publications and DailyMed ids
+ * or links are drug labels, matching how the result view counts them. Other links are left out,
+ * as they are from the result view's publication count.
+ *
+ * @param edge - The canvas edge, or anything carrying its publications and trials.
+ * @returns The distinct publication, clinical trial, and drug label counts.
+ */
+export const getEvidenceCountsFromCanvasEdge = (
+  edge: { publications?: ResultEdge['publications']; trials?: string[] },
+): { pubCount: number; ctCount: number; drugLabelCount: number } => {
+  const acc = createEvidenceAccumulator();
+  addEdgePublications(null, { publications: edge.publications ?? {} }, acc);
+  return { pubCount: acc.pubs.size, ctCount: new Set(edge.trials ?? []).size, drugLabelCount: acc.drugLabels.size };
+};
+
+/**
  * Returns a string label that represents the provided ResultEdge object.  
  *
  * @param {ResultSet} resultSet - ResultSet object.
@@ -257,16 +297,6 @@ export const getUrlByType = (publicationID: string, type: string): string => {
  * @returns {string} - A label containing the subject node name, predicate, and object node name
  * separated by pipe characters. 
  */
-export const getEvidenceCountsFromCanvasEdge = (
-  edge: { publications?: Record<string, unknown[]>; trials?: unknown[] },
-): { pubCount: number; ctCount: number } => {
-  let pubCount = 0;
-  for (const entries of Object.values(edge.publications ?? {})) {
-    pubCount += entries.length;
-  }
-  return { pubCount, ctCount: edge.trials?.length ?? 0 };
-};
-
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
@@ -490,7 +520,7 @@ const publicationObjectFromRef = (
     source: getPublicationSource(null, pubEntry.infores, edge, provenanceCatalog),
     support: pubEntry.support || null,
     type,
-    url: getUrlByType(pubEntry.id, type),
+    url: resolveEvidenceUrl(pubEntry.id, getUrlByType(pubEntry.id, type)),
   };
 };
 
@@ -535,7 +565,7 @@ export const flattenPublicationObject = (
           source: getPublicationSource(resultSet, pubEntry.infores, edge),
           support: pub.support || null,
           type: pub.type,
-          url: pub.url
+          url: resolveEvidenceUrl(pubEntry.id, pub.url),
         });
       } else {
         pubArray.push(publicationObjectFromRef(pubEntry, kl, edge, provenanceCatalog));
@@ -568,6 +598,35 @@ export const flattenTrialObject = (resultSet: ResultSet | null, trialIDs: string
   return trialArray;
 }
 
+// The one source clinical trials are attributed to
+const CLINICAL_TRIALS_SOURCE_INFORES = 'infores:multiomics-clinicaltrials';
+
+/**
+ * The source to credit for an edge's clinical trials. Trials carry no source of their own, and an
+ * edge's other sources say nothing about where its trials came from, so trials are credited to
+ * the Multiomics ClinicalTrials KP when it is one of the edge's sources and to nothing otherwise.
+ * A compressed edge keeps only its base edge's trials while merging in the provenance of the edges
+ * compressed into it, so the base edge is looked up again to leave those other edges' sources out.
+ *
+ * @param {ResultSet | null} resultSet - The dataset containing the edge, if any.
+ * @param {ResultEdge} edge - The selected edge.
+ * @param {Record<string, ProvenanceCatalogEntry>} [provenanceCatalog] - Infores catalog entries used to name sources when there is no result set.
+ * @returns {Provenance[]} - The clinical trials source, or nothing when the edge has no trials or is not sourced from it.
+ */
+export const getTrialSources = (
+  resultSet: ResultSet | null,
+  edge: ResultEdge,
+  provenanceCatalog?: Record<string, ProvenanceCatalogEntry>,
+): Provenance[] => {
+  if (!edge.trials?.length) return [];
+  const ownEdge = resultSet?.data.edges[edge.id];
+  return getEdgeProvenance(resultSet, ownEdge ?? edge, provenanceCatalog)
+    .filter(source => source.infores === CLINICAL_TRIALS_SOURCE_INFORES);
+};
+
+/**
+ * A link-only piece of evidence, as shown in the Drug Labels and Miscellaneous sections.
+ */
 export interface FormattedMiscEvidence {
   id: string;
   url: string;
@@ -611,7 +670,7 @@ const addUnique = (list: string[], value: string | null | undefined): void => {
 };
 
 /**
- * Collapses knowledge sources that share a name into one entry, keeping every
+ * Collapses databases (knowledge sources) that share a name into one entry, keeping every
  * distinct URL, infores id, and knowledge level. Sources without a name are dropped.
  */
 export const groupSourcesByName = (sources: Provenance[]): GroupedSource[] => {
@@ -637,28 +696,31 @@ export const groupSourcesByName = (sources: Provenance[]): GroupedSource[] => {
 };
 
 /**
- * An edge's evidence in the form the evidence view shows and exports:
- * miscellaneous links deduplicated by URL and knowledge sources grouped by name.
+ * An edge's evidence in the form the evidence view shows and exports: drug label and
+ * miscellaneous links deduplicated by URL, and databases (knowledge sources) grouped by name.
  */
 export interface EdgeEvidence {
   publications: PublicationObject[];
   clinicalTrials: TrialObject[];
+  drugLabels: FormattedMiscEvidence[];
   miscEvidence: FormattedMiscEvidence[];
   sources: GroupedSource[];
 }
 
 /**
  * Derives the displayable evidence for an edge from its raw collections, so the
- * tabs, the tables, and the CSV export all work from the same lists.
+ * sections and the CSV export all work from the same lists.
  */
 export const buildEdgeEvidence = (raw: {
   publications: PublicationObject[];
   clinicalTrials: TrialObject[];
+  drugLabels: PublicationObject[];
   miscEvidence: PublicationObject[];
   sources: Provenance[];
 }): EdgeEvidence => ({
   publications: raw.publications,
   clinicalTrials: raw.clinicalTrials,
+  drugLabels: formatMiscEvidence(raw.drugLabels),
   miscEvidence: formatMiscEvidence(raw.miscEvidence),
   sources: groupSourcesByName(raw.sources),
 });
@@ -667,6 +729,7 @@ export const buildEdgeEvidence = (raw: {
 export const hasEdgeEvidence = (evidence: EdgeEvidence): boolean =>
   evidence.publications.length > 0
   || evidence.clinicalTrials.length > 0
+  || evidence.drugLabels.length > 0
   || evidence.miscEvidence.length > 0
   || evidence.sources.length > 0;
 

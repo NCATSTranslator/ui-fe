@@ -40,9 +40,15 @@ export const useSeenStatus = (pk: string) => {
   const seenEdgeSet = useSelector((state: RootState) => selectSeenEdgeSetByPk(state, pk));
 
   const isEdgeSeen = useCallback((edgeId: string): boolean => seenEdgeSet.has(edgeId), [seenEdgeSet]);
-  const isPathSeen = useCallback(
-    (edgeIds: string[]): boolean => edgeIds.every((id) => seenEdgeSet.has(id)),
+  // A compressed edge opens whichever of its edges ranks highest, so it counts as seen once
+  // any of its edges has been.
+  const isEdgeGroupSeen = useCallback(
+    (edgeIds: string | string[]): boolean => [edgeIds].flat().some((id) => seenEdgeSet.has(id)),
     [seenEdgeSet]
+  );
+  const isPathSeen = useCallback(
+    (edgeSlots: (string | string[])[]): boolean => edgeSlots.every(isEdgeGroupSeen),
+    [isEdgeGroupSeen]
   );
   const handleMarkEdgeSeen = useCallback((edgeId: string) => dispatch(markEdgeSeen({ pk, edgeId })), [dispatch, pk]);
   const handleMarkEdgeUnseen = useCallback((edgeId: string) => dispatch(markEdgeUnseen({ pk, edgeId })), [dispatch, pk]);
@@ -50,6 +56,7 @@ export const useSeenStatus = (pk: string) => {
 
   return {
     isEdgeSeen,
+    isEdgeGroupSeen,
     isPathSeen,
     markEdgeSeen: handleMarkEdgeSeen,
     markEdgeUnseen: handleMarkEdgeUnseen,

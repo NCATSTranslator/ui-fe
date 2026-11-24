@@ -8,7 +8,7 @@ import useCanvasNodeNameLookup from '@/features/Canvas/hooks/useCanvasNodeNameLo
 import { useCanvasEdgeEntity } from '@/features/Canvas/hooks/useCanvasEntityRoute';
 import {
   parseCompressedEdgeSets,
-  parseInitialTab,
+  parseInitialSection,
   resolveEvidenceEdge,
   resolvePathKey,
   resolveSelectedEdgeGroup,
@@ -66,7 +66,7 @@ const useEvidenceViewRouteData = () => {
     () => resolvePathKey(decodedParams, resultSet, result, pathId),
     [decodedParams, resultSet, result, pathId],
   );
-  const initialTab = parseInitialTab(decodedParams);
+  const initialSection = parseInitialSection(decodedParams);
 
   return {
     resultId,
@@ -84,7 +84,7 @@ const useEvidenceViewRouteData = () => {
     selectedEdgeGroup,
     resolvedEdge,
     pathKey,
-    initialTab,
+    initialSection,
     pk: seenStatusPk,
     canvasId,
     isCanvasOnlyMode,

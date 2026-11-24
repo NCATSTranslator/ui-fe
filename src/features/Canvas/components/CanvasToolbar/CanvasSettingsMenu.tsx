@@ -6,7 +6,7 @@ import OutsideClickHandler from '@/features/Core/components/OutsideClickHandler/
 import SettingsIcon from '@/assets/icons/navigation/Settings.svg?react';
 import Button from '@/features/Core/components/Button/Button';
 import useCanvasSettingsActions from '@/features/Canvas/hooks/useCanvasSettingsActions';
-import useDropdownMenuA11y from './useDropdownMenuA11y';
+import useDropdownMenuA11y from '@/features/Core/hooks/useDropdownMenuA11y';
 
 const layouts: { key: LayoutType; label: string }[] = [
   { key: 'hierarchicalLR', label: 'Horizontal' },

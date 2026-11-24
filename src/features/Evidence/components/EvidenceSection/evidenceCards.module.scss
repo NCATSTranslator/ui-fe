@@ -1,0 +1,109 @@
+// Card styles shared by the lists inside the evidence view's sections
+@use "@/assets/styles/variables" as *;
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $xxs;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  padding: $xs;
+  border-radius: $defaultBorderRadius;
+  background-color: $lightGray;
+  // Long sections hold hundreds of cards; skip layout for the ones scrolled out of view
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $s;
+}
+
+.title {
+  min-width: 0;
+  font-size: $bodyOneSize;
+  font-weight: 800;
+  line-height: 1.25;
+  color: $purpleOne;
+  overflow-wrap: anywhere;
+}
+
+a.title:hover, .title a:hover, .metaLink:hover {
+  text-decoration: underline;
+}
+
+.title a {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.plainTitle {
+  color: $black;
+}
+
+.year {
+  flex-shrink: 0;
+  font-size: $bodyOneSize;
+  line-height: 1.25;
+  color: $black;
+}
+
+.snippet {
+  margin: $xxs 0 0;
+  font-size: $captionSize;
+  line-height: 1.4;
+  color: $black;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: $xxs;
+  margin: $xxs 0 0;
+  font-size: $captionSize;
+  line-height: 1.4;
+  color: $darkGray;
+}
+
+.meta, .snippet {
+  // A global rule gives every element its own font size; keep the line uniform
+  a, span, strong {
+    font-size: inherit;
+    line-height: inherit;
+  }
+}
+
+// The subject and object the edge's supporting text was matched on
+.snippet strong {
+  font-weight: 800;
+}
+
+// The facts about the item itself, as opposed to where it came from
+.summary {
+  color: $black;
+}
+
+.metaLink {
+  font-weight: 800;
+  color: $purpleOne;
+}
+
+.empty {
+  margin: 0;
+  padding: $s 0;
+  font-size: $bodyTwoSize;
+  color: $darkGray;
+}

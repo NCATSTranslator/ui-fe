@@ -1,13 +1,15 @@
-import { FC, KeyboardEvent, useMemo } from 'react';
+import { FC, KeyboardEvent, useMemo, useState } from 'react';
 import PathViewSection from '@/features/Evidence/components/PathViewSection/PathViewSection';
-import EvidenceTabs from '@/features/Evidence/components/EvidenceTabs/EvidenceTabs';
+import { sortPublications } from '@/features/Evidence/utils/publicationSorting';
+import { sortTrials } from '@/features/Evidence/components/ClinicalTrialsList/clinicalTrialHelpers';
+import EvidenceGrid from '@/features/Evidence/components/EvidenceGrid/EvidenceGrid';
 import EvidenceDownloadButton from '@/features/Evidence/components/EvidenceDownloadButton/EvidenceDownloadButton';
 import PathStepper from '@/features/Evidence/components/PathStepper/PathStepper';
-import Tooltip from '@/features/Core/components/Tooltip/Tooltip';
 import ViewTopBar from '@/features/Navigation/components/ViewTopBar/ViewTopBar';
 import FilteredOutWrapper from '@/features/Core/components/FilteredOutWrapper/FilteredOutWrapper';
 import { EvidenceViewContentProps } from '@/features/Evidence/hooks/useEvidenceView';
-import { usePubTableState } from '@/features/Evidence/hooks/evidenceHooks';
+import useEvidenceSorting from '@/features/Evidence/hooks/useEvidenceSorting';
+import useEnrichedTrials from '@/features/Evidence/hooks/useEnrichedTrials';
 import { buildEdgeEvidence, hasEdgeEvidence } from '@/features/Evidence/utils/utilities';
 import styles from './EvidenceView.module.scss';
 
@@ -27,22 +29,46 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
   publications,
   setPublications,
   clinicalTrials,
+  drugLabels,
   miscEvidence,
   sources,
   prefs,
-  initialTab,
+  initialSection,
   isCanvasOnlyMode,
 }) => {
-  // Derived once here so the tabs, the tables, and the download all use the same lists.
+  // Derived once here so the sections and the download all use the same lists. Publications and
+  // trials are put in order here too, so the download follows the order chosen in each sort menu.
+  // Trials are ordered after enrichment, since a title or start date may only arrive with it.
+  const sorting = useEvidenceSorting(prefs?.evidence_sort?.pref_value);
+  const publicationSort = sorting.publications.value;
+  const trialSort = sorting.clinicalTrials.value;
+  const {
+    trials: enrichedTrials,
+    metadata: trialMetadata,
+    isLoading: isTrialDataLoading,
+  } = useEnrichedTrials(clinicalTrials);
+  // Each list is ordered on its own, so trial details arriving does not hand the publications
+  // list a new array, which would restart its PubMed fetch.
+  const sortedPublications = useMemo(
+    () => sortPublications(publications, publicationSort),
+    [publications, publicationSort],
+  );
+  const sortedTrials = useMemo(() => sortTrials(enrichedTrials, trialSort), [enrichedTrials, trialSort]);
   const evidence = useMemo(
-    () => buildEdgeEvidence({ publications, clinicalTrials, miscEvidence, sources }),
-    [publications, clinicalTrials, miscEvidence, sources],
+    () => buildEdgeEvidence({
+      publications: sortedPublications,
+      clinicalTrials: sortedTrials,
+      drugLabels,
+      miscEvidence,
+      sources,
+    }),
+    [sortedPublications, sortedTrials, drugLabels, miscEvidence, sources],
   );
 
-  // The publications table fills in titles, journals, dates, and snippets from
-  // PubMed after it mounts. Its state lives here so the download can wait for that.
-  const [pubTableState, updatePubTableState] = usePubTableState();
-  const isPublicationDataLoading = publications.length > 0 && pubTableState.isLoading;
+  // The publications list fills in titles, journals, dates, and snippets from
+  // PubMed after it mounts. Its loading flag lives here so the download can wait for that.
+  const [isPubmedLoading, setIsPubmedLoading] = useState(true);
+  const isPublicationDataLoading = publications.length > 0 && isPubmedLoading;
 
   const handleToggleSeenKeyDown = (event: KeyboardEvent<HTMLParagraphElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -61,7 +87,7 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
           evidence={evidence}
           edgeLabel={edgeLabel}
           selectedEdge={selectedEdge}
-          isLoading={isPublicationDataLoading}
+          isLoading={isPublicationDataLoading || isTrialDataLoading}
         />
       ) : undefined}
     />
@@ -94,9 +120,6 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
             </p>
           )}
         </div>
-        <Tooltip id="knowledge-sources-tooltip">
-          <span>The resources that provided the information supporting the selected relationship.</span>
-        </Tooltip>
         {path && (
           <PathViewSection
             path={path}
@@ -108,16 +131,16 @@ const EvidenceViewContent: FC<EvidenceViewContentProps> = ({
             selectedEdgeRef={selectedEdgeDomRef}
           />
         )}
-        <EvidenceTabs
-          isOpen={true}
+        <EvidenceGrid
           evidence={evidence}
+          trialMetadata={trialMetadata}
           setPublications={setPublications}
-          pubTableState={pubTableState}
-          updatePubTableState={updatePubTableState}
+          isPublicationDataLoading={isPubmedLoading}
+          setIsPublicationDataLoading={setIsPubmedLoading}
           selectedEdge={selectedEdge}
           pk={pk}
-          prefs={prefs}
-          initialTab={initialTab}
+          sorting={sorting}
+          initialSection={initialSection}
         />
       </div>
     </FilteredOutWrapper>

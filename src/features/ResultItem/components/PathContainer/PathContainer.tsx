@@ -46,11 +46,10 @@ const PathContainer: FC<PathContainerProps> = ({
   const { lastViewedPathID } = useLastViewedPath();
   const isLastViewed = !!lastViewedPathID && lastViewedPathID === path.id;
   const isPathFiltered = getIsPathFiltered(path, pathFilterState);
-  const edgeIds = extractEdgeIDsFromSubgraph(path.subgraph);
-  const { isPathSeen } = useSeenStatus(pk);
-  const isSeen = isPathSeen(edgeIds);
-  const parentPathKey = (pathIndex + 1).toString();
   const subgraphToMap = path.compressedSubgraph?.length ? path.compressedSubgraph : path.subgraph;
+  const { isPathSeen } = useSeenStatus(pk);
+  const isSeen = isPathSeen(extractEdgeIDsFromSubgraph(subgraphToMap));
+  const parentPathKey = (pathIndex + 1).toString();
   const inCompressedModal = !!(inModal && compressedSubgraph);
 
   // Return null if path is filtered and hidden paths are not shown

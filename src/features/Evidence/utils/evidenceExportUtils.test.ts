@@ -4,7 +4,7 @@ import { makeTestEdge } from '@/features/ResultList/utils/resultTestFixtures';
 import { buildEdgeEvidence, EdgeEvidence } from '@/features/Evidence/utils/utilities';
 import { Provenance } from '@/features/Evidence/types/evidence';
 
-const EMPTY: EdgeEvidence = { publications: [], clinicalTrials: [], miscEvidence: [], sources: [] };
+const EMPTY: EdgeEvidence = { publications: [], clinicalTrials: [], drugLabels: [], miscEvidence: [], sources: [] };
 
 const SUPPORT = { object: [0, 1] as [number, number], subject: [2, 3] as [number, number], text: 'edge support text' };
 const EMPTY_SUPPORT = { object: [0, 1] as [number, number], subject: [2, 3] as [number, number], text: '' };
@@ -40,7 +40,11 @@ const EVIDENCE: EdgeEvidence = buildEdgeEvidence({
     status: 'COMPLETED',
     child: false,
     type: 'enrolled',
+    sources: [SOURCE_A, { ...SOURCE_A }],
   }],
+  drugLabels: [
+    { id: 'label1', support: null, type: 'other', url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=abc' },
+  ],
   miscEvidence: [
     { id: 'misc1', support: null, type: 'other', url: 'https://misc.example/1' },
     { id: 'misc2', support: null, type: 'other', url: 'https://misc.example/1' },
@@ -58,13 +62,21 @@ describe('buildEdgeEvidenceCSV', () => {
   it('writes one row per evidence item across all types, deduplicating misc links', () => {
     const lines = buildEdgeEvidenceCSV(EVIDENCE).split('\n');
     const types = lines.slice(1).map(line => line.split(',')[0]);
-    expect(types).toEqual(['publication', 'clinical_trial', 'miscellaneous', 'knowledge_source']);
+    expect(types).toEqual(['publication', 'clinical_trial', 'drug_label', 'miscellaneous', 'database']);
   });
 
-  it('collapses knowledge sources that share a name into one row', () => {
+  it("writes the trial's edge sources on its row, each once", () => {
+    const trialLine = buildEdgeEvidenceCSV(EVIDENCE).split('\n').find(line => line.startsWith('clinical_trial'));
+    expect(trialLine).toContain('Source A');
+    expect(trialLine).toContain('infores:a');
+    expect(trialLine).not.toContain('Source A;Source A');
+  });
+
+  it('collapses databases that share a name into one row', () => {
     const evidence = buildEdgeEvidence({
       publications: [],
       clinicalTrials: [],
+      drugLabels: [],
       miscEvidence: [],
       sources: [
         SOURCE_A,

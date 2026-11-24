@@ -30,12 +30,12 @@ describe('EvidenceBar', () => {
     fireEvent.mouseEnter(pill);
     expect(screen.getByText('30 Publications')).toBeInTheDocument();
 
-    fireEvent.mouseEnter(screen.getByLabelText('2 Knowledge Sources'));
+    fireEvent.mouseEnter(screen.getByLabelText('2 Databases'));
     expect(screen.queryByText('30 Publications')).not.toBeInTheDocument();
-    expect(screen.getByText('2 Knowledge Sources')).toBeInTheDocument();
+    expect(screen.getByText('2 Databases')).toBeInTheDocument();
 
     fireEvent.mouseLeave(pill.parentElement as HTMLElement);
-    expect(screen.queryByText('2 Knowledge Sources')).not.toBeInTheDocument();
+    expect(screen.queryByText('2 Databases')).not.toBeInTheDocument();
   });
 
   it('shows only a zero total when there is no evidence', () => {

@@ -1,5 +1,5 @@
 /** Every kind of evidence a result or edge can carry. */
-export type EvidenceTypeKey = 'publications' | 'clinicalTrials' | 'productLabels' | 'acceptedOntologies' | 'misc' | 'sources';
+export type EvidenceTypeKey = 'publications' | 'clinicalTrials' | 'drugLabels' | 'acceptedOntologies' | 'misc' | 'sources';
 
 export interface EvidenceTypeLabel {
   singular: string;
@@ -7,16 +7,16 @@ export interface EvidenceTypeLabel {
 }
 
 /**
- * Display names for each evidence type: the single source for the evidence tab headings and
+ * Display names for each evidence type: the single source for the evidence section headings and
  * the result evidence bar. "Miscellaneous" reads the same for one item or many.
  */
 export const EVIDENCE_TYPE_LABELS: Record<EvidenceTypeKey, EvidenceTypeLabel> = {
   publications: { singular: 'Publication', plural: 'Publications' },
   clinicalTrials: { singular: 'Clinical Trial', plural: 'Clinical Trials' },
-  productLabels: { singular: 'Product Label', plural: 'Product Labels' },
+  drugLabels: { singular: 'Drug Label', plural: 'Drug Labels' },
   acceptedOntologies: { singular: 'Accepted Ontology', plural: 'Accepted Ontologies' },
   misc: { singular: 'Miscellaneous', plural: 'Miscellaneous' },
-  sources: { singular: 'Knowledge Source', plural: 'Knowledge Sources' },
+  sources: { singular: 'Database', plural: 'Databases' },
 };
 
 /**

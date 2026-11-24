@@ -6,7 +6,8 @@ import { Provenance, PublicationObject } from '@/features/Evidence/types/evidenc
 import { generateScore, type ScorePair } from '@/features/ResultList/utils/scoring';
 import { getFilterFamily, getTagFamily, groupInclusionFiltersByFamily, isEvidenceFilter, FILTERING_CONSTANTS } from '@/features/ResultFiltering/utils/filterFunctions';
 
-const compareWithFallback = (
+/** Compares two texts in the given direction. A missing or blank text goes last in either direction. */
+export const compareWithFallback = (
   aValue: string | undefined | null,
   bValue: string | undefined | null,
   direction: 'asc' | 'desc'
@@ -127,22 +128,20 @@ export const sortByEntityStrings = (items: Result[], strings: string[]) => {
   });
 }
 
+// A publication's year, or failYear when it is missing, unreadable, or the "0" given to unknown years
+const getPubYear = (pub: PublicationObject, failYear: number): number => {
+  const year = Number(pub?.pubdate);
+  return year > 0 ? year : failYear;
+};
+
 export const sortDateYearLowHigh = (items: PublicationObject[]) => {
   const failYear = 3000; // Ensure all invalid dates are sent to the end
-  return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aDate = (!a?.pubdate) ? failYear : Number(a.pubdate);
-    const bDate = (!b?.pubdate) ? failYear : Number(b.pubdate);
-    return (aDate - bDate);
-  });
+  return items.sort((a: PublicationObject, b: PublicationObject) => getPubYear(a, failYear) - getPubYear(b, failYear));
 }
 
 export const sortDateYearHighLow = (items: PublicationObject[]) => {
   const failYear = 0; // Ensure all invalid dates are sent to the end
-  return items.sort((a: PublicationObject, b: PublicationObject) => {
-    const aDate = (!a?.pubdate) ? failYear : Number(a.pubdate);
-    const bDate = (!b?.pubdate) ? failYear : Number(b.pubdate);
-    return (bDate - aDate);
-  });
+  return items.sort((a: PublicationObject, b: PublicationObject) => getPubYear(b, failYear) - getPubYear(a, failYear));
 }
 
 export const sortByNamePathfinderLowHigh = (items: Result[]) => {
