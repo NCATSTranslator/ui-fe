@@ -33,6 +33,11 @@
   line-height: 1.25;
   color: $purpleOne;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 a.title:hover, .title a:hover, .metaLink:hover {
@@ -62,8 +67,8 @@ a.title:hover, .title a:hover, .metaLink:hover {
   color: $black;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   overflow: hidden;
 }
 
