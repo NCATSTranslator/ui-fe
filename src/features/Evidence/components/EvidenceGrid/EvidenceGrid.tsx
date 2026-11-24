@@ -97,6 +97,7 @@ const EvidenceGrid: FC<EvidenceGridProps> = ({
     return <p className={styles.noEvidence}>No evidence is currently available for this item.</p>;
 
   const sectionBodies: Record<EvidenceTypeKey, () => ReactNode> = {
+    clinicalTrials: () => <ClinicalTrialsList clinicalTrials={evidence.clinicalTrials} metadata={trialMetadata} />,
     publications: () => (
       <PublicationsList
         selectedEdge={selectedEdge}
@@ -107,7 +108,6 @@ const EvidenceGrid: FC<EvidenceGridProps> = ({
         pk={pk}
       />
     ),
-    clinicalTrials: () => <ClinicalTrialsList clinicalTrials={evidence.clinicalTrials} metadata={trialMetadata} />,
     drugLabels: () => <EvidenceLinkList links={evidence.drugLabels} linkType="drug_label" />,
     acceptedOntologies: () => (
       <p className={joinClasses(cardStyles.card, styles.explanation)}>{ACCEPTED_ONTOLOGY_EXPLANATION}</p>
