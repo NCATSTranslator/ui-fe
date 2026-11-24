@@ -12,10 +12,10 @@ const formatPredicate = (predicate: string): string =>
 const getEdgeEvidenceCounts = (
   resultSet: ResultSet | null,
   edge: ResultEdge,
-): { pubCount: number; ctCount: number } => {
+): { pubCount: number; ctCount: number; drugLabelCount: number } => {
   if (resultSet) {
     const evidence = getEvidenceFromEdge(resultSet, edge);
-    return { pubCount: evidence.pubs.size, ctCount: evidence.cts.size };
+    return { pubCount: evidence.pubs.size, ctCount: evidence.cts.size, drugLabelCount: evidence.drugLabels.size };
   }
   return getEvidenceCountsFromCanvasEdge(edge);
 };
@@ -30,13 +30,14 @@ export const nodeToTooltipProps = (node: ResultNode): NodeTooltipContentProps =>
 };
 
 export const edgeToTooltipEntry = (resultSet: ResultSet | null, edge: ResultEdge): EdgeTooltipEntry => {
-  const { pubCount, ctCount } = getEdgeEvidenceCounts(resultSet, edge);
+  const { pubCount, ctCount, drugLabelCount } = getEdgeEvidenceCounts(resultSet, edge);
   return {
     id: edge.id,
     predicate: formatPredicate(edge.predicate),
     predicate_url: edge.predicate_url,
     pubCount,
     ctCount,
+    drugLabelCount,
   };
 };
 
