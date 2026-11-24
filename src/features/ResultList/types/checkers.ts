@@ -43,6 +43,7 @@ export const isResultEdge = (obj: unknown, warn = false): obj is ResultEdge => {
     ["metadata", __isEdgeMetadata(obj.metadata, warn), "EdgeMetadata", obj.metadata],
     ["object", tc.isString(obj.object), "string", obj.object],
     ["predicate", tc.isString(obj.predicate), "string", obj.predicate],
+    ["predicate_rank", tc.missable(obj.predicate_rank, tc.isNumber), "number | undefined | null", obj.predicate_rank],
     ["predicate_url", tc.isString(obj.predicate_url), "string", obj.predicate_url],
     ["provenance", tc.makeIsHomogeneousArray((p: unknown) => isEdgeProvenance(p, warn))(obj.provenance), "EdgeProvenance[]", obj.provenance],
     ["publications", tc.isObject(obj.publications), "object", obj.publications],

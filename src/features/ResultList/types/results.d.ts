@@ -91,6 +91,8 @@ export interface ResultEdge {
   object: string;
   predicate: string;
   predicate_url: string;
+  /** Depth of the unqualified predicate in the Biolink hierarchy; higher is more specific. */
+  predicate_rank?: number | null;
   description?: string | null;
   provenance: EdgeProvenance[];
   publications: {[key: string]: {id: string; support: PublicationSupport | null; infores: string}[]};
