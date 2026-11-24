@@ -10,8 +10,8 @@ export interface EvidenceSegment {
 
 // Each evidence type with the field holding its count, listed in display order, left to right
 export const EVIDENCE_COUNT_KEYS: [EvidenceTypeKey, keyof EvidenceCountsContainer][] = [
-  ['publications', 'publicationCount'],
   ['clinicalTrials', 'clinicalTrialCount'],
+  ['publications', 'publicationCount'],
   ['drugLabels', 'drugLabelCount'],
   ['acceptedOntologies', 'acceptedOntologyCount'],
   ['misc', 'miscCount'],
