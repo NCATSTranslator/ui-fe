@@ -115,7 +115,7 @@ export const resolveEdgeFromPath = (
       const item = path.compressedSubgraph[i];
       if (Array.isArray(item)) {
         if (item.includes(edgeId)) {
-          return getCompressedEdge(resultSet, item);
+          return getCompressedEdge(resultSet, item, edgeId);
         }
       } else if (item === edgeId) {
         return getEdgeById(resultSet, edgeId) ?? null;

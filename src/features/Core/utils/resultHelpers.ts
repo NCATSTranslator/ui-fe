@@ -150,39 +150,118 @@ const mergePublications = (target: ResultEdge, source: ResultEdge) => {
   }
 };
 
-const mergeEdgeIntoBase = (baseEdge: ResultEdge, currentEdge: ResultEdge): void => {
-  if (currentEdge.predicate === baseEdge.predicate) {
-    baseEdge.aras = mergeArrays(baseEdge.aras, currentEdge.aras);
-    baseEdge.provenance = mergeArrays(baseEdge.provenance, currentEdge.provenance);
-    mergePublications(baseEdge, currentEdge);
-    return;
-  }
-  const compressedEdge = baseEdge.compressed_edges?.find(e => e.predicate === currentEdge.predicate);
-  if (compressedEdge) {
-    compressedEdge.aras = mergeArrays(compressedEdge.aras, currentEdge.aras);
-    compressedEdge.provenance = mergeArrays(compressedEdge.provenance, currentEdge.provenance);
-    mergePublications(compressedEdge, currentEdge);
-  } else {
-    baseEdge.compressed_edges?.push({ ...currentEdge, compressed_edges: [] });
-  }
+/** Folds an edge into the group edge that shares its predicate, pooling their evidence and sources. */
+const mergeSamePredicateEdge = (target: ResultEdge, source: ResultEdge): void => {
+  target.aras = mergeArrays(target.aras, source.aras);
+  target.provenance = mergeArrays(target.provenance, source.provenance);
+  target.trials = mergeArrays(target.trials, source.trials);
+  mergePublications(target, source);
 };
 
-export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[]): ResultEdge => {
-  const edges = edgeIDs.map(edgeID => getEdgeById(resultSet, edgeID)).filter(edge => !!edge);
+const KNOWLEDGE_LEVEL_RANK: Record<string, number> = { trusted: 2, ml: 0 };
 
-  if (edges.length === 0 || !edges[0]) {
+/** Curated knowledge outranks unlabelled knowledge, which outranks text-mined/ML knowledge. */
+const getKnowledgeLevelRank = (edge: ResultEdge): number => KNOWLEDGE_LEVEL_RANK[edge.knowledge_level] ?? 1;
+
+/**
+ * Distinct publication entries plus clinical trials backing an edge. Publication entries are
+ * everything listed under the edge's publications: PubMed and PMC articles, drug labels, and
+ * other links alike.
+ */
+const getEvidenceCount = (edge: ResultEdge): number => {
+  const pubIDs = new Set<string>();
+  for (const pubs of Object.values(edge.publications))
+    for (const pub of pubs) pubIDs.add(pub.id);
+  return pubIDs.size + new Set(edge.trials).size;
+};
+
+const getSourceCount = (edge: ResultEdge): number => new Set(edge.provenance.map(p => p.infores)).size;
+
+/** Edges sharing a predicate, merged into one edge, with the best knowledge level among them. */
+type PredicateGroup = { edge: ResultEdge; knowledgeLevelRank: number };
+
+/** A predicate group with its counts worked out once, ahead of sorting. */
+type RankedPredicateGroup = PredicateGroup & { evidenceCount: number; sourceCount: number };
+
+const toRankedGroup = (group: PredicateGroup): RankedPredicateGroup => ({
+  ...group,
+  evidenceCount: getEvidenceCount(group.edge),
+  sourceCount: getSourceCount(group.edge),
+});
+
+/**
+ * Orders predicate groups from most to least valuable: evidence count, knowledge level, source
+ * count, ARA count, then predicate specificity. Ties fall back to predicate and ID so the order
+ * is stable across renders.
+ */
+const comparePredicateGroups = (a: RankedPredicateGroup, b: RankedPredicateGroup): number =>
+  b.evidenceCount - a.evidenceCount
+  || b.knowledgeLevelRank - a.knowledgeLevelRank
+  || b.sourceCount - a.sourceCount
+  || b.edge.aras.length - a.edge.aras.length
+  || (b.edge.predicate_rank ?? 0) - (a.edge.predicate_rank ?? 0)
+  || a.edge.predicate.localeCompare(b.edge.predicate)
+  || a.edge.id.localeCompare(b.edge.id);
+
+/**
+ * Compares two edges by value, most valuable first. See comparePredicateGroups for the tiers.
+ *
+ * Note: exported so the ranking tiers can be unit tested on their own. Nothing else calls it;
+ * the app ranks edges through getCompressedEdge and getCompressedEdges.
+ */
+export const compareEdgeValue = (a: ResultEdge, b: ResultEdge): number =>
+  comparePredicateGroups(
+    toRankedGroup({ edge: a, knowledgeLevelRank: getKnowledgeLevelRank(a) }),
+    toRankedGroup({ edge: b, knowledgeLevelRank: getKnowledgeLevelRank(b) }),
+  );
+
+/**
+ * Merges edges that share a predicate and returns the groups most valuable first. Each group
+ * keeps the ID of its first edge. A pinned edge leads its group, and that group leads the list.
+ */
+const getRankedPredicateGroups = (edges: ResultEdge[], pinnedEdgeId?: string): ResultEdge[] => {
+  const pinnedEdge = pinnedEdgeId ? edges.find(edge => edge.id === pinnedEdgeId) : undefined;
+  const ordered = pinnedEdge ? [pinnedEdge, ...edges.filter(edge => edge !== pinnedEdge)] : edges;
+
+  const groups = new Map<string, PredicateGroup>();
+  for (const edge of ordered) {
+    const group = groups.get(edge.predicate);
+    if (group) {
+      mergeSamePredicateEdge(group.edge, edge);
+      group.knowledgeLevelRank = Math.max(group.knowledgeLevelRank, getKnowledgeLevelRank(edge));
+    } else {
+      groups.set(edge.predicate, {
+        edge: { ...getDefaultEdge(edge), compressed_edges: [] },
+        knowledgeLevelRank: getKnowledgeLevelRank(edge),
+      });
+    }
+  }
+
+  const isPinned = (group: PredicateGroup) => !!pinnedEdge && group.edge.predicate === pinnedEdge.predicate;
+  return Array.from(groups.values(), toRankedGroup)
+    .sort((a, b) => Number(isPinned(b)) - Number(isPinned(a)) || comparePredicateGroups(a, b))
+    .map(group => group.edge);
+};
+
+/**
+ * Compresses edges between the same two nodes into one edge. Edges are grouped by predicate, and
+ * the most valuable group becomes the returned edge, with the rest in compressed_edges in rank
+ * order.
+ *
+ * @param {ResultSet} resultSet - Result Set to fetch the edges from.
+ * @param {string[]} edgeIDs - IDs of the edges to compress.
+ * @param {string} [pinnedEdgeId] - An edge that must be the returned edge, whatever its rank.
+ */
+export const getCompressedEdge = (resultSet: ResultSet, edgeIDs: string[], pinnedEdgeId?: string): ResultEdge => {
+  const edges = getEdgesByIds(resultSet, edgeIDs);
+
+  if (edges.length === 0) {
     console.warn("No valid edges found for the provided edgeIDs.", edges);
     return getDefaultEdge(undefined);
   }
 
-  const baseEdge: ResultEdge = { ...getDefaultEdge(edges[0]), compressed_edges: [] };
-
-  for (const edge of edges.slice(1)) {
-    if (!edge) continue;
-    mergeEdgeIntoBase(baseEdge, getDefaultEdge(edge));
-  }
-
-  return baseEdge;
+  const [topEdge, ...otherEdges] = getRankedPredicateGroups(edges, pinnedEdgeId);
+  return { ...topEdge, compressed_edges: otherEdges };
 };
 
 /**
@@ -205,34 +284,8 @@ export const getDistinctResultEdges = (resultSet: ResultSet, edgeIDs: string[]):
 export const getDistinctPredicateEdgeIDs = (resultSet: ResultSet, edgeIDs: string[]): string[] =>
   getDistinctResultEdges(resultSet, edgeIDs).map(edge => edge.id);
 
-export const getCompressedEdges = (resultSet: ResultSet, edges: ResultEdge[]): ResultEdge[] => {
-  const compressedEdges: ResultEdge[] = [];
-  edges.sort((a,b)=> a.predicate.localeCompare(b.predicate));
-  let edgeIDsToCompress: Set<string> = new Set<string>([]);
-  for(let i = 0; i < edges.length; i++) {
-    let edge = edges[i];
-    let nextEdge: undefined | ResultEdge = edges[i+1];
-    if(!!nextEdge && nextEdge.predicate === edge.predicate) {
-      if(!edgeIDsToCompress.has(edge.id))
-        edgeIDsToCompress.add(edge.id);
-      edgeIDsToCompress.add(nextEdge.id);
-    } else {
-      if(edgeIDsToCompress.size > 0) {
-        let compressedEdge = getCompressedEdge(resultSet, Array.from(edgeIDsToCompress));
-        edgeIDsToCompress.clear();
-        compressedEdges.push(compressedEdge);
-      } else {
-        compressedEdges.push(edge);
-      }
-    }
-  }
-
-  return compressedEdges.sort((a, b) =>
-    Object.values(b.publications).reduce((acc, curr) => acc + curr.length, 0) - Object.values(a.publications).reduce((acc, curr) => acc + curr.length, 0)
-    || b.trials.length - a.trials.length
-    || b.predicate.localeCompare(a.predicate)
-  );
-};
+/** One merged edge per distinct predicate, most valuable first. */
+export const getCompressedEdges = (edges: ResultEdge[]): ResultEdge[] => getRankedPredicateGroups(edges);
 
 export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | string[])[]): (ResultNode | ResultEdge | ResultEdge[])[] => {
   const compressedSubgraph: (ResultNode | ResultEdge | ResultEdge[])[] = [];
@@ -247,7 +300,7 @@ export const getCompressedSubgraph = (resultSet: ResultSet, subgraph: (string | 
       const edge = getEdgeById(resultSet, ID);
       if (edge) compressedSubgraph.push(edge);
     } else {
-      compressedSubgraph.push(getCompressedEdges(resultSet, getEdgesByIds(resultSet, ID)));
+      compressedSubgraph.push(getCompressedEdges(getEdgesByIds(resultSet, ID)));
     }
   }
   return compressedSubgraph;

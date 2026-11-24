@@ -37,8 +37,7 @@ export const resolveEvidenceEdge = (
 ): ResultEdge | null => {
   if (!resultSet || !decodedEdgeId) return null;
   if (selectedEdgeGroup.length > 1) {
-    const ordered = [decodedEdgeId, ...selectedEdgeGroup.filter(id => id !== decodedEdgeId)];
-    return getCompressedEdge(resultSet, ordered);
+    return getCompressedEdge(resultSet, selectedEdgeGroup, decodedEdgeId);
   }
   return resolveEdgeFromPath(resultSet, path, decodedEdgeId);
 };
