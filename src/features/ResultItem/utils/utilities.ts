@@ -40,10 +40,12 @@ export const getARATagsFromResultTags = (tags: EntityTags): string[] => {
  * Returns an array of edge IDs extracted from a subgraph sequence, which consists of alternating
  * node and edge IDs, always starting and ending with a node ID.
  *
- * @param {string[]} subgraph - An array representing a path subgraph with alternating node and edge IDs.
- * @returns {string[]} - An array containing only the edge IDs from the subgraph.
+ * In a compressed subgraph an edge slot is an array of the IDs compressed into it.
+ *
+ * @param {T[]} subgraph - An array representing a path subgraph with alternating node and edge IDs.
+ * @returns {T[]} - An array containing only the edge slots from the subgraph.
  */
-export const extractEdgeIDsFromSubgraph = (subgraph: string[]): string[] =>
+export const extractEdgeIDsFromSubgraph = <T,>(subgraph: T[]): T[] =>
   subgraph.filter((_, i) => !isNodeIndex(i));
 
 /**

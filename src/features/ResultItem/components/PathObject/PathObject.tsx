@@ -77,8 +77,8 @@ const PathObject: FC<PathObjectProps> = ({
     warnOnceOnEntityTypeMismatch(isNodeSlot ? 'node' : 'edge', itemID, pathObject);
   }, [pathObject, isNodeSlot, itemID]);
 
-  const { isEdgeSeen } = useSeenStatus(pk);
-  const isSeen = !!edge && isEdgeSeen(edge.id);
+  const { isEdgeGroupSeen } = useSeenStatus(pk);
+  const isSeen = !!edge && isEdgeGroupSeen(id);
   const uid = useId();
   // Subscribing to just this entity's highlight keeps a hover from re-rendering
   // every other path object on the page.
