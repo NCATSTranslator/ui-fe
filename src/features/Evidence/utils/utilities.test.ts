@@ -4,6 +4,7 @@ import { isDrugLabelUrl, resolveEvidenceUrl } from '@/features/Evidence/types/ch
 import {
   buildEdgeEvidence,
   getEvidenceCounts,
+  getEvidenceCountsFromCanvasEdge,
   getTrialSources,
   getPublicationDisplaySnippet,
   groupSourcesByName,
@@ -226,5 +227,27 @@ describe('getTrialSources', () => {
     expect(getTrialSources(null, edge, CATALOG)).toEqual([
       { infores: 'infores:multiomics-clinicaltrials', knowledge_level: 'trusted', name: 'Trials KP', url: 'https://trials.example', wiki: null },
     ]);
+  });
+});
+
+describe('getEvidenceCountsFromCanvasEdge', () => {
+  const ref = (id: string) => ({ id, support: null, infores: 'infores:test' });
+  const setId = '0a1b2c3d-0000-4000-8000-000000000001';
+
+  it('counts publications, drug labels, and trials apart, leaving other links out', () => {
+    const counts = getEvidenceCountsFromCanvasEdge({
+      publications: {
+        a: [ref('PMID:1'), ref('PMC:2'), ref(`dailymed:${setId}`), ref('https://example.com/other')],
+        b: [ref('PMID:1'), ref(`DailyMed:${setId.toUpperCase()}`)],
+        c: [ref(`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${setId}`)],
+        d: [ref('https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0a1b2c3d-0000-4000-8000-000000000002')],
+      },
+      trials: ['NCT1', 'NCT1', 'NCT2'],
+    });
+    expect(counts).toEqual({ pubCount: 2, ctCount: 2, drugLabelCount: 2 });
+  });
+
+  it('returns zeroes for an edge with no evidence', () => {
+    expect(getEvidenceCountsFromCanvasEdge({})).toEqual({ pubCount: 0, ctCount: 0, drugLabelCount: 0 });
   });
 });

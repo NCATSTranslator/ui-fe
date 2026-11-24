@@ -1,7 +1,7 @@
 //  Focus: General evidence processing and data analysis
 
 import { PublicationObject, RawPublicationList, TrialObject, PubmedMetadataMap, PublicationSupport, ProvenanceCatalogEntry, Provenance } from "@/features/Evidence/types/evidence";
-import { classifyEvidenceLink, EvidenceLinkKind, isPublication, resolveEvidenceUrl } from "@/features/Evidence/types/checkers";
+import { classifyEvidenceLink, EvidenceLinkKind, isDrugLabelUrl, isPublication, resolveEvidenceUrl } from "@/features/Evidence/types/checkers";
 import { capitalizeAllWords } from '@/features/Core/utils/stringFormatters';
 import { getNodeById, getEdgeById, getEdgeProvenance, getPubById, getPathById, getTrialById, getPublicationSource } from "@/features/ResultList/slices/resultsSlice";
 import { ResultSet, ResultEdge, ResultNode, Result, Path } from "@/features/ResultList/types/results.d";
@@ -29,14 +29,33 @@ const LINK_KIND_SETS: Record<EvidenceLinkKind, keyof EvidenceAccumulator> = {
   misc: 'misc',
 };
 
-const addEdgePublications = (resultSet: ResultSet, edge: ResultEdge, acc: EvidenceAccumulator) => {
+/**
+ * Sorts a publication id into its kind when there is no catalog entry to read its link from, as
+ * for an edge on a canvas. The link is worked out from the id the same way the evidence view
+ * does for such an edge, so the two agree.
+ *
+ * @param {string} id - The publication id, e.g. "PMID:1", "dailymed:<set id>", or a bare link.
+ * @returns The kind of evidence, and the link it is counted by.
+ */
+const classifyPublicationId = (id: string): { kind: EvidenceLinkKind; url: string } => {
+  const type = getTypeFromPub(id);
+  const url = resolveEvidenceUrl(id, getUrlByType(id, type));
+  if (type === 'PMID' || type === 'PMC') return { kind: 'publication', url };
+  return { kind: isDrugLabelUrl(url) ? 'drugLabel' : 'misc', url };
+};
+
+const addEdgePublications = (resultSet: ResultSet | null, edge: Pick<ResultEdge, 'publications'>, acc: EvidenceAccumulator) => {
   for (const key in edge.publications) {
     const pubArray = edge.publications[key];
     if (!Array.isArray(pubArray)) continue;
     for (const pubData of pubArray) {
-      const pub = getPubById(resultSet, pubData.id);
-      if (!pub) continue;
-      acc[LINK_KIND_SETS[classifyEvidenceLink(pub)]].add(resolveEvidenceUrl(pubData.id, pub.url));
+      if (typeof pubData?.id !== 'string') continue;
+      const pub = resultSet ? getPubById(resultSet, pubData.id) : undefined;
+      // An edge from a canvas can carry publications the loaded result set has no entry for
+      const { kind, url } = pub
+        ? { kind: classifyEvidenceLink(pub), url: resolveEvidenceUrl(pubData.id, pub.url) }
+        : classifyPublicationId(pubData.id);
+      acc[LINK_KIND_SETS[kind]].add(url);
     }
   }
 };
@@ -254,6 +273,23 @@ export const getUrlByType = (publicationID: string, type: string): string => {
 }
 
 /**
+ * Counts the evidence on a canvas edge when no result set is loaded to look its publications up
+ * in. Each publication is sorted by its id: PubMed and PMC ids are publications and DailyMed ids
+ * or links are drug labels, matching how the result view counts them. Other links are left out,
+ * as they are from the result view's publication count.
+ *
+ * @param edge - The canvas edge, or anything carrying its publications and trials.
+ * @returns The distinct publication, clinical trial, and drug label counts.
+ */
+export const getEvidenceCountsFromCanvasEdge = (
+  edge: { publications?: ResultEdge['publications']; trials?: string[] },
+): { pubCount: number; ctCount: number; drugLabelCount: number } => {
+  const acc = createEvidenceAccumulator();
+  addEdgePublications(null, { publications: edge.publications ?? {} }, acc);
+  return { pubCount: acc.pubs.size, ctCount: new Set(edge.trials ?? []).size, drugLabelCount: acc.drugLabels.size };
+};
+
+/**
  * Returns a string label that represents the provided ResultEdge object.  
  *
  * @param {ResultSet} resultSet - ResultSet object.
@@ -261,16 +297,6 @@ export const getUrlByType = (publicationID: string, type: string): string => {
  * @returns {string} - A label containing the subject node name, predicate, and object node name
  * separated by pipe characters. 
  */
-export const getEvidenceCountsFromCanvasEdge = (
-  edge: { publications?: Record<string, unknown[]>; trials?: unknown[] },
-): { pubCount: number; ctCount: number } => {
-  let pubCount = 0;
-  for (const entries of Object.values(edge.publications ?? {})) {
-    pubCount += entries.length;
-  }
-  return { pubCount, ctCount: edge.trials?.length ?? 0 };
-};
-
 export const getFormattedEdgeLabel = (resultSet: ResultSet, edge: ResultEdge): string => {
   const subjectNode = getNodeById(resultSet, edge.subject);
   const subjectNodeName = (!!subjectNode) ? subjectNode.names[0] : "";
